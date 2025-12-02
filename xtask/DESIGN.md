@@ -1,5 +1,28 @@
 # xtask Design
 
+## Status
+
+### Completed
+
+- **KDL migration**: All ~100 grammars converted from `info.toml` to `arborium.kdl`
+- **Legacy cleanup**: Deleted all `info.toml` files, removed orphan directories
+- **Lint command**: `cargo xtask grammars lint` validates entire registry
+- **Generate command**: `cargo xtask grammars generate [--dry-run]` regenerates Cargo.toml, build.rs, src/lib.rs
+- **Plan-execute pattern**: Two-phase approach with diff display and optional dry-run
+- **KDL 2.0 syntax**: Fixed all files to use `#true`/`#false` and snake_case identifiers
+- **Vendored grammars**: asciidoc, asciidoc_inline, markdown, markdown-inline added
+
+### In Progress
+
+- Vendor command for new grammars
+- Update command for checking/pulling upstream changes
+
+### Not Started
+
+- serve-demo command (WASM build + static site)
+- Query inheritance implementation
+- Final cleanup (remove old xtask code, update README)
+
 ## Dependencies
 
 | Purpose | Crate |
@@ -61,7 +84,7 @@ arborium/
 **`arborium.kdl`** contains everything:
 - Source: repo, commit, license, authors
 - Metadata: name, icon, aliases, tier, tag
-- Build config: has-scanner, c-symbol, grammar-path
+- Build config: has_scanner, c_symbol, grammar_path
 - Query inheritance: which grammars' queries to prepend
 - Description, trivia, links
 - Sample definitions
@@ -71,6 +94,10 @@ No `grammars/` directory. No top-level `GRAMMARS.toml`. No `info.toml`.
 Vendoring new grammars and checking for updates is a manual process.
 
 ## arborium.kdl Schema
+
+**Important:** This uses KDL 2.0 syntax:
+- Booleans are `#true` and `#false` (not bare `true`/`false`)
+- Identifiers use snake_case (no hyphens)
 
 ### Simple grammar (most common)
 
@@ -88,8 +115,8 @@ grammar {
     icon "devicon-plain:rust"
     aliases "rs"
     
-    has-scanner true
-    c-symbol "rust_orchard"  // generates tree_sitter_rust_orchard()
+    has_scanner #true
+    c_symbol "rust_orchard"  // generates tree_sitter_rust_orchard()
     
     inventor "Graydon Hoare"
     year 2010
@@ -122,8 +149,8 @@ grammar {
     icon "devicon-plain:xml"
     aliases "xsl" "xslt" "svg"
     
-    has-scanner true
-    grammar-path "xml"  // subdirectory within repo
+    has_scanner #true
+    grammar_path "xml"  // subdirectory within repo
     
     // ...metadata, samples...
 }
@@ -134,8 +161,8 @@ grammar {
     tag "markup"
     tier 3
     
-    has-scanner true
-    grammar-path "dtd"
+    has_scanner #true
+    grammar_path "dtd"
     
     // ...metadata, samples...
 }
@@ -197,82 +224,121 @@ grammar {
 1. Every grammar crate uses `links = "arborium-{id}"` in Cargo.toml
 2. Every build.rs emits `cargo:queries-dir={manifest_dir}/queries`
 3. Dependent crates read `DEP_ARBORIUM_{ID}_QUERIES_DIR` in their build.rs
-4. Build.rs concatenates prepended queries + local query → writes to OUT_DIR
+4. Build.rs concatenates prepended queries + local query -> writes to OUT_DIR
 5. lib.rs does `include_str!(concat!(env!("OUT_DIR"), "/highlights.scm"))`
 
 The `prepend` entries add the crate as a dependency in generated Cargo.toml.
 Order matters: first listed = first in output file.
 
-## Startup: Registry Loading & Linting
+## Plan-Execute Pattern
 
-Every xtask invocation starts the same way:
+All commands that modify files use a two-phase approach:
 
-1. Find workspace root (walk up looking for `Cargo.toml` with `[workspace]`)
-2. Crawl `crates/` directory, find all `arborium-*/` directories
-3. Parse every `arborium.kdl` into a registry
-4. Lint the entire registry:
-   - Missing required fields in `arborium.kdl`
-   - Sample files that don't exist on disk
-   - Sample files that are empty or just comments
-   - Highlight queries referencing invalid node types
-   - Missing `grammar-src/` or required files
-5. Report diagnostics (warnings and errors) with Miette
-6. If any errors: refuse to continue, exit non-zero
-7. If only warnings: continue with the command
+### Phase 1: Plan
+
+Compute all operations without touching disk:
+
+```rust
+pub enum Operation {
+    CreateFile { path, content, description },
+    UpdateFile { path, old_content, new_content, description },
+    DeleteFile { path, description },
+    CreateDir { path, description },
+    RunCommand { command, args, working_dir, description },
+    CopyFile { src, dest, description },
+    GitClone { url, dest, commit, description },
+}
+
+pub struct Plan {
+    name: String,
+    operations: Vec<Operation>,
+}
+
+pub struct PlanSet {
+    plans: Vec<Plan>,
+}
+```
+
+### Phase 2: Display
+
+Show what would change with colored diff output:
+
+```
+Plan: arborium-rust
+  update Cargo.toml
+    - version = "0.1.0"
+    + version = "0.2.0"
+  unchanged build.rs
+  unchanged src/lib.rs
+
+Plan: arborium-javascript
+  create src/lib.rs
+    + // Generated file
+    + pub fn language() -> tree_sitter::Language { ... }
+```
+
+### Phase 3: Execute
+
+If `--dry-run` is passed, exit after display. Otherwise, execute all operations.
+
+This preserves mtimes on unchanged files, avoiding unnecessary Cargo rebuilds.
 
 ## Commands
 
-### `cargo xtask generate`
+### `cargo xtask grammars lint`
 
-Regenerate all crate code from `arborium.kdl` files.
+Run all lints without generating anything.
 
-```
-cargo xtask generate [--dry-run]
-```
+1. Load and validate registry
+2. **Sample validation:**
+   - Sample files exist on disk
+   - Sample files are not empty
+   - Sample files have reasonable length (warn if < 25 lines)
+3. **Config validation:**
+   - Required fields present
+   - Tier values in valid range
+   - highlight.scm exists if grammar-src present
 
-Uses a two-phase approach: plan, then execute.
+### `cargo xtask grammars generate [--dry-run] [name]`
 
-**Phase 1: Plan**
-
-Compute all file writes without touching disk:
-
-```rust
-struct GeneratePlan {
-    files: Vec<PlannedWrite>,
-}
-
-struct PlannedWrite {
-    path: Utf8PathBuf,
-    content: String,
-    changed: bool,  // compared against current disk content
-}
-```
+Regenerate crate code from `arborium.kdl` files.
 
 For each grammar in registry:
 - Generate `Cargo.toml` from template
 - Generate `build.rs` from template
 - Generate `src/lib.rs` from template
 
-Also generate main `crates/arborium/src/lib.rs` (re-exports all grammars).
+Optional `name` argument filters to a single crate.
 
-**Phase 2: Report**
+### `cargo xtask grammars vendor` (TODO)
 
-Show what would be written:
+Vendor or re-vendor grammar source from upstream.
 
 ```
-  unchanged crates/arborium-rust/Cargo.toml
-  unchanged crates/arborium-rust/build.rs
-  write     crates/arborium-rust/src/lib.rs
-  ...
+cargo xtask grammars vendor rust [--dry-run]
 ```
 
-**Phase 3: Execute**
+1. Read `repo` and `commit` from arborium.kdl
+2. Clone repo to temp directory
+3. Checkout specified commit
+4. Copy parser.c, scanner.c (if has_scanner), headers to grammar-src/
+5. Update commit hash in arborium.kdl if changed
 
-If `--dry-run` is passed, exit here. Otherwise, write only the changed files.
+### `cargo xtask grammars update` (TODO)
 
-This preserves mtimes on unchanged files, avoiding unnecessary Cargo rebuilds.
+Check for upstream updates.
 
-### `cargo xtask serve`
+```
+cargo xtask grammars update [--apply]
+```
+
+1. For each grammar with a repo URL
+2. Fetch latest commit from default branch
+3. Compare to stored commit
+4. Report which grammars have updates available
+5. If `--apply`: update commit hash in arborium.kdl (still need to re-vendor)
+
+### `cargo xtask serve` (TODO)
 
 Build and serve the WASM demo locally.
 
@@ -324,7 +390,7 @@ demo/
 
 Sample content is inlined because:
 - Code compresses extremely well (brotli gets ~10-15x on source code)
-- ~90 grammars × ~5KB average = ~450KB uncompressed → ~30-50KB compressed
+- ~90 grammars x ~5KB average = ~450KB uncompressed -> ~30-50KB compressed
 - Simpler than lazy loading (no fetch waterfall, works offline, no CORS issues)
 
 The static HTML/JS/CSS are checked into the repo and not generated. The JS
@@ -345,43 +411,19 @@ fetches `registry.json` on load and builds the UI dynamically.
 4. **Generate theme CSS** - Generate CSS from `arborium::theme::builtin` themes
    for the demo's theme switcher.
 
-### `cargo xtask lint`
+## Next Steps
 
-Run all lints without generating anything.
+1. **Vendor command** - Implement `cargo xtask grammars vendor <name>` to automate
+   the git clone + file copy workflow
 
-1. Load and validate registry (same as startup)
-2. **Sample validation:**
-   - Sample files exist on disk
-   - Sample files are not empty
-   - Sample files are not HTTP error pages (failed downloads)
-   - Sample files have reasonable length (warn if < 25 lines)
-3. **Highlight validation:**
-   - Run highlighting on each sample with its grammar
-   - Warn if zero highlights produced (query might be broken)
-   - Report query parse errors
+2. **Update command** - Implement `cargo xtask grammars update` to check upstream
+   repos for new commits
 
-## Cleanup (after migration complete)
+3. **Query inheritance** - Implement build.rs logic for prepending parent queries
 
-Once all grammars have `arborium.kdl` and everything works:
+4. **serve-demo** - Build WASM binaries and serve the interactive demo
 
-1. **Delete legacy files:**
-   - Remove all `crates/arborium-*/info.toml`
-   - Remove top-level `GRAMMARS.toml`
-   - Remove `grammars/` directory entirely
-   - Remove `grammar-crate-config.toml` files
-
-2. **Delete old xtask code:**
-   - `vendor_grammar.rs` - manual vendoring now
-   - `tiering.rs` - no more npm dependency ordering
-   - `config.rs` - info.toml parsing
-   - Old command handlers
-
-3. **Update documentation:**
-   - README: explain new structure
-   - README: how to add a new grammar (create `arborium.kdl`, vendor sources)
-   - README: how to update a grammar (bump commit, re-vendor)
-
-4. **Remove dead dependencies from xtask:**
-   - `toml` (was for info.toml/GRAMMARS.toml parsing)
-   - `regex` (was for template substitution)
-   - Any npm/node-related tooling
+5. **Final cleanup:**
+   - Delete old xtask modules (vendor_grammar.rs, tiering.rs, config.rs)
+   - Remove dead dependencies (toml, regex)
+   - Update README with new workflow
