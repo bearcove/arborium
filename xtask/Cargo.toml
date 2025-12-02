@@ -5,6 +5,12 @@ edition = "2024"
 publish = false
 
 [dependencies]
+camino = "1"
+facet = { git = "https://github.com/facet-rs/facet" }
+facet-args = { git = "https://github.com/facet-rs/facet" }
+facet-kdl = { git = "https://github.com/facet-rs/facet" }
+miette = { version = "7", features = ["fancy"] }
+rootcause = "0.10"
 tiny_http = "0.12"
 flate2 = "1"
 brotli = "7"
