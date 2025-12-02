@@ -18,8 +18,8 @@ grammar {
 
     sample {
         path "samples/router.gleam"
-        description "Wisp router with request handling, middleware, and pattern matching."
-        link "local"
+        description "Gleam list operations with types, pattern matching, and tail recursion."
+        link "https://github.com/gleam-lang/stdlib/blob/main/src/gleam/list.gleam"
         license "Apache-2.0"
     }
 }

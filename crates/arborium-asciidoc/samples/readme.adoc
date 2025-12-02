@@ -1,0 +1,64 @@
+= Asciidoctor
+Dan Allen; Sarah White
+
+{url-project}[Asciidoctor] is a fast, open source, Ruby-based text processor for parsing AsciiDoc(R) into a document model and converting it to output formats such as HTML 5, DocBook 5, manual pages, PDF, EPUB 3, and other formats.
+
+== Installation
+
+Asciidoctor is packaged and distributed to RubyGems.org as a RubyGem (aka gem) named {url-rubygem}[asciidoctor^].
+
+=== Linux package managers
+
+The version of Asciidoctor installed by the package manager may not match the latest release of Asciidoctor.
+
+* https://pkgs.alpinelinux.org/packages?name=asciidoctor[Alpine Linux (asciidoctor)]
+* https://www.archlinux.org/packages/?name=asciidoctor[Arch Linux (asciidoctor)]
+
+==== apk (Alpine Linux)
+
+To install the gem on Alpine Linux, open a terminal and type:
+
+ $ sudo apk add asciidoctor
+
+=== macOS
+
+==== Homebrew
+
+You can use https://brew.sh[Homebrew], the macOS package manager, to install Asciidoctor.
+
+ $ brew install asciidoctor
+
+=== gem install
+
+Before installing Asciidoctor using `gem install`, you should set up https://rvm.io[RVM].
+
+ $ gem install asciidoctor
+
+== Usage
+
+If the Asciidoctor gem installed successfully, the `asciidoctor` command line interface (CLI) will be available on your PATH.
+
+ $ asciidoctor --version
+
+== Quick Reference
+
+Here are some common AsciiDoc elements:
+
+.Code block
+[source,ruby]
+----
+require 'asciidoctor'
+Asciidoctor.convert_file 'document.adoc', safe: :safe
+----
+
+.Table example
+|===
+|Header 1 |Header 2
+
+|Cell 1
+|Cell 2
+|===
+
+NOTE: This is an admonition block.
+
+TIP: Use AsciiDoc for documentation!

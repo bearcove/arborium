@@ -16,4 +16,11 @@ grammar {
     description "A lightweight markup language for writing technical documentation and books."
     link "https://en.wikipedia.org/wiki/AsciiDoc"
     trivia "O'Reilly Media uses AsciiDoc as the source format for many of their technical books."
+
+    sample {
+        path "samples/readme.adoc"
+        description "AsciiDoc readme showing headers, code blocks, tables, and admonitions."
+        link "https://github.com/asciidoctor/asciidoctor/blob/main/README.adoc"
+        license "MIT"
+    }
 }

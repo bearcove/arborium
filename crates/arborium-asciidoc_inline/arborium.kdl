@@ -1,0 +1,13 @@
+repo "https://github.com/cathaysia/tree-sitter-asciidoc"
+commit "0ecc13042b7352ddc3f7b8b31432e262711d44e4"
+license "Apache-2.0"
+
+grammar {
+    id "asciidoc_inline"
+    name "Asciidoc Inline"
+    tag "markup"
+    tier 5
+    has_scanner #true
+
+    description "Inline grammar for AsciiDoc parsing; companion to the block-level asciidoc grammar."
+}

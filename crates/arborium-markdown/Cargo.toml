@@ -1,11 +1,11 @@
 [package]
-name = "arborium-interface"
+name = "arborium-markdown"
 version = "0.1.0"
 edition = "2024"
-description = "interface grammar for arborium (tree-sitter bindings)"
+description = "markdown grammar for arborium (tree-sitter bindings)"
 license = "MIT"
 repository = "https://github.com/bearcove/arborium"
-keywords = ["tree-sitter", "interface", "syntax-highlighting"]
+keywords = ["tree-sitter", "markdown", "syntax-highlighting"]
 categories = ["parsing", "text-processing"]
 
 [lib]

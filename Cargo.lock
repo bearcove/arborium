@@ -176,6 +176,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "arborium-asciidoc_inline"
+version = "0.1.0"
+dependencies = [
+ "arborium-sysroot",
+ "arborium-test-harness",
+ "cc",
+ "tree-sitter-patched-arborium",
+]
+
+[[package]]
 name = "arborium-asm"
 version = "0.1.0"
 dependencies = [
@@ -625,6 +635,26 @@ dependencies = [
 
 [[package]]
 name = "arborium-lua"
+version = "0.1.0"
+dependencies = [
+ "arborium-sysroot",
+ "arborium-test-harness",
+ "cc",
+ "tree-sitter-patched-arborium",
+]
+
+[[package]]
+name = "arborium-markdown"
+version = "0.1.0"
+dependencies = [
+ "arborium-sysroot",
+ "arborium-test-harness",
+ "cc",
+ "tree-sitter-patched-arborium",
+]
+
+[[package]]
+name = "arborium-markdown-inline"
 version = "0.1.0"
 dependencies = [
  "arborium-sysroot",
