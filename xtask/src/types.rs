@@ -306,7 +306,7 @@ pub struct GrammarConfig {
     pub grammar_path: Option<GrammarPath>,
 
     /// Override the C symbol name.
-    #[facet(kdl::child, default, rename = "c-symbol")]
+    #[facet(kdl::child, default)]
     pub c_symbol: Option<CSymbol>,
 
     /// Query configuration (highlights inheritance).
