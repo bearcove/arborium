@@ -7,6 +7,7 @@ grammar {
     name "Asciidoc"
     tag "markup"
     tier 5
+    has_scanner #true
     icon "mdi:text-box"
     aliases "adoc"
 

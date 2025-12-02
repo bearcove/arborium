@@ -7,6 +7,7 @@ grammar {
     name "MATLAB"
     tag "code"
     tier 4
+    has_scanner #true
     icon "devicon-plain:matlab"
     aliases "m"
 

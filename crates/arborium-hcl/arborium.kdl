@@ -7,6 +7,7 @@ grammar {
     name "HCL"
     tag "config"
     tier 3
+    has_scanner #true
     icon "devicon-plain:terraform"
     aliases "terraform" "tf"
 

@@ -83,6 +83,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use facet::Facet;
 use facet_kdl as kdl;
 use facet_kdl::Spanned;
+use miette::NamedSource;
 pub use rootcause::Report;
 
 // =============================================================================
@@ -243,7 +244,7 @@ impl std::ops::Deref for Year {
 
 /// Has-scanner child node (bool value).
 #[derive(Debug, Clone, Facet)]
-#[facet(rename = "has-scanner")]
+#[facet(rename = "has_scanner")]
 pub struct HasScanner {
     #[facet(kdl::argument)]
     pub value: bool,
@@ -630,8 +631,17 @@ impl CrateRegistry {
             let config: CrateConfig = match facet_kdl::from_str(&content) {
                 Ok(c) => c,
                 Err(e) => {
-                    eprintln!("Error parsing {}: {}", kdl_path, e);
-                    return Err(e.into());
+                    // Print detailed error info
+                    eprintln!("Error parsing {}:", kdl_path);
+                    eprintln!("  Kind: {:?}", e.kind());
+
+                    // Use miette to display the error with source context
+                    let report = miette::Report::new(e)
+                        .with_source_code(NamedSource::new(kdl_path.as_str(), content.clone()));
+                    eprintln!("{:?}", report);
+                    return Err(
+                        std::io::Error::other(format!("Failed to parse {}", kdl_path)).into(),
+                    );
                 }
             };
             files.kdl = FileState::Present {
