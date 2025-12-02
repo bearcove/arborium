@@ -1,0 +1,24 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "query"
+    name "Tree-sitter Query"
+    tag "query"
+    tier 5
+    icon "mdi:file-tree-outline"
+    aliases "scm"
+
+    inventor "Max Brunsfeld"
+    year 2020
+    description "A S-expression based pattern language for matching nodes in tree-sitter syntax trees."
+    link "https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries"
+    trivia "Tree-sitter queries power syntax highlighting in editors like Neovim, Helix, and Zed—this is what arborium uses under the hood."
+
+    sample {
+        path "samples/highlights.scm"
+        description "Tree-sitter highlight queries with S-expressions and captures."
+        license "MIT"
+    }
+}

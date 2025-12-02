@@ -10,6 +10,8 @@ facet = { git = "https://github.com/facet-rs/facet" }
 facet-args = { git = "https://github.com/facet-rs/facet" }
 facet-kdl = { git = "https://github.com/facet-rs/facet" }
 miette = { version = "7", features = ["fancy"] }
+thiserror = "2"
+structstruck = "0.4"
 rootcause = "0.10"
 tiny_http = "0.12"
 flate2 = "1"
@@ -23,4 +25,4 @@ serde_json = "1"
 ureq = "2"
 regex = "1"
 pulldown-cmark = "0.12"
-arborium = { path = "../crates/arborium", features = ["all-languages"] }  # For theme CSS generation and highlight linting
+# arborium = { path = "../crates/arborium", features = ["all-languages"] }  # TODO: re-enable for theme CSS generation and highlight linting

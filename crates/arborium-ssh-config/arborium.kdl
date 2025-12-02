@@ -1,0 +1,23 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "ssh-config"
+    name "SSH Config"
+    tag "config"
+    tier 5
+    icon "mdi:key-chain"
+
+    inventor "Tatu Ylönen"
+    year 1995
+    description "Configuration file format for OpenSSH client settings like hosts, keys, and connection options."
+    link "https://man.openbsd.org/ssh_config"
+    trivia "SSH was created in 1995 after a password-sniffing attack at Helsinki University of Technology prompted Tatu Ylönen to develop a secure replacement for rlogin."
+
+    sample {
+        path "samples/config"
+        description "SSH client configuration with hosts, identity files, and forwarding."
+        license "CC0-1.0"
+    }
+}

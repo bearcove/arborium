@@ -1,0 +1,24 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "sparql"
+    name "SPARQL"
+    tag "query"
+    tier 5
+    icon "mdi:graph-outline"
+    aliases "rq"
+
+    inventor "W3C RDF Data Access Working Group"
+    year 2008
+    description "A query language for retrieving and manipulating data stored in RDF (Resource Description Framework) format."
+    link "https://en.wikipedia.org/wiki/SPARQL"
+    trivia "SPARQL is a recursive acronym: 'SPARQL Protocol and RDF Query Language'—it powers knowledge graphs like Wikidata and DBpedia."
+
+    sample {
+        path "samples/query.sparql"
+        description "SPARQL queries with SELECT, CONSTRUCT, FILTER, and aggregations."
+        license "CC0-1.0"
+    }
+}

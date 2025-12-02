@@ -1,0 +1,24 @@
+repo "https://github.com/tree-sitter-grammars/tree-sitter-svelte"
+commit "ae5199db47757f785e43a14b332118a5474de1a2"
+license "MIT"
+
+grammar {
+    id "svelte"
+    name "Svelte"
+    tag "markup"
+    tier 3
+    icon "devicon-plain:svelte"
+
+    inventor "Rich Harris"
+    year 2016
+    description "Compiler-based UI framework that outputs minimal JS; official tutorial at https://svelte.dev/docs/introduction."
+    link "https://en.wikipedia.org/wiki/Svelte"
+    trivia "Harris announced Svelte in 2016 to eliminate the virtual DOM; the https://svelte.dev/blog covers milestones like SvelteKit and run-time improvements."
+
+    sample {
+        path "samples/App.svelte"
+        description "Svelte starter component with props, scoped styles, and reactive declarations."
+        link "https://github.com/sveltejs/template/blob/master/src/App.svelte"
+        license "MIT"
+    }
+}

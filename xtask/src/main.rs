@@ -10,6 +10,7 @@
 
 mod config;
 mod lint;
+mod lint_new;
 mod types;
 mod util;
 
@@ -129,10 +130,15 @@ fn main() {
             todo!("implement generate-demo")
         }
         Command::Lint => {
-            println!("Running lints...");
-            lint::lint_info_toml();
-            println!();
-            lint::lint_highlights();
+            let crates_dir = util::find_repo_root()
+                .expect("Could not find repo root")
+                .join("crates");
+            let crates_dir = camino::Utf8PathBuf::from_path_buf(crates_dir).expect("non-UTF8 path");
+
+            if let Err(e) = lint_new::run_lints(&crates_dir) {
+                eprintln!("{:?}", e);
+                std::process::exit(1);
+            }
         }
     }
 }

@@ -1,0 +1,24 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "kdl"
+    name "KDL"
+    tag "config"
+    tier 4
+    icon "mdi:file-document-outline"
+
+    inventor "KDL community"
+    year 2021
+    description "A document language with XML-like semantics and a more human-friendly syntax."
+    link "https://kdl.dev"
+    trivia "KDL stands for 'KDL Document Language'—the recursive acronym is intentional, inspired by GNU."
+
+    sample {
+        path "samples/schema.kdl"
+        description "KDL schema definition with nested nodes and type annotations."
+        link "https://github.com/kdl-org/kdl/blob/main/examples/kdl-schema.kdl"
+        license "CC0-1.0"
+    }
+}

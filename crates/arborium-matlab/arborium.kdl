@@ -1,0 +1,24 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "matlab"
+    name "MATLAB"
+    tag "code"
+    tier 4
+    icon "devicon-plain:matlab"
+    aliases "m"
+
+    inventor "Cleve Moler"
+    year 1984
+    description "A numerical computing environment and programming language for matrix operations and data visualization."
+    link "https://en.wikipedia.org/wiki/MATLAB"
+    trivia "MATLAB was originally written to give students access to LINPACK and EISPACK without learning Fortran—the name means 'MATrix LABoratory.'"
+
+    sample {
+        path "samples/fft_example.m"
+        description "FFT signal analysis with functions, plotting, and matrix operations."
+        license "CC0-1.0"
+    }
+}

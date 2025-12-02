@@ -1,0 +1,25 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "graphql"
+    name "GraphQL"
+    tag "query"
+    tier 3
+    icon "devicon-plain:graphql"
+    aliases "gql"
+
+    inventor "Lee Byron, Nick Schrock"
+    year 2012
+    description "A query language for APIs that lets clients request exactly the data they need."
+    link "https://en.wikipedia.org/wiki/GraphQL"
+    trivia "GraphQL was developed internally at Facebook starting in 2012 to power the News Feed on mobile apps before being open-sourced in 2015."
+
+    sample {
+        path "samples/starwars_schema.graphql"
+        description "Star Wars schema from graphql-js with interfaces, types, enums, and query definitions."
+        link "https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsSchema.ts"
+        license "MIT"
+    }
+}

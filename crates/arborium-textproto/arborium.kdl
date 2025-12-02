@@ -1,0 +1,24 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "textproto"
+    name "Text Proto"
+    tag "data"
+    tier 4
+    icon "mdi:message-outline"
+    aliases "pbtxt" "textpb"
+
+    inventor "Google"
+    year 2001
+    description "A human-readable text format for Protocol Buffer messages, commonly used for configuration files."
+    link "https://github.com/protocolbuffers/protobuf"
+    trivia "Protocol Buffers were developed at Google in 2001 and are used for nearly all inter-machine communication at the company."
+
+    sample {
+        path "samples/config.textproto"
+        description "Protocol Buffer text format with nested messages and repeated fields."
+        license "CC0-1.0"
+    }
+}

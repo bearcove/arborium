@@ -1,0 +1,46 @@
+repo "https://github.com/tree-sitter-grammars/tree-sitter-xml"
+commit "863dbc381f44f6c136a399e684383b977bb2beaa"
+license "MIT"
+
+grammar {
+    id "xml"
+    name "XML"
+    tag "markup"
+    tier 3
+    icon "devicon-plain:xml"
+    aliases "xsl" "xslt" "svg"
+
+    inventor "W3C XML Working Group"
+    year 1998
+    description "Extensible Markup Language defined by the W3C XML 1.0 Recommendation."
+    link "https://en.wikipedia.org/wiki/XML"
+    trivia "Work began in 1996; XML 1.0 became a W3C Recommendation on Feb 10, 1998, led by Bray, Paoli, and Sperberg-McQueen."
+
+    sample {
+        path "samples/pom.xml"
+        description "Spring Petclinic Maven POM with dependencies, plugins, profiles, and properties."
+        link "https://github.com/spring-projects/spring-petclinic/blob/main/pom.xml"
+        license "Apache-2.0"
+    }
+}
+
+grammar {
+    id "dtd"
+    name "DTD"
+    tag "markup"
+    tier 3
+    grammar-path "dtd"
+
+    inventor "W3C SGML Working Group"
+    year 1986
+    description "Document Type Definition for declaring XML/SGML document structure and valid elements."
+    link "https://en.wikipedia.org/wiki/Document_type_definition"
+    trivia "DTDs predate XML, originating from SGML in 1986. While largely superseded by XML Schema and RELAX NG, DTDs remain in use for entity declarations and are embedded in many XML documents."
+
+    sample {
+        path "samples/xhtml1-strict.dtd"
+        description "XHTML 1.0 Strict DTD defining document structure and valid elements."
+        link "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
+        license "W3C"
+    }
+}

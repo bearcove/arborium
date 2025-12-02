@@ -6,6 +6,7 @@ members = [
     "crates/arborium-ada",
     "crates/arborium-agda",
     "crates/arborium-asm",
+    "crates/arborium-asciidoc",
     "crates/arborium-awk",
     "crates/arborium-bash",
     "crates/arborium-batch",

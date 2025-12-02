@@ -1,0 +1,25 @@
+repo "https://github.com/tree-sitter/tree-sitter-c"
+commit "ae19b676b13bdcc13b7665397e6d9b14975473dd"
+license "MIT"
+
+grammar {
+    id "c"
+    name "C"
+    tag "code"
+    tier 1
+    icon "devicon-plain:c"
+    aliases "h"
+
+    inventor "Dennis Ritchie"
+    year 1972
+    description "General-purpose systems language created at Bell Labs."
+    link "https://en.wikipedia.org/wiki/C_(programming_language)"
+    trivia "C evolved from B/BCPL during 1969-1973 alongside Unix; the name comes from its predecessor B."
+
+    sample {
+        path "samples/paren_main.c"
+        description "Paren interpreter main with parser, eval loop, and hash table usage."
+        link "https://github.com/gfaster/paren/blob/main/main.c"
+        license "MIT"
+    }
+}

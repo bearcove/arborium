@@ -1,0 +1,25 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "commonlisp"
+    name "Common Lisp"
+    tag "code"
+    tier 4
+    icon "mdi:lambda"
+    aliases "lisp" "cl"
+
+    inventor "ANSI X3J13 committee"
+    year 1984
+    description "A multi-paradigm dialect of Lisp standardized by ANSI with powerful macro capabilities."
+    link "https://en.wikipedia.org/wiki/Common_Lisp"
+    trivia "The Common Lisp standard is over 1,000 pages long and defines nearly 1,000 symbols—making it one of the most comprehensive language specifications ever written."
+
+    sample {
+        path "samples/session_middleware.lisp"
+        description "Lack web framework session middleware with closures, macros, and hash tables."
+        link "https://github.com/fukamachi/lack/blob/master/src/middleware/session.lisp"
+        license "MIT"
+    }
+}

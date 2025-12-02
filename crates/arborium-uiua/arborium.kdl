@@ -1,0 +1,25 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "uiua"
+    name "Uiua"
+    tag "code"
+    tier 5
+    icon "mdi:alpha-u-box-outline"
+    aliases "ua"
+
+    inventor "Daniel Diaz"
+    year 2023
+    description "A stack-based array programming language with a focus on tacit (point-free) code using Unicode glyphs."
+    link "https://www.uiua.org"
+    trivia "Uiua (pronounced 'wee-wuh') uses Unicode symbols for operations—you can type them with ASCII shortcuts that auto-convert."
+
+    sample {
+        path "samples/macros.ua"
+        description "Uiua array language with stack-based operations and unicode glyphs."
+        link "https://github.com/uiua-lang/uiua/blob/main/tests/macros.ua"
+        license "MIT"
+    }
+}

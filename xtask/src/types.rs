@@ -6,38 +6,74 @@
 //! # File Format
 //!
 //! Each crate in `crates/arborium-*` contains an `arborium.kdl` file that
-//! describes the language grammar. This is the single source of truth for:
+//! describes one or more language grammars. This is the single source of truth for:
 //!
-//! - Upstream repository and commit information
-//! - Language metadata (name, icon, description, etc.)
+//! - Upstream repository and commit information (crate-level)
+//! - Language metadata (name, icon, description, etc.) per grammar
 //! - Sample files for testing and demos
 //! - Build configuration for special cases
 //!
-//! # Example `arborium.kdl`
+//! # Example `arborium.kdl` (single grammar, most common)
 //!
 //! ```kdl
-//! id "rust"
-//! name "Rust"
-//! tag "code"
-//! tier 1
-//! icon "devicon-plain:rust"
-//! aliases "rs"
-//!
-//! repo "https://codeberg.org/grammar-orchard/tree-sitter-rust-orchard"
+//! repo "https://github.com/tree-sitter/tree-sitter-rust"
 //! commit "261b20226c04ef601adbdf185a800512a5f66291"
 //! license "MIT"
+//! authors "Maxim Sokolov"
 //!
-//! inventor "Graydon Hoare"
-//! year 2010
-//! description "Systems language focused on safety and performance without GC"
-//! link "https://en.wikipedia.org/wiki/Rust_(programming_language)"
-//! trivia "Hoare began Rust as a side project at Mozilla in 2006"
+//! grammar {
+//!     id "rust"
+//!     name "Rust"
+//!     tag "code"
+//!     tier 1
+//!     icon "devicon-plain:rust"
+//!     aliases "rs"
+//!     has-scanner true
+//!     c-symbol "rust_orchard"
 //!
-//! sample {
-//!     path "samples/example.rs"
-//!     description "Clippy lint implementation"
-//!     link "https://github.com/rust-lang/rust/blob/main/..."
-//!     license "MIT OR Apache-2.0"
+//!     inventor "Graydon Hoare"
+//!     year 2010
+//!     description "Systems language focused on safety and performance without GC"
+//!     link "https://en.wikipedia.org/wiki/Rust_(programming_language)"
+//!     trivia "Hoare began Rust as a side project at Mozilla in 2006"
+//!
+//!     sample {
+//!         path "samples/example.rs"
+//!         description "Clippy lint implementation"
+//!         link "https://github.com/rust-lang/rust/blob/main/..."
+//!         license "MIT OR Apache-2.0"
+//!     }
+//! }
+//! ```
+//!
+//! # Example `arborium.kdl` (multi-grammar crate)
+//!
+//! ```kdl
+//! repo "https://github.com/tree-sitter-grammars/tree-sitter-xml"
+//! commit "863dbc381f44f6c136a399e684383b977bb2beaa"
+//! license "MIT"
+//! authors "ObserverOfTime"
+//!
+//! grammar {
+//!     id "xml"
+//!     name "XML"
+//!     tag "markup"
+//!     tier 3
+//!     has-scanner true
+//!     grammar-path "xml"
+//!
+//!     // ...metadata, samples...
+//! }
+//!
+//! grammar {
+//!     id "dtd"
+//!     name "DTD"
+//!     tag "markup"
+//!     tier 3
+//!     has-scanner true
+//!     grammar-path "dtd"
+//!
+//!     // ...metadata, samples...
 //! }
 //! ```
 
@@ -45,219 +81,514 @@ use std::collections::BTreeMap;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use facet::Facet;
+use facet_kdl as kdl;
+use facet_kdl::Spanned;
 pub use rootcause::Report;
 
-/// Complete metadata for a language grammar crate.
+// =============================================================================
+// Crate-level configuration (parsed from arborium.kdl)
+// =============================================================================
+
+/// Configuration for an entire arborium-* crate.
 ///
-/// This struct represents the contents of an `arborium.kdl` file and serves
-/// as the single source of truth for all grammar-related information.
-///
-/// The struct is used by xtask commands for:
-/// - `grammars vendor` - Creating new grammar crates
-/// - `grammars update` - Checking for upstream updates
-/// - `grammars generate` - Regenerating parser sources and crate code
-/// - `serve-demo` - Building the demo with language metadata
+/// This represents the contents of an `arborium.kdl` file. A crate can
+/// contain one or more grammars that share the same upstream source.
 #[derive(Debug, Clone, Facet)]
-pub struct GrammarInfo {
-    // =========================================================================
-    // Identity
-    // =========================================================================
-    /// Unique identifier for this grammar, used in crate names and feature flags.
-    ///
-    /// This should be a lowercase, hyphen-separated string (e.g., "rust", "c-sharp").
-    /// The crate will be named `arborium-{id}` and the feature flag `lang-{id}`.
-    pub id: String,
-
-    /// Human-readable display name for the language (e.g., "Rust", "C#", "TypeScript").
-    pub name: String,
-
-    /// Category tag for grouping languages in the UI.
-    ///
-    /// Common values: "code", "markup", "config", "data", "shell", "query", "build"
-    pub tag: String,
-
-    /// Quality/completeness tier (1 = best, 3 = experimental).
-    ///
-    /// - Tier 1: Well-tested, complete highlighting, curated samples
-    /// - Tier 2: Working but may have gaps in highlighting
-    /// - Tier 3: Experimental or incomplete
-    #[facet(default)]
-    pub tier: Option<u8>,
-
-    /// Iconify icon identifier (e.g., "devicon-plain:rust", "mdi:language-python").
-    #[facet(default)]
-    pub icon: Option<String>,
-
-    /// Alternative names or file extensions for this language.
-    ///
-    /// Used for language detection (e.g., ["rs"] for Rust, ["ts", "mts", "cts"] for TypeScript).
-    #[facet(default)]
-    pub aliases: Vec<String>,
-
-    // =========================================================================
+pub struct CrateConfig {
+    // =====================================================================
     // Upstream Source
-    // =========================================================================
+    // =====================================================================
     /// Git repository URL for the upstream tree-sitter grammar.
     ///
     /// Use "local" for grammars that are maintained in this repository.
-    pub repo: String,
+    #[facet(kdl::child)]
+    pub repo: Repo,
 
     /// Git commit hash of the vendored version.
-    ///
-    /// This is updated by `cargo xtask grammars vendor` and checked by
-    /// `cargo xtask grammars update`.
-    pub commit: String,
+    #[facet(kdl::child)]
+    pub commit: Commit,
 
-    /// SPDX license identifier for the grammar (e.g., "MIT", "Apache-2.0", "GPL-3.0").
-    pub license: String,
+    /// SPDX license identifier for the grammar (e.g., "MIT", "Apache-2.0").
+    #[facet(kdl::child)]
+    pub license: License,
 
-    /// Subdirectory within the repo containing the grammar (for multi-grammar repos).
+    // TODO: Add authors field back once facet-kdl supports Option<T> + kdl::child + default
+    // when the child node is omitted from the KDL.
+    // See: https://github.com/facet-rs/facet/issues/XXX
+
+    // =====================================================================
+    // Grammars
+    // =====================================================================
+    /// One or more grammars exported by this crate.
     ///
-    /// For example, tree-sitter-typescript has `typescript/` and `tsx/` subdirectories.
-    #[facet(default)]
-    pub subdir: Option<String>,
+    /// Most crates have exactly one grammar. Multi-grammar crates (like
+    /// tree-sitter-xml which exports both XML and DTD) have multiple.
+    #[facet(kdl::children)]
+    pub grammars: Vec<GrammarConfig>,
+}
+
+/// Git repository URL node.
+#[derive(Debug, Clone, Facet)]
+pub struct Repo {
+    #[facet(kdl::argument)]
+    pub value: Spanned<String>,
+}
+
+/// Git commit hash node.
+#[derive(Debug, Clone, Facet)]
+pub struct Commit {
+    #[facet(kdl::argument)]
+    pub value: Spanned<String>,
+}
+
+/// SPDX license identifier node.
+#[derive(Debug, Clone, Facet)]
+pub struct License {
+    #[facet(kdl::argument)]
+    pub value: Spanned<String>,
+}
+
+/// Authors of the tree-sitter grammar.
+#[derive(Debug, Clone, Facet)]
+pub struct Authors {
+    #[facet(kdl::argument)]
+    pub value: String,
+}
+
+// =============================================================================
+// KDL child node wrapper types
+// =============================================================================
+// In KDL, `name "value"` is a child node with an argument, not a property.
+// These wrapper types allow facet-kdl to deserialize them correctly.
+
+macro_rules! kdl_child_string {
+    ($name:ident) => {
+        #[derive(Debug, Clone, Facet)]
+        pub struct $name {
+            #[facet(kdl::argument)]
+            pub value: Spanned<String>,
+        }
+
+        impl std::ops::Deref for $name {
+            type Target = str;
+            fn deref(&self) -> &Self::Target {
+                &self.value
+            }
+        }
+    };
+}
+
+macro_rules! kdl_child_string_optional {
+    ($name:ident) => {
+        #[derive(Debug, Clone, Facet)]
+        pub struct $name {
+            #[facet(kdl::argument)]
+            pub value: String,
+        }
+
+        impl std::ops::Deref for $name {
+            type Target = str;
+            fn deref(&self) -> &Self::Target {
+                &self.value
+            }
+        }
+    };
+}
+
+// Required string children
+kdl_child_string!(Id);
+kdl_child_string!(Name);
+kdl_child_string!(Tag);
+kdl_child_string!(GrammarPath);
+kdl_child_string!(CSymbol);
+kdl_child_string!(Path);
+
+// Optional string children (no span tracking needed)
+kdl_child_string_optional!(Icon);
+kdl_child_string_optional!(Inventor);
+kdl_child_string_optional!(Description);
+kdl_child_string_optional!(Link);
+kdl_child_string_optional!(Trivia);
+kdl_child_string_optional!(SampleDescription);
+kdl_child_string_optional!(SampleLink);
+kdl_child_string_optional!(SampleLicense);
+
+/// Tier child node (u8 value).
+#[derive(Debug, Clone, Facet)]
+pub struct Tier {
+    #[facet(kdl::argument)]
+    pub value: Spanned<u8>,
+}
+
+impl std::ops::Deref for Tier {
+    type Target = u8;
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+/// Year child node (u16 value).
+#[derive(Debug, Clone, Facet)]
+pub struct Year {
+    #[facet(kdl::argument)]
+    pub value: u16,
+}
+
+impl std::ops::Deref for Year {
+    type Target = u16;
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+/// Has-scanner child node (bool value).
+#[derive(Debug, Clone, Facet)]
+#[facet(rename = "has-scanner")]
+pub struct HasScanner {
+    #[facet(kdl::argument)]
+    pub value: bool,
+}
+
+/// Aliases child node (multiple string arguments).
+#[derive(Debug, Clone, Facet)]
+pub struct Aliases {
+    #[facet(kdl::arguments)]
+    pub values: Vec<String>,
+}
+
+// =============================================================================
+// Per-grammar configuration
+// =============================================================================
+
+/// Configuration for a single grammar within a crate.
+///
+/// This contains all the metadata and build configuration for one language.
+#[derive(Debug, Clone, Facet)]
+#[facet(kdl::child, rename = "grammar")]
+pub struct GrammarConfig {
+    // =========================================================================
+    // Identity
+    // =========================================================================
+    /// Unique identifier for this grammar, used in feature flags and exports.
+    #[facet(kdl::child)]
+    pub id: Id,
+
+    /// Human-readable display name for the language.
+    #[facet(kdl::child)]
+    pub name: Name,
+
+    /// Category tag for grouping languages in the UI.
+    #[facet(kdl::child)]
+    pub tag: Tag,
+
+    /// Quality/completeness tier (1 = best, 5 = experimental).
+    #[facet(kdl::child, default)]
+    pub tier: Option<Tier>,
+
+    /// Iconify icon identifier.
+    #[facet(kdl::child, default)]
+    pub icon: Option<Icon>,
+
+    /// Alternative names or file extensions for this language.
+    #[facet(kdl::child, default)]
+    pub aliases: Option<Aliases>,
+
+    // =========================================================================
+    // Build Configuration
+    // =========================================================================
+    /// Whether this grammar has a scanner.c file.
+    #[facet(kdl::child, default)]
+    pub has_scanner: Option<HasScanner>,
+
+    /// Path to the grammar within the repo (for multi-grammar repos).
+    #[facet(kdl::child, default, rename = "grammar-path")]
+    pub grammar_path: Option<GrammarPath>,
+
+    /// Override the C symbol name.
+    #[facet(kdl::child, default, rename = "c-symbol")]
+    pub c_symbol: Option<CSymbol>,
+
+    /// Query configuration (highlights inheritance).
+    #[facet(kdl::child, default)]
+    pub queries: Option<QueriesConfig>,
 
     // =========================================================================
     // Language Metadata (for demos and documentation)
     // =========================================================================
     /// Creator(s) of the programming language.
-    #[facet(default)]
-    pub inventor: Option<String>,
+    #[facet(kdl::child, default)]
+    pub inventor: Option<Inventor>,
 
     /// Year the language was first released.
-    #[facet(default)]
-    pub year: Option<u16>,
+    #[facet(kdl::child, default)]
+    pub year: Option<Year>,
 
-    /// Brief description of the language and its primary use cases.
-    ///
-    /// May contain Markdown links for references.
-    #[facet(default)]
-    pub description: Option<String>,
+    /// Brief description of the language.
+    #[facet(kdl::child, default)]
+    pub description: Option<Description>,
 
-    /// URL to more information (typically Wikipedia or official docs).
-    #[facet(default)]
-    pub link: Option<String>,
+    /// URL to more information.
+    #[facet(kdl::child, default)]
+    pub link: Option<Link>,
 
-    /// Fun facts or interesting history about the language.
-    ///
-    /// Shown in the demo UI to make learning about languages more engaging.
-    #[facet(default)]
-    pub trivia: Option<String>,
-
-    /// Whether this sample was hand-picked for quality.
-    #[facet(default)]
-    pub handpicked: Option<bool>,
+    /// Fun facts or interesting history.
+    #[facet(kdl::child, default)]
+    pub trivia: Option<Trivia>,
 
     // =========================================================================
     // Samples
     // =========================================================================
     /// Sample files for testing highlighting and displaying in demos.
-    #[facet(default)]
-    pub samples: Vec<SampleInfo>,
+    #[facet(kdl::children, default)]
+    pub samples: Vec<SampleConfig>,
+}
 
-    // =========================================================================
-    // Build Configuration
-    // =========================================================================
-    /// Build-time configuration for special cases.
+impl GrammarConfig {
+    /// Get the grammar ID as a string.
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    /// Get the C symbol name for this grammar.
     ///
-    /// Most grammars don't need this - it's auto-detected from the grammar sources.
-    #[facet(default)]
-    pub build: Option<BuildConfig>,
+    /// Returns the explicit `c_symbol` if set, otherwise derives from `id`
+    /// by replacing hyphens with underscores.
+    pub fn c_symbol(&self) -> String {
+        self.c_symbol
+            .as_ref()
+            .map(|s| s.value.to_string())
+            .unwrap_or_else(|| self.id().replace('-', "_"))
+    }
+
+    /// Whether this grammar has a scanner.
+    pub fn has_scanner(&self) -> bool {
+        self.has_scanner.as_ref().map(|h| h.value).unwrap_or(false)
+    }
+
+    /// Get the grammar path within the repo.
+    pub fn grammar_path(&self) -> Option<&str> {
+        self.grammar_path.as_ref().map(|p| p.value.as_str())
+    }
+}
+
+/// Query configuration for a grammar.
+#[derive(Debug, Clone, Facet)]
+#[facet(kdl::child, rename = "queries")]
+pub struct QueriesConfig {
+    /// Highlights query configuration.
+    #[facet(kdl::child, default)]
+    pub highlights: Option<HighlightsConfig>,
+}
+
+/// Highlights query configuration.
+#[derive(Debug, Clone, Facet)]
+#[facet(kdl::child, rename = "highlights")]
+pub struct HighlightsConfig {
+    /// Queries to prepend from other grammars.
+    #[facet(kdl::children, default)]
+    pub prepend: Vec<PrependConfig>,
+}
+
+/// A reference to another grammar's queries to prepend.
+#[derive(Debug, Clone, Facet)]
+#[facet(kdl::child, rename = "prepend")]
+pub struct PrependConfig {
+    /// The crate to prepend from (e.g., "arborium-javascript").
+    #[facet(kdl::property, rename = "crate")]
+    pub crate_name: Spanned<String>,
+
+    /// The grammar within that crate (optional if crate has only one grammar).
+    #[facet(kdl::property, default)]
+    pub grammar: Option<Spanned<String>>,
 }
 
 /// Metadata for a sample source file.
-///
-/// Samples are used for:
-/// - Testing that highlighting works correctly
-/// - Displaying in the demo UI
-/// - Validating grammar completeness
 #[derive(Debug, Clone, Facet)]
-pub struct SampleInfo {
+#[facet(kdl::child, rename = "sample")]
+pub struct SampleConfig {
     /// Path to the sample file, relative to the crate root.
-    ///
-    /// Typically something like "samples/example.rs".
-    pub path: String,
+    #[facet(kdl::child)]
+    pub path: Path,
 
     /// Brief description of what the sample demonstrates.
-    pub description: Option<String>,
+    #[facet(kdl::child, default)]
+    pub description: Option<SampleDescription>,
 
     /// URL to the original source of this sample (for attribution).
-    #[facet(default)]
-    pub link: Option<String>,
+    #[facet(kdl::child, default)]
+    pub link: Option<SampleLink>,
 
     /// License of the sample file (may differ from the grammar license).
-    #[facet(default)]
-    pub license: Option<String>,
+    #[facet(kdl::child, default)]
+    pub license: Option<SampleLicense>,
 }
 
-/// Build configuration for grammars that need special handling.
-///
-/// Most grammars are auto-detected and don't need explicit configuration.
-/// This is only needed for edge cases like:
-/// - Grammars with non-standard C symbol names
-/// - Grammars that export multiple languages (e.g., TypeScript + TSX)
-/// - Grammars with unusual query directory structures
-#[derive(Debug, Clone, Default, Facet)]
-pub struct BuildConfig {
-    /// Override the C symbol name (defaults to id with hyphens replaced by underscores).
-    ///
-    /// The generated code calls `tree_sitter_{c_symbol}()` to get the language.
-    #[facet(default)]
-    pub c_symbol: Option<String>,
-
-    /// Path prefix for query files within the queries/ directory.
-    ///
-    /// Some grammars have nested query directories (e.g., "just/" for tree-sitter-just).
-    #[facet(default)]
-    pub query_path: Option<String>,
-
-    /// For sub-grammars: the parent repository name.
-    ///
-    /// Used to find shared query files (e.g., "typescript" for the tsx sub-grammar).
-    #[facet(default)]
-    pub parent_repo: Option<String>,
-
-    /// Languages whose queries should be inherited (prepended to this grammar's queries).
-    ///
-    /// For example, TypeScript inherits from JavaScript.
-    #[facet(default)]
-    pub inherits_queries_from: Vec<String>,
-
-    /// Additional languages exported by this grammar crate.
-    ///
-    /// For grammars like tree-sitter-typescript that export both TypeScript and TSX.
-    #[facet(default)]
-    pub extra_languages: Vec<ExtraLanguage>,
+impl SampleConfig {
+    /// Get the sample path as a string.
+    pub fn path(&self) -> &str {
+        &self.path
+    }
 }
 
-/// An additional language exported by a grammar crate.
-///
-/// Used for multi-language grammars like tree-sitter-typescript.
-#[derive(Debug, Clone, Facet)]
-pub struct ExtraLanguage {
-    /// C symbol name for this language (e.g., "tsx").
-    pub c_symbol: String,
+// =============================================================================
+// Crate state (what's on disk)
+// =============================================================================
 
-    /// Export name in the generated Rust code (e.g., "tsx").
-    pub export_name: String,
+/// Complete state of an arborium-* crate, including config and disk state.
+#[derive(Debug)]
+pub struct CrateState {
+    /// The crate name (e.g., "arborium-rust").
+    pub name: String,
+
+    /// Path to the crate directory.
+    pub path: Utf8PathBuf,
+
+    /// Parsed configuration from arborium.kdl (if present).
+    pub config: Option<CrateConfig>,
+
+    /// Raw KDL source for Miette diagnostics.
+    pub kdl_source: Option<String>,
+
+    /// State of files on disk.
+    pub files: CrateFiles,
 }
+
+/// State of files within a crate directory.
+#[derive(Debug, Default)]
+pub struct CrateFiles {
+    /// arborium.kdl - the source of truth
+    pub kdl: FileState,
+
+    /// Cargo.toml - generated
+    pub cargo_toml: FileState,
+
+    /// build.rs - generated
+    pub build_rs: FileState,
+
+    /// src/lib.rs - generated
+    pub lib_rs: FileState,
+
+    /// grammar-src/ directory state
+    pub grammar_src: GrammarSrcState,
+
+    /// queries/ directory state
+    pub queries: QueriesState,
+
+    /// Sample files declared in kdl
+    pub samples: Vec<SampleState>,
+
+    /// Legacy/unexpected files that should be deleted
+    pub legacy_files: Vec<Utf8PathBuf>,
+}
+
+/// State of a single file.
+#[derive(Debug, Default)]
+pub enum FileState {
+    #[default]
+    Missing,
+    Present {
+        content: String,
+    },
+}
+
+impl FileState {
+    pub fn is_present(&self) -> bool {
+        matches!(self, FileState::Present { .. })
+    }
+
+    pub fn content(&self) -> Option<&str> {
+        match self {
+            FileState::Present { content } => Some(content),
+            FileState::Missing => None,
+        }
+    }
+}
+
+/// State of the grammar-src/ directory.
+#[derive(Debug, Default)]
+pub struct GrammarSrcState {
+    /// parser.c - required
+    pub parser_c: FileState,
+
+    /// scanner.c - optional depending on grammar
+    pub scanner_c: FileState,
+
+    /// Other files present
+    pub other_files: Vec<Utf8PathBuf>,
+}
+
+/// State of the queries/ directory.
+#[derive(Debug, Default)]
+pub struct QueriesState {
+    /// highlights.scm
+    pub highlights: FileState,
+
+    /// injections.scm
+    pub injections: FileState,
+
+    /// locals.scm
+    pub locals: FileState,
+}
+
+/// State of a sample file.
+#[derive(Debug)]
+pub struct SampleState {
+    /// Path relative to crate root (from kdl).
+    pub path: String,
+
+    /// What we found on disk.
+    pub state: SampleFileState,
+}
+
+/// State of a sample file on disk.
+#[derive(Debug)]
+pub enum SampleFileState {
+    /// File doesn't exist.
+    Missing,
+
+    /// File exists but is empty.
+    Empty,
+
+    /// File exists but contains an HTTP error (failed download).
+    HttpError,
+
+    /// File exists but is very short.
+    TooShort { lines: usize },
+
+    /// File is good.
+    Ok { lines: usize },
+}
+
+// =============================================================================
+// Registry
+// =============================================================================
 
 /// Registry of all grammar crates in the workspace.
 ///
-/// Built by scanning `crates/arborium-*/arborium.kdl` files at startup.
+/// Built by scanning `crates/arborium-*/` directories at startup.
+/// Contains both parsed configuration and disk state for each crate.
 #[derive(Debug, Default)]
-pub struct GrammarRegistry {
-    /// All grammars, keyed by their id.
-    pub grammars: BTreeMap<String, GrammarInfo>,
+pub struct CrateRegistry {
+    /// All crates, keyed by crate name (e.g., "arborium-rust").
+    pub crates: BTreeMap<String, CrateState>,
 }
 
-impl GrammarRegistry {
-    /// Load the grammar registry by scanning all arborium-* crates.
+/// Crates to skip when scanning (internal/utility crates).
+const SKIP_CRATES: &[&str] = &["sysroot", "test-harness"];
+
+/// Legacy files that should be deleted.
+const LEGACY_FILES: &[&str] = &["info.toml", "grammar-crate-config.toml"];
+
+/// Minimum recommended lines for a sample file.
+pub const MIN_SAMPLE_LINES: usize = 25;
+
+impl CrateRegistry {
+    /// Load the registry by scanning all arborium-* crates.
     ///
-    /// This reads `arborium.kdl` from each crate directory and builds
-    /// a complete registry of all available grammars.
+    /// This scans both the configuration (arborium.kdl) and the actual
+    /// files on disk, building a complete picture of each crate's state.
     pub fn load(crates_dir: &Utf8Path) -> Result<Self, Report> {
-        let mut grammars = BTreeMap::new();
+        let mut crates = BTreeMap::new();
 
         for entry in std::fs::read_dir(crates_dir)? {
             let entry = entry?;
@@ -267,49 +598,158 @@ impl GrammarRegistry {
                 continue;
             }
 
-            let dir_name = path.file_name().unwrap().to_string_lossy();
+            let dir_name = path.file_name().unwrap().to_string_lossy().to_string();
             if !dir_name.starts_with("arborium-") {
                 continue;
             }
 
             // Skip utility crates
             let crate_suffix = dir_name.strip_prefix("arborium-").unwrap();
-            if matches!(crate_suffix, "sysroot" | "test-harness") {
+            if SKIP_CRATES.contains(&crate_suffix) {
                 continue;
             }
 
-            let kdl_path = path.join("arborium.kdl");
-            if !kdl_path.exists() {
-                // TODO: warn about missing arborium.kdl?
-                continue;
-            }
+            let crate_path = Utf8PathBuf::from_path_buf(path).expect("non-UTF8 path");
+            let crate_name = dir_name;
 
-            let content = std::fs::read_to_string(&kdl_path)?;
-            let info: GrammarInfo = facet_kdl::from_str(&content)?;
-
-            grammars.insert(info.id.clone(), info);
+            let state = Self::scan_crate(&crate_name, &crate_path)?;
+            crates.insert(crate_name, state);
         }
 
-        Ok(Self { grammars })
+        Ok(Self { crates })
     }
 
-    /// Get a grammar by its id.
-    pub fn get(&self, id: &str) -> Option<&GrammarInfo> {
-        self.grammars.get(id)
+    /// Scan a single crate directory.
+    fn scan_crate(name: &str, path: &Utf8Path) -> Result<CrateState, Report> {
+        let mut files = CrateFiles::default();
+
+        // Check for arborium.kdl
+        let kdl_path = path.join("arborium.kdl");
+        let (config, kdl_source) = if kdl_path.exists() {
+            let content = std::fs::read_to_string(&kdl_path)?;
+            let config: CrateConfig = match facet_kdl::from_str(&content) {
+                Ok(c) => c,
+                Err(e) => {
+                    eprintln!("Error parsing {}: {}", kdl_path, e);
+                    return Err(e.into());
+                }
+            };
+            files.kdl = FileState::Present {
+                content: content.clone(),
+            };
+            (Some(config), Some(content))
+        } else {
+            (None, None)
+        };
+
+        // Check for generated files
+        files.cargo_toml = Self::read_file_state(&path.join("Cargo.toml"));
+        files.build_rs = Self::read_file_state(&path.join("build.rs"));
+        files.lib_rs = Self::read_file_state(&path.join("src/lib.rs"));
+
+        // Check grammar-src/
+        let grammar_src_path = path.join("grammar-src");
+        if grammar_src_path.exists() {
+            files.grammar_src.parser_c = Self::read_file_state(&grammar_src_path.join("parser.c"));
+            files.grammar_src.scanner_c =
+                Self::read_file_state(&grammar_src_path.join("scanner.c"));
+            // Could scan for other files here
+        }
+
+        // Check queries/
+        let queries_path = path.join("queries");
+        if queries_path.exists() {
+            files.queries.highlights = Self::read_file_state(&queries_path.join("highlights.scm"));
+            files.queries.injections = Self::read_file_state(&queries_path.join("injections.scm"));
+            files.queries.locals = Self::read_file_state(&queries_path.join("locals.scm"));
+        }
+
+        // Check for samples declared in config
+        if let Some(ref cfg) = config {
+            for grammar in &cfg.grammars {
+                for sample in &grammar.samples {
+                    let sample_path = path.join(&*sample.path);
+                    let state = Self::check_sample_file(&sample_path);
+                    files.samples.push(SampleState {
+                        path: sample.path.to_string(),
+                        state,
+                    });
+                }
+            }
+        }
+
+        // Check for legacy files
+        for legacy in LEGACY_FILES {
+            let legacy_path = path.join(legacy);
+            if legacy_path.exists() {
+                files.legacy_files.push(legacy_path);
+            }
+        }
+
+        Ok(CrateState {
+            name: name.to_string(),
+            path: path.to_owned(),
+            config,
+            kdl_source,
+            files,
+        })
     }
 
-    /// Iterate over all grammars.
-    pub fn iter(&self) -> impl Iterator<Item = (&String, &GrammarInfo)> {
-        self.grammars.iter()
+    /// Read a file's state.
+    fn read_file_state(path: &Utf8Path) -> FileState {
+        match std::fs::read_to_string(path) {
+            Ok(content) => FileState::Present { content },
+            Err(_) => FileState::Missing,
+        }
     }
 
-    /// Number of grammars in the registry.
-    pub fn len(&self) -> usize {
-        self.grammars.len()
+    /// Check a sample file's state.
+    fn check_sample_file(path: &Utf8Path) -> SampleFileState {
+        let content = match std::fs::read_to_string(path) {
+            Ok(c) => c,
+            Err(_) => return SampleFileState::Missing,
+        };
+
+        let trimmed = content.trim();
+
+        if trimmed.is_empty() {
+            return SampleFileState::Empty;
+        }
+
+        // Check for HTTP error pages (failed downloads)
+        // Note: Don't flag <!DOCTYPE as error - that's valid for HTML samples
+        if trimmed.starts_with("404:") || trimmed == "Not Found" || trimmed == "404 Not Found" {
+            return SampleFileState::HttpError;
+        }
+
+        let lines = content.lines().count();
+        if lines < MIN_SAMPLE_LINES {
+            return SampleFileState::TooShort { lines };
+        }
+
+        SampleFileState::Ok { lines }
     }
 
-    /// Check if the registry is empty.
-    pub fn is_empty(&self) -> bool {
-        self.grammars.is_empty()
+    /// Iterate over all crates.
+    pub fn iter(&self) -> impl Iterator<Item = (&String, &CrateState)> {
+        self.crates.iter()
+    }
+
+    /// Iterate over all crates that have valid configuration.
+    pub fn configured_crates(&self) -> impl Iterator<Item = (&String, &CrateState, &CrateConfig)> {
+        self.crates
+            .iter()
+            .filter_map(|(name, state)| state.config.as_ref().map(|cfg| (name, state, cfg)))
+    }
+
+    /// Iterate over all grammars across all configured crates.
+    pub fn all_grammars(&self) -> impl Iterator<Item = (&str, &CrateConfig, &GrammarConfig)> {
+        self.configured_crates()
+            .flat_map(|(crate_name, _, config)| {
+                config
+                    .grammars
+                    .iter()
+                    .map(move |g| (crate_name.as_str(), config, g))
+            })
     }
 }

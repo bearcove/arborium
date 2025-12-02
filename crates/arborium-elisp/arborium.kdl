@@ -1,0 +1,25 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "elisp"
+    name "Emacs Lisp"
+    tag "code"
+    tier 4
+    icon "simple-icons:gnuemacs"
+    aliases "emacs-lisp" "el"
+
+    inventor "Richard Stallman"
+    year 1985
+    description "A Lisp dialect used to extend and customize the GNU Emacs text editor."
+    link "https://en.wikipedia.org/wiki/Emacs_Lisp"
+    trivia "Emacs Lisp has been called 'the most widely used Lisp dialect' due to Emacs's popularity—millions of lines of Elisp packages exist."
+
+    sample {
+        path "samples/simple.el"
+        description "Emacs simple.el with defuns, defvars, and interactive commands."
+        link "https://github.com/emacs-mirror/emacs/blob/master/lisp/simple.el"
+        license "GPL-3.0"
+    }
+}

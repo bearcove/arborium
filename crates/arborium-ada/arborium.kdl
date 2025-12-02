@@ -1,0 +1,24 @@
+repo ""
+commit ""
+license ""
+
+grammar {
+    id "ada"
+    name "Ada"
+    tag "code"
+    tier 5
+    icon "mdi:alpha-a-box-outline"
+
+    inventor "Jean Ichbiah"
+    year 1983
+    description "General-purpose systems language created for the U.S. Department of Defense; emphasizes safety and reliability."
+    link "https://en.wikipedia.org/wiki/Ada_(programming_language)"
+    trivia "Named after Ada Lovelace; standardized first in 1983 (Ada 83) and later revisions Ada 95, 2005, 2012, 2022."
+
+    sample {
+        path "samples/inventory.adb"
+        description "Handwritten Ada program using vectors, records, and procedures to manage an inventory."
+        link "local"
+        license "MIT"
+    }
+}
