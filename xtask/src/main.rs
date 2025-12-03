@@ -99,6 +99,11 @@ fn main() {
             }
         }
         Command::Gen { name, dry_run } => {
+            // Check for required tools before starting
+            if !tool::check_tools_or_report(tool::GEN_TOOLS) {
+                std::process::exit(1);
+            }
+
             // Run non-strict lint before generation (missing parser.c is just a warning)
             println!("{}", "Running pre-generation lint...".cyan().bold());
             let options = lint_new::LintOptions { strict: false };
@@ -137,6 +142,11 @@ fn main() {
             }
         }
         Command::Serve { address, port, dev } => {
+            // Check for required tools before starting
+            if !tool::check_tools_or_report(tool::SERVE_TOOLS) {
+                std::process::exit(1);
+            }
+
             let addr = address.as_deref().unwrap_or("127.0.0.1");
             serve::serve(&crates_dir, addr, port, dev);
         }

@@ -23,6 +23,12 @@ pub enum Tool {
 /// All tools that xtask may need.
 pub const ALL_TOOLS: &[Tool] = &[Tool::TreeSitter, Tool::Git, Tool::WasmPack];
 
+/// Tools needed for `cargo xtask gen` (generation).
+pub const GEN_TOOLS: &[Tool] = &[Tool::TreeSitter, Tool::Git];
+
+/// Tools needed for `cargo xtask serve` (WASM demo).
+pub const SERVE_TOOLS: &[Tool] = &[Tool::WasmPack];
+
 impl Tool {
     /// The executable name to search for in PATH.
     pub fn executable_name(self) -> &'static str {
@@ -173,12 +179,12 @@ pub fn print_tools_report() {
     println!("{}", boxed);
 }
 
-/// Check all tools and print a report. Returns true if all are available.
-pub fn check_tools_or_report() -> bool {
+/// Check specified tools and print a report. Returns true if all are available.
+pub fn check_tools_or_report(tools: &[Tool]) -> bool {
     let mut installed = Vec::new();
     let mut missing = Vec::new();
 
-    for &tool in ALL_TOOLS {
+    for &tool in tools {
         match tool.find() {
             Ok(path) => installed.push((tool, path)),
             Err(_) => missing.push(tool),

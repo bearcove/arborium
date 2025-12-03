@@ -20,11 +20,6 @@ pub struct LintOptions {
 
 /// Run all lints on the registry.
 pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<()> {
-    // Check all tools first
-    if !crate::tool::check_tools_or_report() {
-        std::process::exit(1);
-    }
-
     println!("{}", "Loading crate registry...".cyan().bold());
     if !options.strict {
         println!(
