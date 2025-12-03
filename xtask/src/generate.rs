@@ -16,12 +16,7 @@ use std::process::Stdio;
 
 /// Generate crate files for all or a specific grammar.
 pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSet, Report> {
-    // Run lint first to validate everything (including tool checks)
-    if let Err(e) = crate::lint_new::run_lints(crates_dir) {
-        eprintln!("{:?}", e);
-        std::process::exit(1);
-    }
-
+    // Note: lint is run by main.rs before and after calling this function
     let registry = CrateRegistry::load(crates_dir)?;
     let mut plans = PlanSet::new();
 

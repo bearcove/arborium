@@ -18,6 +18,7 @@ mod util;
 
 use facet::Facet;
 use facet_args as args;
+use owo_colors::OwoColorize;
 
 /// Arborium development tasks
 #[derive(Debug, Facet)]
@@ -35,7 +36,12 @@ enum Command {
     Doctor,
 
     /// Validate all grammar configurations
-    Lint,
+    Lint {
+        /// Strict mode: missing generated files (parser.c) are errors.
+        /// Without this flag, they're warnings (useful before running gen).
+        #[facet(args::named, default)]
+        strict: bool,
+    },
 
     /// Regenerate crate files (Cargo.toml, build.rs, lib.rs, grammar-src/) from arborium.kdl
     Gen {
@@ -85,13 +91,24 @@ fn main() {
         Command::Doctor => {
             tool::print_tools_report();
         }
-        Command::Lint => {
-            if let Err(e) = lint_new::run_lints(&crates_dir) {
+        Command::Lint { strict } => {
+            let options = lint_new::LintOptions { strict };
+            if let Err(e) = lint_new::run_lints(&crates_dir, options) {
                 eprintln!("{:?}", e);
                 std::process::exit(1);
             }
         }
         Command::Gen { name, dry_run } => {
+            // Run non-strict lint before generation (missing parser.c is just a warning)
+            println!("{}", "Running pre-generation lint...".cyan().bold());
+            let options = lint_new::LintOptions { strict: false };
+            if let Err(e) = lint_new::run_lints(&crates_dir, options) {
+                eprintln!("{:?}", e);
+                std::process::exit(1);
+            }
+            println!();
+
+            // Plan and execute generation
             match generate::plan_generate(&crates_dir, name.as_deref()) {
                 Ok(plans) => {
                     if let Err(e) = plans.run(dry_run) {
@@ -101,6 +118,17 @@ fn main() {
                 }
                 Err(e) => {
                     eprintln!("{}", e);
+                    std::process::exit(1);
+                }
+            }
+
+            // Run strict lint after generation (now parser.c should exist)
+            if !dry_run {
+                println!();
+                println!("{}", "Running post-generation lint (strict)...".cyan().bold());
+                let options = lint_new::LintOptions { strict: true };
+                if let Err(e) = lint_new::run_lints(&crates_dir, options) {
+                    eprintln!("{:?}", e);
                     std::process::exit(1);
                 }
             }
