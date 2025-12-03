@@ -20,9 +20,11 @@
 //! - Works without JavaScript (custom elements are valid HTML)
 //! - Easy to style with CSS: `a-k { color: purple; }`
 
-use std::io::{self, Write};
-use crate::tree_sitter_highlight::{Highlight, HighlightConfiguration, HighlightEvent, Highlighter};
 use crate::highlights;
+use crate::tree_sitter_highlight::{
+    Highlight, HighlightConfiguration, HighlightEvent, Highlighter,
+};
+use std::io::{self, Write};
 
 /// Get the custom element tag suffix for a highlight index.
 /// Returns None for indices without tags (like "none" or "nospell") or out-of-range indices.

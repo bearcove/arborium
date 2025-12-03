@@ -3,7 +3,7 @@
 //! This is a thin wrapper around arborium's high-level Highlighter API
 //! that exposes functionality to JavaScript via wasm-bindgen.
 
-use arborium::{Highlighter, HIGHLIGHT_NAMES};
+use arborium::{HIGHLIGHT_NAMES, Highlighter};
 use wasm_bindgen::prelude::*;
 
 thread_local! {

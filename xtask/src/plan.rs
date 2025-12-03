@@ -302,7 +302,10 @@ fn display_diff(old: &str, new: &str) {
     }
 
     if end < max_len {
-        println!("    {}", format!("... {} more lines", max_len - end).dimmed());
+        println!(
+            "    {}",
+            format!("... {} more lines", max_len - end).dimmed()
+        );
     }
 }
 
@@ -360,7 +363,11 @@ impl Plan {
 
         for op in &self.operations {
             match op {
-                Operation::CreateFile { path, content, description } => {
+                Operation::CreateFile {
+                    path,
+                    content,
+                    description,
+                } => {
                     println!("  {} {}", "create".green(), description);
                     println!("    {} {}", "->".dimmed(), path);
                     // Show first few lines of new content
@@ -372,7 +379,12 @@ impl Plan {
                         println!("    {} ... {} more lines", "+".green(), total_lines - 10);
                     }
                 }
-                Operation::UpdateFile { path, old_content, new_content, description } => {
+                Operation::UpdateFile {
+                    path,
+                    old_content,
+                    new_content,
+                    description,
+                } => {
                     println!("  {} {}", "update".yellow(), description);
                     println!("    {} {}", "->".dimmed(), path);
                     display_diff(old_content, new_content);

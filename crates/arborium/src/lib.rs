@@ -43,15 +43,14 @@
 //! html::render(&mut output, &mut highlighter, &config, "fn main() {}", |_| None).unwrap();
 //! ```
 
-pub use tree_sitter_patched_arborium as tree_sitter;
 pub use tree_sitter_highlight_patched_arborium as tree_sitter_highlight;
+pub use tree_sitter_patched_arborium as tree_sitter;
 
-pub mod highlights;
-pub mod highlighter;
-pub mod html;
 pub mod ansi;
+pub mod highlighter;
+pub mod highlights;
+pub mod html;
 pub mod theme;
-
 
 pub use highlighter::Highlighter;
 

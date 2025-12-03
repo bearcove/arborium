@@ -174,8 +174,12 @@ impl Theme {
 
     /// Parse a theme from Helix-style TOML.
     pub fn from_toml(toml_str: &str) -> Result<Self, ThemeError> {
-        let value: toml::Value = toml_str.parse().map_err(|e| ThemeError::Parse(format!("{e}")))?;
-        let table = value.as_table().ok_or(ThemeError::Parse("Expected table".into()))?;
+        let value: toml::Value = toml_str
+            .parse()
+            .map_err(|e| ThemeError::Parse(format!("{e}")))?;
+        let table = value
+            .as_table()
+            .ok_or(ThemeError::Parse("Expected table".into()))?;
 
         let mut theme = Theme::default();
 
@@ -194,16 +198,17 @@ impl Theme {
             .map(|t| {
                 t.iter()
                     .filter_map(|(k, v)| {
-                        v.as_str().and_then(Color::from_hex).map(|c| (k.as_str(), c))
+                        v.as_str()
+                            .and_then(Color::from_hex)
+                            .map(|c| (k.as_str(), c))
                     })
                     .collect()
             })
             .unwrap_or_default();
 
         // Helper to resolve a color (either hex or palette reference)
-        let resolve_color = |s: &str| -> Option<Color> {
-            Color::from_hex(s).or_else(|| palette.get(s).copied())
-        };
+        let resolve_color =
+            |s: &str| -> Option<Color> { Color::from_hex(s).or_else(|| palette.get(s).copied()) };
 
         // Extract ui.background and ui.foreground
         if let Some(bg) = table.get("ui.background") {
@@ -318,7 +323,10 @@ impl Theme {
                 &self.styles[i]
             } else if !def.parent_tag.is_empty() {
                 // Look up parent style
-                tag_to_style.get(def.parent_tag).copied().unwrap_or(&self.styles[i])
+                tag_to_style
+                    .get(def.parent_tag)
+                    .copied()
+                    .unwrap_or(&self.styles[i])
             } else {
                 continue; // No style and no parent
             };

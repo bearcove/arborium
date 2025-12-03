@@ -16,7 +16,9 @@
 
 use std::io::{self, Write};
 
-use crate::tree_sitter_highlight::{Highlight, HighlightConfiguration, HighlightEvent, Highlighter};
+use crate::tree_sitter_highlight::{
+    Highlight, HighlightConfiguration, HighlightEvent, Highlighter,
+};
 
 /// RGB color for ANSI output.
 #[derive(Clone, Copy, Debug)]
@@ -161,40 +163,40 @@ const TEXT: Color = Color::new(0xcd, 0xd6, 0xf4);
 /// Default theme based on Catppuccin Mocha.
 pub const CATPPUCCIN_MOCHA: Theme = Theme {
     styles: [
-        Style::new().fg(YELLOW),      // 0:  attribute
-        Style::new().fg(PEACH),       // 1:  constant
-        Style::new().fg(SKY),         // 2:  function.builtin
-        Style::new().fg(BLUE),        // 3:  function
-        Style::new().fg(MAUVE),       // 4:  keyword
-        Style::new().fg(TEAL),        // 5:  operator
-        Style::new().fg(BLUE),        // 6:  property
-        Style::new().fg(OVERLAY2),    // 7:  punctuation
-        Style::new().fg(OVERLAY2),    // 8:  punctuation.bracket
-        Style::new().fg(OVERLAY2),    // 9:  punctuation.delimiter
-        Style::new().fg(GREEN),       // 10: string
-        Style::new().fg(RED),         // 11: string.special
-        Style::new().fg(BLUE),        // 12: tag
-        Style::new().fg(YELLOW),      // 13: type
-        Style::new().fg(YELLOW),      // 14: type.builtin
-        Style::new().fg(TEXT),        // 15: variable
-        Style::new().fg(RED),         // 16: variable.builtin
-        Style::new().fg(PEACH),       // 17: variable.parameter
-        Style::new().fg(OVERLAY0),    // 18: comment
-        Style::new().fg(TEAL),        // 19: macro
-        Style::new().fg(PINK),        // 20: label
-        Style::new().fg(GREEN),       // 21: diff.addition
-        Style::new().fg(RED),         // 22: diff.deletion
-        Style::new().fg(PEACH),       // 23: number
-        Style::new().fg(TEXT),        // 24: text.literal
-        Style::new().italic(),        // 25: text.emphasis
-        Style::new().bold(),          // 26: text.strong
+        Style::new().fg(YELLOW),           // 0:  attribute
+        Style::new().fg(PEACH),            // 1:  constant
+        Style::new().fg(SKY),              // 2:  function.builtin
+        Style::new().fg(BLUE),             // 3:  function
+        Style::new().fg(MAUVE),            // 4:  keyword
+        Style::new().fg(TEAL),             // 5:  operator
+        Style::new().fg(BLUE),             // 6:  property
+        Style::new().fg(OVERLAY2),         // 7:  punctuation
+        Style::new().fg(OVERLAY2),         // 8:  punctuation.bracket
+        Style::new().fg(OVERLAY2),         // 9:  punctuation.delimiter
+        Style::new().fg(GREEN),            // 10: string
+        Style::new().fg(RED),              // 11: string.special
+        Style::new().fg(BLUE),             // 12: tag
+        Style::new().fg(YELLOW),           // 13: type
+        Style::new().fg(YELLOW),           // 14: type.builtin
+        Style::new().fg(TEXT),             // 15: variable
+        Style::new().fg(RED),              // 16: variable.builtin
+        Style::new().fg(PEACH),            // 17: variable.parameter
+        Style::new().fg(OVERLAY0),         // 18: comment
+        Style::new().fg(TEAL),             // 19: macro
+        Style::new().fg(PINK),             // 20: label
+        Style::new().fg(GREEN),            // 21: diff.addition
+        Style::new().fg(RED),              // 22: diff.deletion
+        Style::new().fg(PEACH),            // 23: number
+        Style::new().fg(TEXT),             // 24: text.literal
+        Style::new().italic(),             // 25: text.emphasis
+        Style::new().bold(),               // 26: text.strong
         Style::new().fg(BLUE).underline(), // 27: text.uri
-        Style::new().fg(SKY),         // 28: text.reference
-        Style::new().fg(PEACH),       // 29: string.escape
-        Style::new().fg(MAUVE).bold(), // 30: text.title
-        Style::new().fg(PINK),        // 31: punctuation.special
-        Style::new().strikethrough(), // 32: text.strikethrough
-        Style::new().fg(TEXT),        // 33: spell
+        Style::new().fg(SKY),              // 28: text.reference
+        Style::new().fg(PEACH),            // 29: string.escape
+        Style::new().fg(MAUVE).bold(),     // 30: text.title
+        Style::new().fg(PINK),             // 31: punctuation.special
+        Style::new().strikethrough(),      // 32: text.strikethrough
+        Style::new().fg(TEXT),             // 33: spell
     ],
 };
 
@@ -454,7 +456,14 @@ pub fn render<'a>(
     source: &'a str,
     injection_callback: impl FnMut(&str) -> Option<&'a HighlightConfiguration> + 'a,
 ) -> io::Result<()> {
-    render_with_theme(w, highlighter, config, source, &CATPPUCCIN_MOCHA, injection_callback)
+    render_with_theme(
+        w,
+        highlighter,
+        config,
+        source,
+        &CATPPUCCIN_MOCHA,
+        injection_callback,
+    )
 }
 
 /// Render highlighted code with a custom theme.
@@ -531,10 +540,7 @@ mod tests {
         let style = Style::new().fg(Color::new(255, 0, 128)).bold();
         let mut out = Vec::new();
         style.write_start(&mut out).unwrap();
-        assert_eq!(
-            String::from_utf8_lossy(&out),
-            "\x1b[1;38;2;255;0;128m"
-        );
+        assert_eq!(String::from_utf8_lossy(&out), "\x1b[1;38;2;255;0;128m");
 
         out.clear();
         style.write_end(&mut out).unwrap();

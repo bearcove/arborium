@@ -24,10 +24,10 @@
 use std::collections::HashMap;
 use std::io::{self, Write};
 
-use crate::tree_sitter_highlight::{HighlightConfiguration, HighlightEvent, Highlight};
-use crate::tree_sitter_highlight::Highlighter as TsHighlighter;
 use crate::highlights;
 use crate::html;
+use crate::tree_sitter_highlight::Highlighter as TsHighlighter;
+use crate::tree_sitter_highlight::{Highlight, HighlightConfiguration, HighlightEvent};
 
 /// Error type for highlighting operations
 #[derive(Debug)]
@@ -45,7 +45,9 @@ pub enum HighlightError {
 impl std::fmt::Display for HighlightError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            HighlightError::UnsupportedLanguage(lang) => write!(f, "Unsupported language: {}", lang),
+            HighlightError::UnsupportedLanguage(lang) => {
+                write!(f, "Unsupported language: {}", lang)
+            }
             HighlightError::QueryError(e) => write!(f, "Query error: {}", e),
             HighlightError::HighlightError(e) => write!(f, "Highlight error: {}", e),
             HighlightError::IoError(e) => write!(f, "IO error: {}", e),
@@ -90,7 +92,10 @@ impl Highlighter {
         Self {
             configs: HashMap::new(),
             ts_highlighter: TsHighlighter::new(),
-            names: crate::HIGHLIGHT_NAMES.iter().map(|s| s.to_string()).collect(),
+            names: crate::HIGHLIGHT_NAMES
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
         }
     }
 
@@ -248,96 +253,186 @@ impl Highlighter {
     /// This doesn't initialize any configurations.
     fn available_languages() -> &'static [&'static str] {
         &[
-            #[cfg(feature = "lang-ada")] "ada",
-            #[cfg(feature = "lang-agda")] "agda",
-            #[cfg(feature = "lang-asm")] "asm",
-            #[cfg(feature = "lang-awk")] "awk",
-            #[cfg(feature = "lang-bash")] "bash",
-            #[cfg(feature = "lang-batch")] "batch",
-            #[cfg(feature = "lang-c")] "c",
-            #[cfg(feature = "lang-c-sharp")] "c-sharp",
-            #[cfg(feature = "lang-caddy")] "caddy",
-            #[cfg(feature = "lang-capnp")] "capnp",
-            #[cfg(feature = "lang-clojure")] "clojure",
-            #[cfg(feature = "lang-cmake")] "cmake",
-            #[cfg(feature = "lang-commonlisp")] "commonlisp",
-            #[cfg(feature = "lang-cpp")] "cpp",
-            #[cfg(feature = "lang-css")] "css",
-            #[cfg(feature = "lang-d")] "d",
-            #[cfg(feature = "lang-dart")] "dart",
-            #[cfg(feature = "lang-devicetree")] "devicetree",
-            #[cfg(feature = "lang-diff")] "diff",
-            #[cfg(feature = "lang-dockerfile")] "dockerfile",
-            #[cfg(feature = "lang-dot")] "dot",
-            #[cfg(feature = "lang-elisp")] "elisp",
-            #[cfg(feature = "lang-elixir")] "elixir",
-            #[cfg(feature = "lang-elm")] "elm",
-            #[cfg(feature = "lang-erlang")] "erlang",
-            #[cfg(feature = "lang-fish")] "fish",
-            #[cfg(feature = "lang-fsharp")] "fsharp",
-            #[cfg(feature = "lang-gleam")] "gleam",
-            #[cfg(feature = "lang-glsl")] "glsl",
-            #[cfg(feature = "lang-go")] "go",
-            #[cfg(feature = "lang-graphql")] "graphql",
-            #[cfg(feature = "lang-haskell")] "haskell",
-            #[cfg(feature = "lang-hcl")] "hcl",
-            #[cfg(feature = "lang-hlsl")] "hlsl",
-            #[cfg(feature = "lang-html")] "html",
-            #[cfg(feature = "lang-ini")] "ini",
-            #[cfg(feature = "lang-java")] "java",
-            #[cfg(feature = "lang-javascript")] "javascript",
-            #[cfg(feature = "lang-jinja2")] "jinja2",
-            #[cfg(feature = "lang-jq")] "jq",
-            #[cfg(feature = "lang-json")] "json",
-            #[cfg(feature = "lang-julia")] "julia",
-            #[cfg(feature = "lang-kdl")] "kdl",
-            #[cfg(feature = "lang-kotlin")] "kotlin",
-            #[cfg(feature = "lang-lean")] "lean",
-            #[cfg(feature = "lang-lua")] "lua",
-            #[cfg(feature = "lang-matlab")] "matlab",
-            #[cfg(feature = "lang-meson")] "meson",
-            #[cfg(feature = "lang-nginx")] "nginx",
-            #[cfg(feature = "lang-ninja")] "ninja",
-            #[cfg(feature = "lang-nix")] "nix",
-            #[cfg(feature = "lang-objc")] "objc",
-            #[cfg(feature = "lang-ocaml")] "ocaml",
-            #[cfg(feature = "lang-perl")] "perl",
-            #[cfg(feature = "lang-php")] "php",
-            #[cfg(feature = "lang-powershell")] "powershell",
-            #[cfg(feature = "lang-prolog")] "prolog",
-            #[cfg(feature = "lang-python")] "python",
-            #[cfg(feature = "lang-query")] "query",
-            #[cfg(feature = "lang-r")] "r",
-            #[cfg(feature = "lang-rescript")] "rescript",
-            #[cfg(feature = "lang-ron")] "ron",
-            #[cfg(feature = "lang-ruby")] "ruby",
-            #[cfg(feature = "lang-rust")] "rust",
-            #[cfg(feature = "lang-scala")] "scala",
-            #[cfg(feature = "lang-scheme")] "scheme",
-            #[cfg(feature = "lang-scss")] "scss",
-            #[cfg(feature = "lang-sparql")] "sparql",
-            #[cfg(feature = "lang-sql")] "sql",
-            #[cfg(feature = "lang-ssh-config")] "ssh-config",
-            #[cfg(feature = "lang-starlark")] "starlark",
-            #[cfg(feature = "lang-svelte")] "svelte",
-            #[cfg(feature = "lang-swift")] "swift",
-            #[cfg(feature = "lang-textproto")] "textproto",
-            #[cfg(feature = "lang-thrift")] "thrift",
-            #[cfg(feature = "lang-tlaplus")] "tlaplus",
-            #[cfg(feature = "lang-toml")] "toml",
-            #[cfg(feature = "lang-tsx")] "tsx",
-            #[cfg(feature = "lang-typescript")] "typescript",
-            #[cfg(feature = "lang-typst")] "typst",
-            #[cfg(feature = "lang-uiua")] "uiua",
-            #[cfg(feature = "lang-vb")] "vb",
-            #[cfg(feature = "lang-verilog")] "verilog",
-            #[cfg(feature = "lang-vhdl")] "vhdl",
-            #[cfg(feature = "lang-vue")] "vue",
-            #[cfg(feature = "lang-x86asm")] "x86asm",
-            #[cfg(feature = "lang-xml")] "xml",
-            #[cfg(feature = "lang-yaml")] "yaml",
-            #[cfg(feature = "lang-yuri")] "yuri",
-            #[cfg(feature = "lang-zig")] "zig",
+            #[cfg(feature = "lang-ada")]
+            "ada",
+            #[cfg(feature = "lang-agda")]
+            "agda",
+            #[cfg(feature = "lang-asm")]
+            "asm",
+            #[cfg(feature = "lang-awk")]
+            "awk",
+            #[cfg(feature = "lang-bash")]
+            "bash",
+            #[cfg(feature = "lang-batch")]
+            "batch",
+            #[cfg(feature = "lang-c")]
+            "c",
+            #[cfg(feature = "lang-c-sharp")]
+            "c-sharp",
+            #[cfg(feature = "lang-caddy")]
+            "caddy",
+            #[cfg(feature = "lang-capnp")]
+            "capnp",
+            #[cfg(feature = "lang-clojure")]
+            "clojure",
+            #[cfg(feature = "lang-cmake")]
+            "cmake",
+            #[cfg(feature = "lang-commonlisp")]
+            "commonlisp",
+            #[cfg(feature = "lang-cpp")]
+            "cpp",
+            #[cfg(feature = "lang-css")]
+            "css",
+            #[cfg(feature = "lang-d")]
+            "d",
+            #[cfg(feature = "lang-dart")]
+            "dart",
+            #[cfg(feature = "lang-devicetree")]
+            "devicetree",
+            #[cfg(feature = "lang-diff")]
+            "diff",
+            #[cfg(feature = "lang-dockerfile")]
+            "dockerfile",
+            #[cfg(feature = "lang-dot")]
+            "dot",
+            #[cfg(feature = "lang-elisp")]
+            "elisp",
+            #[cfg(feature = "lang-elixir")]
+            "elixir",
+            #[cfg(feature = "lang-elm")]
+            "elm",
+            #[cfg(feature = "lang-erlang")]
+            "erlang",
+            #[cfg(feature = "lang-fish")]
+            "fish",
+            #[cfg(feature = "lang-fsharp")]
+            "fsharp",
+            #[cfg(feature = "lang-gleam")]
+            "gleam",
+            #[cfg(feature = "lang-glsl")]
+            "glsl",
+            #[cfg(feature = "lang-go")]
+            "go",
+            #[cfg(feature = "lang-graphql")]
+            "graphql",
+            #[cfg(feature = "lang-haskell")]
+            "haskell",
+            #[cfg(feature = "lang-hcl")]
+            "hcl",
+            #[cfg(feature = "lang-hlsl")]
+            "hlsl",
+            #[cfg(feature = "lang-html")]
+            "html",
+            #[cfg(feature = "lang-ini")]
+            "ini",
+            #[cfg(feature = "lang-java")]
+            "java",
+            #[cfg(feature = "lang-javascript")]
+            "javascript",
+            #[cfg(feature = "lang-jinja2")]
+            "jinja2",
+            #[cfg(feature = "lang-jq")]
+            "jq",
+            #[cfg(feature = "lang-json")]
+            "json",
+            #[cfg(feature = "lang-julia")]
+            "julia",
+            #[cfg(feature = "lang-kdl")]
+            "kdl",
+            #[cfg(feature = "lang-kotlin")]
+            "kotlin",
+            #[cfg(feature = "lang-lean")]
+            "lean",
+            #[cfg(feature = "lang-lua")]
+            "lua",
+            #[cfg(feature = "lang-matlab")]
+            "matlab",
+            #[cfg(feature = "lang-meson")]
+            "meson",
+            #[cfg(feature = "lang-nginx")]
+            "nginx",
+            #[cfg(feature = "lang-ninja")]
+            "ninja",
+            #[cfg(feature = "lang-nix")]
+            "nix",
+            #[cfg(feature = "lang-objc")]
+            "objc",
+            #[cfg(feature = "lang-ocaml")]
+            "ocaml",
+            #[cfg(feature = "lang-perl")]
+            "perl",
+            #[cfg(feature = "lang-php")]
+            "php",
+            #[cfg(feature = "lang-powershell")]
+            "powershell",
+            #[cfg(feature = "lang-prolog")]
+            "prolog",
+            #[cfg(feature = "lang-python")]
+            "python",
+            #[cfg(feature = "lang-query")]
+            "query",
+            #[cfg(feature = "lang-r")]
+            "r",
+            #[cfg(feature = "lang-rescript")]
+            "rescript",
+            #[cfg(feature = "lang-ron")]
+            "ron",
+            #[cfg(feature = "lang-ruby")]
+            "ruby",
+            #[cfg(feature = "lang-rust")]
+            "rust",
+            #[cfg(feature = "lang-scala")]
+            "scala",
+            #[cfg(feature = "lang-scheme")]
+            "scheme",
+            #[cfg(feature = "lang-scss")]
+            "scss",
+            #[cfg(feature = "lang-sparql")]
+            "sparql",
+            #[cfg(feature = "lang-sql")]
+            "sql",
+            #[cfg(feature = "lang-ssh-config")]
+            "ssh-config",
+            #[cfg(feature = "lang-starlark")]
+            "starlark",
+            #[cfg(feature = "lang-svelte")]
+            "svelte",
+            #[cfg(feature = "lang-swift")]
+            "swift",
+            #[cfg(feature = "lang-textproto")]
+            "textproto",
+            #[cfg(feature = "lang-thrift")]
+            "thrift",
+            #[cfg(feature = "lang-tlaplus")]
+            "tlaplus",
+            #[cfg(feature = "lang-toml")]
+            "toml",
+            #[cfg(feature = "lang-tsx")]
+            "tsx",
+            #[cfg(feature = "lang-typescript")]
+            "typescript",
+            #[cfg(feature = "lang-typst")]
+            "typst",
+            #[cfg(feature = "lang-uiua")]
+            "uiua",
+            #[cfg(feature = "lang-vb")]
+            "vb",
+            #[cfg(feature = "lang-verilog")]
+            "verilog",
+            #[cfg(feature = "lang-vhdl")]
+            "vhdl",
+            #[cfg(feature = "lang-vue")]
+            "vue",
+            #[cfg(feature = "lang-x86asm")]
+            "x86asm",
+            #[cfg(feature = "lang-xml")]
+            "xml",
+            #[cfg(feature = "lang-yaml")]
+            "yaml",
+            #[cfg(feature = "lang-yuri")]
+            "yuri",
+            #[cfg(feature = "lang-zig")]
+            "zig",
         ]
     }
 
@@ -431,7 +526,11 @@ impl Highlighter {
     ///
     /// This is the main entry point for highlighting. It automatically handles
     /// language injections (e.g., CSS/JS in HTML).
-    pub fn highlight_to_html(&mut self, language: &str, source: &str) -> Result<String, HighlightError> {
+    pub fn highlight_to_html(
+        &mut self,
+        language: &str,
+        source: &str,
+    ) -> Result<String, HighlightError> {
         let mut output = Vec::new();
         self.highlight_to_html_writer(&mut output, language, source)?;
         String::from_utf8(output).map_err(|e| HighlightError::HighlightError(e.to_string()))
@@ -459,11 +558,16 @@ impl Highlighter {
             self.ensure_config("typescript");
         }
 
-        let config = self.configs.get(normalized)
+        let config = self
+            .configs
+            .get(normalized)
             .ok_or_else(|| HighlightError::UnsupportedLanguage(language.to_string()))?;
 
-        let highlights = self.ts_highlighter
-            .highlight(config, source.as_bytes(), None, |lang| self.configs.get(lang))
+        let highlights = self
+            .ts_highlighter
+            .highlight(config, source.as_bytes(), None, |lang| {
+                self.configs.get(lang)
+            })
             .map_err(|e| HighlightError::HighlightError(e.to_string()))?;
 
         let mut tag_stack: Vec<&'static str> = Vec::new();
@@ -500,7 +604,9 @@ mod tests {
     #[cfg(feature = "lang-rust")]
     fn test_rust_highlighting() {
         let mut highlighter = Highlighter::new();
-        let html = highlighter.highlight_to_html("rust", "fn main() {}").unwrap();
+        let html = highlighter
+            .highlight_to_html("rust", "fn main() {}")
+            .unwrap();
         assert!(html.contains("<a-k>fn</a-k>")); // keyword
         assert!(html.contains("<a-f>main</a-f>")); // function
     }

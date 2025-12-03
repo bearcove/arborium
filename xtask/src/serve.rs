@@ -289,10 +289,7 @@ fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
     use std::process::Command;
 
     let mut cmd = Command::new("wasm-pack");
-    cmd.arg("build")
-        .arg(demo_dir)
-        .arg("--target")
-        .arg("web");
+    cmd.arg("build").arg(demo_dir).arg("--target").arg("web");
 
     if dev {
         cmd.arg("--dev");
@@ -300,7 +297,9 @@ fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
         cmd.arg("--release");
     }
 
-    let status = cmd.status().map_err(|e| format!("Failed to run wasm-pack: {}", e))?;
+    let status = cmd
+        .status()
+        .map_err(|e| format!("Failed to run wasm-pack: {}", e))?;
 
     if !status.success() {
         return Err("wasm-pack build failed".to_string());
@@ -334,8 +333,8 @@ fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
 }
 
 fn generate_registry_json(crates_dir: &Utf8Path, demo_dir: &PathBuf) -> Result<Registry, String> {
-    let crates_dir = Utf8PathBuf::from_path_buf(crates_dir.to_path_buf().into())
-        .map_err(|_| "non-UTF8 path")?;
+    let crates_dir =
+        Utf8PathBuf::from_path_buf(crates_dir.to_path_buf().into()).map_err(|_| "non-UTF8 path")?;
 
     let crate_registry = CrateRegistry::load(&crates_dir).map_err(|e| e.to_string())?;
     let registry = Registry::from_crate_registry(&crate_registry, &crates_dir);
@@ -469,7 +468,10 @@ fn generate_index_html(demo_dir: &PathBuf, icons: &BTreeMap<String, String>) -> 
     }
 
     // TODO: Replace {{THEME_SWATCHES}} when theme support is added
-    html = html.replace("{{THEME_SWATCHES}}", "<!-- Theme swatches not yet implemented -->");
+    html = html.replace(
+        "{{THEME_SWATCHES}}",
+        "<!-- Theme swatches not yet implemented -->",
+    );
 
     fs::write(&output_path, &html).map_err(|e| e.to_string())?;
     Ok(())
@@ -502,7 +504,10 @@ fn generate_app_js(
 
     // Do replacements
     let output = app_js
-        .replace("// {{LANGUAGE_INFO}}", &format!("const languageInfo = {};", lang_info_js))
+        .replace(
+            "// {{LANGUAGE_INFO}}",
+            &format!("const languageInfo = {};", lang_info_js),
+        )
         .replace("{{EXAMPLES}}", &examples_js)
         .replace("{{ICONS}}", &icons_js);
 
@@ -515,8 +520,14 @@ fn build_language_info_js(registry: &Registry) -> String {
     let mut js = String::from("{\n");
     for (i, grammar) in registry.grammars.iter().enumerate() {
         js.push_str(&format!("    \"{}\": {{\n", grammar.id));
-        js.push_str(&format!("        \"name\": \"{}\",\n", escape_for_js(&grammar.name)));
-        js.push_str(&format!("        \"tag\": \"{}\",\n", escape_for_js(&grammar.tag)));
+        js.push_str(&format!(
+            "        \"name\": \"{}\",\n",
+            escape_for_js(&grammar.name)
+        ));
+        js.push_str(&format!(
+            "        \"tag\": \"{}\",\n",
+            escape_for_js(&grammar.tag)
+        ));
         if let Some(ref icon) = grammar.icon {
             js.push_str(&format!("        \"icon\": \"{}\",\n", escape_for_js(icon)));
         }
@@ -524,10 +535,17 @@ fn build_language_info_js(registry: &Registry) -> String {
             js.push_str(&format!("        \"tier\": {},\n", tier));
         }
         if let Some(ref desc) = grammar.description {
-            js.push_str(&format!("        \"description\": \"{}\",\n", escape_for_js(desc)));
+            js.push_str(&format!(
+                "        \"description\": \"{}\",\n",
+                escape_for_js(desc)
+            ));
         }
         if !grammar.aliases.is_empty() {
-            let aliases: Vec<String> = grammar.aliases.iter().map(|a| format!("\"{}\"", escape_for_js(a))).collect();
+            let aliases: Vec<String> = grammar
+                .aliases
+                .iter()
+                .map(|a| format!("\"{}\"", escape_for_js(a)))
+                .collect();
             js.push_str(&format!("        \"aliases\": [{}],\n", aliases.join(", ")));
         }
         // Remove trailing comma and newline, add just newline
@@ -660,8 +678,8 @@ fn compress_brotli_fast(data: &[u8]) -> Result<Vec<u8>, std::io::Error> {
 }
 
 fn compress_gzip(data: &[u8]) -> Result<Vec<u8>, std::io::Error> {
-    use flate2::write::GzEncoder;
     use flate2::Compression;
+    use flate2::write::GzEncoder;
 
     let mut encoder = GzEncoder::new(Vec::new(), Compression::best());
     encoder.write_all(data)?;
@@ -669,8 +687,8 @@ fn compress_gzip(data: &[u8]) -> Result<Vec<u8>, std::io::Error> {
 }
 
 fn compress_gzip_fast(data: &[u8]) -> Result<Vec<u8>, std::io::Error> {
-    use flate2::write::GzEncoder;
     use flate2::Compression;
+    use flate2::write::GzEncoder;
 
     let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
     encoder.write_all(data)?;
@@ -823,14 +841,17 @@ mod tests {
     fn test_registry_from_crate_registry() {
         let repo_root = util::find_repo_root().expect("Could not find repo root");
         let crates_dir = repo_root.join("crates");
-        let crates_dir =
-            camino::Utf8PathBuf::from_path_buf(crates_dir).expect("non-UTF8 path");
+        let crates_dir = camino::Utf8PathBuf::from_path_buf(crates_dir).expect("non-UTF8 path");
 
         let crate_registry = CrateRegistry::load(&crates_dir).expect("Failed to load registry");
         let registry = Registry::from_crate_registry(&crate_registry, &crates_dir);
 
         // Should have many grammars
-        assert!(registry.grammars.len() > 50, "Expected 50+ grammars, got {}", registry.grammars.len());
+        assert!(
+            registry.grammars.len() > 50,
+            "Expected 50+ grammars, got {}",
+            registry.grammars.len()
+        );
 
         // Check a known grammar exists
         let rust = registry.grammars.iter().find(|g| g.id == "rust");

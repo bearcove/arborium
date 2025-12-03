@@ -5,7 +5,7 @@
 #![cfg(feature = "lang-vue")]
 
 use arborium::tree_sitter_highlight::{Highlight, HighlightEvent, Highlighter as TsHighlighter};
-use arborium::{Highlighter, HIGHLIGHT_NAMES};
+use arborium::{HIGHLIGHT_NAMES, Highlighter};
 use indoc::indoc;
 
 /// A recorded highlight event for testing

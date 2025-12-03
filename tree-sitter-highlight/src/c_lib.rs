@@ -4,8 +4,8 @@ use std::{
 };
 
 use regex::Regex;
-use tree_sitter_patched_arborium as tree_sitter;
 use tree_sitter::Language;
+use tree_sitter_patched_arborium as tree_sitter;
 
 use super::{Error, Highlight, HighlightConfiguration, Highlighter, HtmlRenderer};
 
