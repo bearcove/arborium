@@ -288,6 +288,12 @@ fn generate_sample_files(
 fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
     use std::process::Command;
 
+    // Nuke pkg/ to avoid stale cached files
+    let pkg_dir = demo_dir.join("pkg");
+    if pkg_dir.exists() {
+        fs::remove_dir_all(&pkg_dir).map_err(|e| format!("Failed to remove pkg/: {}", e))?;
+    }
+
     let mut cmd = Command::new("wasm-pack");
     cmd.arg("build").arg(demo_dir).arg("--target").arg("web");
 
@@ -611,50 +617,74 @@ fn escape_for_js(s: &str) -> String {
 
 fn precompress_files(demo_dir: &PathBuf) -> Result<(), String> {
     let files = ["index.html", "registry.json", "styles.css", "app.js"];
+    let pkg_files = ["arborium_demo.js", "app.generated.js"];
 
     for file in files {
         let path = demo_dir.join(file);
-        if !path.exists() {
-            continue;
-        }
-
-        let data = fs::read(&path).map_err(|e| e.to_string())?;
-
-        // Brotli
-        let br_path = PathBuf::from(format!("{}.br", path.display()));
-        let br_data = compress_brotli(&data).map_err(|e| e.to_string())?;
-        fs::write(&br_path, &br_data).map_err(|e| e.to_string())?;
-
-        // Gzip
-        let gz_path = PathBuf::from(format!("{}.gz", path.display()));
-        let gz_data = compress_gzip(&data).map_err(|e| e.to_string())?;
-        fs::write(&gz_path, &gz_data).map_err(|e| e.to_string())?;
+        compress_file(&path)?;
     }
+
+    for file in pkg_files {
+        let path = demo_dir.join("pkg").join(file);
+        compress_file(&path)?;
+    }
+
+    Ok(())
+}
+
+fn compress_file(path: &PathBuf) -> Result<(), String> {
+    if !path.exists() {
+        return Ok(());
+    }
+
+    let data = fs::read(path).map_err(|e| e.to_string())?;
+
+    // Brotli
+    let br_path = PathBuf::from(format!("{}.br", path.display()));
+    let br_data = compress_brotli(&data).map_err(|e| e.to_string())?;
+    fs::write(&br_path, &br_data).map_err(|e| e.to_string())?;
+
+    // Gzip
+    let gz_path = PathBuf::from(format!("{}.gz", path.display()));
+    let gz_data = compress_gzip(&data).map_err(|e| e.to_string())?;
+    fs::write(&gz_path, &gz_data).map_err(|e| e.to_string())?;
 
     Ok(())
 }
 
 fn precompress_files_fast(demo_dir: &PathBuf) -> Result<(), String> {
     let files = ["index.html", "registry.json", "styles.css", "app.js"];
+    let pkg_files = ["arborium_demo.js", "app.generated.js"];
 
     for file in files {
         let path = demo_dir.join(file);
-        if !path.exists() {
-            continue;
-        }
-
-        let data = fs::read(&path).map_err(|e| e.to_string())?;
-
-        // Brotli (fast)
-        let br_path = PathBuf::from(format!("{}.br", path.display()));
-        let br_data = compress_brotli_fast(&data).map_err(|e| e.to_string())?;
-        fs::write(&br_path, &br_data).map_err(|e| e.to_string())?;
-
-        // Gzip (fast)
-        let gz_path = PathBuf::from(format!("{}.gz", path.display()));
-        let gz_data = compress_gzip_fast(&data).map_err(|e| e.to_string())?;
-        fs::write(&gz_path, &gz_data).map_err(|e| e.to_string())?;
+        compress_file_fast(&path)?;
     }
+
+    for file in pkg_files {
+        let path = demo_dir.join("pkg").join(file);
+        compress_file_fast(&path)?;
+    }
+
+    Ok(())
+}
+
+fn compress_file_fast(path: &PathBuf) -> Result<(), String> {
+    if !path.exists() {
+        return Ok(());
+    }
+
+    let data = fs::read(path).map_err(|e| e.to_string())?;
+
+    // Brotli (fast)
+    let br_path = PathBuf::from(format!("{}.br", path.display()));
+    let br_data = compress_brotli_fast(&data).map_err(|e| e.to_string())?;
+    fs::write(&br_path, &br_data).map_err(|e| e.to_string())?;
+
+    // Gzip (fast)
+    let gz_path = PathBuf::from(format!("{}.gz", path.display()));
+    let gz_data = compress_gzip_fast(&data).map_err(|e| e.to_string())?;
+    fs::write(&gz_path, &gz_data).map_err(|e| e.to_string())?;
 
     Ok(())
 }
