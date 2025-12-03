@@ -1,7 +1,0 @@
-examples/**/*.ml
-examples/**/*.mli
-!examples/**/*.cppo.*
-!examples/**/*.template.*
-!examples/ocamlformat/test/failing/**/*
-!examples/ocamlformat/test/passing/**/*
-!examples/ocaml/testsuite/tests/parse-errors/*

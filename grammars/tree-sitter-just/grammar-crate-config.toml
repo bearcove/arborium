@@ -1,3 +1,0 @@
-# Grammar crate configuration for Just
-# Queries are in a nested directory
-query_path = "just/"

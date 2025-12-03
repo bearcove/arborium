@@ -1,6 +1,0 @@
-# Grammar crate configuration for TSX
-# Sub-grammar of tree-sitter-typescript - queries are in parent directory
-parent_repo = "typescript"
-
-# TSX inherits JavaScript's queries (TypeScript queries are shared)
-inherits_queries_from = ["javascript"]

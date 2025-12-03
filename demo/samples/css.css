@@ -1,0 +1,121 @@
+h1 {
+  --pico-font-size: 2rem;
+  --pico-line-height: 1.125;
+  --pico-typography-spacing-top: 3rem;
+}
+
+h2 {
+  --pico-font-size: 1.75rem;
+  --pico-line-height: 1.15;
+  --pico-typography-spacing-top: 2.625rem;
+}
+
+h3 {
+  --pico-font-size: 1.5rem;
+  --pico-line-height: 1.175;
+  --pico-typography-spacing-top: 2.25rem;
+}
+
+h4 {
+  --pico-font-size: 1.25rem;
+  --pico-line-height: 1.2;
+  --pico-typography-spacing-top: 1.874rem;
+}
+
+h5 {
+  --pico-font-size: 1.125rem;
+  --pico-line-height: 1.225;
+  --pico-typography-spacing-top: 1.6875rem;
+}
+
+h6 {
+  --pico-font-size: 1rem;
+  --pico-line-height: 1.25;
+  --pico-typography-spacing-top: 1.5rem;
+}
+
+thead th,
+thead td,
+tfoot th,
+tfoot td {
+  --pico-font-weight: 600;
+  --pico-border-width: 0.1875rem;
+}
+
+pre,
+code,
+kbd,
+samp {
+  --pico-font-family: var(--pico-font-family-monospace);
+}
+
+kbd {
+  --pico-font-weight: bolder;
+}
+
+input:not([type=submit],
+[type=button],
+[type=reset],
+[type=checkbox],
+[type=radio],
+[type=file]),
+:where(select, textarea) {
+  --pico-outline-width: 0.0625rem;
+}
+
+[type=search] {
+  --pico-border-radius: 5rem;
+}
+
+[type=checkbox],
+[type=radio] {
+  --pico-border-width: 0.125rem;
+}
+
+[type=checkbox][role=switch] {
+  --pico-border-width: 0.1875rem;
+}
+
+details.dropdown summary:not([role=button]) {
+  --pico-outline-width: 0.0625rem;
+}
+
+nav details.dropdown summary:focus-visible {
+  --pico-outline-width: 0.125rem;
+}
+
+[role=search] {
+  --pico-border-radius: 5rem;
+}
+
+[role=search]:has(button.secondary:focus,
+[type=submit].secondary:focus,
+[type=button].secondary:focus,
+[role=button].secondary:focus),
+[role=group]:has(button.secondary:focus,
+[type=submit].secondary:focus,
+[type=button].secondary:focus,
+[role=button].secondary:focus) {
+  --pico-group-box-shadow-focus-with-button: 0 0 0 var(--pico-outline-width) var(--pico-secondary-focus);
+}
+[role=search]:has(button.contrast:focus,
+[type=submit].contrast:focus,
+[type=button].contrast:focus,
+[role=button].contrast:focus),
+[role=group]:has(button.contrast:focus,
+[type=submit].contrast:focus,
+[type=button].contrast:focus,
+[role=button].contrast:focus) {
+  --pico-group-box-shadow-focus-with-button: 0 0 0 var(--pico-outline-width) var(--pico-contrast-focus);
+}
+[role=search] button,
+[role=search] [type=submit],
+[role=search] [type=button],
+[role=search] [role=button],
+[role=group] button,
+[role=group] [type=submit],
+[role=group] [type=button],
+[role=group] [role=button] {
+  --pico-form-element-spacing-horizontal: 2rem;
+}
+

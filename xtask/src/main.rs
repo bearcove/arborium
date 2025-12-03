@@ -32,7 +32,7 @@ enum Command {
     /// Validate all grammar configurations
     Lint,
 
-    /// Regenerate crate files (Cargo.toml, build.rs, lib.rs) from arborium.kdl
+    /// Regenerate crate files (Cargo.toml, build.rs, lib.rs, grammar-src/) from arborium.kdl
     Gen {
         /// Optional grammar name to regenerate (regenerates all if omitted)
         #[facet(args::positional, default)]

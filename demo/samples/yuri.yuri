@@ -1,0 +1,42 @@
+# --------------------------------------------------
+# Basic vertex and fragment shaders in one file,
+# written in the Yuri shader language (WIP).
+# See https://git.gay/yuri/yuri for more.
+# --------------------------------------------------
+
+# Type aliases for shader outputs
+type VertexOutput = {{ @vert.pos out: vec4f, coord: vec2f }}
+type FragmentOutput = vec4f
+
+# Vertex shader - transforms vertex positions
+@vert
+fn my_vert_main(pos: vec3f, coord: vec2f): VertexOutput {
+    {{ out = vec4f(pos, 1), pos, coord }}
+}
+
+# Fragment shader - outputs final pixel color
+@frag
+fn my_frag_main(coord: vec2f): FragmentOutput {
+    vec4f(coord, 0, 1)
+}
+
+# Another vertex shader example with matrix transform
+@vert
+fn transformed_vert(
+    pos: vec3f,
+    normal: vec3f,
+    uv: vec2f,
+    model_matrix: mat4f,
+    view_proj: mat4f
+): VertexOutput {
+    let world_pos = model_matrix * vec4f(pos, 1)
+    let clip_pos = view_proj * world_pos
+    {{ out = clip_pos, coord = uv }}
+}
+
+# Fragment shader with texture sampling
+@frag
+fn textured_frag(coord: vec2f, tex: sampler2D): FragmentOutput {
+    let color = sample(tex, coord)
+    color
+}

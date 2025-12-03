@@ -1,0 +1,29 @@
+# Personal SSH configuration
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+    AddKeysToAgent yes
+
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    AddKeysToAgent yes
+    IdentitiesOnly yes
+
+Host dev-server
+    HostName 192.168.1.100
+    User developer
+    Port 2222
+    ForwardAgent yes
+    LocalForward 8080 localhost:80
+
+Host jump-host
+    HostName bastion.example.com
+    User admin
+    IdentityFile ~/.ssh/jump_key
+
+Host internal-*
+    ProxyJump jump-host
+    User deploy

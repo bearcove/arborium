@@ -15,10 +15,10 @@ fn main() {
 
     // For WASM builds, use our custom sysroot (provided by arborium crate via links = "arborium")
     let target = std::env::var("TARGET").unwrap_or_default();
-    if target.contains("wasm") {
-        if let Ok(sysroot) = std::env::var("DEP_ARBORIUM_SYSROOT_PATH") {
-            build.include(&sysroot);
-        }
+    if target.contains("wasm")
+        && let Ok(sysroot) = std::env::var("DEP_ARBORIUM_SYSROOT_PATH")
+    {
+        build.include(&sysroot);
     }
 
     build.file(format!("{}/parser.c", src_dir));

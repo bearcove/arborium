@@ -1,8 +1,0 @@
-# Grammar crate configuration for Markdown
-# Queries are in a nested directory
-query_path = "tree-sitter-markdown/"
-
-# Also exports the inline markdown grammar
-[[extra_languages]]
-c_symbol = "markdown_inline"
-export_name = "markdown_inline"

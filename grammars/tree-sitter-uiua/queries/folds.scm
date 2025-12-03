@@ -1,6 +1,0 @@
-[
-  (array)
-  (module)
-  (inlineFunction)
-] @fold
-

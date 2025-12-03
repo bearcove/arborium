@@ -1,6 +1,0 @@
-# Grammar crate configuration for TypeScript
-# Sub-grammar of tree-sitter-typescript - queries are in parent directory
-parent_repo = "typescript"
-
-# TypeScript inherits JavaScript's queries
-inherits_queries_from = ["javascript"]
