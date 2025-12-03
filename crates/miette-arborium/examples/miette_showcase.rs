@@ -1,6 +1,6 @@
 //! Showcase of miette-arborium syntax highlighting across various languages.
 //!
-//! Run with: cargo run --example showcase -p miette-arborium --features all-languages
+//! Run with: cargo run --example miette_showcase -p miette-arborium --features all-languages
 
 use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, NamedSource, SourceSpan};
 use miette_arborium::ArboriumHighlighter;

@@ -36,6 +36,7 @@
 //! ```
 
 use std::path::Path;
+use std::sync::RwLock;
 
 use arborium::ansi::{Style, CATPPUCCIN_MOCHA as DEFAULT_THEME};
 use arborium::tree_sitter_highlight::{Highlight, HighlightConfiguration, HighlightEvent};
@@ -49,7 +50,10 @@ use owo_colors::{Rgb, Style as OwoStyle, Styled};
 /// This highlighter uses arborium to provide accurate, language-aware syntax
 /// highlighting for source code snippets in miette diagnostic output.
 pub struct ArboriumHighlighter {
-    highlighter: ArboriumCoreHighlighter,
+    // Using RwLock because miette's Highlighter trait only gives us &self,
+    // but we need to lazily initialize language configs via get_config_mut.
+    // RwLock is needed for thread-safety (miette requires Sync + Send).
+    highlighter: RwLock<ArboriumCoreHighlighter>,
     theme: &'static Theme,
 }
 
@@ -63,7 +67,7 @@ impl ArboriumHighlighter {
     /// Create a new highlighter with the default theme (Catppuccin Mocha).
     pub fn new() -> Self {
         Self {
-            highlighter: ArboriumCoreHighlighter::new(),
+            highlighter: RwLock::new(ArboriumCoreHighlighter::new()),
             theme: &DEFAULT_THEME,
         }
     }
@@ -80,7 +84,7 @@ impl ArboriumHighlighter {
     /// ```
     pub fn with_theme(theme: &'static Theme) -> Self {
         Self {
-            highlighter: ArboriumCoreHighlighter::new(),
+            highlighter: RwLock::new(ArboriumCoreHighlighter::new()),
             theme,
         }
     }
@@ -89,7 +93,7 @@ impl ArboriumHighlighter {
     fn detect_language(&self, contents: &dyn SpanContents<'_>) -> Option<&'static str> {
         // First try the explicit language hint
         if let Some(lang) = contents.language() {
-            if self.highlighter.is_supported(lang) {
+            if self.highlighter.read().unwrap().is_supported(lang) {
                 return Some(self.normalize_language(lang));
             }
         }
@@ -313,7 +317,7 @@ impl ArboriumHighlighter {
             _ => return None,
         };
 
-        if self.highlighter.is_supported(lang) {
+        if self.highlighter.read().unwrap().is_supported(lang) {
             Some(lang)
         } else {
             None
@@ -337,7 +341,10 @@ impl Highlighter for ArboriumHighlighter {
 
         // If we have a supported language, prepare the highlighted lines
         if let Some(lang) = language {
-            if let Some(config) = self.highlighter.get_config(lang) {
+            // Use get_config_mut to lazily initialize the language config
+            // We need to do all highlighting work inside the lock scope
+            let mut highlighter = self.highlighter.write().unwrap();
+            if let Some(config) = highlighter.get_config_mut(lang) {
                 return Box::new(ArboriumHighlighterState::new(
                     source_str,
                     config,
