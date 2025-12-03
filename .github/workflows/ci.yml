@@ -124,12 +124,6 @@ jobs:
     needs: generate
     runs-on: depot-windows-2022-32
     steps:
-      - name: Setup Dev Drive
-        uses: samypr100/setup-dev-drive@v3
-        with:
-          workspace-copy: true
-          drive-size: 8GB
-
       - uses: actions/checkout@v4
 
       - name: Download grammar sources
