@@ -112,9 +112,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         }
 
         // Check size
-        let size = std::fs::metadata(&wasm_file)
-            .into_diagnostic()?
-            .len() as usize;
+        let size = std::fs::metadata(&wasm_file).into_diagnostic()?.len() as usize;
         if size > options.size_budget {
             println!(
                 "  {} Size {} exceeds budget {} ({:.1}x)",

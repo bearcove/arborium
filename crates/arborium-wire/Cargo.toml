@@ -11,5 +11,5 @@ default = []
 std = []
 
 [dependencies]
-facet = { git = "https://github.com/facet-rs/facet" }
-facet-postcard = { git = "https://github.com/facet-rs/facet", features = ["alloc"] }
+facet = { git = "https://github.com/facet-rs/facet", rev = "e06efea69a5c104a861429a15d81182cc9b01c0b" }
+facet-postcard = { git = "https://github.com/facet-rs/facet", rev = "e06efea69a5c104a861429a15d81182cc9b01c0b", features = ["alloc"] }

@@ -66,10 +66,18 @@ impl HighlightConfig {
         locals_query: &str,
     ) -> Result<Self, QueryError> {
         // Concatenate queries: injections, then locals, then highlights
+        // Add newline separators to ensure queries don't merge incorrectly
+        // if they don't end with newlines
         let mut query_source = String::new();
         query_source.push_str(injections_query);
+        if !injections_query.is_empty() && !injections_query.ends_with('\n') {
+            query_source.push('\n');
+        }
         let locals_query_offset = query_source.len();
         query_source.push_str(locals_query);
+        if !locals_query.is_empty() && !locals_query.ends_with('\n') {
+            query_source.push('\n');
+        }
         let highlights_query_offset = query_source.len();
         query_source.push_str(highlights_query);
 
@@ -127,7 +135,9 @@ struct Session {
 impl Session {
     fn new(language: &Language) -> Self {
         let mut parser = Parser::new();
-        parser.set_language(language).expect("language should be valid");
+        parser
+            .set_language(language)
+            .expect("language should be valid");
         Self {
             parser,
             tree: None,

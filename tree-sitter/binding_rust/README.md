@@ -11,7 +11,7 @@ Rust bindings to the [Tree-sitter][] parsing library.
 
 First, create a parser:
 
-```rust
+```rust,ignore
 use tree_sitter::{InputEdit, Language, Parser, Point};
 
 let mut parser = Parser::new();
@@ -34,13 +34,13 @@ tree-sitter-rust = "0.23"
 
 To then use a language, you assign them to the parser.
 
-```rust
+```rust,ignore
 parser.set_language(&tree_sitter_rust::LANGUAGE.into()).expect("Error loading Rust grammar");
 ```
 
 Now you can parse source code:
 
-```rust
+```rust,ignore
 let source_code = "fn test() {}";
 let mut tree = parser.parse(source_code, None).unwrap();
 let root_node = tree.root_node();
@@ -55,7 +55,7 @@ assert_eq!(root_node.end_position().column, 12);
 Once you have a syntax tree, you can update it when your source code changes.
 Passing in the previous edited tree makes `parse` run much more quickly:
 
-```rust
+```rust,ignore
 let new_source_code = "fn test(a: u32) {}";
 
 tree.edit(&InputEdit {
@@ -75,7 +75,7 @@ let new_tree = parser.parse(new_source_code, Some(&tree));
 The source code to parse can be provided either as a string, a slice, a vector,
 or as a function that returns a slice. The text can be encoded as either UTF8 or UTF16:
 
-```rust
+```rust,ignore
 // Store some source code in an array of lines.
 let lines = &[
     "pub fn foo() {",

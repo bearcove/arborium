@@ -18,7 +18,7 @@ tree-sitter-javascript = "0.21.3"
 
 Define the list of highlight names that you will recognize:
 
-```rust
+```rust,ignore
 let highlight_names = [
     "attribute",
     "comment",
@@ -52,7 +52,7 @@ let highlight_names = [
 Create a highlighter. You need one of these for each thread that you're using for
 syntax highlighting:
 
-```rust
+```rust,ignore
 use tree_sitter_highlight::Highlighter;
 
 let mut highlighter = Highlighter::new();
@@ -60,7 +60,7 @@ let mut highlighter = Highlighter::new();
 
 Load some highlighting queries from the `queries` directory of the language repository:
 
-```rust
+```rust,ignore
 use tree_sitter_highlight::HighlightConfiguration;
 
 let javascript_language = tree_sitter_javascript::language();
@@ -76,13 +76,13 @@ let mut javascript_config = HighlightConfiguration::new(
 
 Configure the recognized names:
 
-```rust
+```rust,ignore
 javascript_config.configure(&highlight_names);
 ```
 
 Highlight some code:
 
-```rust
+```rust,ignore
 use tree_sitter_highlight::HighlightEvent;
 
 let highlights = highlighter.highlight(

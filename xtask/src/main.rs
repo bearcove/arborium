@@ -200,8 +200,7 @@ fn main() {
             }
 
             let repo_root = util::find_repo_root().expect("Could not find repo root");
-            let repo_root =
-                camino::Utf8PathBuf::from_path_buf(repo_root).expect("non-UTF8 path");
+            let repo_root = camino::Utf8PathBuf::from_path_buf(repo_root).expect("non-UTF8 path");
 
             match action {
                 PluginsAction::Build {
