@@ -11,6 +11,7 @@ use crate::tool::Tool;
 use crate::types::{CrateRegistry, CrateState};
 use camino::{Utf8Path, Utf8PathBuf};
 use fs_err as fs;
+use indicatif::{ProgressBar, ProgressStyle};
 use rootcause::Report;
 use std::process::Stdio;
 
@@ -20,28 +21,47 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
     let registry = CrateRegistry::load(crates_dir)?;
     let mut plans = PlanSet::new();
 
-    for (_name, crate_state) in &registry.crates {
-        // Skip if a specific name was requested and this isn't it
-        if let Some(filter) = name {
-            // Match either full name (arborium-rust) or suffix (rust)
-            let matches = crate_state.name == filter
-                || crate_state
-                    .name
-                    .strip_prefix("arborium-")
-                    .map_or(false, |suffix| suffix == filter);
-            if !matches {
-                continue;
+    // Collect crates to process (respecting filter)
+    let crates_to_process: Vec<_> = registry
+        .crates
+        .iter()
+        .filter(|(_name, crate_state)| {
+            // Skip if a specific name was requested and this isn't it
+            if let Some(filter) = name {
+                let matches = crate_state.name == filter
+                    || crate_state
+                        .name
+                        .strip_prefix("arborium-")
+                        .map_or(false, |suffix| suffix == filter);
+                if !matches {
+                    return false;
+                }
             }
-        }
+            // Skip crates without arborium.kdl
+            crate_state.config.is_some()
+        })
+        .collect();
 
-        // Skip crates without arborium.kdl
-        let Some(ref config) = crate_state.config else {
-            continue;
-        };
+    // Set up progress bar
+    let pb = ProgressBar::new(crates_to_process.len() as u64);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} {msg}")
+            .unwrap()
+            .progress_chars("█▓░"),
+    );
 
+    for (_name, crate_state) in crates_to_process {
+        pb.set_message(crate_state.name.clone());
+
+        let config = crate_state.config.as_ref().unwrap();
         let plan = plan_crate_generation(crate_state, config)?;
         plans.add(plan);
+
+        pb.inc(1);
     }
+
+    pb.finish_with_message("done");
 
     Ok(plans)
 }
@@ -203,23 +223,32 @@ fn plan_grammar_src_generation(
     // Get the crates directory (parent of crate_path)
     let crates_dir = crate_path.parent().ok_or_else(|| std::io::Error::other("Could not get crates directory"))?;
 
-    // Create a temp directory
+    // Create a temp directory with same structure as the crate
+    // Some grammars have `require('../common/...')` so we need to preserve the relative paths
     let temp_dir = tempfile::tempdir()?;
-    let temp_path = Utf8PathBuf::from_path_buf(temp_dir.path().to_path_buf())
+    let temp_root = Utf8PathBuf::from_path_buf(temp_dir.path().to_path_buf())
         .map_err(|_| std::io::Error::other("Non-UTF8 temp path"))?;
 
-    // Copy vendored grammar files to temp dir
-    copy_dir_contents(&grammar_dir, &temp_path)?;
+    // Copy grammar/ to temp/grammar/
+    let temp_grammar = temp_root.join("grammar");
+    copy_dir_contents(&grammar_dir, &temp_grammar)?;
 
-    // Set up cross-grammar dependencies if needed
-    setup_grammar_dependencies(&temp_path, crates_dir, crate_name)?;
+    // Copy common/ to temp/common/ if it exists (some grammars share code via ../common/)
+    let common_dir = crate_path.join("common");
+    if common_dir.exists() {
+        let temp_common = temp_root.join("common");
+        copy_dir_contents(&common_dir, &temp_common)?;
+    }
 
-    // Run tree-sitter generate in the temp directory
+    // Set up cross-grammar dependencies if needed (in temp/grammar/node_modules/)
+    setup_grammar_dependencies(&temp_grammar, crates_dir, crate_name)?;
+
+    // Run tree-sitter generate in the temp/grammar directory
     let tree_sitter = Tool::TreeSitter.find()?;
     let output = tree_sitter
         .command()
         .args(["generate"])
-        .current_dir(&temp_path)
+        .current_dir(&temp_grammar)
         .stdout(Stdio::null())
         .stderr(Stdio::piped())
         .output()?;
@@ -235,8 +264,8 @@ fn plan_grammar_src_generation(
         )))?;
     }
 
-    // The generated files are in temp_path/src/
-    let generated_src = temp_path.join("src");
+    // The generated files are in temp/grammar/src/
+    let generated_src = temp_grammar.join("src");
 
     // Ensure grammar-src/ directory exists in plan
     if !grammar_src_dir.exists() {
