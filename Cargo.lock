@@ -2833,7 +2833,6 @@ dependencies = [
  "cc",
  "regex",
  "regex-syntax",
- "serde_json",
  "streaming-iterator",
  "tree-sitter-language",
 ]

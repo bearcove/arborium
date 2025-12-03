@@ -36,12 +36,6 @@ use std::os::windows::io::AsRawHandle;
 pub use streaming_iterator::{StreamingIterator, StreamingIteratorMut};
 use tree_sitter_language::LanguageFn;
 
-#[cfg(feature = "wasm")]
-mod wasm_language;
-#[cfg(feature = "wasm")]
-#[cfg_attr(docsrs, doc(cfg(feature = "wasm")))]
-pub use wasm_language::*;
-
 /// The latest ABI version that is supported by the current version of the
 /// library.
 ///
