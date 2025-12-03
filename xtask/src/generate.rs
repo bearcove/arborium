@@ -23,7 +23,11 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// Generate crate files for all or a specific grammar.
-pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>, mode: PlanMode) -> Result<PlanSet, Report> {
+pub fn plan_generate(
+    crates_dir: &Utf8Path,
+    name: Option<&str>,
+    mode: PlanMode,
+) -> Result<PlanSet, Report> {
     use std::time::Instant;
     let total_start = Instant::now();
 
@@ -337,6 +341,7 @@ fn setup_grammar_dependencies(
 }
 
 /// Plan the generation of grammar/src/ by running tree-sitter generate in a temp directory.
+#[allow(clippy::too_many_arguments)]
 fn plan_grammar_src_generation(
     plan: &mut Plan,
     crate_path: &Utf8Path,
@@ -462,7 +467,13 @@ fn plan_updates_from_generated(
 
         let dest_file = dest_src_dir.join(&file_name);
         let new_content = fs::read_to_string(&generated_file)?;
-        plan_file_update(plan, &dest_file, new_content, &format!("src/{}", file_name), mode)?;
+        plan_file_update(
+            plan,
+            &dest_file,
+            new_content,
+            &format!("src/{}", file_name),
+            mode,
+        )?;
     }
 
     // Copy tree_sitter/ directory
@@ -646,7 +657,7 @@ fn generate_build_rs(crate_name: &str, config: &crate::types::CrateConfig) -> St
 
     build
         .include(src_dir)
-        .include("grammar")  // for common/ includes like "../common/scanner.h"
+        .include("grammar") // for common/ includes like "../common/scanner.h"
         .include(format!("{{}}/tree_sitter", src_dir))
         .warnings(false)
         .flag_if_supported("-Wno-unused-parameter")

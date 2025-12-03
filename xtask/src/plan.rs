@@ -399,14 +399,9 @@ impl Plan {
                 } => {
                     println!("  {} {}", "create".green(), description);
                     println!("    {} {}", "->".dimmed(), path);
-                    // Show first few lines of new content
-                    for line in content.lines().take(10) {
-                        println!("    {} {}", "+".green(), line.green());
-                    }
+                    // Just show line count, no content preview (too verbose for large files)
                     let total_lines = content.lines().count();
-                    if total_lines > 10 {
-                        println!("    {} ... {} more lines", "+".green(), total_lines - 10);
-                    }
+                    println!("    {} ({} lines)", "+".green(), total_lines);
                 }
                 Operation::UpdateFile {
                     path,
