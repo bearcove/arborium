@@ -12,9 +12,6 @@ links = "arborium"
 [features]
 default = []
 
-# WASM support with custom allocator
-wasm-fix = ["dep:dlmalloc"]
-
 # All languages (excluding idris which has build issues)
 all-languages = [
     "lang-ada", "lang-agda", "lang-asm", "lang-awk",
@@ -146,9 +143,9 @@ tree-sitter-patched-arborium = { version = "0.25.10", path = "../../tree-sitter"
 tree-sitter-highlight-patched-arborium = { version = "0.25.10", path = "../../tree-sitter-highlight" }
 toml = "0.8"
 
-# WASM allocator (only for wasm-fix feature on wasm targets)
+# WASM allocator (automatically enabled on wasm targets)
 [target.'cfg(target_family = "wasm")'.dependencies]
-dlmalloc = { version = "0.2", optional = true }
+dlmalloc = "0.2"
 
 # Optional grammar dependencies
 [dependencies.arborium-ada]

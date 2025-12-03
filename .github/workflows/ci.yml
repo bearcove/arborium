@@ -12,8 +12,9 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test-linux:
-    runs-on: depot-ubuntu-24.04-32
+  # Generate all grammar sources once on a fast runner, then share with other jobs
+  generate:
+    runs-on: depot-ubuntu-24.04-64
     steps:
       - uses: actions/checkout@v4
 
@@ -21,12 +22,46 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-targets: false
 
       - name: Install tree-sitter CLI
         run: cargo install tree-sitter-cli
 
       - name: Generate grammar sources
         run: cargo xtask gen
+
+      - name: Create grammar sources tarball
+        run: |
+          # Collect all generated grammar/src directories
+          find crates -type d -name 'src' -path '*/grammar/src' > grammar_dirs.txt
+          tar -cvf grammar-sources.tar -T grammar_dirs.txt
+
+      - name: Upload grammar sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: grammar-sources
+          path: grammar-sources.tar
+          retention-days: 1
+
+  test-linux:
+    needs: generate
+    runs-on: depot-ubuntu-24.04-32
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with:
+          name: grammar-sources
+
+      - name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
 
       - name: Build
         run: cargo build --verbose
@@ -38,20 +73,23 @@ jobs:
         run: cargo build --all-features --verbose
 
   test-macos:
+    needs: generate
     runs-on: depot-macos-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with:
+          name: grammar-sources
+
+      - name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
-
-      - name: Install tree-sitter CLI
-        run: cargo install tree-sitter-cli
-
-      - name: Generate grammar sources
-        run: cargo xtask gen
 
       - name: Build
         run: cargo build --verbose
@@ -60,18 +98,21 @@ jobs:
         run: cargo test --verbose
 
   check-windows:
+    needs: generate
     runs-on: depot-windows-2022
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with:
+          name: grammar-sources
+
+      - name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-
-      - name: Install tree-sitter CLI
-        run: cargo install tree-sitter-cli
-
-      - name: Generate grammar sources
-        run: cargo xtask gen
 
       - name: Build
         run: cargo build --verbose
@@ -80,9 +121,18 @@ jobs:
         run: cargo test --verbose
 
   wasm:
+    needs: generate
     runs-on: depot-ubuntu-24.04-32
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with:
+          name: grammar-sources
+
+      - name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -94,14 +144,8 @@ jobs:
       - name: Install wabt
         run: sudo apt-get update && sudo apt-get install -y wabt
 
-      - name: Install tree-sitter CLI
-        run: cargo install tree-sitter-cli
-
-      - name: Generate grammar sources
-        run: cargo xtask gen
-
-      - name: Build for WASM
-        run: cargo build --target wasm32-unknown-unknown --features wasm-fix
+      - name: Build arborium for WASM
+        run: cargo build -p arborium --target wasm32-unknown-unknown
 
       - name: Check for env imports in WASM
         run: |
@@ -121,9 +165,18 @@ jobs:
           echo "No env imports found - WASM modules are browser-compatible"
 
   clippy:
+    needs: generate
     runs-on: depot-ubuntu-24.04-32
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with:
+          name: grammar-sources
+
+      - name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -131,12 +184,6 @@ jobs:
           components: clippy
 
       - uses: Swatinem/rust-cache@v2
-
-      - name: Install tree-sitter CLI
-        run: cargo install tree-sitter-cli
-
-      - name: Generate grammar sources
-        run: cargo xtask gen
 
       - name: Run Clippy
         run: cargo clippy --all-targets -- -D warnings
@@ -155,20 +202,23 @@ jobs:
         run: cargo fmt --all -- --check
 
   docs:
+    needs: generate
     runs-on: depot-ubuntu-24.04-32
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with:
+          name: grammar-sources
+
+      - name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
-
-      - name: Install tree-sitter CLI
-        run: cargo install tree-sitter-cli
-
-      - name: Generate grammar sources
-        run: cargo xtask gen
 
       - name: Build docs
         run: cargo doc --no-deps

@@ -4,6 +4,8 @@
 // Allow warnings in vendored tree-sitter code
 #![allow(clippy::all)]
 #![allow(mismatched_lifetime_syntaxes)]
+#![allow(rustdoc::broken_intra_doc_links)]
+#![allow(rustdoc::private_intra_doc_links)]
 
 pub mod ffi;
 mod util;

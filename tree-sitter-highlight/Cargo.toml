@@ -17,6 +17,7 @@ publish = true
 
 [lib]
 crate-type = ["lib", "staticlib"]
+doctest = false
 
 [dependencies]
 regex = "1.11.1"

@@ -11,5 +11,5 @@ wasm-opt = ["-Oz", "--enable-bulk-memory"]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-arborium = { path = "../crates/arborium", features = ["wasm-fix", "all-languages"] }
+arborium = { path = "../crates/arborium", features = ["all-languages"] }
 wasm-bindgen = "0.2"

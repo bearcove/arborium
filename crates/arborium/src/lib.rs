@@ -3,7 +3,7 @@
 //! This crate provides:
 //! - Re-exports of individual grammar crates via feature flags
 //! - HTML rendering with CSS classes for syntax highlighting
-//! - WASM support with custom allocator (via `wasm-fix` feature)
+//! - WASM support with custom allocator (automatically enabled on WASM targets)
 //!
 //! # Usage
 //!
@@ -54,7 +54,7 @@ pub mod theme;
 
 pub use highlighter::Highlighter;
 
-#[cfg(all(feature = "wasm-fix", target_family = "wasm"))]
+#[cfg(target_family = "wasm")]
 mod wasm;
 
 // Language grammar re-exports based on enabled features.

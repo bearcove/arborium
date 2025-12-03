@@ -25,8 +25,9 @@
 //!
 //! # Usage
 //!
-//! Simply enable the `wasm-fix` feature. You don't need to call these functions
-//! directly - having this module compiled in ensures the symbols are exported.
+//! This module is automatically enabled when compiling for WASM targets.
+//! You don't need to call these functions directly - having this module
+//! compiled in ensures the symbols are exported.
 //!
 //! # Debugging
 //!
