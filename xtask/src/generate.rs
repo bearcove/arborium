@@ -71,8 +71,7 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
 
             // Check if this crate has a grammar to generate
             let grammar_dir = crate_state.path.join("grammar");
-            let needs_generation =
-                grammar_dir.exists() && grammar_dir.join("grammar.js").exists();
+            let needs_generation = grammar_dir.exists() && grammar_dir.join("grammar.js").exists();
 
             // Show progress - spinner in TTY, plain text in CI
             let pb = if needs_generation {
