@@ -27,4 +27,5 @@ toml = "0.8"
 ureq = "2"
 regex = "1"
 pulldown-cmark = "0.12"
+boxen = "0.1.3"
 # arborium = { path = "../crates/arborium", features = ["all-languages"] }  # TODO: re-enable for theme CSS generation and highlight linting

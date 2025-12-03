@@ -56,25 +56,25 @@ impl Tool {
         match self {
             Tool::TreeSitter => {
                 if cfg!(target_os = "macos") {
-                    "brew install tree-sitter  (or: cargo install tree-sitter-cli)"
+                    "brew install tree-sitter"
                 } else {
-                    "cargo binstall tree-sitter-cli  (or: cargo install tree-sitter-cli)"
+                    "cargo install tree-sitter-cli --locked"
                 }
             }
             Tool::Git => {
                 if cfg!(target_os = "macos") {
-                    "xcode-select --install  (or: brew install git)"
+                    "xcode-select --install"
                 } else if cfg!(target_os = "linux") {
-                    "apt install git  (or: dnf install git)"
+                    "apt install git"
                 } else {
-                    "Install Git from https://git-scm.com/"
+                    "https://git-scm.com/"
                 }
             }
             Tool::WasmPack => {
                 if cfg!(target_os = "macos") {
-                    "brew install wasm-pack  (or: cargo install wasm-pack)"
+                    "brew install wasm-pack"
                 } else {
-                    "cargo binstall wasm-pack  (or: cargo install wasm-pack)"
+                    "cargo binstall -y wasm-pack"
                 }
             }
         }
@@ -83,7 +83,7 @@ impl Tool {
     /// Cargo package name for binstall (if available).
     pub fn cargo_package(self) -> Option<&'static str> {
         match self {
-            Tool::TreeSitter => Some("tree-sitter-cli"),
+            Tool::TreeSitter => None, // not available via binstall
             Tool::Git => None,
             Tool::WasmPack => Some("wasm-pack"),
         }
@@ -110,41 +110,45 @@ pub fn print_tools_report() {
         }
     }
 
-    // Print installed tools
-    println!("{}", "Installed tools:".cyan().bold());
-    if installed.is_empty() {
-        println!("  {}", "(none)".dimmed());
+    // Build content lines
+    let mut lines = Vec::new();
+
+    if installed.is_empty() && missing.is_empty() {
+        lines.push("(no tools configured)".dimmed().to_string());
     } else {
         for (tool, path) in &installed {
-            println!(
-                "  {} {} {}",
-                "[x]".green(),
+            lines.push(format!(
+                "{} {} {}",
+                "✓".green().bold(),
                 tool.display_name().bold(),
                 format!("({})", path.path().display()).dimmed()
-            );
+            ));
+        }
+        for tool in &missing {
+            lines.push(format!(
+                "{} {}",
+                "✗".red().bold(),
+                tool.display_name().bold()
+            ));
+            lines.push(format!("    {}", tool.install_hint().yellow()));
         }
     }
 
-    // Print missing tools
-    println!("\n{}", "Missing tools:".cyan().bold());
-    if missing.is_empty() {
-        println!("  {}", "(none - all tools available!)".green());
-    } else {
-        for tool in &missing {
-            println!("  {} {}", "[ ]".red(), tool.display_name().bold());
-            println!("       {}", tool.install_hint().yellow());
-        }
-
-        // Provide combined install commands
+    // Add quick install section only if more than one tool is missing
+    if missing.len() > 1 {
+        lines.push(String::new());
         if cfg!(target_os = "macos") {
             let brew_packages: Vec<_> = missing
                 .iter()
                 .filter_map(|t| t.brew_package())
                 .collect();
 
-            if !brew_packages.is_empty() {
-                println!("\n{}", "Quick install (macOS):".green().bold());
-                println!("  {}", format!("brew install {}", brew_packages.join(" ")).yellow());
+            if brew_packages.len() > 1 {
+                lines.push(format!("{}", "Quick install:".green().bold()));
+                lines.push(format!(
+                    "  {}",
+                    format!("brew install {}", brew_packages.join(" ")).yellow()
+                ));
             }
         } else {
             let cargo_packages: Vec<_> = missing
@@ -152,92 +156,109 @@ pub fn print_tools_report() {
                 .filter_map(|t| t.cargo_package())
                 .collect();
 
-            if !cargo_packages.is_empty() {
-                println!("\n{}", "Quick install (with cargo-binstall):".green().bold());
-                println!("  {}", format!("cargo binstall {}", cargo_packages.join(" ")).yellow());
+            if cargo_packages.len() > 1 {
+                lines.push(format!("{}", "Quick install:".green().bold()));
+                lines.push(format!(
+                    "  {}",
+                    format!("cargo binstall -y {}", cargo_packages.join(" ")).yellow()
+                ));
             }
         }
     }
+
+    // Render with boxen
+    let content = lines.join("\n");
+    let boxed = boxen::builder()
+        .border_style(boxen::BorderStyle::Round)
+        .padding(1)
+        .title("Tools Status")
+        .border_color("cyan")
+        .render(&content)
+        .unwrap_or_else(|_| content);
+
+    println!("{}", boxed);
 }
 
-/// Check required tools and print a report. Returns true if all are available.
-pub fn check_tools_or_report(required: &[Tool]) -> bool {
+/// Check all tools and print a report. Returns true if all are available.
+pub fn check_tools_or_report() -> bool {
     let mut installed = Vec::new();
     let mut missing = Vec::new();
 
     for &tool in ALL_TOOLS {
-        let is_required = required.contains(&tool);
         match tool.find() {
-            Ok(path) => installed.push((tool, path, is_required)),
-            Err(_) => missing.push((tool, is_required)),
+            Ok(path) => installed.push((tool, path)),
+            Err(_) => missing.push(tool),
         }
     }
 
-    // Check if any required tools are missing
-    let missing_required: Vec<_> = missing.iter().filter(|(_, req)| *req).collect();
-    if missing_required.is_empty() {
+    if missing.is_empty() {
         return true;
     }
 
-    // Print report
-    eprintln!("{}", "Installed tools:".cyan().bold());
-    if installed.is_empty() {
-        eprintln!("  {}", "(none)".dimmed());
-    } else {
-        for (tool, path, _required) in &installed {
-            eprintln!(
-                "  {} {} {}",
-                "[x]".green(),
-                tool.display_name().bold(),
-                format!("({})", path.path().display()).dimmed()
-            );
-        }
+    // Build content lines
+    let mut lines = Vec::new();
+
+    for (tool, path) in &installed {
+        lines.push(format!(
+            "{} {} {}",
+            "✓".green().bold(),
+            tool.display_name().bold(),
+            format!("({})", path.path().display()).dimmed()
+        ));
     }
 
-    eprintln!("\n{}", "Missing tools:".cyan().bold());
-    for (tool, required) in &missing {
-        if *required {
-            eprintln!(
-                "  {} {} {}",
-                "[ ]".red(),
-                tool.display_name().bold(),
-                "(required)".red()
-            );
-            eprintln!("       {}", tool.install_hint().yellow());
+    for tool in &missing {
+        lines.push(format!(
+            "{} {}",
+            "✗".red().bold(),
+            tool.display_name().bold(),
+        ));
+        lines.push(format!("    {}", tool.install_hint().yellow()));
+    }
+
+    // Provide combined install command if more than one tool is missing
+    if missing.len() > 1 {
+        lines.push(String::new());
+        if cfg!(target_os = "macos") {
+            let brew_packages: Vec<_> = missing
+                .iter()
+                .filter_map(|t| t.brew_package())
+                .collect();
+
+            if brew_packages.len() > 1 {
+                lines.push(format!("{}", "Quick install:".green().bold()));
+                lines.push(format!(
+                    "  {}",
+                    format!("brew install {}", brew_packages.join(" ")).yellow()
+                ));
+            }
         } else {
-            eprintln!(
-                "  {} {}",
-                "[-]".dimmed(),
-                tool.display_name().dimmed()
-            );
+            let cargo_packages: Vec<_> = missing
+                .iter()
+                .filter_map(|t| t.cargo_package())
+                .collect();
+
+            if cargo_packages.len() > 1 {
+                lines.push(format!("{}", "Quick install:".green().bold()));
+                lines.push(format!(
+                    "  {}",
+                    format!("cargo binstall -y {}", cargo_packages.join(" ")).yellow()
+                ));
+            }
         }
     }
 
-    // Provide combined install commands for missing required tools
-    let missing_required_tools: Vec<_> = missing.iter().filter(|(_, req)| *req).map(|(t, _)| *t).collect();
+    // Render with boxen
+    let content = lines.join("\n");
+    let boxed = boxen::builder()
+        .border_style(boxen::BorderStyle::Round)
+        .padding(1)
+        .title("Missing Tools")
+        .border_color("red")
+        .render(&content)
+        .unwrap_or_else(|_| content);
 
-    if cfg!(target_os = "macos") {
-        let brew_packages: Vec<_> = missing_required_tools
-            .iter()
-            .filter_map(|t| t.brew_package())
-            .collect();
-
-        if !brew_packages.is_empty() {
-            eprintln!("\n{}", "Quick install (macOS):".green().bold());
-            eprintln!("  {}", format!("brew install {}", brew_packages.join(" ")).yellow());
-        }
-    } else {
-        let cargo_packages: Vec<_> = missing_required_tools
-            .iter()
-            .filter_map(|t| t.cargo_package())
-            .collect();
-
-        if !cargo_packages.is_empty() {
-            eprintln!("\n{}", "Quick install (with cargo-binstall):".green().bold());
-            eprintln!("  {}", format!("cargo binstall {}", cargo_packages.join(" ")).yellow());
-        }
-    }
-    eprintln!();
+    eprintln!("{}", boxed);
 
     false
 }
