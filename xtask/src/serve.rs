@@ -463,6 +463,74 @@ fn serialize_icon_cache(icons: &BTreeMap<String, String>) -> String {
     facet_json::to_string_pretty(icons)
 }
 
+/// Theme metadata for generating swatches
+struct ThemeInfo {
+    id: &'static str,
+    name: &'static str,
+    variant: &'static str,
+    bg: &'static str,
+}
+
+/// All themes with their metadata (must match CSS and app.js)
+const THEMES: &[ThemeInfo] = &[
+    // Catppuccin family
+    ThemeInfo { id: "mocha", name: "Catppuccin Mocha", variant: "dark", bg: "#1e1e2e" },
+    ThemeInfo { id: "macchiato", name: "Catppuccin Macchiato", variant: "dark", bg: "#24273a" },
+    ThemeInfo { id: "frappe", name: "Catppuccin Frappe", variant: "dark", bg: "#303446" },
+    ThemeInfo { id: "latte", name: "Catppuccin Latte", variant: "light", bg: "#eff1f5" },
+    // Popular dark themes
+    ThemeInfo { id: "tokyo-night", name: "Tokyo Night", variant: "dark", bg: "#1a1b26" },
+    ThemeInfo { id: "dracula", name: "Dracula", variant: "dark", bg: "#282a36" },
+    ThemeInfo { id: "monokai", name: "Monokai Pro", variant: "dark", bg: "#2d2a2e" },
+    ThemeInfo { id: "one-dark", name: "One Dark", variant: "dark", bg: "#282c34" },
+    ThemeInfo { id: "nord", name: "Nord", variant: "dark", bg: "#2e3440" },
+    ThemeInfo { id: "gruvbox-dark", name: "Gruvbox Dark", variant: "dark", bg: "#282828" },
+    ThemeInfo { id: "rose-pine-moon", name: "Rosé Pine Moon", variant: "dark", bg: "#232136" },
+    ThemeInfo { id: "kanagawa-dragon", name: "Kanagawa Dragon", variant: "dark", bg: "#181616" },
+    ThemeInfo { id: "cobalt2", name: "Cobalt2", variant: "dark", bg: "#193549" },
+    ThemeInfo { id: "zenburn", name: "Zenburn", variant: "dark", bg: "#3f3f3f" },
+    ThemeInfo { id: "melange-dark", name: "Melange Dark", variant: "dark", bg: "#292522" },
+    ThemeInfo { id: "monokai-aqua", name: "Monokai Aqua", variant: "dark", bg: "#222222" },
+    ThemeInfo { id: "desert256", name: "Desert256", variant: "dark", bg: "#000000" },
+    // GitHub
+    ThemeInfo { id: "github-dark", name: "GitHub Dark", variant: "dark", bg: "#0d1117" },
+    ThemeInfo { id: "github-light", name: "GitHub Light", variant: "light", bg: "#ffffff" },
+    // Light themes
+    ThemeInfo { id: "gruvbox-light", name: "Gruvbox Light", variant: "light", bg: "#fbf1c7" },
+    ThemeInfo { id: "alabaster", name: "Alabaster", variant: "light", bg: "#f7f7f7" },
+    ThemeInfo { id: "dayfox", name: "Dayfox", variant: "light", bg: "#f6f2ee" },
+    ThemeInfo { id: "melange-light", name: "Melange Light", variant: "light", bg: "#f1f1f1" },
+];
+
+/// Generate HTML for theme swatches in the "Theme support" section
+fn generate_theme_swatches() -> String {
+    let mut html = String::new();
+
+    // Sample code snippet (Rust) for each theme preview
+    // Keep it short to fit in small boxes
+    let sample_code = r#"<a-k>fn</a-k> <a-f>main</a-f><a-p>()</a-p> <a-p>{</a-p>
+    <a-k>let</a-k> <a-v>x</a-v> <a-o>=</a-o> <a-n>42</a-n><a-p>;</a-p>
+    <a-fb>println!</a-fb><a-p>(</a-p><a-s>"Hello"</a-s><a-p>)</a-p><a-p>;</a-p>
+<a-p>}</a-p>"#;
+
+    for theme in THEMES {
+        html.push_str(&format!(
+            r#"<div class="theme-preview" data-variant="{variant}" data-theme="{id}">
+    <pre style="background: {bg}; padding: 0.75rem; border-radius: 6px;"><code>{code}</code></pre>
+    <span class="theme-name">{name}</span>
+</div>
+"#,
+            id = theme.id,
+            variant = theme.variant,
+            bg = theme.bg,
+            name = theme.name,
+            code = sample_code,
+        ));
+    }
+
+    html
+}
+
 fn generate_index_html(demo_dir: &PathBuf, icons: &BTreeMap<String, String>) -> Result<(), String> {
     let template_path = demo_dir.join("template.html");
     let output_path = demo_dir.join("index.html");
@@ -483,11 +551,9 @@ fn generate_index_html(demo_dir: &PathBuf, icons: &BTreeMap<String, String>) -> 
         }
     }
 
-    // TODO: Replace {{THEME_SWATCHES}} when theme support is added
-    html = html.replace(
-        "{{THEME_SWATCHES}}",
-        "<!-- Theme swatches not yet implemented -->",
-    );
+    // Generate theme swatches
+    let swatches_html = generate_theme_swatches();
+    html = html.replace("{{THEME_SWATCHES}}", &swatches_html);
 
     fs::write(&output_path, &html).map_err(|e| e.to_string())?;
     Ok(())
