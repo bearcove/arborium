@@ -335,6 +335,16 @@ fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
         fs::write(&gz_path, &gz_data).map_err(|e| e.to_string())?;
     }
 
+    // Copy static assets to pkg/
+    let assets = ["styles.css", "Iosevka-Regular.woff2", "Iosevka-Bold.woff2"];
+    for asset in assets {
+        let src = demo_dir.join(asset);
+        let dest = demo_dir.join("pkg").join(asset);
+        if src.exists() {
+            fs::copy(&src, &dest).map_err(|e| format!("Failed to copy {}: {}", asset, e))?;
+        }
+    }
+
     Ok(())
 }
 
