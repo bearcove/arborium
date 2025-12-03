@@ -1,4 +1,4 @@
-//! TLAPLUS grammar for tree-sitter
+//! TLA+ grammar for tree-sitter
 //!
 //! This crate provides the tlaplus language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_tlaplus() }
 }
 
-/// The highlight query for tlaplus.
+/// The highlights query for tlaplus.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for tlaplus (empty - no injections available).

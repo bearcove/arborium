@@ -1,4 +1,4 @@
-//! VB grammar for tree-sitter
+//! VISUAL BASIC grammar for tree-sitter
 //!
 //! This crate provides the vb language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_vb_dotnet() }
 }
 
-/// The highlight query for vb.
+/// The highlights query for vb.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for vb (empty - no injections available).

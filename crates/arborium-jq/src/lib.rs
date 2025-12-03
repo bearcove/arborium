@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_jq() }
 }
 
-/// The highlight query for jq.
+/// The highlights query for jq.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for jq (empty - no injections available).

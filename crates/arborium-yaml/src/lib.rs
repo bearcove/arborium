@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_yaml() }
 }
 
-/// The highlight query for yaml.
+/// The highlights query for yaml.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for yaml (empty - no injections available).

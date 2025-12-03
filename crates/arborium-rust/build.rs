@@ -25,5 +25,5 @@ fn main() {
     build.file(format!("{}/parser.c", src_dir));
     build.file(format!("{}/scanner.c", src_dir));
 
-    build.compile("tree_sitter_rust");
+    build.compile("tree_sitter_rust_orchard");
 }

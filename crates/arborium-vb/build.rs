@@ -23,5 +23,5 @@ fn main() {
 
     build.file(format!("{}/parser.c", src_dir));
 
-    build.compile("tree_sitter_vb");
+    build.compile("tree_sitter_vb_dotnet");
 }

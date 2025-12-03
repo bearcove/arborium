@@ -253,6 +253,9 @@ fn generate_lib_rs(crate_name: &str, config: &crate::types::CrateConfig) -> Stri
     let injections_exists = std::path::Path::new(&crate_path)
         .join("queries/injections.scm")
         .exists();
+    let locals_exists = std::path::Path::new(&crate_path)
+        .join("queries/locals.scm")
+        .exists();
 
     let highlights_query = if highlights_exists {
         format!(
@@ -278,6 +281,18 @@ pub const INJECTIONS_QUERY: &str = "";"#
         )
     };
 
+    let locals_query = if locals_exists {
+        format!(
+            r#"/// The locals query for {grammar_id}.
+pub const LOCALS_QUERY: &str = include_str!("../queries/locals.scm");"#
+        )
+    } else {
+        format!(
+            r#"/// The locals query for {grammar_id} (empty - no locals available).
+pub const LOCALS_QUERY: &str = "";"#
+        )
+    };
+
     format!(
         r#"//! {grammar_name} grammar for tree-sitter
 //!
@@ -297,6 +312,25 @@ pub fn language() -> Language {{
 {highlights_query}
 
 {injections_query}
+
+{locals_query}
+
+#[cfg(test)]
+mod tests {{
+    use super::*;
+
+    #[test]
+    fn test_grammar() {{
+        arborium_test_harness::test_grammar(
+            language(),
+            "{grammar_id}",
+            HIGHLIGHTS_QUERY,
+            INJECTIONS_QUERY,
+            LOCALS_QUERY,
+            env!("CARGO_MANIFEST_DIR"),
+        );
+    }}
+}}
 "#
     )
 }

@@ -1,4 +1,4 @@
-//! Markdown grammar for tree-sitter
+//! MARKDOWN grammar for tree-sitter
 //!
 //! This crate provides the markdown language grammar for use with tree-sitter.
 
@@ -18,3 +18,23 @@ pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for markdown.
 pub const INJECTIONS_QUERY: &str = include_str!("../queries/injections.scm");
+
+/// The locals query for markdown (empty - no locals available).
+pub const LOCALS_QUERY: &str = "";
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_grammar() {
+        arborium_test_harness::test_grammar(
+            language(),
+            "markdown",
+            HIGHLIGHTS_QUERY,
+            INJECTIONS_QUERY,
+            LOCALS_QUERY,
+            env!("CARGO_MANIFEST_DIR"),
+        );
+    }
+}

@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_python() }
 }
 
-/// The highlight query for python.
+/// The highlights query for python.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for python (empty - no injections available).

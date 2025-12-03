@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_bash() }
 }
 
-/// The highlight query for bash.
+/// The highlights query for bash.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for bash (empty - no injections available).

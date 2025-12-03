@@ -1,4 +1,4 @@
-//! ASM grammar for tree-sitter
+//! ASSEMBLY grammar for tree-sitter
 //!
 //! This crate provides the asm language grammar for use with tree-sitter.
 
@@ -13,11 +13,11 @@ pub fn language() -> Language {
     unsafe { tree_sitter_asm() }
 }
 
-/// The highlight query for asm (empty - no highlights available).
-pub const HIGHLIGHTS_QUERY: &str = "";
+/// The highlights query for asm.
+pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
-/// The injections query for asm (empty - no injections available).
-pub const INJECTIONS_QUERY: &str = "";
+/// The injections query for asm.
+pub const INJECTIONS_QUERY: &str = include_str!("../queries/injections.scm");
 
 /// The locals query for asm (empty - no locals available).
 pub const LOCALS_QUERY: &str = "";

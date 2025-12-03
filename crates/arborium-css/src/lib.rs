@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_css() }
 }
 
-/// The highlight query for css.
+/// The highlights query for css.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for css (empty - no injections available).

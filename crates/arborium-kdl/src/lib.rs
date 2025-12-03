@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_kdl() }
 }
 
-/// The highlight query for kdl.
+/// The highlights query for kdl.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for kdl (empty - no injections available).

@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_powershell() }
 }
 
-/// The highlight query for powershell.
+/// The highlights query for powershell.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for powershell (empty - no injections available).

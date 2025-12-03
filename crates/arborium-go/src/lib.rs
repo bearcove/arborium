@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_go() }
 }
 
-/// The highlight query for go.
+/// The highlights query for go.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for go (empty - no injections available).

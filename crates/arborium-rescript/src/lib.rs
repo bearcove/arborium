@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_rescript() }
 }
 
-/// The highlight query for rescript.
+/// The highlights query for rescript.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for rescript.

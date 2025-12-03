@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_perl() }
 }
 
-/// The highlight query for perl.
+/// The highlights query for perl.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for perl.

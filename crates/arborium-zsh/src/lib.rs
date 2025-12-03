@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_zsh() }
 }
 
-/// The highlight query for zsh.
+/// The highlights query for zsh.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for zsh (empty - no injections available).

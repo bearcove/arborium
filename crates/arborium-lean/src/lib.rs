@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_lean() }
 }
 
-/// The highlight query for lean.
+/// The highlights query for lean.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for lean (empty - no injections available).

@@ -1,4 +1,4 @@
-//! CADDY grammar for tree-sitter
+//! CADDYFILE grammar for tree-sitter
 //!
 //! This crate provides the caddy language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_caddy() }
 }
 
-/// The highlight query for caddy.
+/// The highlights query for caddy.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for caddy (empty - no injections available).

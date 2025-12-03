@@ -13,8 +13,8 @@ pub fn language() -> Language {
     unsafe { tree_sitter_postscript() }
 }
 
-/// The highlight query for postscript (empty - no highlights available).
-pub const HIGHLIGHTS_QUERY: &str = "";
+/// The highlights query for postscript.
+pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for postscript (empty - no injections available).
 pub const INJECTIONS_QUERY: &str = "";

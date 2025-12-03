@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_scala() }
 }
 
-/// The highlight query for scala.
+/// The highlights query for scala.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for scala (empty - no injections available).

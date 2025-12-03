@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_clojure() }
 }
 
-/// The highlight query for clojure.
+/// The highlights query for clojure.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for clojure (empty - no injections available).

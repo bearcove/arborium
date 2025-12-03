@@ -13,8 +13,8 @@ pub fn language() -> Language {
     unsafe { tree_sitter_asciidoc() }
 }
 
-/// The highlight query for asciidoc (empty - no highlights available).
-pub const HIGHLIGHTS_QUERY: &str = "";
+/// The highlights query for asciidoc.
+pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for asciidoc (empty - no injections available).
 pub const INJECTIONS_QUERY: &str = "";

@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_fish() }
 }
 
-/// The highlight query for fish.
+/// The highlights query for fish.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for fish (empty - no injections available).

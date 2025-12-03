@@ -1,4 +1,4 @@
-//! VIM grammar for tree-sitter
+//! VIMSCRIPT grammar for tree-sitter
 //!
 //! This crate provides the vim language grammar for use with tree-sitter.
 
@@ -13,11 +13,11 @@ pub fn language() -> Language {
     unsafe { tree_sitter_vim() }
 }
 
-/// The highlight query for vim (empty - no highlights available).
-pub const HIGHLIGHTS_QUERY: &str = "";
+/// The highlights query for vim.
+pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
-/// The injections query for vim (empty - no injections available).
-pub const INJECTIONS_QUERY: &str = "";
+/// The injections query for vim.
+pub const INJECTIONS_QUERY: &str = include_str!("../queries/injections.scm");
 
 /// The locals query for vim (empty - no locals available).
 pub const LOCALS_QUERY: &str = "";

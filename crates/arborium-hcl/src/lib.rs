@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_hcl() }
 }
 
-/// The highlight query for hcl.
+/// The highlights query for hcl.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for hcl (empty - no injections available).

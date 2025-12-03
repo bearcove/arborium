@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_lua() }
 }
 
-/// The highlight query for lua.
+/// The highlights query for lua.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for lua.

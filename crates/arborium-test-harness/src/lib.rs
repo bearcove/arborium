@@ -31,14 +31,14 @@ pub use tree_sitter_patched_arborium as tree_sitter;
 use std::fs;
 use std::path::Path;
 use tree_sitter::Language;
-use tree_sitter_highlight::{HighlightConfiguration, Highlighter};
+use tree_sitter_highlight::{HighlightConfiguration, HighlightEvent, Highlighter};
 
-/// Tests a grammar by validating its queries and highlighting all samples from info.toml.
+/// Tests a grammar by validating its queries and highlighting all samples.
 ///
 /// This function:
 /// 1. Validates that the queries compile correctly
-/// 2. Reads info.toml from the crate directory to find sample files
-/// 3. Highlights each sample file to verify the queries work in practice
+/// 2. Finds sample files in the samples/ directory
+/// 3. Highlights each sample file and verifies we get highlights
 ///
 /// # Arguments
 ///
@@ -51,7 +51,7 @@ use tree_sitter_highlight::{HighlightConfiguration, Highlighter};
 ///
 /// # Panics
 ///
-/// Panics if query validation fails or if highlighting any sample produces an error.
+/// Panics if query validation fails, highlighting produces errors, or no highlights are found.
 pub fn test_grammar(
     language: Language,
     name: &str,
@@ -60,7 +60,7 @@ pub fn test_grammar(
     locals_query: &str,
     crate_dir: &str,
 ) {
-    // First validate queries compile
+    // Validate queries compile
     let mut config = HighlightConfiguration::new(
         language,
         name,
@@ -79,24 +79,30 @@ pub fn test_grammar(
 
     config.configure(&HIGHLIGHT_NAMES);
 
-    // Read info.toml to find samples
+    // Find samples from arborium.kdl
     let crate_path = Path::new(crate_dir);
-    let info_toml_path = crate_path.join("info.toml");
-
-    let samples = if info_toml_path.exists() {
-        parse_samples_from_info_toml(&info_toml_path)
+    let kdl_path = crate_path.join("arborium.kdl");
+    let samples: Vec<_> = if kdl_path.exists() {
+        parse_samples_from_kdl(&kdl_path)
+            .into_iter()
+            .map(|p| crate_path.join(p))
+            .collect()
     } else {
         vec![]
     };
 
-    // Test each sample
+    if samples.is_empty() {
+        // No samples - just verify query compiles (already done above)
+        return;
+    }
+
+    // Test each sample - must produce at least one highlight
     let mut highlighter = Highlighter::new();
     for sample_path in &samples {
-        let full_path = crate_path.join(sample_path);
-        let sample_code = fs::read_to_string(&full_path).unwrap_or_else(|e| {
+        let sample_code = fs::read_to_string(sample_path).unwrap_or_else(|e| {
             panic!(
                 "Failed to read sample file {} for {}: {}",
-                full_path.display(),
+                sample_path.display(),
                 name,
                 e
             );
@@ -107,202 +113,91 @@ pub fn test_grammar(
             .unwrap_or_else(|e| {
                 panic!(
                     "Failed to start highlighting {} for {}: {:?}",
-                    sample_path, name, e
+                    sample_path.display(),
+                    name,
+                    e
                 );
             });
 
-        // Consume all highlight events to ensure no errors occur
+        // Count highlight events
+        let mut highlight_count = 0;
         for event in highlights {
-            if let Err(e) = event {
+            let event = event.unwrap_or_else(|e| {
                 panic!(
                     "Highlighting error in {} for {}: {:?}",
-                    sample_path, name, e
+                    sample_path.display(),
+                    name,
+                    e
                 );
+            });
+            if matches!(event, HighlightEvent::HighlightStart(_)) {
+                highlight_count += 1;
             }
         }
-    }
 
-    // If no samples, just validate queries worked (already done above)
-    if samples.is_empty() {
-        // Test with minimal sample code to ensure highlighter actually runs
-        let minimal_sample = "x";
-        let highlights = highlighter
-            .highlight(&config, minimal_sample.as_bytes(), None, |_| None)
-            .unwrap_or_else(|e| {
-                panic!("Failed to highlight minimal sample for {}: {:?}", name, e);
-            });
-
-        for event in highlights {
-            if let Err(e) = event {
-                panic!("Highlighting error for {}: {:?}", name, e);
-            }
+        // Verify we got highlights
+        if highlight_count == 0 {
+            panic!(
+                "No highlights produced for {} in {}.\n\
+                 Sample has {} bytes.\n\
+                 This likely means the highlights.scm query doesn't match anything in the sample.",
+                sample_path.display(),
+                name,
+                sample_code.len()
+            );
         }
     }
 }
 
-/// Parse [[samples]] entries from info.toml
-fn parse_samples_from_info_toml(path: &Path) -> Vec<String> {
+/// Parse sample paths from arborium.kdl
+///
+/// Looks for `sample { path "..." }` blocks and extracts the path values.
+fn parse_samples_from_kdl(path: &Path) -> Vec<String> {
     let content = match fs::read_to_string(path) {
         Ok(c) => c,
         Err(_) => return vec![],
     };
 
     let mut samples = Vec::new();
-    let mut in_samples_block = false;
+    let mut in_sample_block = false;
+    let mut brace_depth = 0;
 
     for line in content.lines() {
-        let line = line.trim();
+        let trimmed = line.trim();
 
-        if line == "[[samples]]" {
-            in_samples_block = true;
+        // Track sample blocks
+        if trimmed.starts_with("sample") && trimmed.contains('{') {
+            in_sample_block = true;
+            brace_depth = 1;
             continue;
         }
 
-        if in_samples_block && line.starts_with("path") {
-            if let Some(value) = line.split('=').nth(1) {
-                let value = value.split('#').next().unwrap_or(value);
-                let value = value.trim().trim_matches('"').trim_matches('\'');
-                if !value.is_empty() {
-                    samples.push(value.to_string());
+        if in_sample_block {
+            // Track brace depth
+            brace_depth += trimmed.matches('{').count();
+            brace_depth = brace_depth.saturating_sub(trimmed.matches('}').count());
+
+            if brace_depth == 0 {
+                in_sample_block = false;
+                continue;
+            }
+
+            // Look for path "..."
+            if trimmed.starts_with("path") {
+                // Extract the quoted string
+                if let Some(start) = trimmed.find('"') {
+                    if let Some(end) = trimmed[start + 1..].find('"') {
+                        let path_value = &trimmed[start + 1..start + 1 + end];
+                        if !path_value.is_empty() {
+                            samples.push(path_value.to_string());
+                        }
+                    }
                 }
             }
-            in_samples_block = false;
         }
     }
 
     samples
-}
-
-/// Result of testing injections - tracks which highlight names were seen
-#[derive(Debug, Default)]
-pub struct InjectionTestResult {
-    /// The highlight names that were captured during highlighting
-    pub highlights_seen: std::collections::HashSet<String>,
-    /// The source ranges that were highlighted
-    pub highlighted_ranges: Vec<(usize, usize, String)>,
-}
-
-/// Configuration for an injected language
-pub struct InjectedLanguageConfig {
-    pub name: &'static str,
-    pub language: Language,
-    pub highlights_query: &'static str,
-    pub injections_query: &'static str,
-    pub locals_query: &'static str,
-}
-
-/// Tests that language injections work correctly by verifying that specific patterns
-/// produce highlights from the injected language.
-///
-/// # Arguments
-///
-/// * `host_language` - The host language (e.g., HTML, Svelte)
-/// * `host_name` - Name of the host language
-/// * `host_highlights` - Highlights query for host
-/// * `host_injections` - Injections query for host
-/// * `host_locals` - Locals query for host
-/// * `injected_languages` - Slice of injected language configs (CSS, JS, etc.)
-/// * `source` - Source code to test
-/// * `expected_highlights` - Highlight names that MUST appear in the output
-///
-/// # Panics
-///
-/// Panics if any expected highlight is not found, indicating the injection isn't working.
-pub fn test_injections(
-    host_language: Language,
-    host_name: &str,
-    host_highlights: &str,
-    host_injections: &str,
-    host_locals: &str,
-    injected_languages: &[InjectedLanguageConfig],
-    source: &str,
-    expected_highlights: &[&str],
-) -> InjectionTestResult {
-    use tree_sitter_highlight::HighlightEvent;
-
-    // Build configs for all languages
-    let mut host_config = HighlightConfiguration::new(
-        host_language,
-        host_name,
-        host_highlights,
-        host_injections,
-        host_locals,
-    )
-    .unwrap_or_else(|e| panic!("Failed to create host config for {}: {:?}", host_name, e));
-    host_config.configure(&HIGHLIGHT_NAMES);
-
-    let mut injected_configs: Vec<HighlightConfiguration> = Vec::new();
-    for lang in injected_languages {
-        let mut config = HighlightConfiguration::new(
-            lang.language,
-            lang.name,
-            lang.highlights_query,
-            lang.injections_query,
-            lang.locals_query,
-        )
-        .unwrap_or_else(|e| panic!("Failed to create config for {}: {:?}", lang.name, e));
-        config.configure(&HIGHLIGHT_NAMES);
-        injected_configs.push(config);
-    }
-
-    // Create injection callback
-    let injection_callback = |lang_name: &str| -> Option<&HighlightConfiguration> {
-        for (i, lang) in injected_languages.iter().enumerate() {
-            if lang.name == lang_name {
-                return Some(&injected_configs[i]);
-            }
-        }
-        None
-    };
-
-    let mut highlighter = Highlighter::new();
-    let highlights = highlighter
-        .highlight(&host_config, source.as_bytes(), None, injection_callback)
-        .unwrap_or_else(|e| panic!("Failed to highlight for {}: {:?}", host_name, e));
-
-    let mut result = InjectionTestResult::default();
-    let mut current_highlight: Option<usize> = None;
-    let mut current_start: usize = 0;
-
-    for event in highlights {
-        let event = event.unwrap_or_else(|e| panic!("Highlight event error: {:?}", e));
-        match event {
-            HighlightEvent::Source { start, end } => {
-                if let Some(idx) = current_highlight {
-                    if idx < HIGHLIGHT_NAMES.len() {
-                        let name = HIGHLIGHT_NAMES[idx].to_string();
-                        result.highlights_seen.insert(name.clone());
-                        result.highlighted_ranges.push((start, end, name));
-                    }
-                }
-            }
-            HighlightEvent::HighlightStart(tree_sitter_highlight::Highlight(idx)) => {
-                current_highlight = Some(idx);
-                current_start = 0; // Will be set by next Source event
-            }
-            HighlightEvent::HighlightEnd => {
-                current_highlight = None;
-            }
-        }
-    }
-
-    // Check expected highlights are present
-    for expected in expected_highlights {
-        if !result.highlights_seen.contains(*expected) {
-            panic!(
-                "Expected highlight '{}' not found in output for {}.\n\
-                 Source: {:?}\n\
-                 Highlights seen: {:?}\n\
-                 This likely means the injection query is not working correctly.",
-                expected,
-                host_name,
-                source,
-                result.highlights_seen
-            );
-        }
-    }
-
-    result
 }
 
 /// Standard highlight names used by arborium.

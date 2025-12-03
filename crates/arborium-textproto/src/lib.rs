@@ -1,4 +1,4 @@
-//! TEXTPROTO grammar for tree-sitter
+//! TEXT PROTO grammar for tree-sitter
 //!
 //! This crate provides the textproto language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_textproto() }
 }
 
-/// The highlight query for textproto.
+/// The highlights query for textproto.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for textproto (empty - no injections available).

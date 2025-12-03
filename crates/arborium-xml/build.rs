@@ -2,6 +2,7 @@ fn main() {
     let src_dir = "grammar-src";
 
     println!("cargo:rerun-if-changed={}/parser.c", src_dir);
+    println!("cargo:rerun-if-changed={}/scanner.c", src_dir);
 
     let mut build = cc::Build::new();
 

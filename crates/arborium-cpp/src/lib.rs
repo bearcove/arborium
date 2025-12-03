@@ -1,4 +1,4 @@
-//! CPP grammar for tree-sitter
+//! C++ grammar for tree-sitter
 //!
 //! This crate provides the cpp language grammar for use with tree-sitter.
 
@@ -13,12 +13,8 @@ pub fn language() -> Language {
     unsafe { tree_sitter_cpp() }
 }
 
-/// The highlight query for cpp.
-pub const HIGHLIGHTS_QUERY: &str = concat!(
-    include_str!("../queries/inherited-c-highlights.scm"),
-    "\n",
-    include_str!("../queries/highlights.scm"),
-);
+/// The highlights query for cpp.
+pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for cpp.
 pub const INJECTIONS_QUERY: &str = include_str!("../queries/injections.scm");

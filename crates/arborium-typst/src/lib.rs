@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_typst() }
 }
 
-/// The highlight query for typst.
+/// The highlights query for typst.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for typst.

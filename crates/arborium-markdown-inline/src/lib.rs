@@ -1,6 +1,6 @@
-//! MARKDOWN-INLINE grammar for tree-sitter
+//! MARKDOWN INLINE grammar for tree-sitter
 //!
-//! This crate provides the markdown-inline language grammar for use with tree-sitter.
+//! This crate provides the markdown_inline language grammar for use with tree-sitter.
 
 use tree_sitter_patched_arborium::Language;
 
@@ -8,18 +8,18 @@ unsafe extern "C" {
     fn tree_sitter_markdown_inline() -> Language;
 }
 
-/// Returns the markdown-inline tree-sitter language.
+/// Returns the markdown_inline tree-sitter language.
 pub fn language() -> Language {
     unsafe { tree_sitter_markdown_inline() }
 }
 
-/// The highlight query for markdown-inline.
+/// The highlights query for markdown_inline.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
-/// The injections query for markdown-inline.
+/// The injections query for markdown_inline.
 pub const INJECTIONS_QUERY: &str = include_str!("../queries/injections.scm");
 
-/// The locals query for markdown-inline (empty - no locals available).
+/// The locals query for markdown_inline (empty - no locals available).
 pub const LOCALS_QUERY: &str = "";
 
 #[cfg(test)]
@@ -30,7 +30,7 @@ mod tests {
     fn test_grammar() {
         arborium_test_harness::test_grammar(
             language(),
-            "markdown-inline",
+            "markdown_inline",
             HIGHLIGHTS_QUERY,
             INJECTIONS_QUERY,
             LOCALS_QUERY,

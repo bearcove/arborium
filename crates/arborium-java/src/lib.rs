@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_java() }
 }
 
-/// The highlight query for java.
+/// The highlights query for java.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for java (empty - no injections available).

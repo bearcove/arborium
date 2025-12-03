@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_ninja() }
 }
 
-/// The highlight query for ninja.
+/// The highlights query for ninja.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for ninja (empty - no injections available).

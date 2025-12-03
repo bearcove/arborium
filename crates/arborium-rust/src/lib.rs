@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_rust_orchard() }
 }
 
-/// The highlight query for rust.
+/// The highlights query for rust.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for rust.

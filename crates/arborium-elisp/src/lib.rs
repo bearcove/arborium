@@ -1,4 +1,4 @@
-//! ELISP grammar for tree-sitter
+//! EMACS LISP grammar for tree-sitter
 //!
 //! This crate provides the elisp language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_elisp() }
 }
 
-/// The highlight query for elisp.
+/// The highlights query for elisp.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for elisp (empty - no injections available).

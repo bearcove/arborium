@@ -8,9 +8,11 @@
 - **Legacy cleanup**: Deleted all `info.toml` files, removed orphan directories
 - **Lint command**: `cargo xtask lint` validates entire registry
 - **Generate command**: `cargo xtask gen [--dry-run]` regenerates Cargo.toml, build.rs, src/lib.rs
-- **Plan-execute pattern**: Two-phase approach with diff display and optional dry-run
+- **Plan-execute pattern**: Two-phase approach with colored diff display and optional dry-run
 - **KDL 2.0 syntax**: Fixed all files to use `#true`/`#false` and snake_case identifiers
 - **Vendored grammars**: asciidoc, asciidoc_inline, markdown, markdown-inline added
+- **Test harness**: `arborium-test-harness` reads samples from arborium.kdl and verifies highlighting works
+- **Internal grammars**: `internal #true` flag to skip metadata linting for grammars like asciidoc_inline
 
 ### Not Started
 

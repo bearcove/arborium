@@ -1,4 +1,4 @@
-//! DOT grammar for tree-sitter
+//! DOT/GRAPHVIZ grammar for tree-sitter
 //!
 //! This crate provides the dot language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_dot() }
 }
 
-/// The highlight query for dot.
+/// The highlights query for dot.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for dot.

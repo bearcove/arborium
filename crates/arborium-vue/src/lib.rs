@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_vue() }
 }
 
-/// The highlight query for vue.
+/// The highlights query for vue.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for vue.

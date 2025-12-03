@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_graphql() }
 }
 
-/// The highlight query for graphql.
+/// The highlights query for graphql.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for graphql (empty - no injections available).

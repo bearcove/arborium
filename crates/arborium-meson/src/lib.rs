@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_meson() }
 }
 
-/// The highlight query for meson.
+/// The highlights query for meson.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for meson (empty - no injections available).

@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_erlang() }
 }
 
-/// The highlight query for erlang.
+/// The highlights query for erlang.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for erlang (empty - no injections available).

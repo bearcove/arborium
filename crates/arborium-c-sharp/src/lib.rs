@@ -1,4 +1,4 @@
-//! C-SHARP grammar for tree-sitter
+//! C# grammar for tree-sitter
 //!
 //! This crate provides the c-sharp language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_c_sharp() }
 }
 
-/// The highlight query for c-sharp.
+/// The highlights query for c-sharp.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for c-sharp (empty - no injections available).

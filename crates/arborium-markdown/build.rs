@@ -14,6 +14,7 @@ fn main() {
         .flag_if_supported("-Wno-unused-but-set-variable")
         .flag_if_supported("-Wno-trigraphs");
 
+    // For WASM builds, use our custom sysroot (provided by arborium crate via links = "arborium")
     let target = std::env::var("TARGET").unwrap_or_default();
     if target.contains("wasm") {
         if let Ok(sysroot) = std::env::var("DEP_ARBORIUM_SYSROOT_PATH") {

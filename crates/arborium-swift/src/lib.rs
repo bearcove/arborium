@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_swift() }
 }
 
-/// The highlight query for swift.
+/// The highlights query for swift.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for swift.

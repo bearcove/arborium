@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_batch() }
 }
 
-/// The highlight query for batch.
+/// The highlights query for batch.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for batch (empty - no injections available).

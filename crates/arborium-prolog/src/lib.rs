@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_prolog() }
 }
 
-/// The highlight query for prolog.
+/// The highlights query for prolog.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for prolog (empty - no injections available).

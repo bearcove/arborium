@@ -2,10 +2,10 @@
 name = "arborium-markdown-inline"
 version = "0.1.0"
 edition = "2024"
-description = "markdown-inline grammar for arborium (tree-sitter bindings)"
+description = "markdown_inline grammar for arborium (tree-sitter bindings)"
 license = "MIT"
 repository = "https://github.com/bearcove/arborium"
-keywords = ["tree-sitter", "markdown-inline", "syntax-highlighting"]
+keywords = ["tree-sitter", "markdown_inline", "syntax-highlighting"]
 categories = ["parsing", "text-processing"]
 
 [lib]

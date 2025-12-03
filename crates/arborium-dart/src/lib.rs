@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_dart() }
 }
 
-/// The highlight query for dart.
+/// The highlights query for dart.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for dart (empty - no injections available).

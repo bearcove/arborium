@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_sparql() }
 }
 
-/// The highlight query for sparql.
+/// The highlights query for sparql.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for sparql (empty - no injections available).

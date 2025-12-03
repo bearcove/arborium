@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_nginx() }
 }
 
-/// The highlight query for nginx.
+/// The highlights query for nginx.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for nginx.

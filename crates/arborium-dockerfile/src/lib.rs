@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_dockerfile() }
 }
 
-/// The highlight query for dockerfile.
+/// The highlights query for dockerfile.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for dockerfile (empty - no injections available).

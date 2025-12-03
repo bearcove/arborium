@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_gleam() }
 }
 
-/// The highlight query for gleam.
+/// The highlights query for gleam.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for gleam.

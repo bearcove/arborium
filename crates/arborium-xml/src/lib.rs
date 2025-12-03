@@ -13,16 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_xml() }
 }
 
-unsafe extern "C" {
-    fn tree_sitter_dtd() -> Language;
-}
-
-/// Returns the dtd tree-sitter language.
-pub fn dtd_language() -> Language {
-    unsafe { tree_sitter_dtd() }
-}
-
-/// The highlight query for xml.
+/// The highlights query for xml.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for xml (empty - no injections available).

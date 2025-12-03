@@ -1,4 +1,4 @@
-//! CAPNP grammar for tree-sitter
+//! CAP'N PROTO grammar for tree-sitter
 //!
 //! This crate provides the capnp language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_capnp() }
 }
 
-/// The highlight query for capnp.
+/// The highlights query for capnp.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for capnp.

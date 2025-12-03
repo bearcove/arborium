@@ -1,4 +1,4 @@
-//! FSHARP grammar for tree-sitter
+//! F# grammar for tree-sitter
 //!
 //! This crate provides the fsharp language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_fsharp() }
 }
 
-/// The highlight query for fsharp.
+/// The highlights query for fsharp.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for fsharp.

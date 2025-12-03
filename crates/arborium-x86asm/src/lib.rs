@@ -1,4 +1,4 @@
-//! X86ASM grammar for tree-sitter
+//! X86 ASSEMBLY grammar for tree-sitter
 //!
 //! This crate provides the x86asm language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_x86asm() }
 }
 
-/// The highlight query for x86asm.
+/// The highlights query for x86asm.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for x86asm (empty - no injections available).

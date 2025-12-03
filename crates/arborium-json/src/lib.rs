@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_json() }
 }
 
-/// The highlight query for json.
+/// The highlights query for json.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for json (empty - no injections available).

@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_awk() }
 }
 
-/// The highlight query for awk.
+/// The highlights query for awk.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for awk (empty - no injections available).

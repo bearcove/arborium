@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_ruby() }
 }
 
-/// The highlight query for ruby.
+/// The highlights query for ruby.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for ruby (empty - no injections available).

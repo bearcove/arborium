@@ -1,4 +1,4 @@
-//! OBJC grammar for tree-sitter
+//! OBJECTIVE-C grammar for tree-sitter
 //!
 //! This crate provides the objc language grammar for use with tree-sitter.
 
@@ -13,18 +13,8 @@ pub fn language() -> Language {
     unsafe { tree_sitter_objc() }
 }
 
-/// The highlight query for C (base language).
-pub const C_HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
-
-/// The highlight query for objc (Objective-C specific additions).
-pub const OBJC_HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
-
-/// The combined highlight query for objc (includes C highlights).
-pub const HIGHLIGHTS_QUERY: &str = concat!(
-    include_str!("../queries/highlights.scm"),
-    "\n",
-    include_str!("../queries/highlights.scm"),
-);
+/// The highlights query for objc.
+pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for objc.
 pub const INJECTIONS_QUERY: &str = include_str!("../queries/injections.scm");

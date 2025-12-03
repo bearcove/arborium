@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_agda() }
 }
 
-/// The highlight query for agda.
+/// The highlights query for agda.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for agda (empty - no injections available).

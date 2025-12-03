@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_vhdl() }
 }
 
-/// The highlight query for vhdl.
+/// The highlights query for vhdl.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for vhdl (empty - no injections available).

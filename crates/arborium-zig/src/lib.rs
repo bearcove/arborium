@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_zig() }
 }
 
-/// The highlight query for zig.
+/// The highlights query for zig.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for zig.

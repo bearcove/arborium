@@ -1,4 +1,4 @@
-//! SSH-CONFIG grammar for tree-sitter
+//! SSH CONFIG grammar for tree-sitter
 //!
 //! This crate provides the ssh-config language grammar for use with tree-sitter.
 
@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_ssh_config() }
 }
 
-/// The highlight query for ssh-config.
+/// The highlights query for ssh-config.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for ssh-config.

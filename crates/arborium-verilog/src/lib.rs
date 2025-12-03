@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_verilog() }
 }
 
-/// The highlight query for verilog.
+/// The highlights query for verilog.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for verilog (empty - no injections available).

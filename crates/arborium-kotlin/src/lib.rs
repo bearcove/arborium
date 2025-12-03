@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_kotlin() }
 }
 
-/// The highlight query for kotlin.
+/// The highlights query for kotlin.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for kotlin (empty - no injections available).

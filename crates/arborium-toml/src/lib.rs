@@ -13,7 +13,7 @@ pub fn language() -> Language {
     unsafe { tree_sitter_toml() }
 }
 
-/// The highlight query for toml.
+/// The highlights query for toml.
 pub const HIGHLIGHTS_QUERY: &str = include_str!("../queries/highlights.scm");
 
 /// The injections query for toml (empty - no injections available).
