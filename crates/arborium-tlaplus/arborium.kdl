@@ -7,7 +7,7 @@ grammar {
     name "TLA+"
     tag "code"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "mdi:math-integral"
     aliases "tla"
 

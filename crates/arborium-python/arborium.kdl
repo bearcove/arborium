@@ -7,7 +7,7 @@ grammar {
     name "Python"
     tag "code"
     tier 1
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:python"
     aliases "py" "py3" "python3"
 

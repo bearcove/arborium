@@ -7,7 +7,7 @@ grammar {
     name "x86 Assembly"
     tag "code"
     tier 3
-    has_scanner #true
+    has-scanner #true
     icon "mdi:memory"
     aliases "nasm" "x86"
 

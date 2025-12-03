@@ -7,7 +7,7 @@ grammar {
     name "ReScript"
     tag "code"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "simple-icons:rescript"
     aliases "res"
 

@@ -7,7 +7,7 @@ grammar {
     name "Markdown Inline"
     tag "markup"
     internal #true
-    has_scanner #true
+    has-scanner #true
 
     description "Inline grammar for Markdown parsing; companion to the block-level markdown grammar."
 }

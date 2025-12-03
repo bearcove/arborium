@@ -7,7 +7,7 @@ grammar {
     name "Dockerfile"
     tag "config"
     tier 3
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:docker"
     aliases "docker"
 

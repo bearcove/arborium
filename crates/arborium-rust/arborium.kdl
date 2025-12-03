@@ -7,8 +7,8 @@ grammar {
     name "Rust"
     tag "code"
     tier 1
-    has_scanner #true
-    c_symbol "rust_orchard"
+    has-scanner #true
+    c-symbol "rust_orchard"
     icon "devicon-plain:rust"
     aliases "rs"
 

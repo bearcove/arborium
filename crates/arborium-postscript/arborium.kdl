@@ -7,7 +7,7 @@ grammar {
     name "PostScript"
     tag "code"
     tier 5
-    has_scanner #true
+    has-scanner #true
     icon "mdi:printer"
     aliases "ps"
 

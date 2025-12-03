@@ -7,7 +7,7 @@ grammar {
     name "Caddyfile"
     tag "config"
     tier 5
-    has_scanner #true
+    has-scanner #true
     icon "simple-icons:caddy"
 
     inventor "Matt Holt and Caddy contributors"

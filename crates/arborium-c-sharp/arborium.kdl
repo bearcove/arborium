@@ -7,7 +7,7 @@ grammar {
     name "C#"
     tag "code"
     tier 1
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:csharp"
     aliases "cs" "csharp"
 

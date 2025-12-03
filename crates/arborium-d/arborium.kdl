@@ -7,7 +7,7 @@ grammar {
     name "D"
     tag "code"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "mdi:alpha-d-box-outline"
     aliases "dlang"
 

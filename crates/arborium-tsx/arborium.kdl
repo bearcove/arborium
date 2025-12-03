@@ -7,7 +7,7 @@ grammar {
     name "TSX"
     tag "code"
     tier 3
-    has_scanner #true
+    has-scanner #true
     icon "simple-icons:react"
 
     inventor "Facebook (Jordan Walke for React/JSX) + Microsoft (TypeScript)"

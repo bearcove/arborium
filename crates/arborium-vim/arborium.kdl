@@ -7,7 +7,7 @@ grammar {
     name "Vimscript"
     tag "config"
     tier 3
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:vim"
     aliases "vimscript" "viml"
 

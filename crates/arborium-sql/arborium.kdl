@@ -7,7 +7,7 @@ grammar {
     name "SQL"
     tag "query"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "mdi:database-outline"
     aliases "mysql" "postgresql" "postgres" "sqlite"
 

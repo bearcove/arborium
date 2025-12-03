@@ -7,7 +7,7 @@ grammar {
     name "HTML"
     tag "markup"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:html5"
     aliases "htm"
 

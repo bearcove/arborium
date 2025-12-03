@@ -7,7 +7,7 @@ grammar {
     name "Dart"
     tag "code"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:dart"
 
     inventor "Lars Bak and Kasper Lund"

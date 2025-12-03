@@ -7,7 +7,7 @@ grammar {
     name "Fish"
     tag "shell"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "mdi:fish"
 
     inventor "Axel Liljencrantz"

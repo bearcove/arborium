@@ -7,7 +7,7 @@ grammar {
     name "XML"
     tag "markup"
     tier 3
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:xml"
     aliases "xsl" "xslt" "svg"
 
@@ -30,7 +30,7 @@ grammar {
     name "DTD"
     tag "markup"
     tier 3
-    has_scanner #true
+    has-scanner #true
     grammar-path "dtd"
 
     inventor "W3C SGML Working Group"

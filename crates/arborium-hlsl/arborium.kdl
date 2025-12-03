@@ -7,7 +7,7 @@ grammar {
     name "HLSL"
     tag "code"
     tier 3
-    has_scanner #true
+    has-scanner #true
     icon "mdi:cube-outline"
 
     inventor "Microsoft"

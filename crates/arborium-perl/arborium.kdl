@@ -7,7 +7,7 @@ grammar {
     name "Perl"
     tag "code"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:perl"
     aliases "pl" "pm"
 

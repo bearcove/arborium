@@ -7,7 +7,7 @@ grammar {
     name "Idris"
     tag "code"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "mdi:alpha-i-box-outline"
     aliases "idr"
 

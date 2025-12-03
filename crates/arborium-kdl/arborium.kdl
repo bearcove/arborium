@@ -7,7 +7,7 @@ grammar {
     name "KDL"
     tag "config"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "mdi:file-document-outline"
 
     inventor "KDL community"

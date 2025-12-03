@@ -7,7 +7,7 @@ grammar {
     name "Asciidoc Inline"
     tag "markup"
     internal #true
-    has_scanner #true
+    has-scanner #true
 
     description "Inline grammar for AsciiDoc parsing; companion to the block-level asciidoc grammar."
 }

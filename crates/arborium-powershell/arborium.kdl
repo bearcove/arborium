@@ -7,7 +7,7 @@ grammar {
     name "PowerShell"
     tag "shell"
     tier 1
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:powershell"
     aliases "ps1" "pwsh"
 

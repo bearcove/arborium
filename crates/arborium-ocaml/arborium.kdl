@@ -7,7 +7,7 @@ grammar {
     name "OCaml"
     tag "code"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:ocaml"
     aliases "ml"
 

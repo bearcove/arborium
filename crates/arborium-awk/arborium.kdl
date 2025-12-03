@@ -7,7 +7,7 @@ grammar {
     name "AWK"
     tag "code"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "mdi:text-box-outline"
 
     inventor "Alfred Aho, Peter Weinberger, Brian Kernighan"

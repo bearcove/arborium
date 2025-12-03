@@ -7,7 +7,7 @@ grammar {
     name "Swift"
     tag "code"
     tier 1
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:swift"
 
     inventor "Chris Lattner"

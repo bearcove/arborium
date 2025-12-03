@@ -7,7 +7,7 @@ grammar {
     name "TypeScript"
     tag "code"
     tier 1
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:typescript"
     aliases "ts" "tsx" "mts" "cts"
 

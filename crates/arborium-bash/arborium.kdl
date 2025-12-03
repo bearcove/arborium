@@ -7,7 +7,7 @@ grammar {
     name "Bash"
     tag "shell"
     tier 1
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:bash"
     aliases "sh" "shell"
 

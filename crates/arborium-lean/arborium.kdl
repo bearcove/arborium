@@ -7,7 +7,7 @@ grammar {
     name "Lean"
     tag "code"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "mdi:alpha-l-box-outline"
 
     inventor "Leonardo de Moura"

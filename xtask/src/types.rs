@@ -226,7 +226,6 @@ impl std::ops::Deref for Year {
 
 /// Has-scanner child node (bool value).
 #[derive(Debug, Clone, Facet)]
-#[facet(rename = "has_scanner")]
 pub struct HasScanner {
     #[facet(kdl::argument)]
     pub value: bool,
@@ -298,11 +297,11 @@ pub struct GrammarConfig {
     pub internal: Option<Internal>,
 
     /// Tests are cursed (skip test generation due to platform issues).
-    #[facet(kdl::child, default)]
+    #[facet(kdl::child, default, rename = "tests-cursed")]
     pub tests_cursed: Option<TestsCursed>,
 
     /// Whether this grammar has a scanner.c file.
-    #[facet(kdl::child, default)]
+    #[facet(kdl::child, default, rename = "has-scanner")]
     pub has_scanner: Option<HasScanner>,
 
     /// Path to the grammar within the repo (for multi-grammar repos).
@@ -310,7 +309,7 @@ pub struct GrammarConfig {
     pub grammar_path: Option<GrammarPath>,
 
     /// Override the C symbol name.
-    #[facet(kdl::child, default)]
+    #[facet(kdl::child, default, rename = "c-symbol")]
     pub c_symbol: Option<CSymbol>,
 
     /// Query configuration (highlights inheritance).

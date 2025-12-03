@@ -7,7 +7,7 @@ grammar {
     name "Lua"
     tag "code"
     tier 1
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:lua"
 
     inventor "Roberto Ierusalimschy, Waldemar Celes, Luiz Henrique de Figueiredo"

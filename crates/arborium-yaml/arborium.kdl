@@ -7,7 +7,7 @@ grammar {
     name "YAML"
     tag "config"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:yaml"
     aliases "yml"
 

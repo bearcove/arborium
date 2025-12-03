@@ -7,7 +7,7 @@ grammar {
     name "Starlark"
     tag "build"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "mdi:star-outline"
     aliases "bzl" "bazel"
 

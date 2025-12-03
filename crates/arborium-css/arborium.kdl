@@ -7,7 +7,7 @@ grammar {
     name "CSS"
     tag "markup"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:css3"
 
     inventor "Håkon Wium Lie"

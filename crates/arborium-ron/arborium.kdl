@@ -7,7 +7,7 @@ grammar {
     name "RON"
     tag "data"
     tier 4
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:rust"
 
     inventor "kvark and torkleyy"

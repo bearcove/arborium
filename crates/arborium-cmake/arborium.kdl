@@ -7,7 +7,7 @@ grammar {
     name "CMake"
     tag "build"
     tier 3
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:cmake"
 
     inventor "Bill Hoffman"

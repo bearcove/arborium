@@ -7,7 +7,7 @@ grammar {
     name "Elm"
     tag "code"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:elm"
 
     inventor "Evan Czaplicki"

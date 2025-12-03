@@ -7,7 +7,7 @@ grammar {
     name "Erlang"
     tag "code"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:erlang"
     aliases "erl"
 

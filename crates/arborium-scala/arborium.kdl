@@ -7,7 +7,7 @@ grammar {
     name "Scala"
     tag "code"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:scala"
 
     inventor "Martin Odersky"

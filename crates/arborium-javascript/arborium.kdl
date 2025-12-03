@@ -7,7 +7,7 @@ grammar {
     name "JavaScript"
     tag "code"
     tier 1
-    has_scanner #true
+    has-scanner #true
     icon "devicon-plain:javascript"
     aliases "js" "jsx" "mjs" "cjs"
 

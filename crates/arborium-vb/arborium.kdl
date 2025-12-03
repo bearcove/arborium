@@ -7,7 +7,7 @@ grammar {
     name "Visual Basic"
     tag "code"
     tier 5
-    c_symbol "vb_dotnet"
+    c-symbol "vb_dotnet"
     icon "devicon-plain:visualbasic"
     aliases "vbnet" "visualbasic"
 

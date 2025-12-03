@@ -7,7 +7,7 @@ grammar {
     name "TOML"
     tag "config"
     tier 2
-    has_scanner #true
+    has-scanner #true
     icon "simple-icons:toml"
 
     inventor "Tom Preston-Werner"
