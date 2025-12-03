@@ -1,6 +1,6 @@
 //! Arborium-powered syntax highlighter for miette diagnostics.
 //!
-//! This crate provides a [`miette::Highlighter`] implementation using arborium's
+//! This crate provides a `miette::Highlighter` implementation using arborium's
 //! tree-sitter-based syntax highlighting, giving you accurate, language-aware
 //! highlighting in your error messages.
 //!
