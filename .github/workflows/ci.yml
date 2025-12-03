@@ -10,6 +10,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
 
 jobs:
   # Generate all grammar sources once on a fast runner, then share with other jobs
@@ -80,13 +82,13 @@ jobs:
           tool: cargo-nextest
 
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --locked --verbose
 
       - name: Run tests
-        run: cargo nextest run --verbose
+        run: cargo nextest run --locked --verbose
 
       - name: Build with all features
-        run: cargo build --all-features --verbose
+        run: cargo build --locked --all-features --verbose
 
   test-macos:
     needs: generate
@@ -113,15 +115,21 @@ jobs:
           tool: cargo-nextest
 
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --locked --verbose
 
       - name: Run tests
-        run: cargo nextest run --verbose
+        run: cargo nextest run --locked --verbose
 
   check-windows:
     needs: generate
-    runs-on: depot-windows-2022
+    runs-on: depot-windows-2022-32
     steps:
+      - name: Setup Dev Drive
+        uses: samypr100/setup-dev-drive@v3
+        with:
+          workspace-copy: true
+          drive-size: 8GB
+
       - uses: actions/checkout@v4
 
       - name: Download grammar sources
@@ -135,16 +143,18 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - uses: Swatinem/rust-cache@v2
+
       - name: Install nextest
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-nextest
 
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --locked --verbose
 
       - name: Run tests
-        run: cargo nextest run --verbose
+        run: cargo nextest run --locked --verbose
 
   wasm:
     needs: generate
@@ -171,7 +181,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y wabt
 
       - name: Build arborium for WASM
-        run: cargo build -p arborium --target wasm32-unknown-unknown
+        run: cargo build --locked -p arborium --target wasm32-unknown-unknown
 
       - name: Check for env imports in WASM
         run: |
@@ -212,7 +222,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Run Clippy
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --locked --all-targets -- -D warnings
 
   fmt:
     runs-on: depot-ubuntu-24.04-4
@@ -247,6 +257,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Build docs
-        run: cargo doc --no-deps
+        run: cargo doc --locked --no-deps
         env:
           RUSTDOCFLAGS: -D warnings
