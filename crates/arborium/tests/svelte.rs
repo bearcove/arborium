@@ -18,6 +18,13 @@ enum Event {
 
 /// Record all highlight events for Svelte source
 fn record_events(highlighter: &mut Highlighter, source: &str) -> Vec<Event> {
+    // Pre-load all needed languages before extracting config references
+    highlighter.get_config_mut("svelte");
+    highlighter.get_config_mut("css");
+    highlighter.get_config_mut("javascript");
+    highlighter.get_config_mut("typescript");
+
+    // Now we can safely get immutable references
     let config = highlighter
         .get_config("svelte")
         .expect("Svelte language not found");

@@ -64,14 +64,17 @@ impl From<io::Error> for HighlightError {
 /// High-level syntax highlighter with automatic injection support.
 ///
 /// This struct manages highlight configurations for all enabled languages
-/// and automatically handles language injections.
+/// and automatically handles language injections. Language configurations
+/// are lazily initialized on first use to improve startup performance.
 pub struct Highlighter {
-    /// Language configurations - public for testing
+    /// Language configurations (lazily populated)
     #[cfg(test)]
     pub(crate) configs: HashMap<&'static str, HighlightConfiguration>,
     #[cfg(not(test))]
     configs: HashMap<&'static str, HighlightConfiguration>,
     ts_highlighter: TsHighlighter,
+    /// Cached highlight names for configuration
+    names: Vec<String>,
 }
 
 impl Default for Highlighter {
@@ -81,133 +84,274 @@ impl Default for Highlighter {
 }
 
 impl Highlighter {
-    /// Create a new highlighter with configurations for all enabled languages.
+    /// Create a new highlighter. Language configurations are lazily initialized
+    /// on first use for better startup performance.
     pub fn new() -> Self {
-        let mut configs = HashMap::new();
-        let names: Vec<String> = crate::HIGHLIGHT_NAMES.iter().map(|s| s.to_string()).collect();
+        Self {
+            configs: HashMap::new(),
+            ts_highlighter: TsHighlighter::new(),
+            names: crate::HIGHLIGHT_NAMES.iter().map(|s| s.to_string()).collect(),
+        }
+    }
 
-        // Register all enabled languages
-        macro_rules! register_lang {
-            ($configs:expr, $names:expr, $feature:literal, $module:ident, $primary:literal $(, $alias:literal)*) => {
+    /// Ensure a language configuration is loaded, initializing it if needed.
+    /// Returns true if the language is available (even if init failed previously).
+    fn ensure_config(&mut self, language: &str) -> bool {
+        // First normalize to get the canonical name
+        let normalized = Self::normalize_language(language);
+
+        // Already loaded?
+        if self.configs.contains_key(normalized) {
+            return true;
+        }
+
+        // Find the static string for this language
+        let static_name = Self::available_languages()
+            .iter()
+            .find(|&&s| s == normalized)
+            .copied();
+
+        let Some(static_name) = static_name else {
+            return false;
+        };
+
+        // Try to create the config
+        if let Some(config) = Self::create_config(static_name, &self.names) {
+            self.configs.insert(static_name, config);
+            return true;
+        }
+
+        false
+    }
+
+    /// Create a highlight configuration for a language.
+    /// This is where the actual grammar initialization happens.
+    fn create_config(language: &'static str, names: &[String]) -> Option<HighlightConfiguration> {
+        macro_rules! try_lang {
+            ($feature:literal, $module:ident, $primary:literal) => {
                 #[cfg(feature = $feature)]
-                {
-                    if let Ok(mut config) = HighlightConfiguration::new(
+                if language == $primary {
+                    return HighlightConfiguration::new(
                         crate::$module::language().into(),
                         $primary,
                         crate::$module::HIGHLIGHTS_QUERY,
                         crate::$module::INJECTIONS_QUERY,
                         crate::$module::LOCALS_QUERY,
-                    ) {
-                        config.configure(&$names);
-                        $configs.insert($primary, config);
-                    }
+                    )
+                    .ok()
+                    .map(|mut config| {
+                        config.configure(names);
+                        config
+                    });
                 }
             };
         }
 
-        // Core languages needed for injections
-        register_lang!(configs, names, "lang-javascript", lang_javascript, "javascript");
-        register_lang!(configs, names, "lang-css", lang_css, "css");
-        register_lang!(configs, names, "lang-typescript", lang_typescript, "typescript");
+        // Core languages for injections
+        try_lang!("lang-javascript", lang_javascript, "javascript");
+        try_lang!("lang-css", lang_css, "css");
+        try_lang!("lang-typescript", lang_typescript, "typescript");
 
         // All other languages
-        register_lang!(configs, names, "lang-ada", lang_ada, "ada");
-        register_lang!(configs, names, "lang-agda", lang_agda, "agda");
-        register_lang!(configs, names, "lang-asm", lang_asm, "asm");
-        register_lang!(configs, names, "lang-awk", lang_awk, "awk");
-        register_lang!(configs, names, "lang-bash", lang_bash, "bash");
-        register_lang!(configs, names, "lang-batch", lang_batch, "batch");
-        register_lang!(configs, names, "lang-c", lang_c, "c");
-        register_lang!(configs, names, "lang-c-sharp", lang_c_sharp, "c-sharp");
-        register_lang!(configs, names, "lang-caddy", lang_caddy, "caddy");
-        register_lang!(configs, names, "lang-capnp", lang_capnp, "capnp");
-        register_lang!(configs, names, "lang-clojure", lang_clojure, "clojure");
-        register_lang!(configs, names, "lang-cmake", lang_cmake, "cmake");
-        register_lang!(configs, names, "lang-commonlisp", lang_commonlisp, "commonlisp");
-        register_lang!(configs, names, "lang-cpp", lang_cpp, "cpp");
-        register_lang!(configs, names, "lang-d", lang_d, "d");
-        register_lang!(configs, names, "lang-dart", lang_dart, "dart");
-        register_lang!(configs, names, "lang-devicetree", lang_devicetree, "devicetree");
-        register_lang!(configs, names, "lang-diff", lang_diff, "diff");
-        register_lang!(configs, names, "lang-dockerfile", lang_dockerfile, "dockerfile");
-        register_lang!(configs, names, "lang-dot", lang_dot, "dot");
-        register_lang!(configs, names, "lang-elisp", lang_elisp, "elisp");
-        register_lang!(configs, names, "lang-elixir", lang_elixir, "elixir");
-        register_lang!(configs, names, "lang-elm", lang_elm, "elm");
-        register_lang!(configs, names, "lang-erlang", lang_erlang, "erlang");
-        register_lang!(configs, names, "lang-fish", lang_fish, "fish");
-        register_lang!(configs, names, "lang-fsharp", lang_fsharp, "fsharp");
-        register_lang!(configs, names, "lang-gleam", lang_gleam, "gleam");
-        register_lang!(configs, names, "lang-glsl", lang_glsl, "glsl");
-        register_lang!(configs, names, "lang-go", lang_go, "go");
-        register_lang!(configs, names, "lang-graphql", lang_graphql, "graphql");
-        register_lang!(configs, names, "lang-haskell", lang_haskell, "haskell");
-        register_lang!(configs, names, "lang-hcl", lang_hcl, "hcl");
-        register_lang!(configs, names, "lang-hlsl", lang_hlsl, "hlsl");
-        register_lang!(configs, names, "lang-html", lang_html, "html");
-        register_lang!(configs, names, "lang-ini", lang_ini, "ini");
-        register_lang!(configs, names, "lang-java", lang_java, "java");
-        register_lang!(configs, names, "lang-jinja2", lang_jinja2, "jinja2");
-        register_lang!(configs, names, "lang-jq", lang_jq, "jq");
-        register_lang!(configs, names, "lang-json", lang_json, "json");
-        register_lang!(configs, names, "lang-julia", lang_julia, "julia");
-        register_lang!(configs, names, "lang-kdl", lang_kdl, "kdl");
-        register_lang!(configs, names, "lang-kotlin", lang_kotlin, "kotlin");
-        register_lang!(configs, names, "lang-lean", lang_lean, "lean");
-        register_lang!(configs, names, "lang-lua", lang_lua, "lua");
-        register_lang!(configs, names, "lang-matlab", lang_matlab, "matlab");
-        register_lang!(configs, names, "lang-meson", lang_meson, "meson");
-        register_lang!(configs, names, "lang-nginx", lang_nginx, "nginx");
-        register_lang!(configs, names, "lang-ninja", lang_ninja, "ninja");
-        register_lang!(configs, names, "lang-nix", lang_nix, "nix");
-        register_lang!(configs, names, "lang-objc", lang_objc, "objc");
-        register_lang!(configs, names, "lang-ocaml", lang_ocaml, "ocaml");
-        register_lang!(configs, names, "lang-perl", lang_perl, "perl");
-        register_lang!(configs, names, "lang-php", lang_php, "php");
-        register_lang!(configs, names, "lang-powershell", lang_powershell, "powershell");
-        register_lang!(configs, names, "lang-prolog", lang_prolog, "prolog");
-        register_lang!(configs, names, "lang-python", lang_python, "python");
-        register_lang!(configs, names, "lang-query", lang_query, "query");
-        register_lang!(configs, names, "lang-r", lang_r, "r");
-        register_lang!(configs, names, "lang-rescript", lang_rescript, "rescript");
-        register_lang!(configs, names, "lang-ron", lang_ron, "ron");
-        register_lang!(configs, names, "lang-ruby", lang_ruby, "ruby");
-        register_lang!(configs, names, "lang-rust", lang_rust, "rust");
-        register_lang!(configs, names, "lang-scala", lang_scala, "scala");
-        register_lang!(configs, names, "lang-scheme", lang_scheme, "scheme");
-        register_lang!(configs, names, "lang-scss", lang_scss, "scss");
-        register_lang!(configs, names, "lang-sparql", lang_sparql, "sparql");
-        register_lang!(configs, names, "lang-sql", lang_sql, "sql");
-        register_lang!(configs, names, "lang-ssh-config", lang_ssh_config, "ssh-config");
-        register_lang!(configs, names, "lang-starlark", lang_starlark, "starlark");
-        register_lang!(configs, names, "lang-svelte", lang_svelte, "svelte");
-        register_lang!(configs, names, "lang-swift", lang_swift, "swift");
-        register_lang!(configs, names, "lang-textproto", lang_textproto, "textproto");
-        register_lang!(configs, names, "lang-thrift", lang_thrift, "thrift");
-        register_lang!(configs, names, "lang-tlaplus", lang_tlaplus, "tlaplus");
-        register_lang!(configs, names, "lang-toml", lang_toml, "toml");
-        register_lang!(configs, names, "lang-tsx", lang_tsx, "tsx");
-        register_lang!(configs, names, "lang-typst", lang_typst, "typst");
-        register_lang!(configs, names, "lang-uiua", lang_uiua, "uiua");
-        register_lang!(configs, names, "lang-vb", lang_vb, "vb");
-        register_lang!(configs, names, "lang-verilog", lang_verilog, "verilog");
-        register_lang!(configs, names, "lang-vhdl", lang_vhdl, "vhdl");
-        register_lang!(configs, names, "lang-vue", lang_vue, "vue");
-        register_lang!(configs, names, "lang-x86asm", lang_x86asm, "x86asm");
-        register_lang!(configs, names, "lang-xml", lang_xml, "xml");
-        register_lang!(configs, names, "lang-yaml", lang_yaml, "yaml");
-        register_lang!(configs, names, "lang-yuri", lang_yuri, "yuri");
-        register_lang!(configs, names, "lang-zig", lang_zig, "zig");
+        try_lang!("lang-ada", lang_ada, "ada");
+        try_lang!("lang-agda", lang_agda, "agda");
+        try_lang!("lang-asm", lang_asm, "asm");
+        try_lang!("lang-awk", lang_awk, "awk");
+        try_lang!("lang-bash", lang_bash, "bash");
+        try_lang!("lang-batch", lang_batch, "batch");
+        try_lang!("lang-c", lang_c, "c");
+        try_lang!("lang-c-sharp", lang_c_sharp, "c-sharp");
+        try_lang!("lang-caddy", lang_caddy, "caddy");
+        try_lang!("lang-capnp", lang_capnp, "capnp");
+        try_lang!("lang-clojure", lang_clojure, "clojure");
+        try_lang!("lang-cmake", lang_cmake, "cmake");
+        try_lang!("lang-commonlisp", lang_commonlisp, "commonlisp");
+        try_lang!("lang-cpp", lang_cpp, "cpp");
+        try_lang!("lang-d", lang_d, "d");
+        try_lang!("lang-dart", lang_dart, "dart");
+        try_lang!("lang-devicetree", lang_devicetree, "devicetree");
+        try_lang!("lang-diff", lang_diff, "diff");
+        try_lang!("lang-dockerfile", lang_dockerfile, "dockerfile");
+        try_lang!("lang-dot", lang_dot, "dot");
+        try_lang!("lang-elisp", lang_elisp, "elisp");
+        try_lang!("lang-elixir", lang_elixir, "elixir");
+        try_lang!("lang-elm", lang_elm, "elm");
+        try_lang!("lang-erlang", lang_erlang, "erlang");
+        try_lang!("lang-fish", lang_fish, "fish");
+        try_lang!("lang-fsharp", lang_fsharp, "fsharp");
+        try_lang!("lang-gleam", lang_gleam, "gleam");
+        try_lang!("lang-glsl", lang_glsl, "glsl");
+        try_lang!("lang-go", lang_go, "go");
+        try_lang!("lang-graphql", lang_graphql, "graphql");
+        try_lang!("lang-haskell", lang_haskell, "haskell");
+        try_lang!("lang-hcl", lang_hcl, "hcl");
+        try_lang!("lang-hlsl", lang_hlsl, "hlsl");
+        try_lang!("lang-html", lang_html, "html");
+        try_lang!("lang-ini", lang_ini, "ini");
+        try_lang!("lang-java", lang_java, "java");
+        try_lang!("lang-jinja2", lang_jinja2, "jinja2");
+        try_lang!("lang-jq", lang_jq, "jq");
+        try_lang!("lang-json", lang_json, "json");
+        try_lang!("lang-julia", lang_julia, "julia");
+        try_lang!("lang-kdl", lang_kdl, "kdl");
+        try_lang!("lang-kotlin", lang_kotlin, "kotlin");
+        try_lang!("lang-lean", lang_lean, "lean");
+        try_lang!("lang-lua", lang_lua, "lua");
+        try_lang!("lang-matlab", lang_matlab, "matlab");
+        try_lang!("lang-meson", lang_meson, "meson");
+        try_lang!("lang-nginx", lang_nginx, "nginx");
+        try_lang!("lang-ninja", lang_ninja, "ninja");
+        try_lang!("lang-nix", lang_nix, "nix");
+        try_lang!("lang-objc", lang_objc, "objc");
+        try_lang!("lang-ocaml", lang_ocaml, "ocaml");
+        try_lang!("lang-perl", lang_perl, "perl");
+        try_lang!("lang-php", lang_php, "php");
+        try_lang!("lang-powershell", lang_powershell, "powershell");
+        try_lang!("lang-prolog", lang_prolog, "prolog");
+        try_lang!("lang-python", lang_python, "python");
+        try_lang!("lang-query", lang_query, "query");
+        try_lang!("lang-r", lang_r, "r");
+        try_lang!("lang-rescript", lang_rescript, "rescript");
+        try_lang!("lang-ron", lang_ron, "ron");
+        try_lang!("lang-ruby", lang_ruby, "ruby");
+        try_lang!("lang-rust", lang_rust, "rust");
+        try_lang!("lang-scala", lang_scala, "scala");
+        try_lang!("lang-scheme", lang_scheme, "scheme");
+        try_lang!("lang-scss", lang_scss, "scss");
+        try_lang!("lang-sparql", lang_sparql, "sparql");
+        try_lang!("lang-sql", lang_sql, "sql");
+        try_lang!("lang-ssh-config", lang_ssh_config, "ssh-config");
+        try_lang!("lang-starlark", lang_starlark, "starlark");
+        try_lang!("lang-svelte", lang_svelte, "svelte");
+        try_lang!("lang-swift", lang_swift, "swift");
+        try_lang!("lang-textproto", lang_textproto, "textproto");
+        try_lang!("lang-thrift", lang_thrift, "thrift");
+        try_lang!("lang-tlaplus", lang_tlaplus, "tlaplus");
+        try_lang!("lang-toml", lang_toml, "toml");
+        try_lang!("lang-tsx", lang_tsx, "tsx");
+        try_lang!("lang-typst", lang_typst, "typst");
+        try_lang!("lang-uiua", lang_uiua, "uiua");
+        try_lang!("lang-vb", lang_vb, "vb");
+        try_lang!("lang-verilog", lang_verilog, "verilog");
+        try_lang!("lang-vhdl", lang_vhdl, "vhdl");
+        try_lang!("lang-vue", lang_vue, "vue");
+        try_lang!("lang-x86asm", lang_x86asm, "x86asm");
+        try_lang!("lang-xml", lang_xml, "xml");
+        try_lang!("lang-yaml", lang_yaml, "yaml");
+        try_lang!("lang-yuri", lang_yuri, "yuri");
+        try_lang!("lang-zig", lang_zig, "zig");
 
-        Self {
-            configs,
-            ts_highlighter: TsHighlighter::new(),
-        }
+        None
+    }
+
+    /// Get the list of available languages (based on enabled features).
+    /// This doesn't initialize any configurations.
+    fn available_languages() -> &'static [&'static str] {
+        &[
+            #[cfg(feature = "lang-ada")] "ada",
+            #[cfg(feature = "lang-agda")] "agda",
+            #[cfg(feature = "lang-asm")] "asm",
+            #[cfg(feature = "lang-awk")] "awk",
+            #[cfg(feature = "lang-bash")] "bash",
+            #[cfg(feature = "lang-batch")] "batch",
+            #[cfg(feature = "lang-c")] "c",
+            #[cfg(feature = "lang-c-sharp")] "c-sharp",
+            #[cfg(feature = "lang-caddy")] "caddy",
+            #[cfg(feature = "lang-capnp")] "capnp",
+            #[cfg(feature = "lang-clojure")] "clojure",
+            #[cfg(feature = "lang-cmake")] "cmake",
+            #[cfg(feature = "lang-commonlisp")] "commonlisp",
+            #[cfg(feature = "lang-cpp")] "cpp",
+            #[cfg(feature = "lang-css")] "css",
+            #[cfg(feature = "lang-d")] "d",
+            #[cfg(feature = "lang-dart")] "dart",
+            #[cfg(feature = "lang-devicetree")] "devicetree",
+            #[cfg(feature = "lang-diff")] "diff",
+            #[cfg(feature = "lang-dockerfile")] "dockerfile",
+            #[cfg(feature = "lang-dot")] "dot",
+            #[cfg(feature = "lang-elisp")] "elisp",
+            #[cfg(feature = "lang-elixir")] "elixir",
+            #[cfg(feature = "lang-elm")] "elm",
+            #[cfg(feature = "lang-erlang")] "erlang",
+            #[cfg(feature = "lang-fish")] "fish",
+            #[cfg(feature = "lang-fsharp")] "fsharp",
+            #[cfg(feature = "lang-gleam")] "gleam",
+            #[cfg(feature = "lang-glsl")] "glsl",
+            #[cfg(feature = "lang-go")] "go",
+            #[cfg(feature = "lang-graphql")] "graphql",
+            #[cfg(feature = "lang-haskell")] "haskell",
+            #[cfg(feature = "lang-hcl")] "hcl",
+            #[cfg(feature = "lang-hlsl")] "hlsl",
+            #[cfg(feature = "lang-html")] "html",
+            #[cfg(feature = "lang-ini")] "ini",
+            #[cfg(feature = "lang-java")] "java",
+            #[cfg(feature = "lang-javascript")] "javascript",
+            #[cfg(feature = "lang-jinja2")] "jinja2",
+            #[cfg(feature = "lang-jq")] "jq",
+            #[cfg(feature = "lang-json")] "json",
+            #[cfg(feature = "lang-julia")] "julia",
+            #[cfg(feature = "lang-kdl")] "kdl",
+            #[cfg(feature = "lang-kotlin")] "kotlin",
+            #[cfg(feature = "lang-lean")] "lean",
+            #[cfg(feature = "lang-lua")] "lua",
+            #[cfg(feature = "lang-matlab")] "matlab",
+            #[cfg(feature = "lang-meson")] "meson",
+            #[cfg(feature = "lang-nginx")] "nginx",
+            #[cfg(feature = "lang-ninja")] "ninja",
+            #[cfg(feature = "lang-nix")] "nix",
+            #[cfg(feature = "lang-objc")] "objc",
+            #[cfg(feature = "lang-ocaml")] "ocaml",
+            #[cfg(feature = "lang-perl")] "perl",
+            #[cfg(feature = "lang-php")] "php",
+            #[cfg(feature = "lang-powershell")] "powershell",
+            #[cfg(feature = "lang-prolog")] "prolog",
+            #[cfg(feature = "lang-python")] "python",
+            #[cfg(feature = "lang-query")] "query",
+            #[cfg(feature = "lang-r")] "r",
+            #[cfg(feature = "lang-rescript")] "rescript",
+            #[cfg(feature = "lang-ron")] "ron",
+            #[cfg(feature = "lang-ruby")] "ruby",
+            #[cfg(feature = "lang-rust")] "rust",
+            #[cfg(feature = "lang-scala")] "scala",
+            #[cfg(feature = "lang-scheme")] "scheme",
+            #[cfg(feature = "lang-scss")] "scss",
+            #[cfg(feature = "lang-sparql")] "sparql",
+            #[cfg(feature = "lang-sql")] "sql",
+            #[cfg(feature = "lang-ssh-config")] "ssh-config",
+            #[cfg(feature = "lang-starlark")] "starlark",
+            #[cfg(feature = "lang-svelte")] "svelte",
+            #[cfg(feature = "lang-swift")] "swift",
+            #[cfg(feature = "lang-textproto")] "textproto",
+            #[cfg(feature = "lang-thrift")] "thrift",
+            #[cfg(feature = "lang-tlaplus")] "tlaplus",
+            #[cfg(feature = "lang-toml")] "toml",
+            #[cfg(feature = "lang-tsx")] "tsx",
+            #[cfg(feature = "lang-typescript")] "typescript",
+            #[cfg(feature = "lang-typst")] "typst",
+            #[cfg(feature = "lang-uiua")] "uiua",
+            #[cfg(feature = "lang-vb")] "vb",
+            #[cfg(feature = "lang-verilog")] "verilog",
+            #[cfg(feature = "lang-vhdl")] "vhdl",
+            #[cfg(feature = "lang-vue")] "vue",
+            #[cfg(feature = "lang-x86asm")] "x86asm",
+            #[cfg(feature = "lang-xml")] "xml",
+            #[cfg(feature = "lang-yaml")] "yaml",
+            #[cfg(feature = "lang-yuri")] "yuri",
+            #[cfg(feature = "lang-zig")] "zig",
+        ]
     }
 
     /// Get a reference to a language configuration by name.
+    /// Note: This will NOT lazily initialize the config. Use `get_config_mut` for that.
     pub fn get_config(&self, language: &str) -> Option<&HighlightConfiguration> {
         // Normalize language name
+        let normalized = Self::normalize_language(language);
+        self.configs.get(normalized)
+    }
+
+    /// Get a reference to a language configuration by name, initializing it if needed.
+    pub fn get_config_mut(&mut self, language: &str) -> Option<&HighlightConfiguration> {
+        self.ensure_config(language);
         let normalized = Self::normalize_language(language);
         self.configs.get(normalized)
     }
@@ -270,14 +414,17 @@ impl Highlighter {
         }
     }
 
-    /// Check if a language is supported
+    /// Check if a language is supported (based on enabled features).
+    /// This doesn't initialize the language configuration.
     pub fn is_supported(&self, language: &str) -> bool {
-        self.get_config(language).is_some()
+        let normalized = Self::normalize_language(language);
+        Self::available_languages().contains(&normalized)
     }
 
-    /// Get list of supported languages
+    /// Get list of supported languages (based on enabled features).
+    /// This doesn't initialize any language configurations.
     pub fn supported_languages(&self) -> Vec<&'static str> {
-        self.configs.keys().copied().collect()
+        Self::available_languages().to_vec()
     }
 
     /// Highlight source code and return HTML string.
@@ -298,6 +445,20 @@ impl Highlighter {
         source: &str,
     ) -> Result<(), HighlightError> {
         let normalized = Self::normalize_language(language);
+
+        // Ensure the primary language is loaded
+        if !self.ensure_config(language) {
+            return Err(HighlightError::UnsupportedLanguage(language.to_string()));
+        }
+
+        // Pre-load common injection languages if they might be needed
+        // (HTML can inject CSS, JS, etc.)
+        if normalized == "html" || normalized == "svelte" || normalized == "vue" {
+            self.ensure_config("css");
+            self.ensure_config("javascript");
+            self.ensure_config("typescript");
+        }
+
         let config = self.configs.get(normalized)
             .ok_or_else(|| HighlightError::UnsupportedLanguage(language.to_string()))?;
 

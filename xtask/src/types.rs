@@ -92,63 +92,42 @@ pub use rootcause::Report;
 // Crate-level configuration (parsed from arborium.kdl)
 // =============================================================================
 
-/// Configuration for an entire arborium-* crate.
-///
-/// This represents the contents of an `arborium.kdl` file. A crate can
-/// contain one or more grammars that share the same upstream source.
-#[derive(Debug, Clone, Facet)]
-pub struct CrateConfig {
-    // =====================================================================
-    // Upstream Source
-    // =====================================================================
-    /// Git repository URL for the upstream tree-sitter grammar.
+structstruck::strike! {
+    /// Configuration for an entire arborium-* crate.
     ///
-    /// Use "local" for grammars that are maintained in this repository.
-    #[facet(kdl::child)]
-    pub repo: Repo,
+    /// This represents the contents of an `arborium.kdl` file. A crate can
+    /// contain one or more grammars that share the same upstream source.
+    #[strikethrough[derive(Debug, Clone, Facet)]]
+    pub struct CrateConfig {
+        /// Git repository URL for the upstream tree-sitter grammar.
+        ///
+        /// Use "local" for grammars that are maintained in this repository.
+        #[facet(kdl::child)]
+        pub repo: pub struct Repo {
+            #[facet(kdl::argument)]
+            pub value: Spanned<String>,
+        },
 
-    /// Git commit hash of the vendored version.
-    #[facet(kdl::child)]
-    pub commit: Commit,
+        /// Git commit hash of the vendored version.
+        #[facet(kdl::child)]
+        pub commit: pub struct Commit {
+            #[facet(kdl::argument)]
+            pub value: Spanned<String>,
+        },
 
-    /// SPDX license identifier for the grammar (e.g., "MIT", "Apache-2.0").
-    #[facet(kdl::child)]
-    pub license: License,
+        /// SPDX license identifier for the grammar (e.g., "MIT", "Apache-2.0").
+        #[facet(kdl::child)]
+        pub license: pub struct License {
+            #[facet(kdl::argument)]
+            pub value: Spanned<String>,
+        },
 
-    // TODO: Add authors field back once facet-kdl supports Option<T> + kdl::child + default
-    // when the child node is omitted from the KDL.
-    // See: https://github.com/facet-rs/facet/issues/XXX
+        // TODO: Add authors field back once facet-kdl supports Option<T> + kdl::child + default
 
-    // =====================================================================
-    // Grammars
-    // =====================================================================
-    /// One or more grammars exported by this crate.
-    ///
-    /// Most crates have exactly one grammar. Multi-grammar crates (like
-    /// tree-sitter-xml which exports both XML and DTD) have multiple.
-    #[facet(kdl::children)]
-    pub grammars: Vec<GrammarConfig>,
-}
-
-/// Git repository URL node.
-#[derive(Debug, Clone, Facet)]
-pub struct Repo {
-    #[facet(kdl::argument)]
-    pub value: Spanned<String>,
-}
-
-/// Git commit hash node.
-#[derive(Debug, Clone, Facet)]
-pub struct Commit {
-    #[facet(kdl::argument)]
-    pub value: Spanned<String>,
-}
-
-/// SPDX license identifier node.
-#[derive(Debug, Clone, Facet)]
-pub struct License {
-    #[facet(kdl::argument)]
-    pub value: Spanned<String>,
+        /// One or more grammars exported by this crate.
+        #[facet(kdl::children)]
+        pub grammars: Vec<GrammarConfig>,
+    }
 }
 
 /// Authors of the tree-sitter grammar.
@@ -456,34 +435,6 @@ pub struct CrateState {
     pub files: CrateFiles,
 }
 
-/// State of files within a crate directory.
-#[derive(Debug, Default)]
-pub struct CrateFiles {
-    /// arborium.kdl - the source of truth
-    pub kdl: FileState,
-
-    /// Cargo.toml - generated
-    pub cargo_toml: FileState,
-
-    /// build.rs - generated
-    pub build_rs: FileState,
-
-    /// src/lib.rs - generated
-    pub lib_rs: FileState,
-
-    /// grammar-src/ directory state
-    pub grammar_src: GrammarSrcState,
-
-    /// queries/ directory state
-    pub queries: QueriesState,
-
-    /// Sample files declared in kdl
-    pub samples: Vec<SampleState>,
-
-    /// Legacy/unexpected files that should be deleted
-    pub legacy_files: Vec<Utf8PathBuf>,
-}
-
 /// State of a single file.
 #[derive(Debug, Default)]
 pub enum FileState {
@@ -507,30 +458,52 @@ impl FileState {
     }
 }
 
-/// State of the grammar-src/ directory.
-#[derive(Debug, Default)]
-pub struct GrammarSrcState {
-    /// parser.c - required
-    pub parser_c: FileState,
+structstruck::strike! {
+    /// State of files within a crate directory.
+    #[strikethrough[derive(Debug, Default)]]
+    pub struct CrateFiles {
+        /// arborium.kdl - the source of truth
+        pub kdl: FileState,
 
-    /// scanner.c - optional depending on grammar
-    pub scanner_c: FileState,
+        /// Cargo.toml - generated
+        pub cargo_toml: FileState,
 
-    /// Other files present
-    pub other_files: Vec<Utf8PathBuf>,
-}
+        /// build.rs - generated
+        pub build_rs: FileState,
 
-/// State of the queries/ directory.
-#[derive(Debug, Default)]
-pub struct QueriesState {
-    /// highlights.scm
-    pub highlights: FileState,
+        /// src/lib.rs - generated
+        pub lib_rs: FileState,
 
-    /// injections.scm
-    pub injections: FileState,
+        /// grammar-src/ directory state
+        pub grammar_src: pub struct GrammarSrcState {
+            /// parser.c - required
+            pub parser_c: FileState,
 
-    /// locals.scm
-    pub locals: FileState,
+            /// scanner.c - optional depending on grammar
+            pub scanner_c: FileState,
+
+            /// Other files present
+            pub other_files: Vec<Utf8PathBuf>,
+        },
+
+        /// queries/ directory state
+        pub queries: pub struct QueriesState {
+            /// highlights.scm
+            pub highlights: FileState,
+
+            /// injections.scm
+            pub injections: FileState,
+
+            /// locals.scm
+            pub locals: FileState,
+        },
+
+        /// Sample files declared in kdl
+        pub samples: Vec<SampleState>,
+
+        /// Legacy/unexpected files that should be deleted
+        pub legacy_files: Vec<Utf8PathBuf>,
+    }
 }
 
 /// State of a sample file.

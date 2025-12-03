@@ -3,8 +3,42 @@ import init, { highlight, supported_languages, highlight_names } from './arboriu
 // Language metadata will be injected by generate-demo
 // {{LANGUAGE_INFO}}
 
-// Examples will be injected by generate-demo
-const examples = {{EXAMPLES}};
+// Examples: maps language id to file extension (e.g. "rust" -> "rs")
+// Content fetched on-demand from /samples/{id}.{ext}
+const exampleExtensions = {{EXAMPLES}};
+
+// Cache for fetched sample content
+const examplesCache = {};
+
+// Fetch sample content on-demand
+async function fetchExample(langId) {
+    // Return cached content if available
+    if (examplesCache[langId] !== undefined) {
+        return examplesCache[langId];
+    }
+
+    // Check if sample exists
+    const ext = exampleExtensions[langId];
+    if (!ext) {
+        examplesCache[langId] = null;
+        return null;
+    }
+
+    // Fetch from server using actual file extension
+    try {
+        const response = await fetch(`/samples/${langId}.${ext}`);
+        if (!response.ok) {
+            examplesCache[langId] = null;
+            return null;
+        }
+        const content = await response.text();
+        examplesCache[langId] = content;
+        return content;
+    } catch (e) {
+        examplesCache[langId] = null;
+        return null;
+    }
+}
 
 // Icons will be injected by generate-demo (SVG strings keyed by iconify name)
 const icons = {{ICONS}};
@@ -284,11 +318,12 @@ function exitSearchMode() {
 }
 
 // Preview a language (without committing selection)
-function previewLanguage(id) {
+async function previewLanguage(id) {
     // Load example if available and re-highlight
     const sourceEl = document.getElementById('source');
-    if (examples[id]) {
-        sourceEl.value = examples[id];
+    const example = await fetchExample(id);
+    if (example) {
+        sourceEl.value = example;
     }
     // Temporarily highlight with this language
     if (wasmLoaded) {
@@ -309,7 +344,7 @@ function previewLanguage(id) {
 }
 
 // Select a language
-function selectLanguage(id) {
+async function selectLanguage(id) {
     selectedLang = id;
     updateLabel(id);
     exitSearchMode();
@@ -318,8 +353,9 @@ function selectLanguage(id) {
     history.replaceState(null, '', `#${id}`);
 
     // Load example if available
-    if (examples[id]) {
-        document.getElementById('source').value = examples[id];
+    const example = await fetchExample(id);
+    if (example) {
+        document.getElementById('source').value = example;
     }
 
     doHighlight();

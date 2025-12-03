@@ -1,0 +1,1730 @@
+{
+  "grammars": [
+    {
+      "id": "ada",
+      "crate": "arborium-ada",
+      "name": "Ada",
+      "icon": "mdi:alpha-a-box-outline",
+      "tier": 5,
+      "tag": "code",
+      "description": "General-purpose systems language created for the U.S. Department of Defense; emphasizes safety and reliability.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/inventory.adb",
+          "description": "Handwritten Ada program using vectors, records, and procedures to manage an inventory."
+        }
+      ]
+    },
+    {
+      "id": "agda",
+      "crate": "arborium-agda",
+      "name": "Agda",
+      "icon": null,
+      "tier": 4,
+      "tag": "code",
+      "description": "A dependently typed functional programming language and proof assistant.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/List.agda",
+          "description": "Agda standard library List module with dependent types and pattern matching."
+        }
+      ]
+    },
+    {
+      "id": "asciidoc",
+      "crate": "arborium-asciidoc",
+      "name": "Asciidoc",
+      "icon": "mdi:text-box",
+      "tier": 5,
+      "tag": "markup",
+      "description": "A lightweight markup language for writing technical documentation and books.",
+      "aliases": [
+        "adoc"
+      ],
+      "samples": [
+        {
+          "path": "samples/readme.adoc",
+          "description": "AsciiDoc readme showing headers, code blocks, tables, and admonitions."
+        }
+      ]
+    },
+    {
+      "id": "asm",
+      "crate": "arborium-asm",
+      "name": "Assembly",
+      "icon": "mdi:memory",
+      "tier": 3,
+      "tag": "code",
+      "description": "Low-level programming language that maps mnemonic instructions directly to machine code; the earliest published example was Booth's 1947 ARC2 'Contracted Notation' assembler (https://en.wikipedia.org/wiki/Kathleen_Booth).",
+      "aliases": [
+        "assembly"
+      ],
+      "samples": [
+        {
+          "path": "samples/struc.asm",
+          "description": "Exercises NASM struc/istruc directives, offsets, and data definitions."
+        }
+      ]
+    },
+    {
+      "id": "awk",
+      "crate": "arborium-awk",
+      "name": "AWK",
+      "icon": "mdi:text-box-outline",
+      "tier": 4,
+      "tag": "code",
+      "description": "Pattern-scanning and text processing language; original description in the 1978 paper 'AWK — A Pattern Scanning and Processing Language'.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/chem.awk",
+          "description": "AWK script from one-true-awk tests exercising records, fields, loops, and functions."
+        }
+      ]
+    },
+    {
+      "id": "bash",
+      "crate": "arborium-bash",
+      "name": "Bash",
+      "icon": "devicon-plain:bash",
+      "tier": 1,
+      "tag": "shell",
+      "description": "Unix shell and command language for GNU; see the official https://www.gnu.org/software/bash/manual/.",
+      "aliases": [
+        "sh",
+        "shell"
+      ],
+      "samples": [
+        {
+          "path": "samples/doorbell.sh",
+          "description": "doorbell.sh notifier with POSIX shell features, signals, file descriptors, and scheduling."
+        }
+      ]
+    },
+    {
+      "id": "batch",
+      "crate": "arborium-batch",
+      "name": "Batch",
+      "icon": "mdi:console",
+      "tier": 5,
+      "tag": "shell",
+      "description": "DOS/Windows batch scripting (.bat/.cmd); commands documented in the https://winworldpc.com/product/ms-dos/5x and modern https://learn.microsoft.com/windows-server/administration/windows-commands/windows-commands.",
+      "aliases": [
+        "bat",
+        "cmd"
+      ],
+      "samples": [
+        {
+          "path": "samples/init.bat",
+          "description": "Cmder console emulator init script with argument parsing, path setup, and library calls."
+        }
+      ]
+    },
+    {
+      "id": "c",
+      "crate": "arborium-c",
+      "name": "C",
+      "icon": "devicon-plain:c",
+      "tier": 1,
+      "tag": "code",
+      "description": "General-purpose systems language created at Bell Labs.",
+      "aliases": [
+        "h"
+      ],
+      "samples": [
+        {
+          "path": "samples/paren_main.c",
+          "description": "Paren interpreter main with parser, eval loop, and hash table usage."
+        }
+      ]
+    },
+    {
+      "id": "c-sharp",
+      "crate": "arborium-c-sharp",
+      "name": "C#",
+      "icon": "devicon-plain:csharp",
+      "tier": 1,
+      "tag": "code",
+      "description": "Modern object-oriented language for .NET; official spec is published as https://www.ecma-international.org/publications-and-standards/standards/ecma-334/.",
+      "aliases": [
+        "cs",
+        "csharp"
+      ],
+      "samples": [
+        {
+          "path": "samples/ref_readonly_program.cs",
+          "description": "Demonstrates ref readonly structs, in parameters, default arguments, and static refs."
+        },
+        {
+          "path": "samples/ref_readonly_point3d.cs",
+          "description": "Supporting struct definitions with ref readonly properties and readonly struct."
+        }
+      ]
+    },
+    {
+      "id": "caddy",
+      "crate": "arborium-caddy",
+      "name": "Caddyfile",
+      "icon": "simple-icons:caddy",
+      "tier": 5,
+      "tag": "config",
+      "description": "Caddyfile configuration language for the Caddy web server; official docs at https://caddyserver.com/docs/caddyfile.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/Caddyfile",
+          "description": "Default Caddy distribution config showing sites, reverse proxy, and TLS settings."
+        }
+      ]
+    },
+    {
+      "id": "capnp",
+      "crate": "arborium-capnp",
+      "name": "Cap'n Proto",
+      "icon": "mdi:message-fast-outline",
+      "tier": 4,
+      "tag": "data",
+      "description": "Cap'n Proto serialization and RPC system; design and spec at https://capnproto.org/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/addressbook.capnp",
+          "description": "Cap'n Proto address book example with structs, lists, and annotations."
+        }
+      ]
+    },
+    {
+      "id": "clojure",
+      "crate": "arborium-clojure",
+      "name": "Clojure",
+      "icon": "simple-icons:clojure",
+      "tier": 2,
+      "tag": "code",
+      "description": "Functional Lisp dialect for the JVM with strong concurrency support; official site: https://clojure.org/.",
+      "aliases": [
+        "clj"
+      ],
+      "samples": [
+        {
+          "path": "samples/params.clj",
+          "description": "Ring middleware for parsing params and multipart requests; showcases namespaces, metadata, higher-order functions."
+        }
+      ]
+    },
+    {
+      "id": "cmake",
+      "crate": "arborium-cmake",
+      "name": "CMake",
+      "icon": "devicon-plain:cmake",
+      "tier": 3,
+      "tag": "build",
+      "description": "A cross-platform build system generator for C/C++ projects.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/catch2_cmakelists.cmake",
+          "description": "Catch2 testing framework build configuration with options, subdirectories, and installation setup."
+        }
+      ]
+    },
+    {
+      "id": "commonlisp",
+      "crate": "arborium-commonlisp",
+      "name": "Common Lisp",
+      "icon": "mdi:lambda",
+      "tier": 4,
+      "tag": "code",
+      "description": "A multi-paradigm dialect of Lisp standardized by ANSI with powerful macro capabilities.",
+      "aliases": [
+        "lisp",
+        "cl"
+      ],
+      "samples": [
+        {
+          "path": "samples/session_middleware.lisp",
+          "description": "Lack web framework session middleware with closures, macros, and hash tables."
+        }
+      ]
+    },
+    {
+      "id": "cpp",
+      "crate": "arborium-cpp",
+      "name": "C++",
+      "icon": "devicon-plain:cplusplus",
+      "tier": 1,
+      "tag": "code",
+      "description": "General-purpose language extending C with zero-overhead abstractions; see Stroustrup's official overview at https://isocpp.org/about.",
+      "aliases": [
+        "c++",
+        "cxx",
+        "hpp"
+      ],
+      "samples": [
+        {
+          "path": "samples/chrono-test.cc",
+          "description": "fmtlib chrono tests with templates, user-defined literals, chrono formatting, and GoogleTest macros."
+        },
+        {
+          "path": "samples/BytecodeReader.cpp",
+          "description": "Ark bytecode reader handling chunk parsing, endian conversion, and error cases."
+        }
+      ]
+    },
+    {
+      "id": "css",
+      "crate": "arborium-css",
+      "name": "CSS",
+      "icon": "devicon-plain:css3",
+      "tier": 2,
+      "tag": "markup",
+      "description": "Style sheet language for web documents; the living standard is maintained by the W3C (https://www.w3.org/TR/CSS/).",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/pico.css",
+          "description": "Pico CSS framework with typography, form inputs, and utility selectors."
+        }
+      ]
+    },
+    {
+      "id": "d",
+      "crate": "arborium-d",
+      "name": "D",
+      "icon": "mdi:alpha-d-box-outline",
+      "tier": 4,
+      "tag": "code",
+      "description": "A systems programming language with C-like syntax, designed as a more modern alternative to C++.",
+      "aliases": [
+        "dlang"
+      ],
+      "samples": [
+        {
+          "path": "samples/platform.d",
+          "description": "Build platform detection from Dub package manager; showcases D's version conditions and compile-time metaprogramming."
+        }
+      ]
+    },
+    {
+      "id": "dart",
+      "crate": "arborium-dart",
+      "name": "Dart",
+      "icon": "devicon-plain:dart",
+      "tier": 2,
+      "tag": "code",
+      "description": "Object-oriented language optimized for UI development; official site: https://dart.dev/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/fluid_api.dart",
+          "description": "Extension methods demo with fluent API, getters, operators, and generics."
+        }
+      ]
+    },
+    {
+      "id": "devicetree",
+      "crate": "arborium-devicetree",
+      "name": "Device Tree",
+      "icon": "mdi:file-tree",
+      "tier": 5,
+      "tag": "config",
+      "description": "Data structure for describing hardware; documented in the https://www.devicetree.org/specifications/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/decawave_dwm1001_dev.dts",
+          "description": "Zephyr board DTS describing SPI, UART, regulators, GPIOs, and sensors."
+        }
+      ]
+    },
+    {
+      "id": "diff",
+      "crate": "arborium-diff",
+      "name": "Diff",
+      "icon": "mdi:file-compare",
+      "tier": 3,
+      "tag": "data",
+      "description": "Unified diff format for representing file differences; GNU diffutils manual documents the format (https://www.gnu.org/software/diffutils/manual/).",
+      "aliases": [
+        "patch"
+      ],
+      "samples": [
+        {
+          "path": "samples/t-apply-1.patch",
+          "description": "Git rename refactoring patch from rpull/rpush to ssh-pull/ssh-push with docs, Makefile, and C sources."
+        }
+      ]
+    },
+    {
+      "id": "dockerfile",
+      "crate": "arborium-dockerfile",
+      "name": "Dockerfile",
+      "icon": "devicon-plain:docker",
+      "tier": 3,
+      "tag": "config",
+      "description": "Declarative format for Docker image builds; official reference: https://docs.docker.com/engine/reference/builder/.",
+      "aliases": [
+        "docker"
+      ],
+      "samples": [
+        {
+          "path": "samples/python-bookworm.Dockerfile",
+          "description": "Official Python 3.12 Docker image with GPG verification, build optimization, and multi-arch support."
+        }
+      ]
+    },
+    {
+      "id": "dot",
+      "crate": "arborium-dot",
+      "name": "DOT/Graphviz",
+      "icon": "mdi:graph",
+      "tier": 4,
+      "tag": "data",
+      "description": "A graph description language for defining nodes, edges, and graph layouts in Graphviz.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/crazy.gv",
+          "description": "Unix family tree visualization; demonstrates creative node styling with distortion, orientation, and skew parameters."
+        }
+      ]
+    },
+    {
+      "id": "dtd",
+      "crate": "arborium-xml",
+      "name": "DTD",
+      "icon": null,
+      "tier": 3,
+      "tag": "markup",
+      "description": "Document Type Definition for declaring XML/SGML document structure and valid elements.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/xhtml1-strict.dtd",
+          "description": "XHTML 1.0 Strict DTD defining document structure and valid elements."
+        }
+      ]
+    },
+    {
+      "id": "elisp",
+      "crate": "arborium-elisp",
+      "name": "Emacs Lisp",
+      "icon": "simple-icons:gnuemacs",
+      "tier": 4,
+      "tag": "code",
+      "description": "A Lisp dialect used to extend and customize the GNU Emacs text editor.",
+      "aliases": [
+        "emacs-lisp",
+        "el"
+      ],
+      "samples": [
+        {
+          "path": "samples/simple.el",
+          "description": "Emacs simple.el with defuns, defvars, and interactive commands."
+        }
+      ]
+    },
+    {
+      "id": "elixir",
+      "crate": "arborium-elixir",
+      "name": "Elixir",
+      "icon": "devicon-plain:elixir",
+      "tier": 1,
+      "tag": "code",
+      "description": "Functional, concurrent language on the BEAM VM; official site: https://elixir-lang.org/.",
+      "aliases": [
+        "ex",
+        "exs"
+      ],
+      "samples": [
+        {
+          "path": "samples/controller.ex",
+          "description": "Phoenix controller module with plugs, alias/import/use macros, pattern matching, and response helpers."
+        }
+      ]
+    },
+    {
+      "id": "elm",
+      "crate": "arborium-elm",
+      "name": "Elm",
+      "icon": "devicon-plain:elm",
+      "tier": 2,
+      "tag": "code",
+      "description": "Purely functional language for reliable web apps; see the official https://guide.elm-lang.org/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/Article.elm",
+          "description": "Elm SPA article page with Model-View-Update, commands, and HTML rendering."
+        }
+      ]
+    },
+    {
+      "id": "erlang",
+      "crate": "arborium-erlang",
+      "name": "Erlang",
+      "icon": "devicon-plain:erlang",
+      "tier": 2,
+      "tag": "code",
+      "description": "A concurrent, functional language designed for building fault-tolerant distributed systems.",
+      "aliases": [
+        "erl"
+      ],
+      "samples": [
+        {
+          "path": "samples/lists.erl",
+          "description": "OTP's lists module with pattern matching, guards, and list comprehensions."
+        }
+      ]
+    },
+    {
+      "id": "fish",
+      "crate": "arborium-fish",
+      "name": "Fish",
+      "icon": "mdi:fish",
+      "tier": 4,
+      "tag": "shell",
+      "description": "A user-friendly interactive shell with syntax highlighting and autosuggestions out of the box.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/fisher.fish",
+          "description": "Fisher plugin manager with functions, conditionals, and command substitution."
+        }
+      ]
+    },
+    {
+      "id": "fsharp",
+      "crate": "arborium-fsharp",
+      "name": "F#",
+      "icon": "devicon-plain:fsharp",
+      "tier": 2,
+      "tag": "code",
+      "description": "Functional-first .NET language with type inference; official docs at https://learn.microsoft.com/dotnet/fsharp/.",
+      "aliases": [
+        "fs",
+        "f#"
+      ],
+      "samples": [
+        {
+          "path": "samples/Http.fs",
+          "description": "FSharp.Data HTTP utilities with modules, constants, request headers, and content types."
+        }
+      ]
+    },
+    {
+      "id": "gleam",
+      "crate": "arborium-gleam",
+      "name": "Gleam",
+      "icon": "devicon-plain:gleam",
+      "tier": 1,
+      "tag": "code",
+      "description": "Statically typed functional language for the BEAM; official docs at https://gleam.run/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/router.gleam",
+          "description": "Gleam list operations with types, pattern matching, and tail recursion."
+        }
+      ]
+    },
+    {
+      "id": "glsl",
+      "crate": "arborium-glsl",
+      "name": "GLSL",
+      "icon": "devicon-plain:opengl",
+      "tier": 3,
+      "tag": "code",
+      "description": "OpenGL Shading Language for programmable GPUs; defined in the https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.4.60.pdf.",
+      "aliases": [
+        "vert",
+        "frag"
+      ],
+      "samples": [
+        {
+          "path": "samples/phong.frag",
+          "description": "Fragment shader from Vulkan samples using samplers, structs, and lighting calculations."
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "crate": "arborium-go",
+      "name": "Go",
+      "icon": "devicon-plain:go",
+      "tier": 1,
+      "tag": "code",
+      "description": "Statically typed compiled language from Google; the canonical spec is the https://go.dev/ref/spec.",
+      "aliases": [
+        "golang"
+      ],
+      "samples": [
+        {
+          "path": "samples/explore_repo.go",
+          "description": "Gitea explore page with imports, constants, structs, and HTTP handler functions."
+        },
+        {
+          "path": "samples/repo.go",
+          "description": "Gitea explore/repo handler showing routing, templating, pagination, and service calls."
+        }
+      ]
+    },
+    {
+      "id": "graphql",
+      "crate": "arborium-graphql",
+      "name": "GraphQL",
+      "icon": "devicon-plain:graphql",
+      "tier": 3,
+      "tag": "query",
+      "description": "A query language for APIs that lets clients request exactly the data they need.",
+      "aliases": [
+        "gql"
+      ],
+      "samples": [
+        {
+          "path": "samples/starwars_schema.graphql",
+          "description": "Star Wars schema from graphql-js with interfaces, types, enums, and query definitions."
+        }
+      ]
+    },
+    {
+      "id": "haskell",
+      "crate": "arborium-haskell",
+      "name": "Haskell",
+      "icon": "devicon-plain:haskell",
+      "tier": 1,
+      "tag": "code",
+      "description": "Purely functional language with lazy evaluation and strong typing; see the https://www.haskell.org/onlinereport/haskell2010/ for the language definition.",
+      "aliases": [
+        "hs"
+      ],
+      "samples": [
+        {
+          "path": "samples/Version.hs",
+          "description": "Cabal's Version type with pragmas, data types, typeclass instances, and bit manipulation."
+        }
+      ]
+    },
+    {
+      "id": "hcl",
+      "crate": "arborium-hcl",
+      "name": "HCL",
+      "icon": "devicon-plain:terraform",
+      "tier": 3,
+      "tag": "config",
+      "description": "HashiCorp Configuration Language for IaC; language spec lives in the Terraform docs (https://developer.hashicorp.com/terraform/language/syntax/configuration).",
+      "aliases": [
+        "terraform",
+        "tf"
+      ],
+      "samples": [
+        {
+          "path": "samples/vpc-main.tf",
+          "description": "Terraform VPC example using providers, modules, variables, and resource blocks."
+        }
+      ]
+    },
+    {
+      "id": "hlsl",
+      "crate": "arborium-hlsl",
+      "name": "HLSL",
+      "icon": "mdi:cube-outline",
+      "tier": 3,
+      "tag": "code",
+      "description": "High-Level Shading Language for DirectX; official reference in the https://learn.microsoft.com/windows/win32/direct3dhlsl/dx-graphics-hlsl-pguide.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/HelloTriangle.hlsl",
+          "description": "DirectX 12 HelloTriangle shader showing vertex/pixel stages and constant buffers."
+        }
+      ]
+    },
+    {
+      "id": "html",
+      "crate": "arborium-html",
+      "name": "HTML",
+      "icon": "devicon-plain:html5",
+      "tier": 2,
+      "tag": "markup",
+      "description": "Standard markup language for web documents; current living standard is maintained by WHATWG at https://html.spec.whatwg.org/.",
+      "aliases": [
+        "htm"
+      ],
+      "samples": [
+        {
+          "path": "samples/component.html",
+          "description": "Interactive component with inline CSS, JavaScript, templates, and event handlers."
+        }
+      ]
+    },
+    {
+      "id": "idris",
+      "crate": "arborium-idris",
+      "name": "Idris",
+      "icon": "mdi:alpha-i-box-outline",
+      "tier": 4,
+      "tag": "code",
+      "description": "Dependently typed functional language for verified software; see the official site https://www.idris-lang.org/.",
+      "aliases": [
+        "idr"
+      ],
+      "samples": [
+        {
+          "path": "samples/List.idr",
+          "description": "Idris2 Data.List module with dependent types, proofs, and list operations."
+        }
+      ]
+    },
+    {
+      "id": "ini",
+      "crate": "arborium-ini",
+      "name": "INI",
+      "icon": "mdi:cog-outline",
+      "tier": 3,
+      "tag": "config",
+      "description": "Simple key-value configuration format; Microsoft documented the `.ini` structure in early Windows SDKs (e.g., https://win16.org/).",
+      "aliases": [
+        "conf",
+        "cfg"
+      ],
+      "samples": [
+        {
+          "path": "samples/pytest.ini",
+          "description": "Combined Python linting config with pycodestyle, flake8, pylint sections and pytest markers."
+        }
+      ]
+    },
+    {
+      "id": "java",
+      "crate": "arborium-java",
+      "name": "Java",
+      "icon": "devicon-plain:java",
+      "tier": 1,
+      "tag": "code",
+      "description": "Object-oriented, class-based language targeting the JVM; authoritative reference is the https://docs.oracle.com/javase/specs/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/Vet.java",
+          "description": "Spring Petclinic domain entity using annotations, collections, comparators."
+        }
+      ]
+    },
+    {
+      "id": "javascript",
+      "crate": "arborium-javascript",
+      "name": "JavaScript",
+      "icon": "devicon-plain:javascript",
+      "tier": 1,
+      "tag": "code",
+      "description": "High-level, dynamic language for the web and beyond; the current language spec is https://tc39.es/ecma262/.",
+      "aliases": [
+        "js",
+        "jsx",
+        "mjs",
+        "cjs"
+      ],
+      "samples": [
+        {
+          "path": "samples/x-model.js",
+          "description": "Alpine.js x-model directive with reactivity, DOM binding, and event handling."
+        }
+      ]
+    },
+    {
+      "id": "jinja2",
+      "crate": "arborium-jinja2",
+      "name": "Jinja2",
+      "icon": "mdi:code-braces",
+      "tier": 5,
+      "tag": "markup",
+      "description": "Python templating engine inspired by Django; official docs at https://jinja.palletsprojects.com/.",
+      "aliases": [
+        "jinja",
+        "j2"
+      ],
+      "samples": [
+        {
+          "path": "samples/admin-base.html",
+          "description": "Django admin base template with blocks, conditionals, i18n, and component includes."
+        }
+      ]
+    },
+    {
+      "id": "jq",
+      "crate": "arborium-jq",
+      "name": "jq",
+      "icon": "mdi:code-json",
+      "tier": 4,
+      "tag": "query",
+      "description": "Command-line JSON processor; manual at the official site https://stedolan.github.io/jq/manual/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/geo.jq",
+          "description": "Geographic calculations in jq - haversine distance, bearing, coordinate conversions."
+        }
+      ]
+    },
+    {
+      "id": "json",
+      "crate": "arborium-json",
+      "name": "JSON",
+      "icon": "mdi:code-json",
+      "tier": 2,
+      "tag": "data",
+      "description": "Lightweight data interchange format; see the ECMA-404 standard (https://www.ecma-international.org/publications-and-standards/standards/ecma-404/).",
+      "aliases": [
+        "jsonc"
+      ],
+      "samples": [
+        {
+          "path": "samples/package.json",
+          "description": "Vite monorepo package.json with scripts, dependencies, and workspace configuration."
+        }
+      ]
+    },
+    {
+      "id": "julia",
+      "crate": "arborium-julia",
+      "name": "Julia",
+      "icon": "devicon-plain:julia",
+      "tier": 1,
+      "tag": "code",
+      "description": "A high-performance language for numerical and scientific computing with Python-like syntax.",
+      "aliases": [
+        "jl"
+      ],
+      "samples": [
+        {
+          "path": "samples/array.jl",
+          "description": "Julia's core array implementation with docstrings, macros, and multiple dispatch."
+        }
+      ]
+    },
+    {
+      "id": "kdl",
+      "crate": "arborium-kdl",
+      "name": "KDL",
+      "icon": "mdi:file-document-outline",
+      "tier": 4,
+      "tag": "config",
+      "description": "A document language with XML-like semantics and a more human-friendly syntax.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/schema.kdl",
+          "description": "KDL schema definition with nested nodes and type annotations."
+        }
+      ]
+    },
+    {
+      "id": "kotlin",
+      "crate": "arborium-kotlin",
+      "name": "Kotlin",
+      "icon": "devicon-plain:kotlin",
+      "tier": 1,
+      "tag": "code",
+      "description": "A modern programming language that runs on the JVM, official for Android development",
+      "aliases": [
+        "kt",
+        "kts"
+      ],
+      "samples": [
+        {
+          "path": "samples/Sequences.kt",
+          "description": "Kotlin standard library sequence operations with lazy evaluation, inline functions, and extension methods."
+        }
+      ]
+    },
+    {
+      "id": "lean",
+      "crate": "arborium-lean",
+      "name": "Lean",
+      "icon": "mdi:alpha-l-box-outline",
+      "tier": 4,
+      "tag": "code",
+      "description": "Proof assistant and functional language based on dependent type theory; official docs at https://lean-lang.org/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/bintree.lean",
+          "description": "Lean 4 example defining binary trees, recursion, and proofs."
+        }
+      ]
+    },
+    {
+      "id": "lua",
+      "crate": "arborium-lua",
+      "name": "Lua",
+      "icon": "devicon-plain:lua",
+      "tier": 1,
+      "tag": "code",
+      "description": "Lightweight embeddable scripting language from PUC-Rio; official reference manual at https://www.lua.org/manual/5.4/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/utf8.lua",
+          "description": "Lua UTF-8 test exercising pattern matching, loops, and standard library calls."
+        }
+      ]
+    },
+    {
+      "id": "markdown",
+      "crate": "arborium-markdown",
+      "name": "Markdown",
+      "icon": "simple-icons:markdown",
+      "tier": 2,
+      "tag": "markup",
+      "description": "Lightweight markup language for plain-text formatting; original spec on Gruber's site (https://daringfireball.net/projects/markdown/).",
+      "aliases": [
+        "md",
+        "mdx"
+      ],
+      "samples": [
+        {
+          "path": "samples/rust-readme.md",
+          "description": "Rust language README with headings, lists, links, images, and code fences."
+        }
+      ]
+    },
+    {
+      "id": "matlab",
+      "crate": "arborium-matlab",
+      "name": "MATLAB",
+      "icon": "devicon-plain:matlab",
+      "tier": 4,
+      "tag": "code",
+      "description": "A numerical computing environment and programming language for matrix operations and data visualization.",
+      "aliases": [
+        "m"
+      ],
+      "samples": [
+        {
+          "path": "samples/fft_example.m",
+          "description": "FFT signal analysis with functions, plotting, and matrix operations."
+        }
+      ]
+    },
+    {
+      "id": "meson",
+      "crate": "arborium-meson",
+      "name": "Meson",
+      "icon": "mdi:hammer-wrench",
+      "tier": 4,
+      "tag": "build",
+      "description": "Fast, user-friendly build system using Ninja backend; official docs at https://mesonbuild.com/Manual.html.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/meson.build",
+          "description": "Real-world Meson build with MSVC/GCC detection, subprojects, and conditional dependencies."
+        }
+      ]
+    },
+    {
+      "id": "nginx",
+      "crate": "arborium-nginx",
+      "name": "nginx",
+      "icon": "simple-icons:nginx",
+      "tier": 5,
+      "tag": "config",
+      "description": "Configuration language for the nginx web server; official reference at https://nginx.org/en/docs/dirindex.html.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/nginx.conf",
+          "description": "H5BP nginx.conf with includes, gzip, SSL, maps, and logging directives."
+        }
+      ]
+    },
+    {
+      "id": "ninja",
+      "crate": "arborium-ninja",
+      "name": "Ninja",
+      "icon": "mdi:ninja",
+      "tier": 4,
+      "tag": "build",
+      "description": "A small, fast build system focused on speed, designed as a backend for higher-level build systems.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/build.ninja",
+          "description": "Ninja build file with rules, variables, and build edges for C++."
+        }
+      ]
+    },
+    {
+      "id": "nix",
+      "crate": "arborium-nix",
+      "name": "Nix",
+      "icon": "devicon-plain:nixos",
+      "tier": 2,
+      "tag": "config",
+      "description": "Purely functional package manager and language for reproducible builds; see Dolstra's PhD thesis https://edolstra.github.io/pubs/phd-thesis.pdf.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/buildDepsOnly.nix",
+          "description": "crane helper derivation that builds dependencies only, showing functions, let bindings, overrides, and mkDerivation usage."
+        }
+      ]
+    },
+    {
+      "id": "objc",
+      "crate": "arborium-objc",
+      "name": "Objective-C",
+      "icon": "devicon-plain:objectivec",
+      "tier": 3,
+      "tag": "code",
+      "description": "Object-oriented superset of C used for macOS/iOS; Apple's modern reference is the https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/.",
+      "aliases": [
+        "objective-c",
+        "mm"
+      ],
+      "samples": [
+        {
+          "path": "samples/RCTLog.mm",
+          "description": "React Native logging utility showing categories, macros, Objective-C classes, and C functions."
+        }
+      ]
+    },
+    {
+      "id": "ocaml",
+      "crate": "arborium-ocaml",
+      "name": "OCaml",
+      "icon": "devicon-plain:ocaml",
+      "tier": 2,
+      "tag": "code",
+      "description": "A multi-paradigm programming language with emphasis on expressiveness and safety",
+      "aliases": [
+        "ml"
+      ],
+      "samples": [
+        {
+          "path": "samples/option.ml",
+          "description": "OCaml standard library option type with pattern matching, monadic operations, and syntax extensions."
+        }
+      ]
+    },
+    {
+      "id": "perl",
+      "crate": "arborium-perl",
+      "name": "Perl",
+      "icon": "devicon-plain:perl",
+      "tier": 2,
+      "tag": "code",
+      "description": "General-purpose scripting language renowned for text processing; core docs at https://perldoc.perl.org/.",
+      "aliases": [
+        "pl",
+        "pm"
+      ],
+      "samples": [
+        {
+          "path": "samples/gmtime.pm",
+          "description": "Perl5 Time::gmtime module with exports, OO wrappers, and POD documentation."
+        }
+      ]
+    },
+    {
+      "id": "php",
+      "crate": "arborium-php",
+      "name": "PHP",
+      "icon": "devicon-plain:php",
+      "tier": 2,
+      "tag": "code",
+      "description": "Server-side scripting language; the official manual is at https://www.php.net/manual/en/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/SessionGuard.php",
+          "description": "Laravel SessionGuard with authentication, traits, and typed properties."
+        }
+      ]
+    },
+    {
+      "id": "postscript",
+      "crate": "arborium-postscript",
+      "name": "PostScript",
+      "icon": "mdi:printer",
+      "tier": 5,
+      "tag": "code",
+      "description": "Page description and programming language from Adobe; reference in the https://www.adobe.com/content/dam/acom/en/devnet/actionscript/articles/PLRM.pdf.",
+      "aliases": [
+        "ps"
+      ],
+      "samples": [
+        {
+          "path": "samples/tiger.ps",
+          "description": "Ghostscript tiger example showcasing PostScript drawing, paths, fills, and strokes."
+        }
+      ]
+    },
+    {
+      "id": "powershell",
+      "crate": "arborium-powershell",
+      "name": "PowerShell",
+      "icon": "devicon-plain:powershell",
+      "tier": 1,
+      "tag": "shell",
+      "description": "Task automation shell and scripting language; official docs at https://learn.microsoft.com/powershell/.",
+      "aliases": [
+        "ps1",
+        "pwsh"
+      ],
+      "samples": [
+        {
+          "path": "samples/Get-ChildItem.Tests.ps1",
+          "description": "PowerShell test script exercising cmdlets, parameter sets, error handling, and assertions."
+        }
+      ]
+    },
+    {
+      "id": "prolog",
+      "crate": "arborium-prolog",
+      "name": "Prolog",
+      "icon": "mdi:head-question",
+      "tier": 4,
+      "tag": "code",
+      "description": "Logic programming language for AI and computational linguistics; early definition in Colmerauer's 1972 Marseille reports.",
+      "aliases": [
+        "pl"
+      ],
+      "samples": [
+        {
+          "path": "samples/http_server.pl",
+          "description": "SWI-Prolog HTTP server example with predicates, handlers, and threading."
+        }
+      ]
+    },
+    {
+      "id": "python",
+      "crate": "arborium-python",
+      "name": "Python",
+      "icon": "devicon-plain:python",
+      "tier": 1,
+      "tag": "code",
+      "description": "High-level general-purpose language emphasizing readability; authoritative reference is the https://docs.python.org/3/reference/.",
+      "aliases": [
+        "py",
+        "py3",
+        "python3"
+      ],
+      "samples": [
+        {
+          "path": "samples/dynamic_progress.py",
+          "description": "Rich demo showing dynamic progress bars, context managers, multiple progress tasks."
+        }
+      ]
+    },
+    {
+      "id": "query",
+      "crate": "arborium-query",
+      "name": "Tree-sitter Query",
+      "icon": "mdi:file-tree-outline",
+      "tier": 5,
+      "tag": "query",
+      "description": "A S-expression based pattern language for matching nodes in tree-sitter syntax trees.",
+      "aliases": [
+        "scm"
+      ],
+      "samples": [
+        {
+          "path": "samples/highlights.scm",
+          "description": "Tree-sitter highlight queries with S-expressions and captures."
+        }
+      ]
+    },
+    {
+      "id": "r",
+      "crate": "arborium-r",
+      "name": "R",
+      "icon": "devicon-plain:r",
+      "tier": 1,
+      "tag": "code",
+      "description": "Language and environment for statistical computing; official manuals at https://cran.r-project.org/manuals.html.",
+      "aliases": [
+        "rlang"
+      ],
+      "samples": [
+        {
+          "path": "samples/detect.R",
+          "description": "stringr functions for detecting patterns; showcases vectorization and tidyverse style."
+        }
+      ]
+    },
+    {
+      "id": "rescript",
+      "crate": "arborium-rescript",
+      "name": "ReScript",
+      "icon": "simple-icons:rescript",
+      "tier": 4,
+      "tag": "code",
+      "description": "Functional language that compiles to JavaScript, evolved from BuckleScript/Reason; docs at https://rescript-lang.org/docs/latest.",
+      "aliases": [
+        "res"
+      ],
+      "samples": [
+        {
+          "path": "samples/Core__Array.res",
+          "description": "ReScript Core array module with external bindings, recursive functions, and comparisons."
+        }
+      ]
+    },
+    {
+      "id": "ron",
+      "crate": "arborium-ron",
+      "name": "RON",
+      "icon": "devicon-plain:rust",
+      "tier": 4,
+      "tag": "data",
+      "description": "Rusty Object Notation, a Rust-friendly data format; reference at https://docs.rs/ron/latest/ron/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/kits.ron",
+          "description": "Veloren game server kit definitions with nested item tuples, comments, and RON extensions."
+        }
+      ]
+    },
+    {
+      "id": "ruby",
+      "crate": "arborium-ruby",
+      "name": "Ruby",
+      "icon": "devicon-plain:ruby",
+      "tier": 1,
+      "tag": "code",
+      "description": "A dynamic, object-oriented language designed for programmer happiness and productivity.",
+      "aliases": [
+        "rb"
+      ],
+      "samples": [
+        {
+          "path": "samples/inflector_methods.rb",
+          "description": "Rails ActiveSupport inflector with pluralize, singularize, and camelize methods."
+        }
+      ]
+    },
+    {
+      "id": "rust",
+      "crate": "arborium-rust",
+      "name": "Rust",
+      "icon": "devicon-plain:rust",
+      "tier": 1,
+      "tag": "code",
+      "description": "Systems language focused on safety and performance without GC; official docs at https://doc.rust-lang.org/book/.",
+      "aliases": [
+        "rs"
+      ],
+      "samples": [
+        {
+          "path": "samples/expl_impl_clone_on_copy.rs",
+          "description": "Clippy lint implementation with trait checking, generic handling, and diagnostics."
+        }
+      ]
+    },
+    {
+      "id": "scala",
+      "crate": "arborium-scala",
+      "name": "Scala",
+      "icon": "devicon-plain:scala",
+      "tier": 2,
+      "tag": "code",
+      "description": "Multi-paradigm JVM language blending OO and FP; official docs at https://docs.scala-lang.org/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/ResultResolver.scala",
+          "description": "Sangria GraphQL result resolver with pattern matching, options, and marshallers."
+        }
+      ]
+    },
+    {
+      "id": "scheme",
+      "crate": "arborium-scheme",
+      "name": "Scheme",
+      "icon": "mdi:lambda",
+      "tier": 2,
+      "tag": "code",
+      "description": "A minimalist dialect of Lisp with lexical scope, first-class procedures, and tail-call optimization",
+      "aliases": [
+        "scm"
+      ],
+      "samples": [
+        {
+          "path": "samples/list.rkt",
+          "description": "Racket list utilities with macros, recursive functions, tail-call optimization, and comprehensive error handling."
+        }
+      ]
+    },
+    {
+      "id": "scss",
+      "crate": "arborium-scss",
+      "name": "SCSS",
+      "icon": "simple-icons:sass",
+      "tier": 3,
+      "tag": "markup",
+      "description": "Sass/SCSS is a CSS superset adding variables, nesting, and mixins; see the official https://sass-lang.com/documentation/.",
+      "aliases": [
+        "sass"
+      ],
+      "samples": [
+        {
+          "path": "samples/_buttons.scss",
+          "description": "Bootstrap buttons partial with variables, mixins, nesting, and interpolation."
+        }
+      ]
+    },
+    {
+      "id": "sparql",
+      "crate": "arborium-sparql",
+      "name": "SPARQL",
+      "icon": "mdi:graph-outline",
+      "tier": 5,
+      "tag": "query",
+      "description": "A query language for retrieving and manipulating data stored in RDF (Resource Description Framework) format.",
+      "aliases": [
+        "rq"
+      ],
+      "samples": [
+        {
+          "path": "samples/query.sparql",
+          "description": "SPARQL queries with SELECT, CONSTRUCT, FILTER, and aggregations."
+        }
+      ]
+    },
+    {
+      "id": "sql",
+      "crate": "arborium-sql",
+      "name": "SQL",
+      "icon": "mdi:database-outline",
+      "tier": 2,
+      "tag": "query",
+      "description": "Structured Query Language for relational databases; standardized by ANSI/ISO, see https://www.iso.org/standard/63555.html (paywalled) and https://sqlite.org/lang.html as an open reference.",
+      "aliases": [
+        "mysql",
+        "postgresql",
+        "postgres",
+        "sqlite"
+      ],
+      "samples": [
+        {
+          "path": "samples/join.sql",
+          "description": "PostgreSQL regression test covering joins, lateral, outer joins, aggregates, and set operations."
+        }
+      ]
+    },
+    {
+      "id": "ssh-config",
+      "crate": "arborium-ssh-config",
+      "name": "SSH Config",
+      "icon": "mdi:key-chain",
+      "tier": 5,
+      "tag": "config",
+      "description": "Configuration file format for OpenSSH client settings like hosts, keys, and connection options.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/config",
+          "description": "SSH client configuration with hosts, identity files, and forwarding."
+        }
+      ]
+    },
+    {
+      "id": "starlark",
+      "crate": "arborium-starlark",
+      "name": "Starlark",
+      "icon": "mdi:star-outline",
+      "tier": 4,
+      "tag": "build",
+      "description": "Deterministic, hermetic build language used by Bazel/Buck2; spec at https://bazel.build/rules/language.",
+      "aliases": [
+        "bzl",
+        "bazel"
+      ],
+      "samples": [
+        {
+          "path": "samples/http.bzl",
+          "description": "Bazel repository rule definitions using load, attrs, functions, and repository_ctx."
+        }
+      ]
+    },
+    {
+      "id": "svelte",
+      "crate": "arborium-svelte",
+      "name": "Svelte",
+      "icon": "devicon-plain:svelte",
+      "tier": 3,
+      "tag": "markup",
+      "description": "Compiler-based UI framework that outputs minimal JS; official tutorial at https://svelte.dev/docs/introduction.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/App.svelte",
+          "description": "Svelte starter component with props, scoped styles, and reactive declarations."
+        }
+      ]
+    },
+    {
+      "id": "swift",
+      "crate": "arborium-swift",
+      "name": "Swift",
+      "icon": "devicon-plain:swift",
+      "tier": 1,
+      "tag": "code",
+      "description": "A powerful and intuitive programming language for Apple platforms",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/DirectoryConfiguration.swift",
+          "description": "Vapor directory configuration with platform-specific imports, working directory detection, and string extensions."
+        }
+      ]
+    },
+    {
+      "id": "textproto",
+      "crate": "arborium-textproto",
+      "name": "Text Proto",
+      "icon": "mdi:message-outline",
+      "tier": 4,
+      "tag": "data",
+      "description": "A human-readable text format for Protocol Buffer messages, commonly used for configuration files.",
+      "aliases": [
+        "pbtxt",
+        "textpb"
+      ],
+      "samples": [
+        {
+          "path": "samples/config.textproto",
+          "description": "Protocol Buffer text format with nested messages and repeated fields."
+        }
+      ]
+    },
+    {
+      "id": "thrift",
+      "crate": "arborium-thrift",
+      "name": "Thrift",
+      "icon": "mdi:swap-horizontal",
+      "tier": 4,
+      "tag": "data",
+      "description": "Interface Definition Language and RPC framework; official Apache docs at https://thrift.apache.org/docs.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/tutorial.thrift",
+          "description": "Official Apache Thrift tutorial showing services, structs, enums, and exceptions."
+        }
+      ]
+    },
+    {
+      "id": "tlaplus",
+      "crate": "arborium-tlaplus",
+      "name": "TLA+",
+      "icon": "mdi:math-integral",
+      "tier": 4,
+      "tag": "code",
+      "description": "Temporal Logic of Actions (TLA+) for formal specs; the canonical reference is Lamport's book https://lamport.azurewebsites.net/tla/book.html.",
+      "aliases": [
+        "tla"
+      ],
+      "samples": [
+        {
+          "path": "samples/TwoPhase.tla",
+          "description": "Paxos consensus algorithm specification with message-passing, quorums, and ballot phases."
+        }
+      ]
+    },
+    {
+      "id": "toml",
+      "crate": "arborium-toml",
+      "name": "TOML",
+      "icon": "simple-icons:toml",
+      "tier": 2,
+      "tag": "config",
+      "description": "Tom's Obvious, Minimal Language for configuration; official spec at https://toml.io/en/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/starship.toml",
+          "description": "Starship Cargo.toml with dependencies, features, and build configuration."
+        }
+      ]
+    },
+    {
+      "id": "tsx",
+      "crate": "arborium-tsx",
+      "name": "TSX",
+      "icon": "simple-icons:react",
+      "tier": 3,
+      "tag": "code",
+      "description": "TypeScript with JSX support for React component development",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/basic-query.tsx",
+          "description": "TanStack Query basic example with data fetching, caching, custom hooks, and React components."
+        }
+      ]
+    },
+    {
+      "id": "typescript",
+      "crate": "arborium-typescript",
+      "name": "TypeScript",
+      "icon": "devicon-plain:typescript",
+      "tier": 1,
+      "tag": "code",
+      "description": "Statically typed superset of JavaScript; official handbook at https://www.typescriptlang.org/docs/.",
+      "aliases": [
+        "ts",
+        "tsx",
+        "mts",
+        "cts"
+      ],
+      "samples": [
+        {
+          "path": "samples/dot-print.ts",
+          "description": "DOT printer for function graphs with generics, async IO, and string templating."
+        }
+      ]
+    },
+    {
+      "id": "typst",
+      "crate": "arborium-typst",
+      "name": "Typst",
+      "icon": "simple-icons:typst",
+      "tier": 3,
+      "tag": "markup",
+      "description": "A modern markup-based typesetting system designed as a faster, friendlier alternative to LaTeX.",
+      "aliases": [
+        "typ"
+      ],
+      "samples": [
+        {
+          "path": "samples/simple.typ",
+          "description": "Polylux presentation theme with slide layouts; showcases Typst's page styling, state management, and function definitions."
+        }
+      ]
+    },
+    {
+      "id": "uiua",
+      "crate": "arborium-uiua",
+      "name": "Uiua",
+      "icon": "mdi:alpha-u-box-outline",
+      "tier": 5,
+      "tag": "code",
+      "description": "A stack-based array programming language with a focus on tacit (point-free) code using Unicode glyphs.",
+      "aliases": [
+        "ua"
+      ],
+      "samples": [
+        {
+          "path": "samples/macros.ua",
+          "description": "Uiua array language with stack-based operations and unicode glyphs."
+        }
+      ]
+    },
+    {
+      "id": "vb",
+      "crate": "arborium-vb",
+      "name": "Visual Basic",
+      "icon": "devicon-plain:visualbasic",
+      "tier": 5,
+      "tag": "code",
+      "description": "Visual Basic .NET, object-oriented language for the .NET Framework; language reference at https://learn.microsoft.com/dotnet/visual-basic/.",
+      "aliases": [
+        "vbnet",
+        "visualbasic"
+      ],
+      "samples": [
+        {
+          "path": "samples/Math.vb",
+          "description": "Roslyn VB.NET operation factory with Select Case, DirectCast, and compiler internals."
+        }
+      ]
+    },
+    {
+      "id": "verilog",
+      "crate": "arborium-verilog",
+      "name": "Verilog",
+      "icon": "mdi:chip",
+      "tier": 5,
+      "tag": "code",
+      "description": "Hardware description language standardized as https://standards.ieee.org/ieee/1364/2985/.",
+      "aliases": [
+        "v",
+        "sv",
+        "systemverilog"
+      ],
+      "samples": [
+        {
+          "path": "samples/lint_style.sv",
+          "description": "CVA6 RISC-V ALU module with parameters, always_comb, generate blocks, and bit manipulation."
+        },
+        {
+          "path": "samples/state_machine.v",
+          "description": "BE-P decoder state machine with always blocks, parameters, and nonblocking assignments."
+        }
+      ]
+    },
+    {
+      "id": "vhdl",
+      "crate": "arborium-vhdl",
+      "name": "VHDL",
+      "icon": "mdi:chip",
+      "tier": 5,
+      "tag": "code",
+      "description": "VHSIC Hardware Description Language; standardized as https://standards.ieee.org/ieee/1076/7424/.",
+      "aliases": [
+        "vhd"
+      ],
+      "samples": [
+        {
+          "path": "samples/issue1220.vhdl",
+          "description": "GHDL finite state machine test with entity, architecture, process, and case statement."
+        }
+      ]
+    },
+    {
+      "id": "vim",
+      "crate": "arborium-vim",
+      "name": "Vimscript",
+      "icon": "devicon-plain:vim",
+      "tier": 3,
+      "tag": "config",
+      "description": "Scripting language for the Vim editor; see the official Vim documentation at http://vimdoc.sourceforge.net/.",
+      "aliases": [
+        "vimscript",
+        "viml"
+      ],
+      "samples": [
+        {
+          "path": "samples/plugin.vim",
+          "description": "Vim plugin with functions, autocommands, mappings, and conditionals."
+        }
+      ]
+    },
+    {
+      "id": "vue",
+      "crate": "arborium-vue",
+      "name": "Vue",
+      "icon": "devicon-plain:vuejs",
+      "tier": 3,
+      "tag": "markup",
+      "description": "Progressive JavaScript framework for UIs; official docs at https://vuejs.org/guide/introduction.html.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/App.vue",
+          "description": "Element Plus Button component with Vue 3 Composition API, TypeScript, and dynamic styling."
+        }
+      ]
+    },
+    {
+      "id": "x86asm",
+      "crate": "arborium-x86asm",
+      "name": "x86 Assembly",
+      "icon": "mdi:memory",
+      "tier": 3,
+      "tag": "code",
+      "description": "Assembly language family for Intel x86; reference manuals at https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html.",
+      "aliases": [
+        "nasm",
+        "x86"
+      ],
+      "samples": [
+        {
+          "path": "samples/elftest.asm",
+          "description": "NASM ELF test exercising labels, externs, sections, and symbol definitions."
+        }
+      ]
+    },
+    {
+      "id": "xml",
+      "crate": "arborium-xml",
+      "name": "XML",
+      "icon": "devicon-plain:xml",
+      "tier": 3,
+      "tag": "markup",
+      "description": "Extensible Markup Language defined by the W3C XML 1.0 Recommendation.",
+      "aliases": [
+        "xsl",
+        "xslt",
+        "svg"
+      ],
+      "samples": [
+        {
+          "path": "samples/pom.xml",
+          "description": "Spring Petclinic Maven POM with dependencies, plugins, profiles, and properties."
+        }
+      ]
+    },
+    {
+      "id": "yaml",
+      "crate": "arborium-yaml",
+      "name": "YAML",
+      "icon": "devicon-plain:yaml",
+      "tier": 2,
+      "tag": "config",
+      "description": "Human-friendly data serialization language; official 1.2 spec at https://yaml.org/spec/1.2.2/.",
+      "aliases": [
+        "yml"
+      ],
+      "samples": [
+        {
+          "path": "samples/bookinfo.yaml",
+          "description": "Istio Bookinfo sample with Services, ServiceAccounts, and Deployments for microservices."
+        }
+      ]
+    },
+    {
+      "id": "yuri",
+      "crate": "arborium-yuri",
+      "name": "Yuri",
+      "icon": "mdi:palette",
+      "tier": 5,
+      "tag": "code",
+      "description": "Yuri shader language; see repository README for current design status.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/example.yuri",
+          "description": "Example Yuri shader demonstrating language syntax."
+        }
+      ]
+    },
+    {
+      "id": "zig",
+      "crate": "arborium-zig",
+      "name": "Zig",
+      "icon": "simple-icons:zig",
+      "tier": null,
+      "tag": "code",
+      "description": "General-purpose systems language focused on simplicity and control; docs at https://ziglang.org/documentation/master/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/generic.zig",
+          "description": "Args-lex generic tokenizer with slices, enums, error sets, and comptime parsing."
+        }
+      ]
+    },
+    {
+      "id": "zsh",
+      "crate": "arborium-zsh",
+      "name": "Zsh",
+      "icon": "mdi:console",
+      "tier": 3,
+      "tag": "shell",
+      "description": "Extended Unix shell with rich scripting; reference manual at https://zsh.sourceforge.io/Doc/.",
+      "aliases": [],
+      "samples": [
+        {
+          "path": "samples/git.plugin.zsh",
+          "description": "oh-my-zsh git plugin with aliases, functions, and completions."
+        }
+      ]
+    }
+  ]
+}

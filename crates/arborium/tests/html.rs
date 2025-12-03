@@ -18,6 +18,12 @@ enum Event {
 
 /// Record all highlight events for HTML source
 fn record_events(highlighter: &mut Highlighter, source: &str) -> Vec<Event> {
+    // Pre-load all needed languages before extracting config references
+    highlighter.get_config_mut("html");
+    highlighter.get_config_mut("css");
+    highlighter.get_config_mut("javascript");
+
+    // Now we can safely get immutable references
     let config = highlighter
         .get_config("html")
         .expect("HTML language not found");

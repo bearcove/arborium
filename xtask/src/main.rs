@@ -10,6 +10,7 @@
 mod generate;
 mod lint_new;
 mod plan;
+mod serve;
 mod types;
 mod util;
 
@@ -45,15 +46,15 @@ enum Command {
     /// Build and serve the WASM demo locally
     Serve {
         /// Address to bind to
-        #[facet(args::named, args::short = 'a')]
+        #[facet(args::named, args::short = 'a', default)]
         address: Option<String>,
 
         /// Port to bind to
-        #[facet(args::named, args::short = 'p')]
+        #[facet(args::named, args::short = 'p', default)]
         port: Option<u16>,
 
         /// Fast dev build (skip optimizations)
-        #[facet(args::named)]
+        #[facet(args::named, default)]
         dev: bool,
     },
 }
@@ -98,11 +99,7 @@ fn main() {
         }
         Command::Serve { address, port, dev } => {
             let addr = address.as_deref().unwrap_or("127.0.0.1");
-            println!("Serving demo at {addr}:{}", port.unwrap_or(8000));
-            if dev {
-                println!("(dev mode)");
-            }
-            todo!("implement serve")
+            serve::serve(&crates_dir, addr, port, dev);
         }
     }
 }
