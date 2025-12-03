@@ -45,6 +45,18 @@ structstruck::strike! {
             /// Brief description of the language.
             pub description: Option<String>,
 
+            /// Creator(s) of the language.
+            pub inventor: Option<String>,
+
+            /// Year the language was first released.
+            pub year: Option<u16>,
+
+            /// URL to more information.
+            pub link: Option<String>,
+
+            /// Fun facts or interesting history.
+            pub trivia: Option<String>,
+
             /// File extension aliases (e.g., ["rs"] for Rust).
             pub aliases: Vec<String>,
 
@@ -105,6 +117,10 @@ impl RegistryGrammar {
             tier: grammar.tier.as_ref().map(|t| *t.value),
             tag: grammar.tag.value.to_string(),
             description: grammar.description.as_ref().map(|d| d.value.clone()),
+            inventor: grammar.inventor.as_ref().map(|i| i.value.clone()),
+            year: grammar.year.as_ref().map(|y| y.value),
+            link: grammar.link.as_ref().map(|l| l.value.clone()),
+            trivia: grammar.trivia.as_ref().map(|t| t.value.clone()),
             aliases: grammar
                 .aliases
                 .as_ref()
