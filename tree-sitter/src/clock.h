@@ -6,7 +6,48 @@
 
 typedef uint64_t TSDuration;
 
-#ifdef _WIN32
+#if defined(__wasm__) && !defined(__EMSCRIPTEN__)
+
+// WASM (non-Emscripten): stub out clock functions
+// In WASM component mode, we don't have access to clock() or clock_gettime(),
+// so we provide stub implementations that disable timeout functionality.
+typedef uint64_t TSClock;
+
+static inline TSDuration duration_from_micros(uint64_t micros) {
+  (void)micros;
+  return 0;
+}
+
+static inline uint64_t duration_to_micros(TSDuration self) {
+  (void)self;
+  return 0;
+}
+
+static inline TSClock clock_null(void) {
+  return 0;
+}
+
+static inline TSClock clock_now(void) {
+  return 0; // Always return 0 - timeouts will be disabled
+}
+
+static inline TSClock clock_after(TSClock base, TSDuration duration) {
+  (void)base;
+  (void)duration;
+  return 0;
+}
+
+static inline bool clock_is_null(TSClock self) {
+  return !self;
+}
+
+static inline bool clock_is_gt(TSClock self, TSClock other) {
+  (void)self;
+  (void)other;
+  return false; // Never timeout
+}
+
+#elif defined(_WIN32)
 
 // Windows:
 // * Represent a time as a performance counter value.

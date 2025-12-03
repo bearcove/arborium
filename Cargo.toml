@@ -102,11 +102,14 @@ members = [
     "crates/arborium-zig",
     "crates/arborium-zsh",
     "crates/miette-arborium",
+    "crates/arborium-wire",
+    "crates/arborium-plugin-runtime",
     "xtask",
     "demo",
     "tree-sitter",
     "tree-sitter/language",
     "tree-sitter-highlight",
+    "crates/arborium-rust-plugin",
 ]
 
 [workspace.package]

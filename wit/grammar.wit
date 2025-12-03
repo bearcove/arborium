@@ -1,0 +1,111 @@
+/// Grammar plugin interface for arborium tree-sitter highlighting.
+///
+/// Each grammar is a separate WASM component implementing this interface.
+/// The host loads grammar components dynamically and orchestrates parsing,
+/// edit application, and injection resolution.
+
+package arborium:grammar@0.1.0;
+
+/// Core types shared between host and plugins.
+interface types {
+    /// A span of highlighted text with a capture name.
+    record span {
+        /// Byte offset where the span starts.
+        start: u32,
+        /// Byte offset where the span ends (exclusive).
+        end: u32,
+        /// The capture name (e.g., "keyword", "function", "string").
+        capture: string,
+    }
+
+    /// An injection point where another language should be parsed.
+    record injection {
+        /// Byte offset where the injection starts.
+        start: u32,
+        /// Byte offset where the injection ends (exclusive).
+        end: u32,
+        /// The language ID to inject (e.g., "javascript", "css").
+        language: string,
+        /// Whether to include the node children in the injection.
+        include-children: bool,
+    }
+
+    /// Result of parsing text.
+    record parse-result {
+        /// Highlighted spans from this parse.
+        spans: list<span>,
+        /// Injection points for other languages.
+        injections: list<injection>,
+    }
+
+    /// An edit to apply to the text (for incremental parsing).
+    record edit {
+        /// Byte offset where the edit starts.
+        start-byte: u32,
+        /// Byte offset of the old end (before edit).
+        old-end-byte: u32,
+        /// Byte offset of the new end (after edit).
+        new-end-byte: u32,
+        /// Row where the edit starts.
+        start-row: u32,
+        /// Column where the edit starts.
+        start-col: u32,
+        /// Old end row (before edit).
+        old-end-row: u32,
+        /// Old end column (before edit).
+        old-end-col: u32,
+        /// New end row (after edit).
+        new-end-row: u32,
+        /// New end column (after edit).
+        new-end-col: u32,
+    }
+
+    /// Error that can occur during parsing.
+    record parse-error {
+        /// Error message.
+        message: string,
+    }
+}
+
+/// The grammar plugin interface that each language implements.
+interface plugin {
+    use types.{span, injection, parse-result, edit, parse-error};
+
+    /// A handle to a parsing session.
+    /// Sessions maintain parser state for incremental parsing.
+    type session = u32;
+
+    /// Get the language ID this plugin provides (e.g., "rust", "javascript").
+    language-id: func() -> string;
+
+    /// Get the language IDs that this grammar may inject.
+    /// Used by the host to know which plugins to preload.
+    injection-languages: func() -> list<string>;
+
+    /// Create a new parsing session.
+    create-session: func() -> session;
+
+    /// Destroy a parsing session and free its resources.
+    free-session: func(session: session);
+
+    /// Set the full text content for a session.
+    /// This replaces any previous content and resets the parse tree.
+    set-text: func(session: session, text: string);
+
+    /// Apply an incremental edit to the session's text.
+    /// The session must have had set-text called previously.
+    apply-edit: func(session: session, text: string, edit: edit);
+
+    /// Parse the current text and return spans and injections.
+    /// If cancelled, returns an empty result.
+    parse: func(session: session) -> result<parse-result, parse-error>;
+
+    /// Request cancellation of an in-progress parse.
+    /// The next call to parse() will return early.
+    cancel: func(session: session);
+}
+
+/// The world that grammar plugins implement.
+world grammar-plugin {
+    export plugin;
+}

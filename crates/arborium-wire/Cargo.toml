@@ -1,0 +1,15 @@
+[package]
+name = "arborium-wire"
+version = "0.1.0"
+edition = "2024"
+description = "Wire protocol types for arborium WASM plugins"
+license = "MIT"
+repository = "https://github.com/bearcove/arborium"
+
+[features]
+default = []
+std = []
+
+[dependencies]
+facet = { git = "https://github.com/facet-rs/facet" }
+facet-postcard = { git = "https://github.com/facet-rs/facet", features = ["alloc"] }

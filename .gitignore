@@ -14,3 +14,4 @@ crates/*/grammar/src/
 # Pre-compressed demo files
 demo/*.br
 demo/*.gz
+/dist/

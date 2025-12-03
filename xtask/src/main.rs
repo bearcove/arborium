@@ -12,6 +12,7 @@ mod cache;
 mod generate;
 mod lint_new;
 mod plan;
+mod plugins;
 mod serve;
 mod tool;
 mod types;
@@ -68,6 +69,40 @@ enum Command {
         /// Fast dev build (skip optimizations)
         #[facet(args::named, default)]
         dev: bool,
+    },
+
+    /// Build WASM component plugins
+    Plugins {
+        #[facet(args::subcommand)]
+        action: PluginsAction,
+    },
+}
+
+/// Plugin subcommands
+#[derive(Debug, Facet)]
+#[repr(u8)]
+#[allow(dead_code)]
+enum PluginsAction {
+    /// Build grammar plugins as WASM components
+    Build {
+        /// Specific grammars to build (build all if omitted)
+        #[facet(args::positional, default)]
+        grammars: Vec<String>,
+
+        /// Output directory for built plugins
+        #[facet(args::named, args::short = 'o', default)]
+        output: Option<String>,
+
+        /// Skip jco transpile step
+        #[facet(args::named, default)]
+        no_transpile: bool,
+    },
+
+    /// Clean plugin build artifacts
+    Clean {
+        /// Output directory to clean
+        #[facet(args::named, args::short = 'o', default)]
+        output: Option<String>,
     },
 }
 
@@ -157,6 +192,45 @@ fn main() {
 
             let addr = address.as_deref().unwrap_or("127.0.0.1");
             serve::serve(&crates_dir, addr, port, dev);
+        }
+        Command::Plugins { action } => {
+            // Check for required tools before starting
+            if !tool::check_tools_or_report(tool::PLUGIN_TOOLS) {
+                std::process::exit(1);
+            }
+
+            let repo_root = util::find_repo_root().expect("Could not find repo root");
+            let repo_root =
+                camino::Utf8PathBuf::from_path_buf(repo_root).expect("non-UTF8 path");
+
+            match action {
+                PluginsAction::Build {
+                    grammars,
+                    output,
+                    no_transpile,
+                } => {
+                    let options = plugins::BuildOptions {
+                        grammars,
+                        output_dir: output
+                            .map(camino::Utf8PathBuf::from)
+                            .unwrap_or_else(|| camino::Utf8PathBuf::from("dist/plugins")),
+                        transpile: !no_transpile,
+                        ..Default::default()
+                    };
+
+                    if let Err(e) = plugins::build_plugins(&repo_root, &options) {
+                        eprintln!("{:?}", e);
+                        std::process::exit(1);
+                    }
+                }
+                PluginsAction::Clean { output } => {
+                    let output_dir = output.as_deref().unwrap_or("dist/plugins");
+                    if let Err(e) = plugins::clean_plugins(&repo_root, output_dir) {
+                        eprintln!("{:?}", e);
+                        std::process::exit(1);
+                    }
+                }
+            }
         }
     }
 }
