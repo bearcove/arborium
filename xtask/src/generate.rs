@@ -221,7 +221,9 @@ fn plan_grammar_src_generation(
     let crate_name = crate_path.file_name().unwrap_or("unknown");
 
     // Get the crates directory (parent of crate_path)
-    let crates_dir = crate_path.parent().ok_or_else(|| std::io::Error::other("Could not get crates directory"))?;
+    let crates_dir = crate_path
+        .parent()
+        .ok_or_else(|| std::io::Error::other("Could not get crates directory"))?;
 
     // Create a temp directory with same structure as the crate
     // Some grammars have `require('../common/...')` so we need to preserve the relative paths
@@ -320,13 +322,18 @@ fn plan_grammar_src_generation(
         for entry in fs::read_dir(&generated_tree_sitter)? {
             let entry = entry?;
             let file_name = entry.file_name().to_string_lossy().to_string();
-            let generated_file =
-                Utf8PathBuf::from_path_buf(entry.path()).map_err(|_| std::io::Error::other("Non-UTF8 path"))?;
+            let generated_file = Utf8PathBuf::from_path_buf(entry.path())
+                .map_err(|_| std::io::Error::other("Non-UTF8 path"))?;
             let dest_file = dest_tree_sitter.join(&file_name);
 
             if generated_file.is_file() {
                 let new_content = fs::read_to_string(&generated_file)?;
-                plan_file_update(plan, &dest_file, new_content, &format!("tree_sitter/{}", file_name))?;
+                plan_file_update(
+                    plan,
+                    &dest_file,
+                    new_content,
+                    &format!("tree_sitter/{}", file_name),
+                )?;
             }
         }
     }
@@ -367,7 +374,8 @@ fn copy_dir_contents(src: &Utf8Path, dest: &Utf8Path) -> Result<(), Report> {
 
     for entry in fs::read_dir(src)? {
         let entry = entry?;
-        let src_path = Utf8PathBuf::from_path_buf(entry.path()).map_err(|_| std::io::Error::other("Non-UTF8 path"))?;
+        let src_path = Utf8PathBuf::from_path_buf(entry.path())
+            .map_err(|_| std::io::Error::other("Non-UTF8 path"))?;
         let dest_path = dest.join(entry.file_name().to_string_lossy().as_ref());
 
         if src_path.is_dir() {
@@ -484,7 +492,11 @@ fn generate_build_rs(crate_name: &str, config: &crate::types::CrateConfig) -> St
 }
 
 /// Generate src/lib.rs content for a grammar crate.
-fn generate_lib_rs(crate_name: &str, crate_path: &Utf8Path, config: &crate::types::CrateConfig) -> String {
+fn generate_lib_rs(
+    crate_name: &str,
+    crate_path: &Utf8Path,
+    config: &crate::types::CrateConfig,
+) -> String {
     let grammar = config.grammars.first();
 
     let grammar_id = grammar

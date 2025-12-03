@@ -27,7 +27,10 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
 
     println!("{}", "Loading crate registry...".cyan().bold());
     if !options.strict {
-        println!("{}", "(non-strict mode: missing generated files are warnings)".dimmed());
+        println!(
+            "{}",
+            "(non-strict mode: missing generated files are warnings)".dimmed()
+        );
     }
     println!();
 

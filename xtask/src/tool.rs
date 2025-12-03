@@ -138,10 +138,7 @@ pub fn print_tools_report() {
     if missing.len() > 1 {
         lines.push(String::new());
         if cfg!(target_os = "macos") {
-            let brew_packages: Vec<_> = missing
-                .iter()
-                .filter_map(|t| t.brew_package())
-                .collect();
+            let brew_packages: Vec<_> = missing.iter().filter_map(|t| t.brew_package()).collect();
 
             if brew_packages.len() > 1 {
                 lines.push(format!("{}", "Quick install:".green().bold()));
@@ -151,10 +148,7 @@ pub fn print_tools_report() {
                 ));
             }
         } else {
-            let cargo_packages: Vec<_> = missing
-                .iter()
-                .filter_map(|t| t.cargo_package())
-                .collect();
+            let cargo_packages: Vec<_> = missing.iter().filter_map(|t| t.cargo_package()).collect();
 
             if cargo_packages.len() > 1 {
                 lines.push(format!("{}", "Quick install:".green().bold()));
@@ -220,10 +214,7 @@ pub fn check_tools_or_report() -> bool {
     if missing.len() > 1 {
         lines.push(String::new());
         if cfg!(target_os = "macos") {
-            let brew_packages: Vec<_> = missing
-                .iter()
-                .filter_map(|t| t.brew_package())
-                .collect();
+            let brew_packages: Vec<_> = missing.iter().filter_map(|t| t.brew_package()).collect();
 
             if brew_packages.len() > 1 {
                 lines.push(format!("{}", "Quick install:".green().bold()));
@@ -233,10 +224,7 @@ pub fn check_tools_or_report() -> bool {
                 ));
             }
         } else {
-            let cargo_packages: Vec<_> = missing
-                .iter()
-                .filter_map(|t| t.cargo_package())
-                .collect();
+            let cargo_packages: Vec<_> = missing.iter().filter_map(|t| t.cargo_package()).collect();
 
             if cargo_packages.len() > 1 {
                 lines.push(format!("{}", "Quick install:".green().bold()));

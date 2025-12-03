@@ -38,11 +38,11 @@
 use std::path::Path;
 use std::sync::RwLock;
 
-use arborium::theme::{builtin, Style, Theme};
-use arborium::tree_sitter_highlight::{Highlight, HighlightConfiguration, HighlightEvent};
 use arborium::Highlighter as ArboriumCoreHighlighter;
-use miette::highlighters::{Highlighter, HighlighterState};
+use arborium::theme::{Style, Theme, builtin};
+use arborium::tree_sitter_highlight::{Highlight, HighlightConfiguration, HighlightEvent};
 use miette::SpanContents;
+use miette::highlighters::{Highlighter, HighlighterState};
 use owo_colors::{Rgb, Style as OwoStyle, Styled};
 
 /// A miette syntax highlighter powered by arborium's tree-sitter grammars.
@@ -346,9 +346,7 @@ impl Highlighter for ArboriumHighlighter {
             let mut highlighter = self.highlighter.write().unwrap();
             if let Some(config) = highlighter.get_config_mut(lang) {
                 return Box::new(ArboriumHighlighterState::new(
-                    source_str,
-                    config,
-                    self.theme,
+                    source_str, config, self.theme,
                 ));
             }
         }
@@ -588,7 +586,8 @@ mod tests {
         }
 
         fn span(&self) -> &miette::SourceSpan {
-            static SPAN: miette::SourceSpan = miette::SourceSpan::new(miette::SourceOffset::from(0), 0);
+            static SPAN: miette::SourceSpan =
+                miette::SourceSpan::new(miette::SourceOffset::from(0), 0);
             &SPAN
         }
 

@@ -125,7 +125,10 @@ fn main() {
             // Run strict lint after generation (now parser.c should exist)
             if !dry_run {
                 println!();
-                println!("{}", "Running post-generation lint (strict)...".cyan().bold());
+                println!(
+                    "{}",
+                    "Running post-generation lint (strict)...".cyan().bold()
+                );
                 let options = lint_new::LintOptions { strict: true };
                 if let Err(e) = lint_new::run_lints(&crates_dir, options) {
                     eprintln!("{:?}", e);

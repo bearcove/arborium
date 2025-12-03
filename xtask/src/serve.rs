@@ -8,7 +8,7 @@ use crate::util;
 use camino::{Utf8Path, Utf8PathBuf};
 use facet::Facet;
 use owo_colors::OwoColorize;
-use pulldown_cmark::{html, Options, Parser};
+use pulldown_cmark::{Options, Parser, html};
 use std::collections::{BTreeMap, HashSet};
 use std::fs;
 use std::io::Write;
@@ -492,32 +492,147 @@ struct ThemeInfo {
 /// All themes with their metadata (must match CSS and app.js)
 const THEMES: &[ThemeInfo] = &[
     // Catppuccin family
-    ThemeInfo { id: "mocha", name: "Catppuccin Mocha", variant: "dark", bg: "#1e1e2e" },
-    ThemeInfo { id: "macchiato", name: "Catppuccin Macchiato", variant: "dark", bg: "#24273a" },
-    ThemeInfo { id: "frappe", name: "Catppuccin Frappe", variant: "dark", bg: "#303446" },
-    ThemeInfo { id: "latte", name: "Catppuccin Latte", variant: "light", bg: "#eff1f5" },
+    ThemeInfo {
+        id: "mocha",
+        name: "Catppuccin Mocha",
+        variant: "dark",
+        bg: "#1e1e2e",
+    },
+    ThemeInfo {
+        id: "macchiato",
+        name: "Catppuccin Macchiato",
+        variant: "dark",
+        bg: "#24273a",
+    },
+    ThemeInfo {
+        id: "frappe",
+        name: "Catppuccin Frappe",
+        variant: "dark",
+        bg: "#303446",
+    },
+    ThemeInfo {
+        id: "latte",
+        name: "Catppuccin Latte",
+        variant: "light",
+        bg: "#eff1f5",
+    },
     // Popular dark themes
-    ThemeInfo { id: "tokyo-night", name: "Tokyo Night", variant: "dark", bg: "#1a1b26" },
-    ThemeInfo { id: "dracula", name: "Dracula", variant: "dark", bg: "#282a36" },
-    ThemeInfo { id: "monokai", name: "Monokai Pro", variant: "dark", bg: "#2d2a2e" },
-    ThemeInfo { id: "one-dark", name: "One Dark", variant: "dark", bg: "#282c34" },
-    ThemeInfo { id: "nord", name: "Nord", variant: "dark", bg: "#2e3440" },
-    ThemeInfo { id: "gruvbox-dark", name: "Gruvbox Dark", variant: "dark", bg: "#282828" },
-    ThemeInfo { id: "rose-pine-moon", name: "Rosé Pine Moon", variant: "dark", bg: "#232136" },
-    ThemeInfo { id: "kanagawa-dragon", name: "Kanagawa Dragon", variant: "dark", bg: "#181616" },
-    ThemeInfo { id: "cobalt2", name: "Cobalt2", variant: "dark", bg: "#193549" },
-    ThemeInfo { id: "zenburn", name: "Zenburn", variant: "dark", bg: "#3f3f3f" },
-    ThemeInfo { id: "melange-dark", name: "Melange Dark", variant: "dark", bg: "#292522" },
-    ThemeInfo { id: "monokai-aqua", name: "Monokai Aqua", variant: "dark", bg: "#222222" },
-    ThemeInfo { id: "desert256", name: "Desert256", variant: "dark", bg: "#000000" },
+    ThemeInfo {
+        id: "tokyo-night",
+        name: "Tokyo Night",
+        variant: "dark",
+        bg: "#1a1b26",
+    },
+    ThemeInfo {
+        id: "dracula",
+        name: "Dracula",
+        variant: "dark",
+        bg: "#282a36",
+    },
+    ThemeInfo {
+        id: "monokai",
+        name: "Monokai Pro",
+        variant: "dark",
+        bg: "#2d2a2e",
+    },
+    ThemeInfo {
+        id: "one-dark",
+        name: "One Dark",
+        variant: "dark",
+        bg: "#282c34",
+    },
+    ThemeInfo {
+        id: "nord",
+        name: "Nord",
+        variant: "dark",
+        bg: "#2e3440",
+    },
+    ThemeInfo {
+        id: "gruvbox-dark",
+        name: "Gruvbox Dark",
+        variant: "dark",
+        bg: "#282828",
+    },
+    ThemeInfo {
+        id: "rose-pine-moon",
+        name: "Rosé Pine Moon",
+        variant: "dark",
+        bg: "#232136",
+    },
+    ThemeInfo {
+        id: "kanagawa-dragon",
+        name: "Kanagawa Dragon",
+        variant: "dark",
+        bg: "#181616",
+    },
+    ThemeInfo {
+        id: "cobalt2",
+        name: "Cobalt2",
+        variant: "dark",
+        bg: "#193549",
+    },
+    ThemeInfo {
+        id: "zenburn",
+        name: "Zenburn",
+        variant: "dark",
+        bg: "#3f3f3f",
+    },
+    ThemeInfo {
+        id: "melange-dark",
+        name: "Melange Dark",
+        variant: "dark",
+        bg: "#292522",
+    },
+    ThemeInfo {
+        id: "monokai-aqua",
+        name: "Monokai Aqua",
+        variant: "dark",
+        bg: "#222222",
+    },
+    ThemeInfo {
+        id: "desert256",
+        name: "Desert256",
+        variant: "dark",
+        bg: "#000000",
+    },
     // GitHub
-    ThemeInfo { id: "github-dark", name: "GitHub Dark", variant: "dark", bg: "#0d1117" },
-    ThemeInfo { id: "github-light", name: "GitHub Light", variant: "light", bg: "#ffffff" },
+    ThemeInfo {
+        id: "github-dark",
+        name: "GitHub Dark",
+        variant: "dark",
+        bg: "#0d1117",
+    },
+    ThemeInfo {
+        id: "github-light",
+        name: "GitHub Light",
+        variant: "light",
+        bg: "#ffffff",
+    },
     // Light themes
-    ThemeInfo { id: "gruvbox-light", name: "Gruvbox Light", variant: "light", bg: "#fbf1c7" },
-    ThemeInfo { id: "alabaster", name: "Alabaster", variant: "light", bg: "#f7f7f7" },
-    ThemeInfo { id: "dayfox", name: "Dayfox", variant: "light", bg: "#f6f2ee" },
-    ThemeInfo { id: "melange-light", name: "Melange Light", variant: "light", bg: "#f1f1f1" },
+    ThemeInfo {
+        id: "gruvbox-light",
+        name: "Gruvbox Light",
+        variant: "light",
+        bg: "#fbf1c7",
+    },
+    ThemeInfo {
+        id: "alabaster",
+        name: "Alabaster",
+        variant: "light",
+        bg: "#f7f7f7",
+    },
+    ThemeInfo {
+        id: "dayfox",
+        name: "Dayfox",
+        variant: "light",
+        bg: "#f6f2ee",
+    },
+    ThemeInfo {
+        id: "melange-light",
+        name: "Melange Light",
+        variant: "light",
+        bg: "#f1f1f1",
+    },
 ];
 
 /// Generate HTML for theme swatches in the "Theme support" section
@@ -651,10 +766,7 @@ fn build_language_info_js(registry: &Registry) -> String {
             js.push_str(&format!("        \"year\": {},\n", year));
         }
         if let Some(ref link) = grammar.link {
-            js.push_str(&format!(
-                "        \"url\": \"{}\",\n",
-                escape_for_js(link)
-            ));
+            js.push_str(&format!("        \"url\": \"{}\",\n", escape_for_js(link)));
         }
         if let Some(ref trivia) = grammar.trivia {
             let html = markdown_to_html(trivia);
