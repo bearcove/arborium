@@ -6,6 +6,7 @@ publish = false
 
 [dependencies]
 camino = "1"
+fs-err = "3"
 facet = { git = "https://github.com/facet-rs/facet" }
 facet-args = { git = "https://github.com/facet-rs/facet" }
 facet-kdl = { git = "https://github.com/facet-rs/facet" }

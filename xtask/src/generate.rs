@@ -9,6 +9,7 @@
 use crate::plan::{Operation, Plan, PlanSet};
 use crate::types::{CrateRegistry, CrateState};
 use camino::{Utf8Path, Utf8PathBuf};
+use fs_err as fs;
 use std::process::{Command, Stdio};
 
 /// Generate crate files for all or a specific grammar.
@@ -54,7 +55,7 @@ fn plan_crate_generation(
     let new_cargo_toml = generate_cargo_toml(&crate_state.name, config);
 
     if cargo_toml_path.exists() {
-        let old_content = std::fs::read_to_string(&cargo_toml_path)?;
+        let old_content = fs::read_to_string(&cargo_toml_path)?;
         if old_content != new_cargo_toml {
             plan.add(Operation::UpdateFile {
                 path: cargo_toml_path,
@@ -76,7 +77,7 @@ fn plan_crate_generation(
     let new_build_rs = generate_build_rs(&crate_state.name, config);
 
     if build_rs_path.exists() {
-        let old_content = std::fs::read_to_string(&build_rs_path)?;
+        let old_content = fs::read_to_string(&build_rs_path)?;
         if old_content != new_build_rs {
             plan.add(Operation::UpdateFile {
                 path: build_rs_path,
@@ -98,7 +99,7 @@ fn plan_crate_generation(
     let new_lib_rs = generate_lib_rs(&crate_state.name, crate_path, config);
 
     if lib_rs_path.exists() {
-        let old_content = std::fs::read_to_string(&lib_rs_path)?;
+        let old_content = fs::read_to_string(&lib_rs_path)?;
         if old_content != new_lib_rs {
             plan.add(Operation::UpdateFile {
                 path: lib_rs_path,
@@ -171,7 +172,7 @@ fn setup_grammar_dependencies(
     }
 
     let node_modules = temp_path.join("node_modules");
-    std::fs::create_dir_all(&node_modules)?;
+    fs::create_dir_all(&node_modules)?;
 
     for (npm_name, arborium_name) in deps {
         let dep_grammar_dir = crates_dir.join(arborium_name).join("grammar");
@@ -253,7 +254,7 @@ fn plan_grammar_src_generation(
         let vendored_scanner = grammar_dir.join("scanner.c");
         let dest_scanner = grammar_src_dir.join("scanner.c");
         if vendored_scanner.exists() {
-            let new_content = std::fs::read_to_string(&vendored_scanner)?;
+            let new_content = fs::read_to_string(&vendored_scanner)?;
             plan_file_update(plan, &dest_scanner, new_content, "scanner.c")?;
         }
     }
@@ -265,7 +266,7 @@ fn plan_grammar_src_generation(
         let dest_file = grammar_src_dir.join(file_name);
 
         if generated_file.exists() {
-            let new_content = std::fs::read_to_string(&generated_file)?;
+            let new_content = fs::read_to_string(&generated_file)?;
             plan_file_update(plan, &dest_file, new_content, file_name)?;
         }
     }
@@ -283,7 +284,7 @@ fn plan_grammar_src_generation(
         }
 
         // Copy each file in tree_sitter/
-        for entry in std::fs::read_dir(&generated_tree_sitter)? {
+        for entry in fs::read_dir(&generated_tree_sitter)? {
             let entry = entry?;
             let file_name = entry.file_name().to_string_lossy().to_string();
             let generated_file =
@@ -291,7 +292,7 @@ fn plan_grammar_src_generation(
             let dest_file = dest_tree_sitter.join(&file_name);
 
             if generated_file.is_file() {
-                let new_content = std::fs::read_to_string(&generated_file)?;
+                let new_content = fs::read_to_string(&generated_file)?;
                 plan_file_update(plan, &dest_file, new_content, &format!("tree_sitter/{}", file_name))?;
             }
         }
@@ -308,7 +309,7 @@ fn plan_file_update(
     description: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     if dest_path.exists() {
-        let old_content = std::fs::read_to_string(dest_path)?;
+        let old_content = fs::read_to_string(dest_path)?;
         if old_content != new_content {
             plan.add(Operation::UpdateFile {
                 path: dest_path.to_owned(),
@@ -329,9 +330,9 @@ fn plan_file_update(
 
 /// Copy directory contents (files and subdirectories) from src to dest.
 fn copy_dir_contents(src: &Utf8Path, dest: &Utf8Path) -> Result<(), Box<dyn std::error::Error>> {
-    std::fs::create_dir_all(dest)?;
+    fs::create_dir_all(dest)?;
 
-    for entry in std::fs::read_dir(src)? {
+    for entry in fs::read_dir(src)? {
         let entry = entry?;
         let src_path = Utf8PathBuf::from_path_buf(entry.path()).map_err(|_| "Non-UTF8 path")?;
         let dest_path = dest.join(entry.file_name().to_string_lossy().as_ref());
@@ -339,7 +340,7 @@ fn copy_dir_contents(src: &Utf8Path, dest: &Utf8Path) -> Result<(), Box<dyn std:
         if src_path.is_dir() {
             copy_dir_contents(&src_path, &dest_path)?;
         } else {
-            std::fs::copy(&src_path, &dest_path)?;
+            fs::copy(&src_path, &dest_path)?;
         }
     }
 

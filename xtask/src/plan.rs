@@ -6,6 +6,7 @@
 #![allow(dead_code)]
 
 use camino::{Utf8Path, Utf8PathBuf};
+use fs_err as fs;
 use owo_colors::OwoColorize;
 use std::fmt;
 
@@ -108,23 +109,23 @@ impl Operation {
         match self {
             Operation::CreateFile { path, content, .. } => {
                 if let Some(parent) = path.parent() {
-                    std::fs::create_dir_all(parent)?;
+                    fs::create_dir_all(parent)?;
                 }
-                std::fs::write(path, content)?;
+                fs::write(path, content)?;
                 Ok(())
             }
             Operation::UpdateFile {
                 path, new_content, ..
             } => {
-                std::fs::write(path, new_content)?;
+                fs::write(path, new_content)?;
                 Ok(())
             }
             Operation::DeleteFile { path, .. } => {
-                std::fs::remove_file(path)?;
+                fs::remove_file(path)?;
                 Ok(())
             }
             Operation::CreateDir { path, .. } => {
-                std::fs::create_dir_all(path)?;
+                fs::create_dir_all(path)?;
                 Ok(())
             }
             Operation::RunCommand {
@@ -149,9 +150,9 @@ impl Operation {
             }
             Operation::CopyFile { src, dest, .. } => {
                 if let Some(parent) = dest.parent() {
-                    std::fs::create_dir_all(parent)?;
+                    fs::create_dir_all(parent)?;
                 }
-                std::fs::copy(src, dest)?;
+                fs::copy(src, dest)?;
                 Ok(())
             }
             Operation::GitClone {

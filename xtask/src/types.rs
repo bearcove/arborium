@@ -82,6 +82,7 @@
 use std::collections::BTreeMap;
 
 use camino::{Utf8Path, Utf8PathBuf};
+use fs_err as fs;
 use facet::Facet;
 use facet_kdl as kdl;
 use facet_kdl::Spanned;
@@ -566,7 +567,7 @@ impl CrateRegistry {
     pub fn load(crates_dir: &Utf8Path) -> Result<Self, Report> {
         let mut crates = BTreeMap::new();
 
-        for entry in std::fs::read_dir(crates_dir)? {
+        for entry in fs::read_dir(crates_dir)? {
             let entry = entry?;
             let path = entry.path();
 
@@ -602,7 +603,7 @@ impl CrateRegistry {
         // Check for arborium.kdl
         let kdl_path = path.join("arborium.kdl");
         let (config, kdl_source) = if kdl_path.exists() {
-            let content = std::fs::read_to_string(&kdl_path)?;
+            let content = fs::read_to_string(&kdl_path)?;
             let config: CrateConfig = match facet_kdl::from_str(&content) {
                 Ok(c) => c,
                 Err(e) => {
@@ -682,7 +683,7 @@ impl CrateRegistry {
 
     /// Read a file's state.
     fn read_file_state(path: &Utf8Path) -> FileState {
-        match std::fs::read_to_string(path) {
+        match fs::read_to_string(path) {
             Ok(content) => FileState::Present { content },
             Err(_) => FileState::Missing,
         }
@@ -690,7 +691,7 @@ impl CrateRegistry {
 
     /// Check a sample file's state.
     fn check_sample_file(path: &Utf8Path) -> SampleFileState {
-        let content = match std::fs::read_to_string(path) {
+        let content = match fs::read_to_string(path) {
             Ok(c) => c,
             Err(_) => return SampleFileState::Missing,
         };
