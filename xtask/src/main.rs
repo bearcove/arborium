@@ -104,15 +104,6 @@ fn main() {
                 std::process::exit(1);
             }
 
-            // Run non-strict lint before generation (missing parser.c is just a warning)
-            println!("{}", "Running pre-generation lint...".cyan().bold());
-            let options = lint_new::LintOptions { strict: false };
-            if let Err(e) = lint_new::run_lints(&crates_dir, options) {
-                eprintln!("{:?}", e);
-                std::process::exit(1);
-            }
-            println!();
-
             // Plan and execute generation
             match generate::plan_generate(&crates_dir, name.as_deref()) {
                 Ok(plans) => {
