@@ -100,13 +100,22 @@ fn main() {
             }
         }
         Command::Gen { name, dry_run } => {
+            use std::time::Instant;
+            let total_start = Instant::now();
+
             // Check for required tools before starting
             if !tool::check_tools_or_report(tool::GEN_TOOLS) {
                 std::process::exit(1);
             }
 
+            let mode = if dry_run {
+                plan::PlanMode::DryRun
+            } else {
+                plan::PlanMode::Execute
+            };
+
             // Plan and execute generation
-            match generate::plan_generate(&crates_dir, name.as_deref()) {
+            match generate::plan_generate(&crates_dir, name.as_deref(), mode) {
                 Ok(plans) => {
                     if let Err(e) = plans.run(dry_run) {
                         eprintln!("Error: {}", e);
@@ -132,6 +141,13 @@ fn main() {
                     std::process::exit(1);
                 }
             }
+
+            let total_elapsed = total_start.elapsed();
+            println!(
+                "\n{} Total time: {:.2}s",
+                "●".green(),
+                total_elapsed.as_secs_f64()
+            );
         }
         Command::Serve { address, port, dev } => {
             // Check for required tools before starting

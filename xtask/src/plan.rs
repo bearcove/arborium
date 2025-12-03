@@ -11,6 +11,21 @@ use fs_err as fs;
 use owo_colors::OwoColorize;
 use std::fmt;
 
+/// Execution mode for planning operations.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PlanMode {
+    /// Preview mode - collect old content for diffs, don't write anything.
+    DryRun,
+    /// Execute mode - hash-compare files, write changes to disk.
+    Execute,
+}
+
+impl PlanMode {
+    pub fn is_dry_run(self) -> bool {
+        matches!(self, PlanMode::DryRun)
+    }
+}
+
 /// A single operation that can be planned and executed.
 #[derive(Debug, Clone)]
 pub enum Operation {
@@ -22,9 +37,10 @@ pub enum Operation {
     },
 
     /// Update an existing file with new content.
+    /// Note: old_content is only populated in dry-run mode for diffing.
     UpdateFile {
         path: Utf8PathBuf,
-        old_content: String,
+        old_content: Option<String>,
         new_content: String,
         description: String,
     },
@@ -400,7 +416,11 @@ impl Plan {
                 } => {
                     println!("  {} {}", "update".yellow(), description);
                     println!("    {} {}", "->".dimmed(), path);
-                    display_diff(old_content, new_content);
+                    if let Some(old) = old_content {
+                        display_diff(old, new_content);
+                    } else {
+                        println!("    {}", "(content changed)".dimmed());
+                    }
                 }
                 Operation::DeleteFile { path, description } => {
                     println!("  {} {}", "delete".red(), description);
@@ -487,15 +507,22 @@ impl PlanSet {
 
     /// Execute all plans.
     pub fn execute(&self) -> Result<(), ExecuteError> {
+        use std::time::Instant;
+        let start = Instant::now();
+
         for plan in &self.plans {
             if let Some(ref name) = plan.crate_name {
                 println!("Processing {}...", name);
             }
             plan.execute()?;
         }
+
+        let elapsed = start.elapsed();
         println!(
-            "\nDone! {} operation(s) completed.",
-            self.total_operations()
+            "\n{} {} operation(s) completed in {:.2}s",
+            "●".green(),
+            self.total_operations(),
+            elapsed.as_secs_f64()
         );
         Ok(())
     }

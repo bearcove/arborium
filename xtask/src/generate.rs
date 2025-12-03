@@ -7,7 +7,7 @@
 //! - grammar/src/ (by running tree-sitter generate)
 
 use crate::cache::GrammarCache;
-use crate::plan::{Operation, Plan, PlanSet};
+use crate::plan::{Operation, Plan, PlanMode, PlanSet};
 use crate::tool::Tool;
 use crate::types::{CrateRegistry, CrateState};
 use crate::util::find_repo_root;
@@ -23,9 +23,14 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// Generate crate files for all or a specific grammar.
-pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSet, Report> {
+pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>, mode: PlanMode) -> Result<PlanSet, Report> {
+    use std::time::Instant;
+    let total_start = Instant::now();
+
     // Note: lint is run by main.rs before and after calling this function
+    let registry_start = Instant::now();
     let registry = CrateRegistry::load(crates_dir)?;
+    let registry_elapsed = registry_start.elapsed();
 
     // Set up grammar cache
     let repo_root =
@@ -107,6 +112,7 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
                 crates_dir,
                 &cache_hits,
                 &cache_misses,
+                mode,
             ) {
                 Ok(plan) => {
                     if !plan.is_empty() {
@@ -129,9 +135,19 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
             }
         });
 
-    // Print cache stats
+    let processing_elapsed = total_start.elapsed();
+
+    // Print timing and cache stats
     let hits = cache_hits.load(Ordering::Relaxed);
     let misses = cache_misses.load(Ordering::Relaxed);
+    println!(
+        "{} Processed {} crate(s) in {:.2}s (registry: {:.2}s, generation: {:.2}s)",
+        "●".cyan(),
+        crates_to_process.len(),
+        processing_elapsed.as_secs_f64(),
+        registry_elapsed.as_secs_f64(),
+        (processing_elapsed - registry_elapsed).as_secs_f64(),
+    );
     if hits > 0 || misses > 0 {
         println!(
             "{} {} cache hits, {} misses",
@@ -172,6 +188,7 @@ fn plan_crate_generation(
     crates_dir: &Utf8Path,
     cache_hits: &AtomicUsize,
     cache_misses: &AtomicUsize,
+    mode: PlanMode,
 ) -> Result<Plan, Report> {
     let mut plan = Plan::for_crate(&crate_state.name);
     let crate_path = &crate_state.path;
@@ -185,7 +202,7 @@ fn plan_crate_generation(
         if old_content != new_cargo_toml {
             plan.add(Operation::UpdateFile {
                 path: cargo_toml_path,
-                old_content,
+                old_content: Some(old_content),
                 new_content: new_cargo_toml,
                 description: "Update Cargo.toml".to_string(),
             });
@@ -207,7 +224,7 @@ fn plan_crate_generation(
         if old_content != new_build_rs {
             plan.add(Operation::UpdateFile {
                 path: build_rs_path,
-                old_content,
+                old_content: Some(old_content),
                 new_content: new_build_rs,
                 description: "Update build.rs".to_string(),
             });
@@ -229,7 +246,7 @@ fn plan_crate_generation(
         if old_content != new_lib_rs {
             plan.add(Operation::UpdateFile {
                 path: lib_rs_path,
-                old_content,
+                old_content: Some(old_content),
                 new_content: new_lib_rs,
                 description: "Update src/lib.rs".to_string(),
             });
@@ -262,6 +279,7 @@ fn plan_crate_generation(
             crates_dir,
             cache_hits,
             cache_misses,
+            mode,
         )?;
     }
 
@@ -327,6 +345,7 @@ fn plan_grammar_src_generation(
     crates_dir: &Utf8Path,
     cache_hits: &AtomicUsize,
     cache_misses: &AtomicUsize,
+    mode: PlanMode,
 ) -> Result<(), Report> {
     let grammar_dir = crate_path.join("grammar");
     let dest_src_dir = grammar_dir.join("src");
@@ -347,7 +366,7 @@ fn plan_grammar_src_generation(
         cached.extract_to(&temp_src)?;
 
         // Plan updates from cached files
-        plan_updates_from_generated(&mut *plan, &temp_src, &dest_src_dir)?;
+        plan_updates_from_generated(&mut *plan, &temp_src, &dest_src_dir, mode)?;
         return Ok(());
     }
 
@@ -408,7 +427,7 @@ fn plan_grammar_src_generation(
     }
 
     // Plan updates from the generated files
-    plan_updates_from_generated(plan, &generated_src, &dest_src_dir)?;
+    plan_updates_from_generated(plan, &generated_src, &dest_src_dir, mode)?;
 
     Ok(())
 }
@@ -418,6 +437,7 @@ fn plan_updates_from_generated(
     plan: &mut Plan,
     generated_src: &Utf8Path,
     dest_src_dir: &Utf8Path,
+    mode: PlanMode,
 ) -> Result<(), Report> {
     // Ensure grammar/src/ directory exists in plan
     if !dest_src_dir.exists() {
@@ -442,7 +462,7 @@ fn plan_updates_from_generated(
 
         let dest_file = dest_src_dir.join(&file_name);
         let new_content = fs::read_to_string(&generated_file)?;
-        plan_file_update(plan, &dest_file, new_content, &format!("src/{}", file_name))?;
+        plan_file_update(plan, &dest_file, new_content, &format!("src/{}", file_name), mode)?;
     }
 
     // Copy tree_sitter/ directory
@@ -472,6 +492,7 @@ fn plan_updates_from_generated(
                     &dest_file,
                     new_content,
                     &format!("src/tree_sitter/{}", file_name),
+                    mode,
                 )?;
             }
         }
@@ -481,15 +502,32 @@ fn plan_updates_from_generated(
 }
 
 /// Helper to plan a file update (create or update based on whether content changed).
+/// In dry-run mode, reads old content for diffing.
+/// In normal mode, uses blake3 hashing to check if update is needed.
 fn plan_file_update(
     plan: &mut Plan,
     dest_path: &Utf8Path,
     new_content: String,
     description: &str,
+    mode: PlanMode,
 ) -> Result<(), Report> {
     if dest_path.exists() {
-        let old_content = fs::read_to_string(dest_path)?;
-        if old_content != new_content {
+        // Hash the new content
+        let new_hash = blake3::hash(new_content.as_bytes());
+
+        // Read and hash existing file
+        let old_bytes = fs::read(dest_path)?;
+        let old_hash = blake3::hash(&old_bytes);
+
+        // Only update if hashes differ
+        if old_hash != new_hash {
+            let old_content = if mode.is_dry_run() {
+                // In dry-run mode, we need the content for diffing
+                Some(String::from_utf8_lossy(&old_bytes).into_owned())
+            } else {
+                None
+            };
+
             plan.add(Operation::UpdateFile {
                 path: dest_path.to_owned(),
                 old_content,
