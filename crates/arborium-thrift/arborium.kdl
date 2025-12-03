@@ -11,9 +11,9 @@ grammar {
 
     inventor "Facebook"
     year 2007
-    description "Interface Definition Language and RPC framework; official Apache docs at https://thrift.apache.org/docs."
+    description "Interface Definition Language and RPC framework; official Apache docs at [thrift.apache.org](https://thrift.apache.org/docs)."
     link "https://en.wikipedia.org/wiki/Apache_Thrift"
-    trivia "Developed at Facebook starting 2006, open-sourced 2007; entered Apache Incubator in 2008 and became a TLP in 2010—see the https://thrift.apache.org/."
+    trivia "Developed at Facebook starting 2006, open-sourced 2007; entered Apache Incubator in 2008 and became a TLP in 2010—see the [Apache Thrift site](https://thrift.apache.org/)."
 
     sample {
         path "samples/tutorial.thrift"

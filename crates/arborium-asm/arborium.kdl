@@ -12,9 +12,9 @@ grammar {
 
     inventor "Kathleen Booth"
     year 1947
-    description "Low-level programming language that maps mnemonic instructions directly to machine code; the earliest published example was Booth's 1947 ARC2 'Contracted Notation' assembler (https://en.wikipedia.org/wiki/Kathleen_Booth)."
+    description "Low-level programming language that maps mnemonic instructions directly to machine code; the earliest published example was Booth's 1947 ARC2 'Contracted Notation' assembler ([Kathleen Booth](https://en.wikipedia.org/wiki/Kathleen_Booth))."
     link "https://en.wikipedia.org/wiki/Assembly_language"
-    trivia "Booth detailed one of the first assemblers in her 1947 ARC report, and backward compatibility means https://archive.org/details/Intel8086ProgrammersReferenceManual."
+    trivia "Booth detailed one of the first assemblers in her 1947 ARC report, and backward compatibility means the [Intel 8086 Programmer's Reference Manual](https://archive.org/details/Intel8086ProgrammersReferenceManual) is still relevant today."
 
     sample {
         path "samples/struc.asm"

@@ -12,9 +12,9 @@ grammar {
 
     inventor "Wayne Davison"
     year 1990
-    description "Unified diff format for representing file differences; GNU diffutils manual documents the format (https://www.gnu.org/software/diffutils/manual/)."
+    description "Unified diff format for representing file differences; GNU diffutils manual documents the format ([diffutils manual](https://www.gnu.org/software/diffutils/manual/))."
     link "https://en.wikipedia.org/wiki/Diff"
-    trivia "Wayne Davison proposed the unified format in Aug 1990 on comp.sources.misc; GNU diff added support in version 1.15 (Jan 1991) per the https://git.savannah.gnu.org/gitweb/?p=diffutils.git;a=blob;f=NEWS;hb=refs/tags/v1.15."
+    trivia "Wayne Davison proposed the unified format in Aug 1990 on comp.sources.misc; GNU diff added support in version 1.15 (Jan 1991) per the [NEWS file](https://git.savannah.gnu.org/gitweb/?p=diffutils.git;a=blob;f=NEWS;hb=refs/tags/v1.15)."
 
     sample {
         path "samples/t-apply-1.patch"

@@ -11,9 +11,9 @@ grammar {
 
     inventor "Stephen Dolan"
     year 2012
-    description "Command-line JSON processor; manual at the official site https://stedolan.github.io/jq/manual/."
+    description "Command-line JSON processor; [manual](https://stedolan.github.io/jq/manual/) at the official site."
     link "https://en.wikipedia.org/wiki/Jq_(programming_language)"
-    trivia "jq debuted in 2012 inspired by AWK/sed but for JSON; language features and functions are specified in the https://stedolan.github.io/jq/manual/."
+    trivia "jq debuted in 2012 inspired by AWK/sed but for JSON; language features and functions are specified in the [manual](https://stedolan.github.io/jq/manual/)."
 
     sample {
         path "samples/geo.jq"

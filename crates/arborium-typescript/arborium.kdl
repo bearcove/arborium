@@ -13,7 +13,7 @@ grammar {
 
     inventor "Anders Hejlsberg"
     year 2012
-    description "Statically typed superset of JavaScript; official handbook at https://www.typescriptlang.org/docs/."
+    description "Statically typed superset of JavaScript; official handbook at [typescriptlang.org](https://www.typescriptlang.org/docs/)."
     link "https://en.wikipedia.org/wiki/TypeScript"
     trivia "Announced by Microsoft in Oct 2012 to add optional types to JS; design is documented in the TypeScript spec and Handbook."
 

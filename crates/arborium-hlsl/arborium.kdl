@@ -12,9 +12,9 @@ grammar {
 
     inventor "Microsoft"
     year 2002
-    description "High-Level Shading Language for DirectX; official reference in the https://learn.microsoft.com/windows/win32/direct3dhlsl/dx-graphics-hlsl-pguide."
+    description "High-Level Shading Language for DirectX; [official reference](https://learn.microsoft.com/windows/win32/direct3dhlsl/dx-graphics-hlsl-pguide)."
     link "https://en.wikipedia.org/wiki/High-Level_Shading_Language"
-    trivia "Introduced with DirectX 9; modern compiler `dxc` targets DXIL and SPIR-V—see the https://github.com/microsoft/DirectXShaderCompiler."
+    trivia "Introduced with DirectX 9; modern compiler `dxc` targets DXIL and SPIR-V—see the [DirectX Shader Compiler](https://github.com/microsoft/DirectXShaderCompiler)."
 
     sample {
         path "samples/HelloTriangle.hlsl"

@@ -8,6 +8,7 @@ use crate::util;
 use camino::{Utf8Path, Utf8PathBuf};
 use facet::Facet;
 use owo_colors::OwoColorize;
+use pulldown_cmark::{html, Options, Parser};
 use std::collections::{BTreeMap, HashSet};
 use std::fs;
 use std::io::Write;
@@ -633,9 +634,10 @@ fn build_language_info_js(registry: &Registry) -> String {
             js.push_str(&format!("        \"tier\": {},\n", tier));
         }
         if let Some(ref desc) = grammar.description {
+            let html = markdown_to_html(desc);
             js.push_str(&format!(
                 "        \"description\": \"{}\",\n",
-                escape_for_js(desc)
+                escape_for_js(&html)
             ));
         }
         if let Some(ref inventor) = grammar.inventor {
@@ -654,9 +656,10 @@ fn build_language_info_js(registry: &Registry) -> String {
             ));
         }
         if let Some(ref trivia) = grammar.trivia {
+            let html = markdown_to_html(trivia);
             js.push_str(&format!(
                 "        \"trivia\": \"{}\",\n",
-                escape_for_js(trivia)
+                escape_for_js(&html)
             ));
         }
         if !grammar.aliases.is_empty() {
@@ -726,6 +729,21 @@ fn escape_for_js(s: &str) -> String {
         .replace('\n', "\\n")
         .replace('\r', "\\r")
         .replace('\t', "\\t")
+}
+
+/// Render markdown to HTML (inline, stripping outer <p> tags)
+fn markdown_to_html(markdown: &str) -> String {
+    let options = Options::empty();
+    let parser = Parser::new_ext(markdown, options);
+    let mut html_output = String::new();
+    html::push_html(&mut html_output, parser);
+    // Strip outer <p>...</p> tags for inline use
+    let trimmed = html_output.trim();
+    if trimmed.starts_with("<p>") && trimmed.ends_with("</p>") {
+        trimmed[3..trimmed.len() - 4].to_string()
+    } else {
+        trimmed.to_string()
+    }
 }
 
 fn precompress_files(demo_dir: &PathBuf) -> Result<(), String> {
@@ -967,6 +985,10 @@ mod tests {
                 tier: Some(1),
                 tag: "code".to_string(),
                 description: Some("Systems programming language".to_string()),
+                inventor: Some("Graydon Hoare".to_string()),
+                year: Some(2010),
+                link: Some("https://www.rust-lang.org/".to_string()),
+                trivia: Some("Originally a personal project".to_string()),
                 aliases: vec!["rs".to_string()],
                 samples: vec![RegistrySample {
                     path: "samples/example.rs".to_string(),

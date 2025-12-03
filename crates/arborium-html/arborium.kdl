@@ -13,9 +13,9 @@ grammar {
 
     inventor "Tim Berners-Lee"
     year 1993
-    description "Standard markup language for web documents; current living standard is maintained by WHATWG at https://html.spec.whatwg.org/."
+    description "Standard markup language for web documents; current [living standard](https://html.spec.whatwg.org/) is maintained by WHATWG."
     link "https://en.wikipedia.org/wiki/HTML"
-    trivia "Berners-Lee introduced HTML in 1991; the first public description appeared in 1993, and the modern living standard is maintained by WHATWG as the authoritative spec (https://whatwg.org/)."
+    trivia "Berners-Lee introduced HTML in 1991; the first public description appeared in 1993, and the modern living standard is maintained by [WHATWG](https://whatwg.org/) as the authoritative spec."
 
     sample {
         path "samples/component.html"

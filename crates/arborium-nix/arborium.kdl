@@ -12,7 +12,7 @@ grammar {
 
     inventor "Eelco Dolstra"
     year 2003
-    description "Purely functional package manager and language for reproducible builds; see Dolstra's PhD thesis https://edolstra.github.io/pubs/phd-thesis.pdf."
+    description "Purely functional package manager and language for reproducible builds; see [Dolstra's PhD thesis](https://edolstra.github.io/pubs/phd-thesis.pdf)."
     link "https://en.wikipedia.org/wiki/Nix_(package_manager)"
     trivia "Nix stores packages in hash-addressed store paths (e.g., /nix/store/...), eliminating dependency hell. The design is formalized in Dolstra's 2006 thesis and underpins NixOS."
 

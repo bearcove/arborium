@@ -12,9 +12,9 @@ grammar {
 
     inventor "Rasmus Lerdorf"
     year 1995
-    description "Server-side scripting language; the official manual is at https://www.php.net/manual/en/."
+    description "Server-side scripting language; the official manual is at [php.net](https://www.php.net/manual/en/)."
     link "https://en.wikipedia.org/wiki/PHP"
-    trivia "Started as 'Personal Home Page Tools' in 1994/95; renamed 'PHP: Hypertext Preprocessor' in 1997. History is documented in the https://www.php.net/ChangeLog-8.php and manual preface."
+    trivia "Started as 'Personal Home Page Tools' in 1994/95; renamed 'PHP: Hypertext Preprocessor' in 1997. History is documented in the [ChangeLog](https://www.php.net/ChangeLog-8.php) and manual preface."
 
     sample {
         path "samples/SessionGuard.php"

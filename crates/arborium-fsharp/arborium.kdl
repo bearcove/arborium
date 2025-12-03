@@ -13,9 +13,9 @@ grammar {
 
     inventor "Don Syme"
     year 2005
-    description "Functional-first .NET language with type inference; official docs at https://learn.microsoft.com/dotnet/fsharp/."
+    description "Functional-first .NET language with type inference; [official docs](https://learn.microsoft.com/dotnet/fsharp/)."
     link "https://en.wikipedia.org/wiki/F_Sharp_(programming_language)"
-    trivia "Developed at Microsoft Research and first released publicly in 2005; see Syme's early https://learn.microsoft.com/dotnet/fsharp/language-reference/ and the 2010 https://learn.microsoft.com/dotnet/fsharp/language-reference/language-specification."
+    trivia "Developed at Microsoft Research and first released publicly in 2005; see Syme's early [language reference](https://learn.microsoft.com/dotnet/fsharp/language-reference/) and the 2010 [language specification](https://learn.microsoft.com/dotnet/fsharp/language-reference/language-specification)."
 
     sample {
         path "samples/Http.fs"

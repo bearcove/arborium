@@ -13,7 +13,7 @@ grammar {
 
     inventor "Donald D. Chamberlin and Raymond F. Boyce"
     year 1974
-    description "Structured Query Language for relational databases; standardized by ANSI/ISO, see https://www.iso.org/standard/63555.html (paywalled) and https://sqlite.org/lang.html as an open reference."
+    description "Structured Query Language for relational databases; standardized by ANSI/ISO, see [ISO/IEC 9075](https://www.iso.org/standard/63555.html) (paywalled) and [SQLite documentation](https://sqlite.org/lang.html) as an open reference."
     link "https://en.wikipedia.org/wiki/SQL"
     trivia "Initially called SEQUEL at IBM for System R; trademark issues shortened it to SQL. Early history is recounted in Chamberlin's paper 'SEQUEL: A Structured English Query Language'."
 

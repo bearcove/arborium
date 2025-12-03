@@ -13,9 +13,9 @@ grammar {
 
     inventor "Edwin Brady"
     year 2009
-    description "Dependently typed functional language for verified software; see the official site https://www.idris-lang.org/."
+    description "Dependently typed functional language for verified software; see the [official site](https://www.idris-lang.org/)."
     link "https://en.wikipedia.org/wiki/Idris_(programming_language)"
-    trivia "Brady introduced Idris in 2009 to bring dependent types to general-purpose programming; the https://www.idris-lang.org/documentation/ demonstrates length-indexed vectors and other proofs in code."
+    trivia "Brady introduced Idris in 2009 to bring dependent types to general-purpose programming; the [documentation](https://www.idris-lang.org/documentation/) demonstrates length-indexed vectors and other proofs in code."
 
     sample {
         path "samples/List.idr"

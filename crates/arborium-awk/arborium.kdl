@@ -14,7 +14,7 @@ grammar {
     year 1977
     description "Pattern-scanning and text processing language; original description in the 1978 paper 'AWK — A Pattern Scanning and Processing Language'."
     link "https://en.wikipedia.org/wiki/AWK"
-    trivia "Name comes from creators' initials Aho–Weinberger–Kernighan; see the https://dl.acm.org/doi/10.5555/104836 and Unix V7 manual pages for the classic implementation."
+    trivia "Name comes from creators' initials Aho–Weinberger–Kernighan; see the [ACM paper](https://dl.acm.org/doi/10.5555/104836) and Unix V7 manual pages for the classic implementation."
 
     sample {
         path "samples/chem.awk"

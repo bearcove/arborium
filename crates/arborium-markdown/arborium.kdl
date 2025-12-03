@@ -13,9 +13,9 @@ grammar {
 
     inventor "John Gruber and Aaron Swartz"
     year 2004
-    description "Lightweight markup language for plain-text formatting; original spec on Gruber's site (https://daringfireball.net/projects/markdown/)."
+    description "Lightweight markup language for plain-text formatting; original spec on [Gruber's site](https://daringfireball.net/projects/markdown/)."
     link "https://en.wikipedia.org/wiki/Markdown"
-    trivia "Gruber published Markdown 1.0 with Swartz as beta tester in 2004; the canonical description and reference implementation are on https://daringfireball.net/projects/markdown/."
+    trivia "Gruber published Markdown 1.0 with Swartz as beta tester in 2004; the canonical description and reference implementation are on [Gruber's site](https://daringfireball.net/projects/markdown/)."
 
     sample {
         path "samples/rust-readme.md"

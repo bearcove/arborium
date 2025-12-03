@@ -13,9 +13,9 @@ grammar {
 
     inventor "Microsoft"
     year 2002
-    description "Visual Basic .NET, object-oriented language for the .NET Framework; language reference at https://learn.microsoft.com/dotnet/visual-basic/."
+    description "Visual Basic .NET, object-oriented language for the .NET Framework; language reference at [learn.microsoft.com](https://learn.microsoft.com/dotnet/visual-basic/)."
     link "https://en.wikipedia.org/wiki/Visual_Basic_(.NET)"
-    trivia "Launched with .NET Framework 1.0 in 2002 as a rewrite of VB6; the https://learn.microsoft.com/dotnet/visual-basic/language-reference/ documents syntax changes and OO features."
+    trivia "Launched with .NET Framework 1.0 in 2002 as a rewrite of VB6; the [VB.NET language reference](https://learn.microsoft.com/dotnet/visual-basic/language-reference/) documents syntax changes and OO features."
 
     sample {
         path "samples/Math.vb"

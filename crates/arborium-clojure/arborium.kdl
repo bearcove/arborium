@@ -12,9 +12,9 @@ grammar {
 
     inventor "Rich Hickey"
     year 2007
-    description "Functional Lisp dialect for the JVM with strong concurrency support; official site: https://clojure.org/."
+    description "Functional Lisp dialect for the JVM with strong concurrency support; official site: [clojure.org](https://clojure.org/)."
     link "https://en.wikipedia.org/wiki/Clojure"
-    trivia "Hickey designed Clojure to simplify concurrent programming; the language was announced publicly in 2007 and documented in the https://clojure.org/releases/downloads."
+    trivia "Hickey designed Clojure to simplify concurrent programming; the language was announced publicly in 2007 and documented in the [release downloads](https://clojure.org/releases/downloads)."
 
     sample {
         path "samples/params.clj"

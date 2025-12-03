@@ -12,9 +12,9 @@ grammar {
 
     inventor "Evan Czaplicki"
     year 2012
-    description "Purely functional language for reliable web apps; see the official https://guide.elm-lang.org/."
+    description "Purely functional language for reliable web apps; see the official [guide](https://guide.elm-lang.org/)."
     link "https://en.wikipedia.org/wiki/Elm_(programming_language)"
-    trivia "Introduced by Czaplicki in 2012 with 'The Elm Architecture' that later inspired Redux; documented in the https://guide.elm-lang.org/architecture/ section of the guide."
+    trivia "Introduced by Czaplicki in 2012 with 'The Elm Architecture' that later inspired Redux; documented in the [architecture section](https://guide.elm-lang.org/architecture/) of the guide."
 
     sample {
         path "samples/Article.elm"

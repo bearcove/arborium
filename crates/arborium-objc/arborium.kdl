@@ -12,7 +12,7 @@ grammar {
 
     inventor "Brad Cox and Tom Love"
     year 1984
-    description "Object-oriented superset of C used for macOS/iOS; Apple's modern reference is the https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/."
+    description "Object-oriented superset of C used for macOS/iOS; Apple's modern reference is the [Programming with Objective-C guide](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/)."
     link "https://en.wikipedia.org/wiki/Objective-C"
     trivia "Derived from Smalltalk messaging added to C; NeXT licensed it in 1988, leading to its adoption by Apple after 1996—documented in Apple's developer library."
 

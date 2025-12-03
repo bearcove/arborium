@@ -13,9 +13,9 @@ grammar {
 
     inventor "Brendan Eich"
     year 1995
-    description "High-level, dynamic language for the web and beyond; the current language spec is https://tc39.es/ecma262/."
+    description "High-level, dynamic language for the web and beyond; the current [ECMAScript specification](https://tc39.es/ecma262/)."
     link "https://en.wikipedia.org/wiki/JavaScript"
-    trivia "Eich created JavaScript in 10 days at Netscape in May 1995; it shipped in Netscape Navigator 2.0. TC39 now standardizes it via https://tc39.es/ecma262/, and the official name of the language is ECMAScript."
+    trivia "Eich created JavaScript in 10 days at Netscape in May 1995; it shipped in Netscape Navigator 2.0. TC39 now standardizes it via [ECMAScript specification](https://tc39.es/ecma262/), and the official name of the language is ECMAScript."
 
     sample {
         path "samples/x-model.js"

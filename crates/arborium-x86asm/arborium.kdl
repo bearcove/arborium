@@ -13,7 +13,7 @@ grammar {
 
     inventor "Intel (Stephen P. Morse et al.)"
     year 1978
-    description "Assembly language family for Intel x86; reference manuals at https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html."
+    description "Assembly language family for Intel x86; reference manuals at [Intel SDM](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)."
     link "https://en.wikipedia.org/wiki/X86_assembly_language"
     trivia "Built on the 8086 ISA released June 1978; Intel's Software Developer Manuals document backward compatibility that lets 1978-era code run on modern CPUs."
 

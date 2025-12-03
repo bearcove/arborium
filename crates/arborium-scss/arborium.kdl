@@ -13,9 +13,9 @@ grammar {
 
     inventor "Hampton Catlin, Natalie Weizenbaum, Chris Eppstein"
     year 2006
-    description "Sass/SCSS is a CSS superset adding variables, nesting, and mixins; see the official https://sass-lang.com/documentation/."
+    description "Sass/SCSS is a CSS superset adding variables, nesting, and mixins; see the official [documentation](https://sass-lang.com/documentation/)."
     link "https://en.wikipedia.org/wiki/Sass_(style_sheet_language)"
-    trivia "SCSS syntax arrived with Sass 3 (2010) to mirror CSS; history and design notes are in the https://sass-lang.com/blog/ and https://sass-lang.com/documentation/syntax."
+    trivia "SCSS syntax arrived with Sass 3 (2010) to mirror CSS; history and design notes are in the [Sass blog](https://sass-lang.com/blog/) and [syntax documentation](https://sass-lang.com/documentation/syntax)."
 
     sample {
         path "samples/_buttons.scss"

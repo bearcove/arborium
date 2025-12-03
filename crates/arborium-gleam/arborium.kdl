@@ -12,9 +12,9 @@ grammar {
 
     inventor "Louis Pilfold"
     year 2016
-    description "Statically typed functional language for the BEAM; official docs at https://gleam.run/."
+    description "Statically typed functional language for the BEAM; [official docs](https://gleam.run/)."
     link "https://en.wikipedia.org/wiki/Gleam_(programming_language)"
-    trivia "Pilfold announced Gleam in 2016 to bring ML-style typing to Erlang; version 1.0 shipped in March 2024 per the https://gleam.run/news/gleam-v1.0/."
+    trivia "Pilfold announced Gleam in 2016 to bring ML-style typing to Erlang; version 1.0 shipped in March 2024 per the [v1.0 announcement](https://gleam.run/news/gleam-v1.0/)."
 
     sample {
         path "samples/router.gleam"

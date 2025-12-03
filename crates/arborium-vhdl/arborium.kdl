@@ -12,7 +12,7 @@ grammar {
 
     inventor "U.S. Department of Defense"
     year 1983
-    description "VHSIC Hardware Description Language; standardized as https://standards.ieee.org/ieee/1076/7424/."
+    description "VHSIC Hardware Description Language; standardized as [IEEE 1076](https://standards.ieee.org/ieee/1076/7424/)."
     link "https://en.wikipedia.org/wiki/VHDL"
     trivia "Developed under the VHSIC program and standardized in 1987 as IEEE 1076; later revisions added numeric_std and child standards."
 

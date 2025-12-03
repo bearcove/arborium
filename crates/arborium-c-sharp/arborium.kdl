@@ -13,9 +13,9 @@ grammar {
 
     inventor "Anders Hejlsberg"
     year 2000
-    description "Modern object-oriented language for .NET; official spec is published as https://www.ecma-international.org/publications-and-standards/standards/ecma-334/."
+    description "Modern object-oriented language for .NET; official spec is published as [ECMA-334](https://www.ecma-international.org/publications-and-standards/standards/ecma-334/)."
     link "https://en.wikipedia.org/wiki/C_Sharp_(programming_language)"
-    trivia "Originally code-named 'Cool' (C-like Object Oriented Language) inside Microsoft before being renamed C#; see the https://www.ecma-international.org/publications-and-standards/standards/ecma-334/ and early .NET announcements."
+    trivia "Originally code-named 'Cool' (C-like Object Oriented Language) inside Microsoft before being renamed C#; see the [ECMA-334 specification](https://www.ecma-international.org/publications-and-standards/standards/ecma-334/) and early .NET announcements."
 
     sample {
         path "samples/ref_readonly_program.cs"

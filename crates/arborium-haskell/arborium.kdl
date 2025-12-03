@@ -13,7 +13,7 @@ grammar {
 
     inventor "Simon Peyton Jones, Paul Hudak, Philip Wadler, et al."
     year 1990
-    description "Purely functional language with lazy evaluation and strong typing; see the https://www.haskell.org/onlinereport/haskell2010/ for the language definition."
+    description "Purely functional language with lazy evaluation and strong typing; see the [Haskell 2010 Report](https://www.haskell.org/onlinereport/haskell2010/) for the language definition."
     link "https://en.wikipedia.org/wiki/Haskell"
     trivia "Named after logician Haskell Curry; standardized in 1990 by a committee that published successive language reports—the 2010 Report remains the latest official spec."
 

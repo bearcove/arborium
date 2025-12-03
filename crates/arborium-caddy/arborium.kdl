@@ -12,9 +12,9 @@ grammar {
 
     inventor "Matt Holt and Caddy contributors"
     year 2015
-    description "Caddyfile configuration language for the Caddy web server; official docs at https://caddyserver.com/docs/caddyfile."
+    description "Caddyfile configuration language for the Caddy web server; official docs at [caddyserver.com](https://caddyserver.com/docs/caddyfile)."
     link "https://caddyserver.com/docs/"
-    trivia "Caddy launched in 2015 with automatic HTTPS via Let's Encrypt; minimal syntax allows a single-line site definition—documented in the https://caddyserver.com/docs/caddyfile."
+    trivia "Caddy launched in 2015 with automatic HTTPS via Let's Encrypt; minimal syntax allows a single-line site definition—documented in the [Caddyfile documentation](https://caddyserver.com/docs/caddyfile)."
 
     sample {
         path "samples/Caddyfile"

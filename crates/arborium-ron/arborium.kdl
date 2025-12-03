@@ -12,9 +12,9 @@ grammar {
 
     inventor "kvark and torkleyy"
     year 2015
-    description "Rusty Object Notation, a Rust-friendly data format; reference at https://docs.rs/ron/latest/ron/."
+    description "Rusty Object Notation, a Rust-friendly data format; reference at [docs.rs/ron](https://docs.rs/ron/latest/ron/)."
     link "https://github.com/ron-rs/ron"
-    trivia "Designed for a (canceled) game project and revived by the Rust community; features trailing commas, comments, and Rust-like enums—see the crate docs on https://docs.rs/ron."
+    trivia "Designed for a (canceled) game project and revived by the Rust community; features trailing commas, comments, and Rust-like enums—see the [crate docs](https://docs.rs/ron)."
 
     sample {
         path "samples/kits.ron"

@@ -11,9 +11,9 @@ grammar {
 
     inventor "Igor Sysoev"
     year 2004
-    description "Configuration language for the nginx web server; official reference at https://nginx.org/en/docs/dirindex.html."
+    description "Configuration language for the nginx web server; official reference at [nginx.org](https://nginx.org/en/docs/dirindex.html)."
     link "https://en.wikipedia.org/wiki/Nginx"
-    trivia "Sysoev began nginx in 2002; first public release in 2004. The configuration syntax is documented in the https://nginx.org/en/docs/."
+    trivia "Sysoev began nginx in 2002; first public release in 2004. The configuration syntax is documented in the [official documentation](https://nginx.org/en/docs/)."
 
     sample {
         path "samples/nginx.conf"

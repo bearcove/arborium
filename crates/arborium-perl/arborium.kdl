@@ -13,9 +13,9 @@ grammar {
 
     inventor "Larry Wall"
     year 1987
-    description "General-purpose scripting language renowned for text processing; core docs at https://perldoc.perl.org/."
+    description "General-purpose scripting language renowned for text processing; core docs at [perldoc.perl.org](https://perldoc.perl.org/)."
     link "https://en.wikipedia.org/wiki/Perl"
-    trivia "Wall released Perl 1.0 on 18 Dec 1987; the motto 'There's more than one way to do it' is from the official https://perldoc.perl.org/perlstyle and https://perldoc.perl.org/perlintro documentation."
+    trivia "Wall released Perl 1.0 on 18 Dec 1987; the motto 'There's more than one way to do it' is from the official [perlstyle](https://perldoc.perl.org/perlstyle) and [perlintro](https://perldoc.perl.org/perlintro) documentation."
 
     sample {
         path "samples/gmtime.pm"

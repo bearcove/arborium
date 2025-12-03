@@ -12,9 +12,9 @@ grammar {
 
     inventor "Martin Odersky"
     year 2004
-    description "Multi-paradigm JVM language blending OO and FP; official docs at https://docs.scala-lang.org/."
+    description "Multi-paradigm JVM language blending OO and FP; official docs at [docs.scala-lang.org](https://docs.scala-lang.org/)."
     link "https://en.wikipedia.org/wiki/Scala_(programming_language)"
-    trivia "The name abbreviates 'scalable language'; Odersky announced Scala in 2004 after work on Java generics and the Pizza language. The https://docs.scala-lang.org/scala3/reference/ documents current syntax and features."
+    trivia "The name abbreviates 'scalable language'; Odersky announced Scala in 2004 after work on Java generics and the Pizza language. The [Scala 3 reference](https://docs.scala-lang.org/scala3/reference/) documents current syntax and features."
 
     sample {
         path "samples/ResultResolver.scala"

@@ -12,9 +12,9 @@ grammar {
 
     inventor "Unknown (popularized by Microsoft Windows)"
     year 1985
-    description "Simple key-value configuration format; Microsoft documented the `.ini` structure in early Windows SDKs (e.g., https://win16.org/)."
+    description "Simple key-value configuration format; Microsoft documented the `.ini` structure in early Windows SDKs (e.g., [Win16 documentation](https://win16.org/))."
     link "https://en.wikipedia.org/wiki/INI_file"
-    trivia "Windows 1.0 (1985) popularized `.ini` for application settings; the legacy WinAPI functions `GetPrivateProfileString` etc. are still documented in https://learn.microsoft.com/windows/win32/api/winbase/."
+    trivia "Windows 1.0 (1985) popularized `.ini` for application settings; the legacy WinAPI functions `GetPrivateProfileString` etc. are still documented in [Windows API documentation](https://learn.microsoft.com/windows/win32/api/winbase/)."
 
     sample {
         path "samples/pytest.ini"

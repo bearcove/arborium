@@ -13,9 +13,9 @@ grammar {
 
     inventor "Brian Fox"
     year 1989
-    description "Unix shell and command language for GNU; see the official https://www.gnu.org/software/bash/manual/."
+    description "Unix shell and command language for GNU; see the official [Bash manual](https://www.gnu.org/software/bash/manual/)."
     link "https://en.wikipedia.org/wiki/Bash_(Unix_shell)"
-    trivia "Bash means 'Bourne Again SHell', a nod to the Bourne shell; Fox began coding it in January 1988 and released the first beta in June 1989 for the GNU Project (https://www.gnu.org/software/bash/manual/bash.html#Bash-History)."
+    trivia "Bash means 'Bourne Again SHell', a nod to the Bourne shell; Fox began coding it in January 1988 and released the first beta in June 1989 for the GNU Project ([Bash History](https://www.gnu.org/software/bash/manual/bash.html#Bash-History))."
 
     sample {
         path "samples/doorbell.sh"

@@ -11,9 +11,9 @@ grammar {
 
     inventor "Kenton Varda"
     year 2013
-    description "Cap'n Proto serialization and RPC system; design and spec at https://capnproto.org/."
+    description "Cap'n Proto serialization and RPC system; design and spec at [capnproto.org](https://capnproto.org/)."
     link "https://en.wikipedia.org/wiki/Cap'n_Proto"
-    trivia "Varda released Cap'n Proto on April 1, 2013, as a faster, zero-copy successor to Protocol Buffers; the https://capnproto.org/faq.html explains the zero-copy format."
+    trivia "Varda released Cap'n Proto on April 1, 2013, as a faster, zero-copy successor to Protocol Buffers; the [FAQ](https://capnproto.org/faq.html) explains the zero-copy format."
 
     sample {
         path "samples/addressbook.capnp"

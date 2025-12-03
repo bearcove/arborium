@@ -13,7 +13,7 @@ grammar {
 
     inventor "John Warnock and Charles Geschke"
     year 1984
-    description "Page description and programming language from Adobe; reference in the https://www.adobe.com/content/dam/acom/en/devnet/actionscript/articles/PLRM.pdf."
+    description "Page description and programming language from Adobe; reference in the [PostScript Language Reference Manual](https://www.adobe.com/content/dam/acom/en/devnet/actionscript/articles/PLRM.pdf)."
     link "https://en.wikipedia.org/wiki/PostScript"
     trivia "Adobe released PostScript in 1984; the LaserWriter (1985) used it to ignite desktop publishing. The 'Red Book' PLRM is the definitive spec."
 

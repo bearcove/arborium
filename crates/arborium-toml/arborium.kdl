@@ -12,9 +12,9 @@ grammar {
 
     inventor "Tom Preston-Werner"
     year 2013
-    description "Tom's Obvious, Minimal Language for configuration; official spec at https://toml.io/en/."
+    description "Tom's Obvious, Minimal Language for configuration; official spec at [toml.io](https://toml.io/en/)."
     link "https://en.wikipedia.org/wiki/TOML"
-    trivia "TOML 1.0.0 was released January 2021 after 8 years of iteration; see the spec changelog on https://toml.io/en/v1.0.0."
+    trivia "TOML 1.0.0 was released January 2021 after 8 years of iteration; see the spec changelog on [toml.io](https://toml.io/en/v1.0.0)."
 
     sample {
         path "samples/starship.toml"

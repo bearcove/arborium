@@ -13,9 +13,9 @@ grammar {
 
     inventor "Solomon Hykes and Docker, Inc."
     year 2013
-    description "Declarative format for Docker image builds; official reference: https://docs.docker.com/engine/reference/builder/."
+    description "Declarative format for Docker image builds; official reference: [Dockerfile reference](https://docs.docker.com/engine/reference/builder/)."
     link "https://docs.docker.com/engine/reference/builder/"
-    trivia "Introduced with Docker's first public release in 2013; the reference documents each instruction and the layer-caching model that made Docker adoption explode (https://docs.docker.com/engine/reference/builder/)."
+    trivia "Introduced with Docker's first public release in 2013; the [reference](https://docs.docker.com/engine/reference/builder/) documents each instruction and the layer-caching model that made Docker adoption explode."
 
     sample {
         path "samples/python-bookworm.Dockerfile"

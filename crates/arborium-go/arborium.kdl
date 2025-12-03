@@ -12,9 +12,9 @@ grammar {
 
     inventor "Robert Griesemer, Rob Pike, Ken Thompson"
     year 2009
-    description "Statically typed compiled language from Google; the canonical spec is the https://go.dev/ref/spec."
+    description "Statically typed compiled language from Google; the canonical [language specification](https://go.dev/ref/spec)."
     link "https://en.wikipedia.org/wiki/Go_(programming_language)"
-    trivia "Announced publicly in Nov 2009; its mascot the Gopher was created by Renée French and documented on the https://go.dev/blog/gopher."
+    trivia "Announced publicly in Nov 2009; its mascot the Gopher was created by Renée French and documented on the [Go blog](https://go.dev/blog/gopher)."
 
     sample {
         path "samples/explore_repo.go"

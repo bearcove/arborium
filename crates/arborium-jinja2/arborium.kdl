@@ -12,9 +12,9 @@ grammar {
 
     inventor "Armin Ronacher"
     year 2008
-    description "Python templating engine inspired by Django; official docs at https://jinja.palletsprojects.com/."
+    description "Python templating engine inspired by Django; [official docs](https://jinja.palletsprojects.com/)."
     link "https://en.wikipedia.org/wiki/Jinja_(template_engine)"
-    trivia "Named after the Jinja shrine; released as part of the Pocoo suite. See the https://jinja.palletsprojects.com/en/stable/#design-goals and early release history in the docs."
+    trivia "Named after the Jinja shrine; released as part of the Pocoo suite. See the [design goals](https://jinja.palletsprojects.com/en/stable/#design-goals) and early release history in the docs."
 
     sample {
         path "samples/admin-base.html"

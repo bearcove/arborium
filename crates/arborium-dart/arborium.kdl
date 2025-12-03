@@ -12,9 +12,9 @@ grammar {
 
     inventor "Lars Bak and Kasper Lund"
     year 2011
-    description "Object-oriented language optimized for UI development; official site: https://dart.dev/."
+    description "Object-oriented language optimized for UI development; official site: [dart.dev](https://dart.dev/)."
     link "https://en.wikipedia.org/wiki/Dart_(programming_language)"
-    trivia "Unveiled at GOTO Aarhus 2011 by Bak and Lund; the https://dart.dev/guides/language/language-tour documents its core goals, and Dart became the language behind Flutter when Google announced Flutter in 2017."
+    trivia "Unveiled at GOTO Aarhus 2011 by Bak and Lund; the [language tour](https://dart.dev/guides/language/language-tour) documents its core goals, and Dart became the language behind Flutter when Google announced Flutter in 2017."
 
     sample {
         path "samples/fluid_api.dart"

@@ -12,9 +12,9 @@ grammar {
 
     inventor "Douglas Crockford"
     year 2001
-    description "Lightweight data interchange format; see the ECMA-404 standard (https://www.ecma-international.org/publications-and-standards/standards/ecma-404/)."
+    description "Lightweight data interchange format; see the [ECMA-404 standard](https://www.ecma-international.org/publications-and-standards/standards/ecma-404/)."
     link "https://en.wikipedia.org/wiki/JSON"
-    trivia "Crockford documented JSON in 2001 while at State Software; it was standardized as https://www.rfc-editor.org/rfc/rfc8259 and https://www.ecma-international.org/publications-and-standards/standards/ecma-404/."
+    trivia "Crockford documented JSON in 2001 while at State Software; it was standardized as [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259) and [ECMA-404](https://www.ecma-international.org/publications-and-standards/standards/ecma-404/)."
 
     sample {
         path "samples/package.json"

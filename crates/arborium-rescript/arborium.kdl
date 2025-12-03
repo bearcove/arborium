@@ -13,9 +13,9 @@ grammar {
 
     inventor "Hongbo Zhang and the ReScript team"
     year 2020
-    description "Functional language that compiles to JavaScript, evolved from BuckleScript/Reason; docs at https://rescript-lang.org/docs/latest."
+    description "Functional language that compiles to JavaScript, evolved from BuckleScript/Reason; docs at [rescript-lang.org](https://rescript-lang.org/docs/latest)."
     link "https://rescript-lang.org/"
-    trivia "Rebranded from BuckleScript/Reason in 2020 to focus on a JS-centric pipeline; see the https://rescript-lang.org/blog/announcement and docs for the syntax and compiler."
+    trivia "Rebranded from BuckleScript/Reason in 2020 to focus on a JS-centric pipeline; see the [announcement](https://rescript-lang.org/blog/announcement) and docs for the syntax and compiler."
 
     sample {
         path "samples/Core__Array.res"

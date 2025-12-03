@@ -11,9 +11,9 @@ grammar {
 
     inventor "James Gosling"
     year 1995
-    description "Object-oriented, class-based language targeting the JVM; authoritative reference is the https://docs.oracle.com/javase/specs/."
+    description "Object-oriented, class-based language targeting the JVM; authoritative [Java Language Specification](https://docs.oracle.com/javase/specs/)."
     link "https://en.wikipedia.org/wiki/Java_(programming_language)"
-    trivia "Started as 'Oak' then renamed Java after Java coffee; the 'write once, run anywhere' mantra comes from Sun's 1995 launch. The https://docs.oracle.com/javase/specs/ defines the language across versions."
+    trivia "Started as 'Oak' then renamed Java after Java coffee; the 'write once, run anywhere' mantra comes from Sun's 1995 launch. The [Java Language Specification](https://docs.oracle.com/javase/specs/) defines the language across versions."
 
     sample {
         path "samples/Vet.java"

@@ -12,7 +12,7 @@ grammar {
 
     inventor "Tim Paterson"
     year 1981
-    description "DOS/Windows batch scripting (.bat/.cmd); commands documented in the https://winworldpc.com/product/ms-dos/5x and modern https://learn.microsoft.com/windows-server/administration/windows-commands/windows-commands."
+    description "DOS/Windows batch scripting (.bat/.cmd); commands documented in the [MS-DOS 5.x manual](https://winworldpc.com/product/ms-dos/5x) and modern [Windows Commands reference](https://learn.microsoft.com/windows-server/administration/windows-commands/windows-commands)."
     link "https://en.wikipedia.org/wiki/Batch_file"
     trivia "Batch files originated with 86-DOS/MS-DOS; Microsoft retained backward compatibility through cmd.exe—see the historical MS-DOS manuals for syntax."
 

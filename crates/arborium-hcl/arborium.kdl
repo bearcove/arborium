@@ -13,9 +13,9 @@ grammar {
 
     inventor "HashiCorp"
     year 2014
-    description "HashiCorp Configuration Language for IaC; language spec lives in the Terraform docs (https://developer.hashicorp.com/terraform/language/syntax/configuration)."
+    description "HashiCorp Configuration Language for IaC; [language spec](https://developer.hashicorp.com/terraform/language/syntax/configuration) lives in the Terraform docs."
     link "https://github.com/hashicorp/hcl"
-    trivia "Designed to be both human-readable and machine-friendly; Terraform accepts both JSON and native HCL, documented in the https://developer.hashicorp.com/terraform/language."
+    trivia "Designed to be both human-readable and machine-friendly; Terraform accepts both JSON and native HCL, documented in the [Terraform language guide](https://developer.hashicorp.com/terraform/language)."
 
     sample {
         path "samples/vpc-main.tf"

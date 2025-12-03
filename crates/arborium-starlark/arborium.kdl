@@ -13,9 +13,9 @@ grammar {
 
     inventor "Laurent Le Brun and Google"
     year 2015
-    description "Deterministic, hermetic build language used by Bazel/Buck2; spec at https://bazel.build/rules/language."
+    description "Deterministic, hermetic build language used by Bazel/Buck2; spec at [bazel.build/rules/language](https://bazel.build/rules/language)."
     link "https://en.wikipedia.org/wiki/Starlark"
-    trivia "Originally named Skylark (2015), renamed Starlark in 2018; deterministic semantics documented in the https://bazel.build/rules/language."
+    trivia "Originally named Skylark (2015), renamed Starlark in 2018; deterministic semantics documented in the [Bazel language guide](https://bazel.build/rules/language)."
 
     sample {
         path "samples/http.bzl"

@@ -12,7 +12,7 @@ grammar {
 
     inventor "Phil Moorby and Prabhu Goel"
     year 1984
-    description "Hardware description language standardized as https://standards.ieee.org/ieee/1364/2985/."
+    description "Hardware description language standardized as [IEEE 1364](https://standards.ieee.org/ieee/1364/2985/)."
     link "https://en.wikipedia.org/wiki/Verilog"
     trivia "Created at Gateway Design Automation (later Cadence) in 1984; became an open IEEE standard in 1995 (IEEE 1364-1995)."
 

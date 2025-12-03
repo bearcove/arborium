@@ -12,9 +12,9 @@ grammar {
 
     inventor "Roberto Ierusalimschy, Waldemar Celes, Luiz Henrique de Figueiredo"
     year 1993
-    description "Lightweight embeddable scripting language from PUC-Rio; official reference manual at https://www.lua.org/manual/5.4/."
+    description "Lightweight embeddable scripting language from PUC-Rio; [official reference manual](https://www.lua.org/manual/5.4/)."
     link "https://en.wikipedia.org/wiki/Lua_(programming_language)"
-    trivia "Lua (meaning 'moon' in Portuguese) succeeded SOL ('sun'); see the https://www.lua.org/history.html and the 1993 technical report introducing Lua."
+    trivia "Lua (meaning 'moon' in Portuguese) succeeded SOL ('sun'); see the [history page](https://www.lua.org/history.html) and the 1993 technical report introducing Lua."
 
     sample {
         path "samples/utf8.lua"

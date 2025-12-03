@@ -12,9 +12,9 @@ grammar {
 
     inventor "Håkon Wium Lie"
     year 1996
-    description "Style sheet language for web documents; the living standard is maintained by the W3C (https://www.w3.org/TR/CSS/)."
+    description "Style sheet language for web documents; the living standard is maintained by the [W3C](https://www.w3.org/TR/CSS/)."
     link "https://en.wikipedia.org/wiki/CSS"
-    trivia "Wium Lie proposed CSS on 10 Oct 1994 while at CERN and it became a W3C Recommendation in 1996; see his original https://www.w3.org/People/howcome/p/Spec/ and the https://www.w3.org/TR/REC-CSS1-961217."
+    trivia "Wium Lie proposed CSS on 10 Oct 1994 while at CERN and it became a W3C Recommendation in 1996; see his [original proposal](https://www.w3.org/People/howcome/p/Spec/) and the [CSS1 specification](https://www.w3.org/TR/REC-CSS1-961217)."
 
     sample {
         path "samples/pico.css"
