@@ -638,6 +638,27 @@ fn build_language_info_js(registry: &Registry) -> String {
                 escape_for_js(desc)
             ));
         }
+        if let Some(ref inventor) = grammar.inventor {
+            js.push_str(&format!(
+                "        \"inventor\": \"{}\",\n",
+                escape_for_js(inventor)
+            ));
+        }
+        if let Some(year) = grammar.year {
+            js.push_str(&format!("        \"year\": {},\n", year));
+        }
+        if let Some(ref link) = grammar.link {
+            js.push_str(&format!(
+                "        \"url\": \"{}\",\n",
+                escape_for_js(link)
+            ));
+        }
+        if let Some(ref trivia) = grammar.trivia {
+            js.push_str(&format!(
+                "        \"trivia\": \"{}\",\n",
+                escape_for_js(trivia)
+            ));
+        }
         if !grammar.aliases.is_empty() {
             let aliases: Vec<String> = grammar
                 .aliases
