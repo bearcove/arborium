@@ -139,6 +139,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          save-if: true  # Save cache even on failure
 
       - name: Install nextest
         uses: taiki-e/install-action@v2
@@ -149,7 +151,7 @@ jobs:
         run: cargo build --locked --verbose
 
       - name: Run tests
-        run: cargo nextest run --locked --verbose
+        run: cargo nextest run --locked --verbose --no-fail-fast
 
   wasm:
     needs: generate

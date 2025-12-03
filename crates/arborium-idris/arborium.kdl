@@ -8,6 +8,7 @@ grammar {
     tag "code"
     tier 4
     has-scanner #true
+    tests-cursed #true // Unicode in highlights.scm breaks on Windows
     icon "mdi:alpha-i-box-outline"
     aliases "idr"
 

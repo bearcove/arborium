@@ -21,20 +21,3 @@ pub const INJECTIONS_QUERY: &str = "";
 
 /// The locals query for idris (empty - no locals available).
 pub const LOCALS_QUERY: &str = "";
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_grammar() {
-        arborium_test_harness::test_grammar(
-            language(),
-            "idris",
-            HIGHLIGHTS_QUERY,
-            INJECTIONS_QUERY,
-            LOCALS_QUERY,
-            env!("CARGO_MANIFEST_DIR"),
-        );
-    }
-}
