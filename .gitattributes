@@ -1,0 +1,17 @@
+# Ensure consistent line endings and encoding across platforms
+* text=auto
+
+# Query files contain Unicode and must not be mangled
+*.scm text eol=lf
+queries/** text eol=lf
+
+# Generated grammar files - preserve exactly as-is
+node-types.json text eol=lf
+grammar.json text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Windows batch files
+*.bat text eol=crlf
+*.cmd text eol=crlf
