@@ -239,6 +239,13 @@ pub struct Internal {
     pub value: bool,
 }
 
+/// Tests cursed marker (bool value) - skip test generation for problematic grammars.
+#[derive(Debug, Clone, Facet)]
+pub struct TestsCursed {
+    #[facet(kdl::argument)]
+    pub value: bool,
+}
+
 /// Aliases child node (multiple string arguments).
 #[derive(Debug, Clone, Facet)]
 pub struct Aliases {
@@ -289,6 +296,10 @@ pub struct GrammarConfig {
     /// Internal grammar (used by other grammars via injection, not user-facing).
     #[facet(kdl::child, default)]
     pub internal: Option<Internal>,
+
+    /// Tests are cursed (skip test generation due to platform issues).
+    #[facet(kdl::child, default)]
+    pub tests_cursed: Option<TestsCursed>,
 
     /// Whether this grammar has a scanner.c file.
     #[facet(kdl::child, default)]
@@ -351,6 +362,11 @@ impl GrammarConfig {
     /// Whether this grammar has a scanner.
     pub fn has_scanner(&self) -> bool {
         self.has_scanner.as_ref().map(|h| h.value).unwrap_or(false)
+    }
+
+    /// Whether tests are cursed (skip test generation).
+    pub fn tests_cursed(&self) -> bool {
+        self.tests_cursed.as_ref().map(|t| t.value).unwrap_or(false)
     }
 }
 

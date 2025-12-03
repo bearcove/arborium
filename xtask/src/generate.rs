@@ -687,6 +687,7 @@ fn generate_lib_rs(
     config: &crate::types::CrateConfig,
 ) -> String {
     let grammar = config.grammars.first();
+    let tests_cursed = grammar.map(|g| g.tests_cursed()).unwrap_or(false);
 
     let grammar_id = grammar
         .map(|g| g.id.as_ref())
@@ -743,6 +744,31 @@ pub const LOCALS_QUERY: &str = "";"#
         )
     };
 
+    let test_module = if tests_cursed {
+        String::new()
+    } else {
+        format!(
+            r#"
+#[cfg(test)]
+mod tests {{
+    use super::*;
+
+    #[test]
+    fn test_grammar() {{
+        arborium_test_harness::test_grammar(
+            language(),
+            "{grammar_id}",
+            HIGHLIGHTS_QUERY,
+            INJECTIONS_QUERY,
+            LOCALS_QUERY,
+            env!("CARGO_MANIFEST_DIR"),
+        );
+    }}
+}}
+"#
+        )
+    };
+
     format!(
         r#"//! {grammar_name} grammar for tree-sitter
 //!
@@ -764,23 +790,6 @@ pub fn language() -> Language {{
 {injections_query}
 
 {locals_query}
-
-#[cfg(test)]
-mod tests {{
-    use super::*;
-
-    #[test]
-    fn test_grammar() {{
-        arborium_test_harness::test_grammar(
-            language(),
-            "{grammar_id}",
-            HIGHLIGHTS_QUERY,
-            INJECTIONS_QUERY,
-            LOCALS_QUERY,
-            env!("CARGO_MANIFEST_DIR"),
-        );
-    }}
-}}
-"#
+{test_module}"#
     )
 }

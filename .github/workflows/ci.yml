@@ -34,9 +34,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache/arborium
-          key: grammar-cache-${{ hashFiles('crates/*/grammar/grammar.js', 'crates/*/grammar/package.json', 'crates/*/common/**') }}
+          # v2: Added generator version to cache key
+          key: grammar-cache-v2-${{ hashFiles('crates/*/grammar/grammar.js', 'crates/*/grammar/package.json', 'crates/*/common/**') }}
           restore-keys: |
-            grammar-cache-
+            grammar-cache-v2-
 
       - name: Install tree-sitter CLI
         run: cargo install tree-sitter-cli

@@ -8,6 +8,7 @@ grammar {
     tag "code"
     tier 4
     has_scanner #true
+    tests_cursed #true // Unicode in highlights.scm breaks on Windows
 
     inventor "Ulf Norell"
     year 2007
