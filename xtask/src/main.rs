@@ -3,6 +3,7 @@
 //! Usage: cargo xtask <command>
 //!
 //! Commands:
+//!   doctor         Check for required external tools
 //!   lint           Validate all grammars
 //!   gen [name]     Regenerate crate files from arborium.kdl
 //!   serve          Build and serve the WASM demo locally
@@ -11,6 +12,7 @@ mod generate;
 mod lint_new;
 mod plan;
 mod serve;
+mod tool;
 mod types;
 mod util;
 
@@ -29,6 +31,9 @@ struct Args {
 #[repr(u8)]
 #[allow(dead_code)] // variants used by facet_args derive
 enum Command {
+    /// Check for required external tools
+    Doctor,
+
     /// Validate all grammar configurations
     Lint,
 
@@ -77,6 +82,9 @@ fn main() {
     let crates_dir = camino::Utf8PathBuf::from_path_buf(crates_dir).expect("non-UTF8 path");
 
     match args.command {
+        Command::Doctor => {
+            tool::print_tools_report();
+        }
         Command::Lint => {
             if let Err(e) = lint_new::run_lints(&crates_dir) {
                 eprintln!("{:?}", e);
@@ -92,7 +100,7 @@ fn main() {
                     }
                 }
                 Err(e) => {
-                    eprintln!("Error planning generation: {}", e);
+                    eprintln!("{}", e);
                     std::process::exit(1);
                 }
             }

@@ -82,10 +82,10 @@
 use std::collections::BTreeMap;
 
 use camino::{Utf8Path, Utf8PathBuf};
-use fs_err as fs;
 use facet::Facet;
 use facet_kdl as kdl;
 use facet_kdl::Spanned;
+use fs_err as fs;
 use miette::NamedSource;
 pub use rootcause::Report;
 

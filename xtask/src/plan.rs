@@ -5,6 +5,7 @@
 
 #![allow(dead_code)]
 
+use crate::tool::Tool;
 use camino::{Utf8Path, Utf8PathBuf};
 use fs_err as fs;
 use owo_colors::OwoColorize;
@@ -158,8 +159,10 @@ impl Operation {
             Operation::GitClone {
                 url, dest, commit, ..
             } => {
+                let git = Tool::Git.find()?;
                 // Clone the repo
-                let status = std::process::Command::new("git")
+                let status = git
+                    .command()
                     .args(["clone", "--depth", "1", url, dest.as_str()])
                     .status()?;
                 if !status.success() {
@@ -170,7 +173,8 @@ impl Operation {
                 }
                 // Checkout specific commit if specified
                 if let Some(commit) = commit {
-                    let status = std::process::Command::new("git")
+                    let status = git
+                        .command()
                         .args(["checkout", commit])
                         .current_dir(dest)
                         .status()?;
@@ -223,11 +227,18 @@ pub enum ExecuteError {
         command: String,
         status: std::process::ExitStatus,
     },
+    ToolNotFound(crate::tool::ToolNotFound),
 }
 
 impl From<std::io::Error> for ExecuteError {
     fn from(e: std::io::Error) -> Self {
         ExecuteError::Io(e)
+    }
+}
+
+impl From<crate::tool::ToolNotFound> for ExecuteError {
+    fn from(e: crate::tool::ToolNotFound) -> Self {
+        ExecuteError::ToolNotFound(e)
     }
 }
 
@@ -238,6 +249,7 @@ impl fmt::Display for ExecuteError {
             ExecuteError::CommandFailed { command, status } => {
                 write!(f, "Command '{}' failed with {}", command, status)
             }
+            ExecuteError::ToolNotFound(e) => write!(f, "{}", e),
         }
     }
 }

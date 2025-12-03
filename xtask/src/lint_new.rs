@@ -8,10 +8,17 @@ use miette::{Diagnostic, NamedSource, SourceSpan};
 use owo_colors::OwoColorize;
 use thiserror::Error;
 
+use crate::tool::Tool;
 use crate::types::{CrateRegistry, CrateState, MIN_SAMPLE_LINES, SampleFileState};
 
 /// Run all lints on the registry.
 pub fn run_lints(crates_dir: &Utf8Path) -> miette::Result<()> {
+    // Check required tools first
+    let required_tools = &[Tool::TreeSitter];
+    if !crate::tool::check_tools_or_report(required_tools) {
+        std::process::exit(1);
+    }
+
     println!("{}", "Loading crate registry...".cyan().bold());
     println!();
 

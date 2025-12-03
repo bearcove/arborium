@@ -7,14 +7,22 @@
 //! - grammar-src/ (by running tree-sitter generate)
 
 use crate::plan::{Operation, Plan, PlanSet};
+use crate::tool::Tool;
 use crate::types::{CrateRegistry, CrateState};
 use camino::{Utf8Path, Utf8PathBuf};
 use fs_err as fs;
-use std::process::{Command, Stdio};
+use rootcause::Report;
+use std::process::Stdio;
 
 /// Generate crate files for all or a specific grammar.
-pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSet, String> {
-    let registry = CrateRegistry::load(crates_dir).map_err(|e| e.to_string())?;
+pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSet, Report> {
+    // Run lint first to validate everything (including tool checks)
+    if let Err(e) = crate::lint_new::run_lints(crates_dir) {
+        eprintln!("{:?}", e);
+        std::process::exit(1);
+    }
+
+    let registry = CrateRegistry::load(crates_dir)?;
     let mut plans = PlanSet::new();
 
     for (_name, crate_state) in &registry.crates {
@@ -36,7 +44,7 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
             continue;
         };
 
-        let plan = plan_crate_generation(crate_state, config).map_err(|e| e.to_string())?;
+        let plan = plan_crate_generation(crate_state, config)?;
         plans.add(plan);
     }
 
@@ -46,7 +54,7 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
 fn plan_crate_generation(
     crate_state: &CrateState,
     config: &crate::types::CrateConfig,
-) -> Result<Plan, Box<dyn std::error::Error>> {
+) -> Result<Plan, Report> {
     let mut plan = Plan::for_crate(&crate_state.name);
     let crate_path = &crate_state.path;
 
@@ -165,7 +173,7 @@ fn setup_grammar_dependencies(
     temp_path: &Utf8Path,
     crates_dir: &Utf8Path,
     crate_name: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Report> {
     let deps = get_grammar_dependencies(crate_name);
     if deps.is_empty() {
         return Ok(());
@@ -192,18 +200,18 @@ fn plan_grammar_src_generation(
     plan: &mut Plan,
     crate_path: &Utf8Path,
     config: &crate::types::CrateConfig,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Report> {
     let grammar_dir = crate_path.join("grammar");
     let grammar_src_dir = crate_path.join("grammar-src");
     let crate_name = crate_path.file_name().unwrap_or("unknown");
 
     // Get the crates directory (parent of crate_path)
-    let crates_dir = crate_path.parent().ok_or("Could not get crates directory")?;
+    let crates_dir = crate_path.parent().ok_or_else(|| std::io::Error::other("Could not get crates directory"))?;
 
     // Create a temp directory
     let temp_dir = tempfile::tempdir()?;
     let temp_path = Utf8PathBuf::from_path_buf(temp_dir.path().to_path_buf())
-        .map_err(|_| "Non-UTF8 temp path")?;
+        .map_err(|_| std::io::Error::other("Non-UTF8 temp path"))?;
 
     // Copy vendored grammar files to temp dir
     copy_dir_contents(&grammar_dir, &temp_path)?;
@@ -212,7 +220,9 @@ fn plan_grammar_src_generation(
     setup_grammar_dependencies(&temp_path, crates_dir, crate_name)?;
 
     // Run tree-sitter generate in the temp directory
-    let output = Command::new("tree-sitter")
+    let tree_sitter = Tool::TreeSitter.find()?;
+    let output = tree_sitter
+        .command()
         .args(["generate"])
         .current_dir(&temp_path)
         .stdout(Stdio::null())
@@ -223,12 +233,11 @@ fn plan_grammar_src_generation(
         let stderr = String::from_utf8_lossy(&output.stderr);
         // Show more context for debugging
         let error_lines: Vec<&str> = stderr.lines().take(20).collect();
-        return Err(format!(
+        return Err(std::io::Error::other(format!(
             "tree-sitter generate failed for {}:\n{}",
             crate_name,
             error_lines.join("\n")
-        )
-        .into());
+        )))?;
     }
 
     // The generated files are in temp_path/src/
@@ -288,7 +297,7 @@ fn plan_grammar_src_generation(
             let entry = entry?;
             let file_name = entry.file_name().to_string_lossy().to_string();
             let generated_file =
-                Utf8PathBuf::from_path_buf(entry.path()).map_err(|_| "Non-UTF8 path")?;
+                Utf8PathBuf::from_path_buf(entry.path()).map_err(|_| std::io::Error::other("Non-UTF8 path"))?;
             let dest_file = dest_tree_sitter.join(&file_name);
 
             if generated_file.is_file() {
@@ -307,7 +316,7 @@ fn plan_file_update(
     dest_path: &Utf8Path,
     new_content: String,
     description: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Report> {
     if dest_path.exists() {
         let old_content = fs::read_to_string(dest_path)?;
         if old_content != new_content {
@@ -329,12 +338,12 @@ fn plan_file_update(
 }
 
 /// Copy directory contents (files and subdirectories) from src to dest.
-fn copy_dir_contents(src: &Utf8Path, dest: &Utf8Path) -> Result<(), Box<dyn std::error::Error>> {
+fn copy_dir_contents(src: &Utf8Path, dest: &Utf8Path) -> Result<(), Report> {
     fs::create_dir_all(dest)?;
 
     for entry in fs::read_dir(src)? {
         let entry = entry?;
-        let src_path = Utf8PathBuf::from_path_buf(entry.path()).map_err(|_| "Non-UTF8 path")?;
+        let src_path = Utf8PathBuf::from_path_buf(entry.path()).map_err(|_| std::io::Error::other("Non-UTF8 path"))?;
         let dest_path = dest.join(entry.file_name().to_string_lossy().as_ref());
 
         if src_path.is_dir() {

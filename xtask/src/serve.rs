@@ -303,7 +303,7 @@ fn generate_sample_files(
 }
 
 fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
-    use std::process::Command;
+    use crate::tool::Tool;
 
     // Nuke pkg/ to avoid stale cached files
     let pkg_dir = demo_dir.join("pkg");
@@ -311,7 +311,8 @@ fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
         fs::remove_dir_all(&pkg_dir).map_err(|e| format!("Failed to remove pkg/: {}", e))?;
     }
 
-    let mut cmd = Command::new("wasm-pack");
+    let wasm_pack = Tool::WasmPack.find().map_err(|e| e.to_string())?;
+    let mut cmd = wasm_pack.command();
     cmd.arg("build").arg(demo_dir).arg("--target").arg("web");
 
     if dev {
