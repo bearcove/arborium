@@ -3,9 +3,6 @@ use std::{env, fs, path::PathBuf};
 fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    #[cfg(feature = "bindgen")]
-    generate_bindings(&out_dir);
-
     fs::copy(
         "src/wasm/stdlib-symbols.txt",
         out_dir.join("stdlib-symbols.txt"),
@@ -64,74 +61,4 @@ fn main() {
         .compile("tree-sitter");
 
     println!("cargo:include={}", include_path.display());
-}
-
-#[cfg(feature = "bindgen")]
-fn generate_bindings(out_dir: &std::path::Path) {
-    use std::{process::Command, str::FromStr};
-
-    use bindgen::RustTarget;
-
-    let output = Command::new("cargo")
-        .args(["metadata", "--format-version", "1"])
-        .output()
-        .unwrap();
-
-    let metadata = serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap();
-
-    let Some(rust_version) = metadata
-        .get("packages")
-        .and_then(|packages| packages.as_array())
-        .and_then(|packages| {
-            packages.iter().find_map(|package| {
-                if package["name"] == "tree-sitter" {
-                    package.get("rust_version").and_then(|v| v.as_str())
-                } else {
-                    None
-                }
-            })
-        })
-    else {
-        panic!("Failed to find tree-sitter package in cargo metadata");
-    };
-
-    const HEADER_PATH: &str = "include/tree_sitter/api.h";
-
-    println!("cargo:rerun-if-changed={HEADER_PATH}");
-
-    let no_copy = [
-        "TSInput",
-        "TSLanguage",
-        "TSLogger",
-        "TSLookaheadIterator",
-        "TSParser",
-        "TSTree",
-        "TSQuery",
-        "TSQueryCursor",
-        "TSQueryCapture",
-        "TSQueryMatch",
-        "TSQueryPredicateStep",
-    ];
-
-    let bindings = bindgen::Builder::default()
-        .header(HEADER_PATH)
-        .layout_tests(false)
-        .allowlist_type("^TS.*")
-        .allowlist_function("^ts_.*")
-        .allowlist_var("^TREE_SITTER.*")
-        .no_copy(no_copy.join("|"))
-        .prepend_enum_name(false)
-        .use_core()
-        .clang_arg("-D TREE_SITTER_FEATURE_WASM")
-        .rust_target(RustTarget::from_str(rust_version).unwrap())
-        .generate()
-        .expect("Failed to generate bindings");
-
-    let bindings_rs = out_dir.join("bindings.rs");
-    bindings.write_to_file(&bindings_rs).unwrap_or_else(|_| {
-        panic!(
-            "Failed to write bindings into path: {}",
-            bindings_rs.display()
-        )
-    });
 }

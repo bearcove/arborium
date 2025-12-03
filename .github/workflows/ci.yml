@@ -40,7 +40,7 @@ jobs:
         run: cargo install tree-sitter-cli
 
       - name: Generate grammar sources
-        run: cargo xtask gen
+        run: cargo run --release -p xtask -- gen
 
       - name: Create grammar sources tarball
         run: |
