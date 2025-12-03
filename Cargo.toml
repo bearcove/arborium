@@ -117,6 +117,7 @@ exclude = [
     "crates/arborium-rust-plugin",
     "crates/arborium-html-plugin",
     "crates/arborium-javascript-plugin",
+    "crates/arborium-host",
 ]
 
 [workspace.package]

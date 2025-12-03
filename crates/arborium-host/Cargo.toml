@@ -1,0 +1,20 @@
+[package]
+name = "arborium-host"
+version = "0.1.0"
+edition = "2024"
+description = "Arborium host component - orchestrates grammar plugins"
+license = "MIT"
+repository = "https://github.com/bearcove/arborium"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = "0.36"
+
+[package.metadata.component]
+package = "arborium:host"
+
+[package.metadata.component.target]
+path = "../../wit/host.wit"
+world = "arborium-host"

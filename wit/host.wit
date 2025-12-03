@@ -1,0 +1,143 @@
+/// Arborium host interface - orchestrates grammar plugins.
+///
+/// The host is a WASM component that manages parsing sessions,
+/// coordinates between grammar plugins, and resolves language injections.
+///
+/// Architecture:
+/// - Browser JS loads the host component
+/// - JS provides plugin access via the `plugin-provider` import
+/// - Host exports a high-level API for creating documents and parsing
+
+package arborium:host@0.1.0;
+
+/// Core types used by the host.
+interface types {
+    /// A span of highlighted text.
+    record span {
+        start: u32,
+        end: u32,
+        capture: string,
+    }
+
+    /// An injection point where another language should be parsed.
+    record injection {
+        start: u32,
+        end: u32,
+        language: string,
+        include-children: bool,
+    }
+
+    /// Result of parsing text.
+    record parse-result {
+        spans: list<span>,
+        injections: list<injection>,
+    }
+
+    /// An edit to apply to text.
+    record edit {
+        start-byte: u32,
+        old-end-byte: u32,
+        new-end-byte: u32,
+        start-row: u32,
+        start-col: u32,
+        old-end-row: u32,
+        old-end-col: u32,
+        new-end-row: u32,
+        new-end-col: u32,
+    }
+
+    /// Parse error.
+    record parse-error {
+        message: string,
+    }
+}
+
+/// Interface that the host imports from JS to access grammar plugins.
+/// JS is responsible for loading/caching plugin WASM and calling into them.
+interface plugin-provider {
+    use types.{edit, parse-result, parse-error};
+
+    /// A handle to a loaded plugin (opaque to the host, managed by JS).
+    type plugin-handle = u32;
+
+    /// A handle to a plugin session (opaque to the host, managed by JS).
+    type plugin-session = u32;
+
+    /// Request JS to load a plugin for the given language.
+    /// Returns a handle if successful, or none if the language is not available.
+    load-plugin: func(language: string) -> option<plugin-handle>;
+
+    /// Get the languages that a plugin may inject.
+    get-injection-languages: func(plugin: plugin-handle) -> list<string>;
+
+    /// Create a session on a plugin.
+    create-plugin-session: func(plugin: plugin-handle) -> plugin-session;
+
+    /// Free a plugin session.
+    free-plugin-session: func(plugin: plugin-handle, session: plugin-session);
+
+    /// Set text on a plugin session.
+    plugin-set-text: func(plugin: plugin-handle, session: plugin-session, text: string);
+
+    /// Apply edit on a plugin session.
+    plugin-apply-edit: func(plugin: plugin-handle, session: plugin-session, text: string, edit: edit);
+
+    /// Parse on a plugin session.
+    plugin-parse: func(plugin: plugin-handle, session: plugin-session) -> result<parse-result, parse-error>;
+
+    /// Cancel a plugin session's parse.
+    plugin-cancel: func(plugin: plugin-handle, session: plugin-session);
+}
+
+/// The main host API exported to JS.
+interface host {
+    use types.{edit};
+
+    /// A document handle - represents a file being edited.
+    type document = u32;
+
+    /// Merged span with source language info.
+    record highlight-span {
+        start: u32,
+        end: u32,
+        capture: string,
+        language: string,
+    }
+
+    /// Result of highlighting a document.
+    record highlight-result {
+        spans: list<highlight-span>,
+    }
+
+    /// Create a new document with the given primary language.
+    create-document: func(language: string) -> option<document>;
+
+    /// Destroy a document and free its resources.
+    free-document: func(doc: document);
+
+    /// Set the full text of a document.
+    set-text: func(doc: document, text: string);
+
+    /// Apply an incremental edit to a document.
+    apply-edit: func(doc: document, text: string, edit: edit);
+
+    /// Parse and highlight the document, resolving all injections.
+    /// max-depth controls how deep to recurse into injections (0 = no injections).
+    highlight: func(doc: document, max-depth: u32) -> highlight-result;
+
+    /// Cancel any in-progress parse on a document.
+    cancel: func(doc: document);
+
+    /// Get list of languages that would be needed to fully highlight this document.
+    /// Useful for preloading plugins.
+    get-required-languages: func(doc: document) -> list<string>;
+}
+
+/// The world that the host component implements.
+world arborium-host {
+    /// Import plugin access from JS.
+    import plugin-provider;
+
+    /// Export the host API.
+    export host;
+}

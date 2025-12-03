@@ -15,3 +15,4 @@ crates/*/grammar/src/
 demo/*.br
 demo/*.gz
 /dist/
+crates/arborium-host/target/
