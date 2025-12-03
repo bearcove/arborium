@@ -542,6 +542,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "arborium-html-plugin"
+version = "0.1.0"
+dependencies = [
+ "arborium-html",
+ "arborium-plugin-runtime",
+ "arborium-wire",
+ "wit-bindgen 0.36.0",
+]
+
+[[package]]
 name = "arborium-idris"
 version = "0.1.0"
 dependencies = [
@@ -579,6 +589,16 @@ dependencies = [
  "arborium-test-harness",
  "cc",
  "tree-sitter-patched-arborium",
+]
+
+[[package]]
+name = "arborium-javascript-plugin"
+version = "0.1.0"
+dependencies = [
+ "arborium-javascript",
+ "arborium-plugin-runtime",
+ "arborium-wire",
+ "wit-bindgen 0.36.0",
 ]
 
 [[package]]

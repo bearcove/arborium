@@ -1,0 +1,23 @@
+[package]
+name = "arborium-html-plugin"
+version = "0.1.0"
+edition = "2024"
+description = "html grammar plugin for arborium"
+license = "MIT"
+repository = "https://github.com/bearcove/arborium"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+arborium-plugin-runtime = { path = "../arborium-plugin-runtime" }
+arborium-wire = { path = "../arborium-wire" }
+arborium-html = { path = "../arborium-html" }
+wit-bindgen = "0.36"
+
+[package.metadata.component]
+package = "arborium:grammar"
+
+[package.metadata.component.target]
+world = "grammar-plugin"
+path = "../../wit/grammar.wit"

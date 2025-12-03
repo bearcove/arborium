@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arborium Browser Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+    h1 {
+      color: #00d4ff;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .panel {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .panel h2 {
+      margin-top: 0;
+      color: #00d4ff;
+      font-size: 16px;
+    }
+    textarea {
+      width: 100%;
+      height: 300px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+      background: #0f0f23;
+      color: #eee;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 12px;
+      resize: vertical;
+    }
+    select {
+      padding: 8px 12px;
+      font-size: 14px;
+      background: #0f0f23;
+      color: #eee;
+      border: 1px solid #333;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 14px;
+      background: #00d4ff;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    button:hover {
+      background: #00b8e6;
+    }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .output {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      background: #0f0f23;
+      padding: 12px;
+      border-radius: 4px;
+      max-height: 400px;
+      overflow: auto;
+    }
+    .highlighted {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      background: #0f0f23;
+      padding: 12px;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+    .status {
+      color: #888;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .status.loading { color: #ffaa00; }
+    .status.ready { color: #00ff88; }
+    .status.error { color: #ff4444; }
+
+    /* Syntax highlighting colors */
+    .keyword { color: #c678dd; }
+    .function { color: #61afef; }
+    .function\.method { color: #61afef; }
+    .function\.macro { color: #e5c07b; }
+    .string { color: #98c379; }
+    .number { color: #d19a66; }
+    .constant { color: #d19a66; }
+    .comment { color: #5c6370; font-style: italic; }
+    .type { color: #e5c07b; }
+    .variable { color: #e06c75; }
+    .variable\.builtin { color: #e5c07b; }
+    .property { color: #abb2bf; }
+    .operator { color: #56b6c2; }
+    .punctuation\.bracket { color: #abb2bf; }
+    .punctuation\.delimiter { color: #abb2bf; }
+    .tag { color: #e06c75; }
+    .attribute { color: #d19a66; }
+    .label { color: #61afef; }
+    .module { color: #e5c07b; }
+    .namespace { color: #e5c07b; }
+    .constructor { color: #e5c07b; }
+    .embedded { background: rgba(97, 175, 239, 0.1); }
+  </style>
+</head>
+<body>
+  <h1>🌳 Arborium Browser Demo</h1>
+  <p>Syntax highlighting powered by tree-sitter WASM plugins with language injection support.</p>
+
+  <div class="container">
+    <div class="panel">
+      <h2>Input</h2>
+      <select id="language">
+        <option value="rust">Rust</option>
+        <option value="javascript">JavaScript</option>
+        <option value="html" selected>HTML (with JS injection)</option>
+      </select>
+      <button id="parse">Parse</button>
+      <textarea id="input"><!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hello World</title>
+  <script>
+    function greet(name) {
+      const message = "Hello, " + name;
+      console.log(message);
+    }
+  </script>
+</head>
+<body>
+  <h1>Welcome</h1>
+  <button onclick="greet('World')">Click</button>
+</body>
+</html></textarea>
+      <div id="status" class="status">Loading plugins...</div>
+    </div>
+
+    <div class="panel">
+      <h2>Highlighted Output</h2>
+      <div id="highlighted" class="highlighted"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top: 20px;">
+    <h2>Parse Results</h2>
+    <div id="output" class="output">Waiting for parse...</div>
+  </div>
+
+  <script type="module">
+    // WASI stubs for browser
+    const wasiStubs = {
+      'wasi:cli/environment': {
+        getEnvironment() { return []; },
+      },
+      'wasi:cli/exit': {
+        exit(status) {
+          if (status.tag === 'err') throw new Error('WASI exit');
+        },
+      },
+      'wasi:cli/stderr': {
+        getStderr() {
+          return { blockingWriteAndFlush() {}, write() { return { tag: 'ok', val: 0n }; } };
+        },
+      },
+      'wasi:io/error': {},
+      'wasi:io/streams': {},
+      'wasi:random/insecure-seed': {
+        insecureSeed() {
+          return [BigInt(Date.now()), BigInt(Math.floor(Math.random() * 0xFFFFFFFF))];
+        },
+      },
+    };
+
+    const baseUrl = '../dist/plugins';
+    const plugins = new Map();
+    const statusEl = document.getElementById('status');
+    const outputEl = document.getElementById('output');
+    const highlightedEl = document.getElementById('highlighted');
+
+    async function loadPlugin(lang) {
+      if (plugins.has(lang)) return plugins.get(lang);
+
+      statusEl.className = 'status loading';
+      statusEl.textContent = `Loading ${lang} plugin...`;
+
+      try {
+        const pluginUrl = `${baseUrl}/${lang}/grammar.js`;
+        const { instantiate } = await import(pluginUrl);
+
+        const getCoreModule = async (path) => {
+          const url = `${baseUrl}/${lang}/${path}`;
+          const response = await fetch(url);
+          const bytes = await response.arrayBuffer();
+          return WebAssembly.compile(bytes);
+        };
+
+        const component = await instantiate(getCoreModule, wasiStubs);
+        plugins.set(lang, component.plugin);
+
+        statusEl.className = 'status ready';
+        statusEl.textContent = `Loaded: ${Array.from(plugins.keys()).join(', ')}`;
+
+        return component.plugin;
+      } catch (err) {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Error loading ${lang}: ${err.message}`;
+        throw err;
+      }
+    }
+
+    async function parseWithInjections(lang, text) {
+      const plugin = await loadPlugin(lang);
+      const session = plugin.createSession();
+      plugin.setText(session, text);
+      const result = plugin.parse(session);
+
+      const allSpans = [...result.spans];
+
+      // Handle injections
+      for (const injection of result.injections) {
+        try {
+          const injPlugin = await loadPlugin(injection.language);
+          const injSession = injPlugin.createSession();
+          const injText = text.slice(injection.start, injection.end);
+          injPlugin.setText(injSession, injText);
+          const injResult = injPlugin.parse(injSession);
+
+          for (const span of injResult.spans) {
+            allSpans.push({
+              start: span.start + injection.start,
+              end: span.end + injection.start,
+              capture: span.capture,
+              injectedFrom: injection.language,
+            });
+          }
+
+          injPlugin.freeSession(injSession);
+        } catch (err) {
+          console.warn(`Injection parse failed for ${injection.language}:`, err);
+        }
+      }
+
+      plugin.freeSession(session);
+
+      allSpans.sort((a, b) => a.start - b.start || b.end - a.end);
+      return { spans: allSpans, injections: result.injections };
+    }
+
+    function highlightCode(text, spans) {
+      if (spans.length === 0) return escapeHtml(text);
+
+      // Build highlighted HTML
+      const parts = [];
+      let pos = 0;
+
+      // Process spans - they may overlap, so we use a simple approach
+      // that prioritizes the first matching span at each position
+      for (const span of spans) {
+        if (span.start > pos) {
+          // Text before this span
+          parts.push(escapeHtml(text.slice(pos, span.start)));
+        }
+        if (span.start >= pos) {
+          // The span itself
+          const className = span.capture.replace(/\./g, '\\.');
+          const cssClass = span.capture.replace(/\./g, '-');
+          parts.push(`<span class="${cssClass}">${escapeHtml(text.slice(span.start, span.end))}</span>`);
+          pos = span.end;
+        }
+      }
+
+      // Remaining text
+      if (pos < text.length) {
+        parts.push(escapeHtml(text.slice(pos)));
+      }
+
+      return parts.join('');
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function doParse() {
+      const lang = document.getElementById('language').value;
+      const text = document.getElementById('input').value;
+
+      outputEl.textContent = 'Parsing...';
+      highlightedEl.textContent = '';
+
+      try {
+        const start = performance.now();
+        const result = await parseWithInjections(lang, text);
+        const elapsed = (performance.now() - start).toFixed(2);
+
+        // Show results
+        const byCapture = {};
+        for (const span of result.spans) {
+          const key = span.injectedFrom
+            ? `${span.injectedFrom}:${span.capture}`
+            : span.capture;
+          byCapture[key] = (byCapture[key] || 0) + 1;
+        }
+
+        let output = `Parsed in ${elapsed}ms\n`;
+        output += `Total spans: ${result.spans.length}\n`;
+        output += `Injections: ${result.injections.length}\n\n`;
+        output += `Spans by capture:\n`;
+        for (const [capture, count] of Object.entries(byCapture).sort()) {
+          output += `  ${capture}: ${count}\n`;
+        }
+
+        outputEl.textContent = output;
+
+        // Highlight code
+        highlightedEl.innerHTML = highlightCode(text, result.spans);
+
+      } catch (err) {
+        outputEl.textContent = `Error: ${err.message}\n${err.stack}`;
+      }
+    }
+
+    // Setup event handlers
+    document.getElementById('parse').addEventListener('click', doParse);
+    document.getElementById('language').addEventListener('change', (e) => {
+      const examples = {
+        rust: `fn main() {
+    let message = "Hello, World!";
+    println!("{}", message);
+
+    for i in 0..10 {
+        if i % 2 == 0 {
+            println!("Even: {}", i);
+        }
+    }
+}`,
+        javascript: `function fibonacci(n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+const result = fibonacci(10);
+console.log("Result:", result);
+
+// Arrow function example
+const double = (x) => x * 2;
+`,
+        html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hello World</title>
+  <script>
+    function greet(name) {
+      const message = "Hello, " + name;
+      console.log(message);
+    }
+  </script>
+</head>
+<body>
+  <h1>Welcome</h1>
+  <button onclick="greet('World')">Click</button>
+</body>
+</html>`,
+      };
+      document.getElementById('input').value = examples[e.target.value] || '';
+    });
+
+    // Preload common plugins
+    (async () => {
+      try {
+        await loadPlugin('html');
+        await loadPlugin('javascript');
+        await loadPlugin('rust');
+        statusEl.className = 'status ready';
+        statusEl.textContent = 'Ready! Loaded: rust, javascript, html';
+      } catch (err) {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Failed to preload: ${err.message}`;
+      }
+    })();
+  </script>
+</body>
+</html>

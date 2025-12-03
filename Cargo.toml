@@ -110,6 +110,8 @@ members = [
     "tree-sitter/language",
     "tree-sitter-highlight",
     "crates/arborium-rust-plugin",
+    "crates/arborium-html-plugin",
+    "crates/arborium-javascript-plugin",
 ]
 
 [workspace.package]
