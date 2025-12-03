@@ -109,6 +109,11 @@ members = [
     "tree-sitter",
     "tree-sitter/language",
     "tree-sitter-highlight",
+]
+
+# Plugin crates are excluded from workspace - they must be built with cargo-component
+# for wasm32-wasip2 target only. Use `cargo xtask plugins build` instead.
+exclude = [
     "crates/arborium-rust-plugin",
     "crates/arborium-html-plugin",
     "crates/arborium-javascript-plugin",
