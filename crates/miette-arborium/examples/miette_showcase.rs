@@ -57,7 +57,8 @@ fn main() {
         .with_syntax_highlighting(ArboriumHighlighter::new())
         .with_context_lines(3);
 
-    println!("\n🎨 miette-arborium Syntax Highlighting Showcase\n");
+    println!("\n🎨 miette-arborium Syntax Highlighting Showcase");
+    println!("Theme: Monokai");
     println!("================================================\n");
 
     // Rust example
@@ -150,7 +151,7 @@ const handleUser = (user: User): void => {
     let ts_error = CodeError {
         message: "TypeScript type error".into(),
         src: NamedSource::new("api.ts", typescript_code.to_string()).with_language("typescript"),
-        span: (394, 10).into(), // "response.status"
+        span: (395, 15).into(), // "response.status"
         label: "Property 'status' does not exist on type 'Response'".into(),
         help: Some("Did you mean to use response.ok or response.statusText?".into()),
     };
@@ -193,7 +194,7 @@ func main() {
     let go_error = CodeError {
         message: "Go error".into(),
         src: NamedSource::new("server.go", go_code.to_string()).with_language("go"),
-        span: (328, 6).into(), // "cancel"
+        span: (330, 6).into(), // "cancel"
         label: "cancel declared and not used".into(),
         help: Some("consider calling cancel() or removing the declaration".into()),
     };
@@ -222,7 +223,7 @@ func main() {
     let json_error = CodeError {
         message: "JSON parse error".into(),
         src: NamedSource::new("package.json", json_code.to_string()).with_language("json"),
-        span: (195, 4).into(), // "true"
+        span: (226, 4).into(), // "true"
         label: "expected array, found boolean".into(),
         help: Some("feature values should be arrays of feature names".into()),
     };
@@ -256,7 +257,7 @@ async = ["tokio"]"#;
     let toml_error = CodeError {
         message: "TOML error".into(),
         src: NamedSource::new("Cargo.toml", toml_code.to_string()).with_language("toml"),
-        span: (280, 9).into(), // "criterion"
+        span: (287, 9).into(), // "criterion"
         label: "failed to select a version for `criterion`".into(),
         help: Some("versions that meet the requirements `0.5` are: 0.5.1".into()),
     };
@@ -284,7 +285,7 @@ LIMIT 100;"#;
     let sql_error = CodeError {
         message: "SQL error".into(),
         src: NamedSource::new("analytics.sql", sql_code.to_string()).with_language("sql"),
-        span: (180, 11).into(), // "total_spent"
+        span: (343, 11).into(), // "total_spent" in ORDER BY
         label: "column 'total_spent' must appear in GROUP BY clause".into(),
         help: Some("add total_spent to GROUP BY or use an aggregate function".into()),
     };
@@ -322,7 +323,7 @@ spec:
     let yaml_error = CodeError {
         message: "YAML validation error".into(),
         src: NamedSource::new("deployment.yaml", yaml_code.to_string()).with_language("yaml"),
-        span: (407, 6).into(), // "500m"
+        span: (451, 7).into(), // "256Mi" memory limit
         label: "resource limit too low for production workload".into(),
         help: Some("consider increasing CPU limit to at least 1000m".into()),
     };
@@ -364,7 +365,7 @@ deploy_application "$@""#;
     let bash_error = CodeError {
         message: "Bash error".into(),
         src: NamedSource::new("deploy.sh", bash_code.to_string()).with_language("bash"),
-        span: (89, 8).into(), // "LOG_DIR"
+        span: (64, 16).into(), // "/var/log/myapp"
         label: "directory does not exist".into(),
         help: Some("create the directory with: mkdir -p /var/log/myapp".into()),
     };
