@@ -23,7 +23,10 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          cache-targets: false
+          # Cache target directory for xtask builds
+          cache-targets: true
+          # Use a separate cache key for generate job
+          prefix-key: "v0-rust-generate"
 
       - name: Restore grammar generation cache
         uses: actions/cache@v4
