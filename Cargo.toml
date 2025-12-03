@@ -101,6 +101,7 @@ members = [
     "crates/arborium-yuri",
     "crates/arborium-zig",
     "crates/arborium-zsh",
+    "crates/miette-arborium",
     "xtask",
     "demo",
     "tree-sitter",
