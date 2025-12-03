@@ -4,7 +4,7 @@
 //! of truth, with Miette diagnostics for precise error reporting.
 
 use camino::Utf8Path;
-use miette::{Diagnostic, LabeledSpan, NamedSource, Report, SourceSpan};
+use miette::{Diagnostic, NamedSource, SourceSpan};
 use owo_colors::OwoColorize;
 use thiserror::Error;
 
@@ -125,6 +125,7 @@ pub fn run_lints(crates_dir: &Utf8Path) -> miette::Result<()> {
 enum LintDiagnostic {
     Error(String),
     Warning(String),
+    #[allow(dead_code)]
     Spanned {
         source_name: String,
         source: String,
@@ -147,7 +148,7 @@ struct SpannedLint {
 
 /// Lint a single crate and return diagnostics.
 fn lint_crate(
-    name: &str,
+    _name: &str,
     state: &CrateState,
     config: &crate::types::CrateConfig,
 ) -> Vec<LintDiagnostic> {
@@ -191,6 +192,11 @@ fn lint_crate(
             diagnostics.push(LintDiagnostic::Warning(format!(
                 "grammar '{gid}': missing queries/highlights.scm",
             )));
+        }
+
+        // Skip user-facing metadata checks for internal grammars
+        if grammar.is_internal() {
+            continue;
         }
 
         // Check samples

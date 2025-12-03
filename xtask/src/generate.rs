@@ -6,7 +6,7 @@
 //! - src/lib.rs
 
 use crate::plan::{Operation, Plan, PlanSet};
-use crate::types::{CrateConfig, CrateRegistry, CrateState};
+use crate::types::{CrateRegistry, CrateState};
 use camino::Utf8Path;
 
 /// Generate crate files for all or a specific grammar.
@@ -17,7 +17,13 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
     for (_name, crate_state) in &registry.crates {
         // Skip if a specific name was requested and this isn't it
         if let Some(filter) = name {
-            if crate_state.name != filter {
+            // Match either full name (arborium-rust) or suffix (rust)
+            let matches = crate_state.name == filter
+                || crate_state
+                    .name
+                    .strip_prefix("arborium-")
+                    .map_or(false, |suffix| suffix == filter);
+            if !matches {
                 continue;
             }
         }
@@ -126,7 +132,7 @@ fn generate_cargo_toml(crate_name: &str, config: &crate::types::CrateConfig) -> 
         .map(|g| g.id.as_ref())
         .unwrap_or(crate_name.strip_prefix("arborium-").unwrap_or(crate_name));
 
-    let description = config
+    let _description = config
         .grammars
         .first()
         .and_then(|g| g.description.as_ref())

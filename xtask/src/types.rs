@@ -77,6 +77,8 @@
 //! }
 //! ```
 
+#![allow(dead_code)]
+
 use std::collections::BTreeMap;
 
 use camino::{Utf8Path, Utf8PathBuf};
@@ -250,6 +252,13 @@ pub struct HasScanner {
     pub value: bool,
 }
 
+/// Internal grammar marker (bool value).
+#[derive(Debug, Clone, Facet)]
+pub struct Internal {
+    #[facet(kdl::argument)]
+    pub value: bool,
+}
+
 /// Aliases child node (multiple string arguments).
 #[derive(Debug, Clone, Facet)]
 pub struct Aliases {
@@ -297,6 +306,10 @@ pub struct GrammarConfig {
     // =========================================================================
     // Build Configuration
     // =========================================================================
+    /// Internal grammar (used by other grammars via injection, not user-facing).
+    #[facet(kdl::child, default)]
+    pub internal: Option<Internal>,
+
     /// Whether this grammar has a scanner.c file.
     #[facet(kdl::child, default)]
     pub has_scanner: Option<HasScanner>,
@@ -350,25 +363,14 @@ impl GrammarConfig {
         &self.id
     }
 
-    /// Get the C symbol name for this grammar.
-    ///
-    /// Returns the explicit `c_symbol` if set, otherwise derives from `id`
-    /// by replacing hyphens with underscores.
-    pub fn c_symbol(&self) -> String {
-        self.c_symbol
-            .as_ref()
-            .map(|s| s.value.to_string())
-            .unwrap_or_else(|| self.id().replace('-', "_"))
+    /// Whether this is an internal grammar (used via injection, not user-facing).
+    pub fn is_internal(&self) -> bool {
+        self.internal.as_ref().map(|i| i.value).unwrap_or(false)
     }
 
     /// Whether this grammar has a scanner.
     pub fn has_scanner(&self) -> bool {
         self.has_scanner.as_ref().map(|h| h.value).unwrap_or(false)
-    }
-
-    /// Get the grammar path within the repo.
-    pub fn grammar_path(&self) -> Option<&str> {
-        self.grammar_path.as_ref().map(|p| p.value.as_str())
     }
 }
 

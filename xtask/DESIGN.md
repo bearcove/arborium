@@ -6,20 +6,15 @@
 
 - **KDL migration**: All ~100 grammars converted from `info.toml` to `arborium.kdl`
 - **Legacy cleanup**: Deleted all `info.toml` files, removed orphan directories
-- **Lint command**: `cargo xtask grammars lint` validates entire registry
-- **Generate command**: `cargo xtask grammars generate [--dry-run]` regenerates Cargo.toml, build.rs, src/lib.rs
+- **Lint command**: `cargo xtask lint` validates entire registry
+- **Generate command**: `cargo xtask gen [--dry-run]` regenerates Cargo.toml, build.rs, src/lib.rs
 - **Plan-execute pattern**: Two-phase approach with diff display and optional dry-run
 - **KDL 2.0 syntax**: Fixed all files to use `#true`/`#false` and snake_case identifiers
 - **Vendored grammars**: asciidoc, asciidoc_inline, markdown, markdown-inline added
 
-### In Progress
-
-- Vendor command for new grammars
-- Update command for checking/pulling upstream changes
-
 ### Not Started
 
-- serve-demo command (WASM build + static site)
+- serve command (WASM build + static site)
 - Query inheritance implementation
 - Final cleanup (remove old xtask code, update README)
 
@@ -285,7 +280,7 @@ This preserves mtimes on unchanged files, avoiding unnecessary Cargo rebuilds.
 
 ## Commands
 
-### `cargo xtask grammars lint`
+### `cargo xtask lint`
 
 Run all lints without generating anything.
 
@@ -299,7 +294,7 @@ Run all lints without generating anything.
    - Tier values in valid range
    - highlight.scm exists if grammar-src present
 
-### `cargo xtask grammars generate [--dry-run] [name]`
+### `cargo xtask gen [--dry-run] [name]`
 
 Regenerate crate code from `arborium.kdl` files.
 
@@ -309,34 +304,6 @@ For each grammar in registry:
 - Generate `src/lib.rs` from template
 
 Optional `name` argument filters to a single crate.
-
-### `cargo xtask grammars vendor` (TODO)
-
-Vendor or re-vendor grammar source from upstream.
-
-```
-cargo xtask grammars vendor rust [--dry-run]
-```
-
-1. Read `repo` and `commit` from arborium.kdl
-2. Clone repo to temp directory
-3. Checkout specified commit
-4. Copy parser.c, scanner.c (if has_scanner), headers to grammar-src/
-5. Update commit hash in arborium.kdl if changed
-
-### `cargo xtask grammars update` (TODO)
-
-Check for upstream updates.
-
-```
-cargo xtask grammars update [--apply]
-```
-
-1. For each grammar with a repo URL
-2. Fetch latest commit from default branch
-3. Compare to stored commit
-4. Report which grammars have updates available
-5. If `--apply`: update commit hash in arborium.kdl (still need to re-vendor)
 
 ### `cargo xtask serve` (TODO)
 

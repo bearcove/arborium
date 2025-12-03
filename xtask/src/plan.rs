@@ -3,7 +3,10 @@
 //! This module provides a way to plan operations before executing them,
 //! with support for `--dry-run` to preview changes without making them.
 
+#![allow(dead_code)]
+
 use camino::{Utf8Path, Utf8PathBuf};
+use owo_colors::OwoColorize;
 use std::fmt;
 
 /// A single operation that can be planned and executed.
@@ -240,6 +243,69 @@ impl fmt::Display for ExecuteError {
 
 impl std::error::Error for ExecuteError {}
 
+/// Display a simple line-by-line diff between old and new content.
+fn display_diff(old: &str, new: &str) {
+    let old_lines: Vec<&str> = old.lines().collect();
+    let new_lines: Vec<&str> = new.lines().collect();
+
+    // Simple diff: find first and last differing lines
+    let mut first_diff = None;
+    let mut last_diff = None;
+
+    let max_len = old_lines.len().max(new_lines.len());
+    for i in 0..max_len {
+        let old_line = old_lines.get(i);
+        let new_line = new_lines.get(i);
+        if old_line != new_line {
+            if first_diff.is_none() {
+                first_diff = Some(i);
+            }
+            last_diff = Some(i);
+        }
+    }
+
+    let Some(first) = first_diff else {
+        println!("    {}", "(no changes)".dimmed());
+        return;
+    };
+    let last = last_diff.unwrap_or(first);
+
+    // Show context around changes
+    let context = 2;
+    let start = first.saturating_sub(context);
+    let end = (last + context + 1).min(max_len);
+
+    if start > 0 {
+        println!("    {}", format!("@@ line {} @@", start + 1).dimmed());
+    }
+
+    for i in start..end {
+        let old_line = old_lines.get(i);
+        let new_line = new_lines.get(i);
+
+        match (old_line, new_line) {
+            (Some(o), Some(n)) if o == n => {
+                println!("    {} {}", " ".dimmed(), o.dimmed());
+            }
+            (Some(o), Some(n)) => {
+                println!("    {} {}", "-".red(), o.red());
+                println!("    {} {}", "+".green(), n.green());
+            }
+            (Some(o), None) => {
+                println!("    {} {}", "-".red(), o.red());
+            }
+            (None, Some(n)) => {
+                println!("    {} {}", "+".green(), n.green());
+            }
+            (None, None) => {}
+        }
+    }
+
+    if end < max_len {
+        println!("    {}", format!("... {} more lines", max_len - end).dimmed());
+    }
+}
+
 /// A plan consisting of multiple operations.
 #[derive(Debug, Default)]
 pub struct Plan {
@@ -284,18 +350,47 @@ impl Plan {
     /// Display the plan to the user.
     pub fn display(&self) {
         if let Some(ref name) = self.crate_name {
-            println!("● {}", name);
+            println!("{} {}", "●".cyan(), name.bold());
         }
 
         if self.operations.is_empty() {
-            println!("  (no changes)");
+            println!("  {}", "(no changes)".dimmed());
             return;
         }
 
         for op in &self.operations {
-            println!("  {} {}", op.verb(), op.description());
-            if let Some(path) = op.path() {
-                println!("    -> {}", path);
+            match op {
+                Operation::CreateFile { path, content, description } => {
+                    println!("  {} {}", "create".green(), description);
+                    println!("    {} {}", "->".dimmed(), path);
+                    // Show first few lines of new content
+                    for line in content.lines().take(10) {
+                        println!("    {} {}", "+".green(), line.green());
+                    }
+                    let total_lines = content.lines().count();
+                    if total_lines > 10 {
+                        println!("    {} ... {} more lines", "+".green(), total_lines - 10);
+                    }
+                }
+                Operation::UpdateFile { path, old_content, new_content, description } => {
+                    println!("  {} {}", "update".yellow(), description);
+                    println!("    {} {}", "->".dimmed(), path);
+                    display_diff(old_content, new_content);
+                }
+                Operation::DeleteFile { path, description } => {
+                    println!("  {} {}", "delete".red(), description);
+                    println!("    {} {}", "->".dimmed(), path);
+                }
+                Operation::CreateDir { path, description } => {
+                    println!("  {} {}", "mkdir".blue(), description);
+                    println!("    {} {}", "->".dimmed(), path);
+                }
+                _ => {
+                    println!("  {} {}", op.verb(), op.description());
+                    if let Some(path) = op.path() {
+                        println!("    {} {}", "->".dimmed(), path);
+                    }
+                }
             }
         }
     }

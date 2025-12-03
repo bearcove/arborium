@@ -6,7 +6,7 @@ grammar {
     id "markdown_inline"
     name "Markdown Inline"
     tag "markup"
-    tier 2
+    internal #true
     has_scanner #true
 
     description "Inline grammar for Markdown parsing; companion to the block-level markdown grammar."
