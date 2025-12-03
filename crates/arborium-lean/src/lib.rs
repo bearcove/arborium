@@ -27,6 +27,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg_attr(windows, ignore = "Unicode in queries not supported on Windows")]
     fn test_grammar() {
         arborium_test_harness::test_grammar(
             language(),
