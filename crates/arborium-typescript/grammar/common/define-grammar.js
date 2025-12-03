@@ -71,6 +71,10 @@ module.exports = function defineGrammar(dialect) {
     ]),
 
     conflicts: ($, previous) => previous.concat([
+      // Conflicts for `using` declarations
+      [$.primary_expression, $.variable_declarator],
+      [$.assignment_expression, $._initializer],
+
       [$.call_expression, $.instantiation_expression, $.binary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],
