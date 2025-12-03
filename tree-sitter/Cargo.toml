@@ -22,9 +22,6 @@ links = "tree-sitter"
 [features]
 default = ["std"]
 std = ["regex/std", "regex/perf", "regex-syntax/unicode"]
-# These features exist to silence cfg warnings - they're not actually used
-bindgen = []
-wasm = []
 
 [dependencies]
 regex = { version = "1.11.1", default-features = false, features = ["unicode"] }
