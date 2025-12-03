@@ -12,8 +12,10 @@ use crate::types::{CrateRegistry, CrateState};
 use camino::{Utf8Path, Utf8PathBuf};
 use fs_err as fs;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
+use owo_colors::OwoColorize;
 use rayon::prelude::*;
 use rootcause::Report;
+use std::io::IsTerminal;
 use std::process::Stdio;
 use std::sync::Mutex;
 
@@ -47,7 +49,10 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
         return Ok(PlanSet::new());
     }
 
-    // Set up multi-progress for parallel spinners
+    // Check if we're in a terminal (for spinners) or CI (for plain output)
+    let is_tty = std::io::stdout().is_terminal();
+
+    // Set up multi-progress for parallel spinners (only used in TTY mode)
     let mp = MultiProgress::new();
     let spinner_style = ProgressStyle::default_spinner()
         .template("{spinner:.green} {msg}")
@@ -64,20 +69,23 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
             let config = crate_state.config.as_ref().unwrap();
             let crate_name = &crate_state.name;
 
-            // Check if this crate needs tree-sitter generation
+            // Check if this crate has a grammar to generate
             let grammar_dir = crate_state.path.join("grammar");
-            let parser_c = crate_state.path.join("grammar-src/parser.c");
-            let needs_generation = grammar_dir.exists()
-                && grammar_dir.join("grammar.js").exists()
-                && !parser_c.exists();
+            let needs_generation =
+                grammar_dir.exists() && grammar_dir.join("grammar.js").exists();
 
-            // Create spinner only if we're doing real work (tree-sitter generation)
+            // Show progress - spinner in TTY, plain text in CI
             let pb = if needs_generation {
-                let pb = mp.add(ProgressBar::new_spinner());
-                pb.set_style(spinner_style.clone());
-                pb.set_message(format!("Generating {}...", crate_name));
-                pb.enable_steady_tick(std::time::Duration::from_millis(80));
-                Some(pb)
+                if is_tty {
+                    let pb = mp.add(ProgressBar::new_spinner());
+                    pb.set_style(spinner_style.clone());
+                    pb.set_message(format!("Generating {}...", crate_name));
+                    pb.enable_steady_tick(std::time::Duration::from_millis(80));
+                    Some(pb)
+                } else {
+                    println!("{} Generating {}...", "●".cyan(), crate_name);
+                    None
+                }
             } else {
                 None
             };
@@ -89,11 +97,15 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
                     }
                     if let Some(pb) = pb {
                         pb.finish_with_message(format!("{} ✓", crate_name));
+                    } else if needs_generation && !is_tty {
+                        println!("  {} {}", "✓".green(), crate_name);
                     }
                 }
                 Err(e) => {
                     if let Some(pb) = pb {
                         pb.finish_with_message(format!("{} ✗", crate_name));
+                    } else if needs_generation && !is_tty {
+                        println!("  {} {}", "✗".red(), crate_name);
                     }
                     errors.lock().unwrap().push((crate_name.clone(), e));
                 }
@@ -192,12 +204,10 @@ fn plan_crate_generation(
     }
 
     // Generate grammar-src/ from vendored grammar sources
-    // Only regenerate if grammar-src/parser.c doesn't exist yet
+    // Always regenerate and check for differences
     let grammar_dir = crate_path.join("grammar");
-    let grammar_src_dir = crate_path.join("grammar-src");
-    let parser_c = grammar_src_dir.join("parser.c");
 
-    if grammar_dir.exists() && grammar_dir.join("grammar.js").exists() && !parser_c.exists() {
+    if grammar_dir.exists() && grammar_dir.join("grammar.js").exists() {
         plan_grammar_src_generation(&mut plan, crate_path, config)?;
     }
 
