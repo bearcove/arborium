@@ -25,6 +25,14 @@ jobs:
         with:
           cache-targets: false
 
+      - name: Restore grammar generation cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/arborium
+          key: grammar-cache-${{ hashFiles('crates/*/grammar/grammar.js', 'crates/*/grammar/package.json', 'crates/*/common/**') }}
+          restore-keys: |
+            grammar-cache-
+
       - name: Install tree-sitter CLI
         run: cargo install tree-sitter-cli
 

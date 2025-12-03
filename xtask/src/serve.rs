@@ -844,13 +844,13 @@ fn escape_for_js(s: &str) -> String {
         .replace('\t', "\\t")
 }
 
-/// Render markdown to HTML (inline, stripping outer <p> tags)
+/// Render markdown to HTML (inline, stripping outer `<p>` tags)
 fn markdown_to_html(markdown: &str) -> String {
     let options = Options::empty();
     let parser = Parser::new_ext(markdown, options);
     let mut html_output = String::new();
     html::push_html(&mut html_output, parser);
-    // Strip outer <p>...</p> tags for inline use
+    // Strip outer `<p>...</p>` tags for inline use
     let trimmed = html_output.trim();
     if trimmed.starts_with("<p>") && trimmed.ends_with("</p>") {
         trimmed[3..trimmed.len() - 4].to_string()

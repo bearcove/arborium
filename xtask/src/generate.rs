@@ -6,9 +6,11 @@
 //! - src/lib.rs
 //! - grammar/src/ (by running tree-sitter generate)
 
+use crate::cache::GrammarCache;
 use crate::plan::{Operation, Plan, PlanSet};
 use crate::tool::Tool;
 use crate::types::{CrateRegistry, CrateState};
+use crate::util::find_repo_root;
 use camino::{Utf8Path, Utf8PathBuf};
 use fs_err as fs;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
@@ -18,11 +20,23 @@ use rootcause::Report;
 use std::io::IsTerminal;
 use std::process::Stdio;
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// Generate crate files for all or a specific grammar.
 pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSet, Report> {
     // Note: lint is run by main.rs before and after calling this function
     let registry = CrateRegistry::load(crates_dir)?;
+
+    // Set up grammar cache
+    let repo_root =
+        find_repo_root().ok_or_else(|| std::io::Error::other("Could not find repo root"))?;
+    let repo_root = Utf8PathBuf::from_path_buf(repo_root)
+        .map_err(|_| std::io::Error::other("Non-UTF8 repo root"))?;
+    let cache = GrammarCache::new(&repo_root);
+
+    // Track cache stats
+    let cache_hits = AtomicUsize::new(0);
+    let cache_misses = AtomicUsize::new(0);
 
     // Collect crates to process (respecting filter)
     let crates_to_process: Vec<_> = registry
@@ -86,7 +100,14 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
                 None
             };
 
-            match plan_crate_generation(crate_state, config) {
+            match plan_crate_generation(
+                crate_state,
+                config,
+                &cache,
+                crates_dir,
+                &cache_hits,
+                &cache_misses,
+            ) {
                 Ok(plan) => {
                     if !plan.is_empty() {
                         plans.lock().unwrap().add(plan);
@@ -107,6 +128,18 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
                 }
             }
         });
+
+    // Print cache stats
+    let hits = cache_hits.load(Ordering::Relaxed);
+    let misses = cache_misses.load(Ordering::Relaxed);
+    if hits > 0 || misses > 0 {
+        println!(
+            "{} {} cache hits, {} misses",
+            "●".green(),
+            hits.to_string().green().bold(),
+            misses.to_string().yellow()
+        );
+    }
 
     // Check for errors - print all of them
     let errors = errors.into_inner().unwrap();
@@ -135,6 +168,10 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
 fn plan_crate_generation(
     crate_state: &CrateState,
     config: &crate::types::CrateConfig,
+    cache: &GrammarCache,
+    crates_dir: &Utf8Path,
+    cache_hits: &AtomicUsize,
+    cache_misses: &AtomicUsize,
 ) -> Result<Plan, Report> {
     let mut plan = Plan::for_crate(&crate_state.name);
     let crate_path = &crate_state.path;
@@ -214,11 +251,18 @@ fn plan_crate_generation(
     }
 
     // Generate grammar/src/ from vendored grammar sources
-    // Always regenerate and check for differences
     let grammar_dir = crate_path.join("grammar");
 
     if grammar_dir.exists() && grammar_dir.join("grammar.js").exists() {
-        plan_grammar_src_generation(&mut plan, crate_path, config)?;
+        plan_grammar_src_generation(
+            &mut plan,
+            crate_path,
+            config,
+            cache,
+            crates_dir,
+            cache_hits,
+            cache_misses,
+        )?;
     }
 
     Ok(plan)
@@ -279,15 +323,36 @@ fn plan_grammar_src_generation(
     plan: &mut Plan,
     crate_path: &Utf8Path,
     _config: &crate::types::CrateConfig,
+    cache: &GrammarCache,
+    crates_dir: &Utf8Path,
+    cache_hits: &AtomicUsize,
+    cache_misses: &AtomicUsize,
 ) -> Result<(), Report> {
     let grammar_dir = crate_path.join("grammar");
     let dest_src_dir = grammar_dir.join("src");
     let crate_name = crate_path.file_name().unwrap_or("unknown");
 
-    // Get the crates directory (parent of crate_path)
-    let crates_dir = crate_path
-        .parent()
-        .ok_or_else(|| std::io::Error::other("Could not get crates directory"))?;
+    // Compute cache key from input files
+    let cache_key = cache.compute_cache_key(crate_path, crates_dir, crate_name)?;
+
+    // Check cache first
+    if let Some(cached) = cache.get(crate_name, &cache_key) {
+        // Cache hit! Extract to a temp dir first, then plan updates
+        cache_hits.fetch_add(1, Ordering::Relaxed);
+
+        let temp_dir = tempfile::tempdir()?;
+        let temp_src = Utf8PathBuf::from_path_buf(temp_dir.path().to_path_buf())
+            .map_err(|_| std::io::Error::other("Non-UTF8 temp path"))?;
+
+        cached.extract_to(&temp_src)?;
+
+        // Plan updates from cached files
+        plan_updates_from_generated(&mut *plan, &temp_src, &dest_src_dir)?;
+        return Ok(());
+    }
+
+    // Cache miss - need to generate
+    cache_misses.fetch_add(1, Ordering::Relaxed);
 
     // Create a temp directory with same structure as the crate
     // Some grammars have `require('../common/...')` so we need to preserve the relative paths
@@ -336,17 +401,35 @@ fn plan_grammar_src_generation(
     // The generated files are in temp/grammar/src/
     let generated_src = temp_grammar.join("src");
 
+    // Save to cache for next time
+    if let Err(e) = cache.save(crate_name, &cache_key, &generated_src) {
+        // Cache save failure is not fatal, just log it
+        eprintln!("Warning: failed to cache {}: {}", crate_name, e);
+    }
+
+    // Plan updates from the generated files
+    plan_updates_from_generated(plan, &generated_src, &dest_src_dir)?;
+
+    Ok(())
+}
+
+/// Plan file updates from a generated source directory to the destination.
+fn plan_updates_from_generated(
+    plan: &mut Plan,
+    generated_src: &Utf8Path,
+    dest_src_dir: &Utf8Path,
+) -> Result<(), Report> {
     // Ensure grammar/src/ directory exists in plan
     if !dest_src_dir.exists() {
         plan.add(Operation::CreateDir {
-            path: dest_src_dir.clone(),
+            path: dest_src_dir.to_owned(),
             description: "Create grammar/src directory".to_string(),
         });
     }
 
     // Copy all generated files to grammar/src/
     // This includes parser.c, scanner.c, grammar.json, node-types.json, and any .h files
-    for entry in fs::read_dir(&generated_src)? {
+    for entry in fs::read_dir(generated_src)? {
         let entry = entry?;
         let file_name = entry.file_name().to_string_lossy().to_string();
         let generated_file = Utf8PathBuf::from_path_buf(entry.path())

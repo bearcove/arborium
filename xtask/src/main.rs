@@ -1,13 +1,14 @@
 //! xtask for arborium - development tasks
 //!
-//! Usage: cargo xtask <command>
+//! Usage: `cargo xtask <command>`
 //!
 //! Commands:
-//!   doctor         Check for required external tools
-//!   lint           Validate all grammars
-//!   gen [name]     Regenerate crate files from arborium.kdl
-//!   serve          Build and serve the WASM demo locally
+//! - `doctor` - Check for required external tools
+//! - `lint` - Validate all grammars
+//! - `gen \[name\]` - Regenerate crate files from arborium.kdl
+//! - `serve` - Build and serve the WASM demo locally
 
+mod cache;
 mod generate;
 mod lint_new;
 mod plan;

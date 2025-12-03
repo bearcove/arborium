@@ -1,5 +1,8 @@
 /target
 
+# Grammar generation cache
+.cache/
+
 # Node modules (created during grammar regeneration)
 node_modules/
 **/node_modules/
