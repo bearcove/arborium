@@ -116,12 +116,15 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
     if !errors.is_empty() {
         eprintln!();
         for (crate_name, error) in &errors {
-            eprintln!("{}", boxen::builder()
-                .border_style(boxen::BorderStyle::Round)
-                .border_color("red")
-                .padding(1)
-                .render(&format!("{}: {}", crate_name.bold(), error))
-                .unwrap_or_else(|_| format!("{}: {}", crate_name, error)));
+            eprintln!(
+                "{}",
+                boxen::builder()
+                    .border_style(boxen::BorderStyle::Round)
+                    .border_color("red")
+                    .padding(1)
+                    .render(&format!("{}: {}", crate_name.bold(), error))
+                    .unwrap_or_else(|_| format!("{}: {}", crate_name, error))
+            );
         }
         return Err(std::io::Error::other(format!(
             "{} grammar(s) failed to generate",
