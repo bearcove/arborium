@@ -95,17 +95,17 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
                     if !plan.is_empty() {
                         plans.lock().unwrap().add(plan);
                     }
+                    // Success: clear the spinner (no need to keep it around)
                     if let Some(pb) = pb {
-                        pb.finish_with_message(format!("{} ✓", crate_name));
-                    } else if needs_generation && !is_tty {
-                        println!("  {} {}", "✓".green(), crate_name);
+                        pb.finish_and_clear();
                     }
                 }
                 Err(e) => {
+                    // Failure: show error marker
                     if let Some(pb) = pb {
-                        pb.finish_with_message(format!("{} ✗", crate_name));
-                    } else if needs_generation && !is_tty {
-                        println!("  {} {}", "✗".red(), crate_name);
+                        pb.finish_with_message(format!("{} {}", "✗".red(), crate_name));
+                    } else if needs_generation {
+                        println!("{} {} {}", "●".red(), "✗".red(), crate_name);
                     }
                     errors.lock().unwrap().push((crate_name.clone(), e));
                 }
