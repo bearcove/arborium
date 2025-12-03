@@ -55,7 +55,7 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
     // Set up multi-progress for parallel spinners (only used in TTY mode)
     let mp = MultiProgress::new();
     let spinner_style = ProgressStyle::default_spinner()
-        .template("{spinner:.green} {msg}")
+        .template("{spinner:.green} {msg} ({elapsed})")
         .unwrap();
 
     // Thread-safe collection for plans and errors
