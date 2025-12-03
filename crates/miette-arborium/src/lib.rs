@@ -16,13 +16,13 @@
 //!
 //! # Theme Support
 //!
-//! The highlighter uses Catppuccin Mocha by default, but you can customize it:
+//! The highlighter uses Monokai by default, but you can customize it:
 //!
 //! ```rust,ignore
 //! use miette_arborium::ArboriumHighlighter;
-//! use arborium::ansi::TOKYO_NIGHT;
+//! use arborium::theme::builtin;
 //!
-//! let highlighter = ArboriumHighlighter::with_theme(&TOKYO_NIGHT);
+//! let highlighter = ArboriumHighlighter::with_theme(builtin::dracula());
 //! ```
 //!
 //! # Feature Flags
@@ -38,7 +38,7 @@
 use std::path::Path;
 use std::sync::RwLock;
 
-use arborium::ansi::{Style, CATPPUCCIN_MOCHA as DEFAULT_THEME};
+use arborium::theme::{builtin, Style, Theme};
 use arborium::tree_sitter_highlight::{Highlight, HighlightConfiguration, HighlightEvent};
 use arborium::Highlighter as ArboriumCoreHighlighter;
 use miette::highlighters::{Highlighter, HighlighterState};
@@ -64,11 +64,11 @@ impl Default for ArboriumHighlighter {
 }
 
 impl ArboriumHighlighter {
-    /// Create a new highlighter with the default theme (Catppuccin Mocha).
+    /// Create a new highlighter with the default theme (Monokai).
     pub fn new() -> Self {
         Self {
             highlighter: RwLock::new(ArboriumCoreHighlighter::new()),
-            theme: &DEFAULT_THEME,
+            theme: builtin::monokai(),
         }
     }
 
@@ -78,9 +78,9 @@ impl ArboriumHighlighter {
     ///
     /// ```rust,ignore
     /// use miette_arborium::ArboriumHighlighter;
-    /// use arborium::ansi::DRACULA;
+    /// use arborium::theme::builtin;
     ///
-    /// let highlighter = ArboriumHighlighter::with_theme(&DRACULA);
+    /// let highlighter = ArboriumHighlighter::with_theme(builtin::dracula());
     /// ```
     pub fn with_theme(theme: &'static Theme) -> Self {
         Self {
@@ -483,19 +483,19 @@ impl<'h> ArboriumHighlighterState<'h> {
             owo_style = owo_style.color(Rgb(color.r, color.g, color.b));
         }
 
-        if arborium_style.bold {
+        if arborium_style.modifiers.bold {
             owo_style = owo_style.bold();
         }
 
-        if arborium_style.italic {
+        if arborium_style.modifiers.italic {
             owo_style = owo_style.italic();
         }
 
-        if arborium_style.underline {
+        if arborium_style.modifiers.underline {
             owo_style = owo_style.underline();
         }
 
-        if arborium_style.strikethrough {
+        if arborium_style.modifiers.strikethrough {
             owo_style = owo_style.strikethrough();
         }
 
@@ -569,11 +569,8 @@ impl HighlighterState for BlankHighlighterState {
     }
 }
 
-// Re-export theme types for convenience
-pub use arborium::ansi::{
-    CATPPUCCIN_LATTE, CATPPUCCIN_MOCHA, DRACULA, GITHUB_DARK, NORD, ONE_DARK, TOKYO_NIGHT,
-};
-pub use arborium::ansi::Theme;
+// Re-export theme module for convenience
+pub use arborium::theme;
 
 #[cfg(test)]
 mod tests {

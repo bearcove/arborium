@@ -82,7 +82,7 @@ struct Summary {
     let rust_error = CodeError {
         message: "Rust type error".into(),
         src: NamedSource::new("processor.rs", rust_code.to_string()).with_language("rust"),
-        span: (147, 11).into(), // "or_insert"
+        span: (246, 9).into(), // "or_insert"
         label: "expected `&mut usize`, found `usize`".into(),
         help: Some("consider using `entry(...).or_insert(0)` pattern correctly".into()),
     };
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     let python_error = CodeError {
         message: "Python import error".into(),
         src: NamedSource::new("fetch_users.py", python_code.to_string()).with_language("python"),
-        span: (289, 7).into(), // "aiohttp"
+        span: (278, 7).into(), // "aiohttp"
         label: "ModuleNotFoundError: No module named 'aiohttp'".into(),
         help: Some("try: pip install aiohttp".into()),
     };
