@@ -11,12 +11,11 @@ pub fn find_repo_root() -> Option<PathBuf> {
 
     loop {
         let cargo_toml = current.join("Cargo.toml");
-        if cargo_toml.exists() {
-            if let Ok(contents) = fs::read_to_string(&cargo_toml) {
-                if contents.contains("[workspace]") {
-                    return Some(current);
-                }
-            }
+        if cargo_toml.exists()
+            && let Ok(contents) = fs::read_to_string(&cargo_toml)
+            && contents.contains("[workspace]")
+        {
+            return Some(current);
         }
         if !current.pop() {
             return None;

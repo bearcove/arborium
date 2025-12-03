@@ -15,6 +15,7 @@ owo-colors = "4"
 
 [dev-dependencies]
 miette = { version = "7", features = ["fancy"] }
+arborium = { path = "../arborium", features = ["lang-rust"] }
 
 [features]
 default = []

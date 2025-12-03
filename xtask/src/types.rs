@@ -475,7 +475,7 @@ structstruck::strike! {
         /// src/lib.rs - generated
         pub lib_rs: FileState,
 
-        /// grammar-src/ directory state
+        /// grammar/src/ directory state
         pub grammar_src: pub struct GrammarSrcState {
             /// parser.c - required
             pub parser_c: FileState,
@@ -633,13 +633,15 @@ impl CrateRegistry {
         files.build_rs = Self::read_file_state(&path.join("build.rs"));
         files.lib_rs = Self::read_file_state(&path.join("src/lib.rs"));
 
-        // Check grammar-src/
-        let grammar_src_path = path.join("grammar-src");
+        // Check grammar/src/ for generated files
+        let grammar_src_path = path.join("grammar/src");
         if grammar_src_path.exists() {
             files.grammar_src.parser_c = Self::read_file_state(&grammar_src_path.join("parser.c"));
-            files.grammar_src.scanner_c =
-                Self::read_file_state(&grammar_src_path.join("scanner.c"));
-            // Could scan for other files here
+        }
+        // Check grammar/ for scanner.c (handwritten, not in src/)
+        let grammar_path = path.join("grammar");
+        if grammar_path.exists() {
+            files.grammar_src.scanner_c = Self::read_file_state(&grammar_path.join("scanner.c"));
         }
 
         // Check queries/

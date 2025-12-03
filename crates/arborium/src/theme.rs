@@ -211,12 +211,11 @@ impl Theme {
             |s: &str| -> Option<Color> { Color::from_hex(s).or_else(|| palette.get(s).copied()) };
 
         // Extract ui.background and ui.foreground
-        if let Some(bg) = table.get("ui.background") {
-            if let Some(bg_table) = bg.as_table() {
-                if let Some(bg_str) = bg_table.get("bg").and_then(|v| v.as_str()) {
-                    theme.background = resolve_color(bg_str);
-                }
-            }
+        if let Some(bg) = table.get("ui.background")
+            && let Some(bg_table) = bg.as_table()
+            && let Some(bg_str) = bg_table.get("bg").and_then(|v| v.as_str())
+        {
+            theme.background = resolve_color(bg_str);
         }
         // Also check for simple "background" key
         if let Some(bg_str) = table.get("background").and_then(|v| v.as_str()) {
@@ -226,10 +225,10 @@ impl Theme {
         if let Some(fg) = table.get("ui.foreground") {
             if let Some(fg_str) = fg.as_str() {
                 theme.foreground = resolve_color(fg_str);
-            } else if let Some(fg_table) = fg.as_table() {
-                if let Some(fg_str) = fg_table.get("fg").and_then(|v| v.as_str()) {
-                    theme.foreground = resolve_color(fg_str);
-                }
+            } else if let Some(fg_table) = fg.as_table()
+                && let Some(fg_str) = fg_table.get("fg").and_then(|v| v.as_str())
+            {
+                theme.foreground = resolve_color(fg_str);
             }
         }
         // Also check for simple "foreground" key

@@ -1,4 +1,6 @@
 #![doc = include_str!("../README.md")]
+// Allow warnings in vendored tree-sitter-highlight code
+#![allow(clippy::all)]
 
 use tree_sitter_patched_arborium as tree_sitter;
 

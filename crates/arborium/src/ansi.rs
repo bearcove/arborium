@@ -486,13 +486,13 @@ pub fn render_with_theme<'a>(
 ) -> io::Result<()> {
     let highlights = highlighter
         .highlight(config, source.as_bytes(), None, injection_callback)
-        .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
+        .map_err(|e| io::Error::other(e.to_string()))?;
 
     // Stack to track active styles
     let mut style_stack: Vec<&Style> = Vec::new();
 
     for event in highlights {
-        let event = event.map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
+        let event = event.map_err(|e| io::Error::other(e.to_string()))?;
         match event {
             HighlightEvent::Source { start, end } => {
                 write!(w, "{}", &source[start..end])?;

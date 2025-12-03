@@ -1,6 +1,9 @@
 #![doc = include_str!("./README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
+// Allow warnings in vendored tree-sitter code
+#![allow(clippy::all)]
+#![allow(mismatched_lifetime_syntaxes)]
 
 pub mod ffi;
 mod util;

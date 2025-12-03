@@ -131,6 +131,7 @@ impl Highlighter {
 
     /// Create a highlight configuration for a language.
     /// This is where the actual grammar initialization happens.
+    #[allow(unused_variables)]
     fn create_config(language: &'static str, names: &[String]) -> Option<HighlightConfiguration> {
         macro_rules! try_lang {
             ($feature:literal, $module:ident, $primary:literal) => {
@@ -598,6 +599,7 @@ impl Highlighter {
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
     #[test]

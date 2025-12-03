@@ -1,4 +1,4 @@
-#include "../../common/scanner.h"
+#include "common/scanner.h"
 
 bool tree_sitter_fsharp_external_scanner_scan(void *payload, TSLexer *lexer,
                                               const bool *valid_symbols) {

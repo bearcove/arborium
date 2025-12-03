@@ -43,7 +43,7 @@ enum Command {
         strict: bool,
     },
 
-    /// Regenerate crate files (Cargo.toml, build.rs, lib.rs, grammar-src/) from arborium.kdl
+    /// Regenerate crate files (Cargo.toml, build.rs, lib.rs, grammar/src/) from arborium.kdl
     Gen {
         /// Optional grammar name to regenerate (regenerates all if omitted)
         #[facet(args::positional, default)]

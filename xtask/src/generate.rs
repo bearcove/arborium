@@ -4,7 +4,7 @@
 //! - Cargo.toml
 //! - build.rs
 //! - src/lib.rs
-//! - grammar-src/ (by running tree-sitter generate)
+//! - grammar/src/ (by running tree-sitter generate)
 
 use crate::plan::{Operation, Plan, PlanSet};
 use crate::tool::Tool;
@@ -32,10 +32,7 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
             // Skip if a specific name was requested and this isn't it
             if let Some(filter) = name {
                 let matches = crate_state.name == filter
-                    || crate_state
-                        .name
-                        .strip_prefix("arborium-")
-                        .map_or(false, |suffix| suffix == filter);
+                    || (crate_state.name.strip_prefix("arborium-") == Some(filter));
                 if !matches {
                     return false;
                 }
@@ -122,11 +119,11 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
                     .border_style(boxen::BorderStyle::Round)
                     .border_color("red")
                     .padding(1)
-                    .render(&format!("{}: {}", crate_name.bold(), error))
+                    .render(format!("{}: {}", crate_name.bold(), error))
                     .unwrap_or_else(|_| format!("{}: {}", crate_name, error))
             );
         }
-        return Err(std::io::Error::other(format!(
+        Err(std::io::Error::other(format!(
             "{} grammar(s) failed to generate",
             errors.len()
         )))?;
@@ -216,7 +213,7 @@ fn plan_crate_generation(
         });
     }
 
-    // Generate grammar-src/ from vendored grammar sources
+    // Generate grammar/src/ from vendored grammar sources
     // Always regenerate and check for differences
     let grammar_dir = crate_path.join("grammar");
 
@@ -277,14 +274,14 @@ fn setup_grammar_dependencies(
     Ok(())
 }
 
-/// Plan the generation of grammar-src/ by running tree-sitter generate in a temp directory.
+/// Plan the generation of grammar/src/ by running tree-sitter generate in a temp directory.
 fn plan_grammar_src_generation(
     plan: &mut Plan,
     crate_path: &Utf8Path,
-    config: &crate::types::CrateConfig,
+    _config: &crate::types::CrateConfig,
 ) -> Result<(), Report> {
     let grammar_dir = crate_path.join("grammar");
-    let grammar_src_dir = crate_path.join("grammar-src");
+    let dest_src_dir = grammar_dir.join("src");
     let crate_name = crate_path.file_name().unwrap_or("unknown");
 
     // Get the crates directory (parent of crate_path)
@@ -329,7 +326,7 @@ fn plan_grammar_src_generation(
         let stderr = String::from_utf8_lossy(&output.stderr);
         // Show more context for debugging
         let error_lines: Vec<&str> = stderr.lines().take(20).collect();
-        return Err(std::io::Error::other(format!(
+        Err(std::io::Error::other(format!(
             "tree-sitter generate failed for {}:\n{}",
             crate_name,
             error_lines.join("\n")
@@ -339,52 +336,41 @@ fn plan_grammar_src_generation(
     // The generated files are in temp/grammar/src/
     let generated_src = temp_grammar.join("src");
 
-    // Ensure grammar-src/ directory exists in plan
-    if !grammar_src_dir.exists() {
+    // Ensure grammar/src/ directory exists in plan
+    if !dest_src_dir.exists() {
         plan.add(Operation::CreateDir {
-            path: grammar_src_dir.clone(),
-            description: "Create grammar-src directory".to_string(),
+            path: dest_src_dir.clone(),
+            description: "Create grammar/src directory".to_string(),
         });
     }
 
-    // Check for scanner.c - copy from vendored grammar/ if it exists there
-    // (scanner.c is handwritten, not generated)
-    let has_scanner = config
-        .grammars
-        .first()
-        .map(|g| g.has_scanner())
-        .unwrap_or(false);
+    // Copy all generated files to grammar/src/
+    // This includes parser.c, scanner.c, grammar.json, node-types.json, and any .h files
+    for entry in fs::read_dir(&generated_src)? {
+        let entry = entry?;
+        let file_name = entry.file_name().to_string_lossy().to_string();
+        let generated_file = Utf8PathBuf::from_path_buf(entry.path())
+            .map_err(|_| std::io::Error::other("Non-UTF8 path"))?;
 
-    if has_scanner {
-        let vendored_scanner = grammar_dir.join("scanner.c");
-        let dest_scanner = grammar_src_dir.join("scanner.c");
-        if vendored_scanner.exists() {
-            let new_content = fs::read_to_string(&vendored_scanner)?;
-            plan_file_update(plan, &dest_scanner, new_content, "scanner.c")?;
+        // Skip directories (tree_sitter/ is handled separately)
+        if !generated_file.is_file() {
+            continue;
         }
-    }
 
-    // Compare generated files with existing grammar-src/
-    // Files to copy: parser.c, grammar.json, node-types.json, tree_sitter/
-    for file_name in ["parser.c", "grammar.json", "node-types.json"] {
-        let generated_file = generated_src.join(file_name);
-        let dest_file = grammar_src_dir.join(file_name);
-
-        if generated_file.exists() {
-            let new_content = fs::read_to_string(&generated_file)?;
-            plan_file_update(plan, &dest_file, new_content, file_name)?;
-        }
+        let dest_file = dest_src_dir.join(&file_name);
+        let new_content = fs::read_to_string(&generated_file)?;
+        plan_file_update(plan, &dest_file, new_content, &format!("src/{}", file_name))?;
     }
 
     // Copy tree_sitter/ directory
     let generated_tree_sitter = generated_src.join("tree_sitter");
-    let dest_tree_sitter = grammar_src_dir.join("tree_sitter");
+    let dest_tree_sitter = dest_src_dir.join("tree_sitter");
     if generated_tree_sitter.exists() {
         // Ensure tree_sitter/ directory exists
         if !dest_tree_sitter.exists() {
             plan.add(Operation::CreateDir {
                 path: dest_tree_sitter.clone(),
-                description: "Create tree_sitter directory".to_string(),
+                description: "Create src/tree_sitter directory".to_string(),
             });
         }
 
@@ -402,7 +388,7 @@ fn plan_grammar_src_generation(
                     plan,
                     &dest_file,
                     new_content,
-                    &format!("tree_sitter/{}", file_name),
+                    &format!("src/tree_sitter/{}", file_name),
                 )?;
             }
         }
@@ -516,7 +502,7 @@ fn generate_build_rs(crate_name: &str, config: &crate::types::CrateConfig) -> St
         });
 
     let scanner_section = if has_scanner {
-        r#"    println!("cargo:rerun-if-changed={}/scanner.c", src_dir);
+        r#"    println!("cargo:rerun-if-changed=grammar/scanner.c");
 "#
     } else {
         ""
@@ -524,14 +510,14 @@ fn generate_build_rs(crate_name: &str, config: &crate::types::CrateConfig) -> St
 
     let scanner_compile = if has_scanner {
         r#"
-    build.file(format!("{}/scanner.c", src_dir));"#
+    build.file("grammar/scanner.c");"#
     } else {
         ""
     };
 
     format!(
         r#"fn main() {{
-    let src_dir = "grammar-src";
+    let src_dir = "grammar/src";
 
     println!("cargo:rerun-if-changed={{}}/parser.c", src_dir);
 {scanner_section}
@@ -539,6 +525,7 @@ fn generate_build_rs(crate_name: &str, config: &crate::types::CrateConfig) -> St
 
     build
         .include(src_dir)
+        .include("grammar")  // for common/ includes like "../common/scanner.h"
         .include(format!("{{}}/tree_sitter", src_dir))
         .warnings(false)
         .flag_if_supported("-Wno-unused-parameter")

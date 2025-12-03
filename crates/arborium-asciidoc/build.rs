@@ -1,13 +1,14 @@
 fn main() {
-    let src_dir = "grammar-src";
+    let src_dir = "grammar/src";
 
     println!("cargo:rerun-if-changed={}/parser.c", src_dir);
-    println!("cargo:rerun-if-changed={}/scanner.c", src_dir);
+    println!("cargo:rerun-if-changed=grammar/scanner.c");
 
     let mut build = cc::Build::new();
 
     build
         .include(src_dir)
+        .include("grammar") // for common/ includes like "../common/scanner.h"
         .include(format!("{}/tree_sitter", src_dir))
         .warnings(false)
         .flag_if_supported("-Wno-unused-parameter")
@@ -23,7 +24,7 @@ fn main() {
     }
 
     build.file(format!("{}/parser.c", src_dir));
-    build.file(format!("{}/scanner.c", src_dir));
+    build.file("grammar/scanner.c");
 
     build.compile("tree_sitter_asciidoc");
 }

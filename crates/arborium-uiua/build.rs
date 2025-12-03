@@ -1,5 +1,5 @@
 fn main() {
-    let src_dir = "grammar-src";
+    let src_dir = "grammar/src";
 
     println!("cargo:rerun-if-changed={}/parser.c", src_dir);
 
@@ -7,6 +7,7 @@ fn main() {
 
     build
         .include(src_dir)
+        .include("grammar") // for common/ includes like "../common/scanner.h"
         .include(format!("{}/tree_sitter", src_dir))
         .warnings(false)
         .flag_if_supported("-Wno-unused-parameter")

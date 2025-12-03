@@ -77,7 +77,7 @@ pub fn test_grammar(
         );
     });
 
-    config.configure(&HIGHLIGHT_NAMES);
+    config.configure(HIGHLIGHT_NAMES);
 
     // Find samples from arborium.kdl
     let crate_path = Path::new(crate_dir);
@@ -183,15 +183,13 @@ fn parse_samples_from_kdl(path: &Path) -> Vec<String> {
             }
 
             // Look for path "..."
-            if trimmed.starts_with("path") {
-                // Extract the quoted string
-                if let Some(start) = trimmed.find('"') {
-                    if let Some(end) = trimmed[start + 1..].find('"') {
-                        let path_value = &trimmed[start + 1..start + 1 + end];
-                        if !path_value.is_empty() {
-                            samples.push(path_value.to_string());
-                        }
-                    }
+            if trimmed.starts_with("path")
+                && let Some(start) = trimmed.find('"')
+                && let Some(end) = trimmed[start + 1..].find('"')
+            {
+                let path_value = &trimmed[start + 1..start + 1 + end];
+                if !path_value.is_empty() {
+                    samples.push(path_value.to_string());
                 }
             }
         }

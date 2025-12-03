@@ -12,7 +12,7 @@ use pulldown_cmark::{Options, Parser, html};
 use std::collections::{BTreeMap, HashSet};
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 // =============================================================================
 // Registry JSON types (for demo consumption)
@@ -273,7 +273,7 @@ where
 fn generate_sample_files(
     crates_dir: &Utf8Path,
     registry: &Registry,
-    demo_dir: &PathBuf,
+    demo_dir: &Path,
 ) -> Result<(), String> {
     let samples_dir = demo_dir.join("samples");
     if !samples_dir.exists() {
@@ -302,7 +302,7 @@ fn generate_sample_files(
     Ok(())
 }
 
-fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
+fn build_wasm(demo_dir: &Path, dev: bool) -> Result<(), String> {
     use crate::tool::Tool;
 
     // Nuke pkg/ to avoid stale cached files
@@ -366,7 +366,7 @@ fn build_wasm(demo_dir: &PathBuf, dev: bool) -> Result<(), String> {
     Ok(())
 }
 
-fn generate_registry_json(crates_dir: &Utf8Path, demo_dir: &PathBuf) -> Result<Registry, String> {
+fn generate_registry_json(crates_dir: &Utf8Path, demo_dir: &Path) -> Result<Registry, String> {
     let crates_dir =
         Utf8PathBuf::from_path_buf(crates_dir.to_path_buf().into()).map_err(|_| "non-UTF8 path")?;
 
@@ -387,7 +387,7 @@ fn generate_registry_json(crates_dir: &Utf8Path, demo_dir: &PathBuf) -> Result<R
 
 fn fetch_icons_from_registry(
     registry: &Registry,
-    demo_dir: &PathBuf,
+    demo_dir: &Path,
 ) -> Result<BTreeMap<String, String>, String> {
     let template_path = demo_dir.join("template.html");
     let template = fs::read_to_string(&template_path).map_err(|e| e.to_string())?;
@@ -664,7 +664,7 @@ fn generate_theme_swatches() -> String {
     html
 }
 
-fn generate_index_html(demo_dir: &PathBuf, icons: &BTreeMap<String, String>) -> Result<(), String> {
+fn generate_index_html(demo_dir: &Path, icons: &BTreeMap<String, String>) -> Result<(), String> {
     let template_path = demo_dir.join("template.html");
     let output_path = demo_dir.join("index.html");
 
@@ -693,7 +693,7 @@ fn generate_index_html(demo_dir: &PathBuf, icons: &BTreeMap<String, String>) -> 
 }
 
 fn generate_app_js(
-    demo_dir: &PathBuf,
+    demo_dir: &Path,
     registry: &Registry,
     icons: &BTreeMap<String, String>,
 ) -> Result<(), String> {
@@ -859,7 +859,7 @@ fn markdown_to_html(markdown: &str) -> String {
     }
 }
 
-fn precompress_files(demo_dir: &PathBuf) -> Result<(), String> {
+fn precompress_files(demo_dir: &Path) -> Result<(), String> {
     let files = ["index.html", "registry.json", "styles.css", "app.js"];
     let pkg_files = ["arborium_demo.js", "app.generated.js"];
 
@@ -876,7 +876,7 @@ fn precompress_files(demo_dir: &PathBuf) -> Result<(), String> {
     Ok(())
 }
 
-fn compress_file(path: &PathBuf) -> Result<(), String> {
+fn compress_file(path: &Path) -> Result<(), String> {
     if !path.exists() {
         return Ok(());
     }
@@ -896,7 +896,7 @@ fn compress_file(path: &PathBuf) -> Result<(), String> {
     Ok(())
 }
 
-fn precompress_files_fast(demo_dir: &PathBuf) -> Result<(), String> {
+fn precompress_files_fast(demo_dir: &Path) -> Result<(), String> {
     let files = ["index.html", "registry.json", "styles.css", "app.js"];
     let pkg_files = ["arborium_demo.js", "app.generated.js"];
 
@@ -913,7 +913,7 @@ fn precompress_files_fast(demo_dir: &PathBuf) -> Result<(), String> {
     Ok(())
 }
 
-fn compress_file_fast(path: &PathBuf) -> Result<(), String> {
+fn compress_file_fast(path: &Path) -> Result<(), String> {
     if !path.exists() {
         return Ok(());
     }
@@ -990,7 +990,7 @@ fn bind_server(addr: &str, port: Option<u16>) -> (tiny_http::Server, u16) {
     }
 }
 
-fn serve_files(server: tiny_http::Server, demo_dir: &PathBuf) {
+fn serve_files(server: tiny_http::Server, demo_dir: &Path) {
     for request in server.incoming_requests() {
         let url_path = request.url().trim_start_matches('/');
 
@@ -1065,7 +1065,7 @@ fn serve_files(server: tiny_http::Server, demo_dir: &PathBuf) {
     }
 }
 
-fn guess_content_type(path: &PathBuf) -> &'static str {
+fn guess_content_type(path: &Path) -> &'static str {
     match path.extension().and_then(|e| e.to_str()) {
         Some("html") | Some("htm") => "text/html; charset=utf-8",
         Some("js") | Some("mjs") | Some("cjs") => "application/javascript; charset=utf-8",

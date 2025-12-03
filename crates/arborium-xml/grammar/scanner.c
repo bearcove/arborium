@@ -1,5 +1,5 @@
 #define TS_XML
-#include "../../common/scanner.h"
+#include "common/scanner.h"
 #include "tree_sitter/array.h"
 
 #include <string.h>

@@ -92,17 +92,17 @@ impl ArboriumHighlighter {
     /// Detect language from SpanContents using language hint, filename, or first line.
     fn detect_language(&self, contents: &dyn SpanContents<'_>) -> Option<&'static str> {
         // First try the explicit language hint
-        if let Some(lang) = contents.language() {
-            if self.highlighter.read().unwrap().is_supported(lang) {
-                return Some(self.normalize_language(lang));
-            }
+        if let Some(lang) = contents.language()
+            && self.highlighter.read().unwrap().is_supported(lang)
+        {
+            return Some(self.normalize_language(lang));
         }
 
         // Try to detect from filename extension
-        if let Some(name) = contents.name() {
-            if let Some(lang) = self.language_from_path(name) {
-                return Some(lang);
-            }
+        if let Some(name) = contents.name()
+            && let Some(lang) = self.language_from_path(name)
+        {
+            return Some(lang);
         }
 
         None
@@ -586,8 +586,9 @@ mod tests {
         }
 
         fn span(&self) -> &miette::SourceSpan {
-            static SPAN: miette::SourceSpan =
-                miette::SourceSpan::new(miette::SourceOffset::from(0), 0);
+            static SPAN: std::sync::LazyLock<miette::SourceSpan> = std::sync::LazyLock::new(|| {
+                miette::SourceSpan::new(miette::SourceOffset::from(0), 0)
+            });
             &SPAN
         }
 

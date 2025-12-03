@@ -519,7 +519,7 @@ pub fn css_inheritance_rules() -> String {
     }
 
     let mut css = String::new();
-    for (parent, children) in parent_children {
+    for (_parent, children) in parent_children {
         if children.is_empty() {
             continue;
         }

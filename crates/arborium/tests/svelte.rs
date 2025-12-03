@@ -96,7 +96,7 @@ fn assert_text_highlighted(events: &[Event], text: &str, highlight: &str, contex
                 current_highlights.pop();
             }
             Event::Source { text: src } => {
-                if src.contains(text) && current_highlights.iter().any(|h| *h == highlight) {
+                if src.contains(text) && current_highlights.contains(&highlight) {
                     found = true;
                     break;
                 }

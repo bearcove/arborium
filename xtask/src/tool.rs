@@ -174,7 +174,7 @@ pub fn print_tools_report() {
         .title("Tools Status")
         .border_color("cyan")
         .render(&content)
-        .unwrap_or_else(|_| content);
+        .unwrap_or(content);
 
     println!("{}", boxed);
 }
@@ -250,7 +250,7 @@ pub fn check_tools_or_report(tools: &[Tool]) -> bool {
         .title("Missing Tools")
         .border_color("red")
         .render(&content)
-        .unwrap_or_else(|_| content);
+        .unwrap_or(content);
 
     eprintln!("{}", boxed);
 
