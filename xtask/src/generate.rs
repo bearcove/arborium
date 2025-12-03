@@ -11,15 +11,16 @@ use crate::tool::Tool;
 use crate::types::{CrateRegistry, CrateState};
 use camino::{Utf8Path, Utf8PathBuf};
 use fs_err as fs;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
+use rayon::prelude::*;
 use rootcause::Report;
 use std::process::Stdio;
+use std::sync::Mutex;
 
 /// Generate crate files for all or a specific grammar.
 pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSet, Report> {
     // Note: lint is run by main.rs before and after calling this function
     let registry = CrateRegistry::load(crates_dir)?;
-    let mut plans = PlanSet::new();
 
     // Collect crates to process (respecting filter)
     let crates_to_process: Vec<_> = registry
@@ -42,28 +43,71 @@ pub fn plan_generate(crates_dir: &Utf8Path, name: Option<&str>) -> Result<PlanSe
         })
         .collect();
 
-    // Set up progress bar
-    let pb = ProgressBar::new(crates_to_process.len() as u64);
-    pb.set_style(
-        ProgressStyle::default_bar()
-            .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} {msg}")
-            .unwrap()
-            .progress_chars("█▓░"),
-    );
-
-    for (_name, crate_state) in crates_to_process {
-        pb.set_message(crate_state.name.clone());
-
-        let config = crate_state.config.as_ref().unwrap();
-        let plan = plan_crate_generation(crate_state, config)?;
-        plans.add(plan);
-
-        pb.inc(1);
+    if crates_to_process.is_empty() {
+        return Ok(PlanSet::new());
     }
 
-    pb.finish_with_message("done");
+    // Set up multi-progress for parallel spinners
+    let mp = MultiProgress::new();
+    let spinner_style = ProgressStyle::default_spinner()
+        .template("{spinner:.green} {msg}")
+        .unwrap();
 
-    Ok(plans)
+    // Thread-safe collection for plans and errors
+    let plans = Mutex::new(PlanSet::new());
+    let errors: Mutex<Vec<(String, Report)>> = Mutex::new(Vec::new());
+
+    // Process crates in parallel
+    crates_to_process
+        .par_iter()
+        .for_each(|(_name, crate_state)| {
+            let config = crate_state.config.as_ref().unwrap();
+            let crate_name = &crate_state.name;
+
+            // Check if this crate needs tree-sitter generation
+            let grammar_dir = crate_state.path.join("grammar");
+            let parser_c = crate_state.path.join("grammar-src/parser.c");
+            let needs_generation = grammar_dir.exists()
+                && grammar_dir.join("grammar.js").exists()
+                && !parser_c.exists();
+
+            // Create spinner only if we're doing real work (tree-sitter generation)
+            let pb = if needs_generation {
+                let pb = mp.add(ProgressBar::new_spinner());
+                pb.set_style(spinner_style.clone());
+                pb.set_message(format!("Generating {}...", crate_name));
+                pb.enable_steady_tick(std::time::Duration::from_millis(80));
+                Some(pb)
+            } else {
+                None
+            };
+
+            match plan_crate_generation(crate_state, config) {
+                Ok(plan) => {
+                    if !plan.is_empty() {
+                        plans.lock().unwrap().add(plan);
+                    }
+                    if let Some(pb) = pb {
+                        pb.finish_with_message(format!("{} ✓", crate_name));
+                    }
+                }
+                Err(e) => {
+                    if let Some(pb) = pb {
+                        pb.finish_with_message(format!("{} ✗", crate_name));
+                    }
+                    errors.lock().unwrap().push((crate_name.clone(), e));
+                }
+            }
+        });
+
+    // Check for errors
+    let errors = errors.into_inner().unwrap();
+    if !errors.is_empty() {
+        let first_error = errors.into_iter().next().unwrap();
+        return Err(first_error.1);
+    }
+
+    Ok(plans.into_inner().unwrap())
 }
 
 fn plan_crate_generation(
