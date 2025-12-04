@@ -1,0 +1,23 @@
+// Compression settings for WASM plugin builds
+// These are applied after wasm-opt optimization
+
+brotli {
+    // Quality level: 0-11 (11 = best compression, slowest)
+    quality 11
+    // Window size: 10-24 (larger = better compression, more memory)
+    window 22
+}
+
+gzip {
+    // Backend: "flate2" (fast) or "zopfli" (best compression, slow)
+    backend "zopfli"
+    // For flate2: compression level 0-9 (9 = best)
+    level 9
+    // For zopfli: number of iterations (15 = default, higher = better but slower)
+    iterations 15
+}
+
+zstd {
+    // Compression level: 1-22 (19 is a good balance, 22 = max)
+    level 19
+}

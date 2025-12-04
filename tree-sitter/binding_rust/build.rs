@@ -42,6 +42,9 @@ fn main() {
             // wctype functions are provided by arborium/src/wasm.rs - don't duplicate
             println!("cargo:rerun-if-changed={}", wasm_sysroot.display());
         }
+        // Suppress format warnings on wasm32 where uint32_t is unsigned long
+        // but tree-sitter's C code uses %u format specifiers
+        config.flag_if_supported("-Wno-format");
     }
 
     config

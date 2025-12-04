@@ -6,12 +6,17 @@ publish = false
 
 [dependencies]
 camino = "1"
+chrono = "0.4"
 fs-err = "3"
 which = "7"
-facet = { git = "https://github.com/facet-rs/facet" }
+facet = { git = "https://github.com/facet-rs/facet", features = ["indexmap"] }
 facet-args = { git = "https://github.com/facet-rs/facet" }
 facet-kdl = { git = "https://github.com/facet-rs/facet" }
 facet-json = { git = "https://github.com/facet-rs/facet" }
+facet-yaml = { git = "https://github.com/facet-rs/facet" }
+facet-pretty = { git = "https://github.com/facet-rs/facet" }
+facet-diff = { git = "https://github.com/facet-rs/facet" }
+indexmap = { version = "2", features = ["std"] }
 miette = { version = "7", features = ["fancy"] }
 thiserror = "2"
 structstruck = "0.4"
@@ -31,4 +36,7 @@ boxen = "0.1.3"
 blake3 = "1"
 tar = "0.4"
 atomicwrites = "0.4"
+zstd = "0.13"
+wasm-opt = "0.116"
+zopfli = "0.8"
 # arborium = { path = "../crates/arborium", features = ["all-languages"] }  # TODO: re-enable for theme CSS generation and highlight linting

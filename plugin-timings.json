@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2025-12-04T10:56:25.664305+00:00",
+  "timings": [
+    {
+      "grammar": "html",
+      "build_ms": 665,
+      "cargo_component_ms": 92,
+      "transpile_ms": 571
+    },
+    {
+      "grammar": "javascript",
+      "build_ms": 686,
+      "cargo_component_ms": 93,
+      "transpile_ms": 592
+    },
+    {
+      "grammar": "rust",
+      "build_ms": 735,
+      "cargo_component_ms": 125,
+      "transpile_ms": 607
+    }
+  ]
+}

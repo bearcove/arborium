@@ -3,12 +3,15 @@
 //! This module handles building grammar plugins as WASM components
 //! and transpiling them to JavaScript for browser usage.
 
+use std::time::Instant;
+
 use camino::{Utf8Path, Utf8PathBuf};
+use chrono::Utc;
 use miette::{Context, IntoDiagnostic, Result};
 use owo_colors::OwoColorize;
 
 use crate::tool::Tool;
-use crate::types::CrateRegistry;
+use crate::types::{CompressionConfig, CrateRegistry};
 
 /// Build options for plugins.
 pub struct BuildOptions {
@@ -18,8 +21,8 @@ pub struct BuildOptions {
     pub output_dir: Utf8PathBuf,
     /// Whether to run jco transpile after building
     pub transpile: bool,
-    /// Size budget in bytes (warn if exceeded)
-    pub size_budget: usize,
+    /// Whether to profile build times and write to plugin-timings.json
+    pub profile: bool,
 }
 
 impl Default for BuildOptions {
@@ -28,8 +31,50 @@ impl Default for BuildOptions {
             grammars: Vec::new(),
             output_dir: Utf8PathBuf::from("dist/plugins"),
             transpile: true,
-            size_budget: 1_500_000, // 1.5 MB
+            profile: false,
         }
+    }
+}
+
+/// Timing data for a single grammar plugin build.
+#[derive(Debug, Clone, facet::Facet)]
+#[facet(rename_all = "snake_case")]
+pub struct PluginTiming {
+    /// Grammar ID (e.g., "rust", "javascript")
+    pub grammar: String,
+    /// Total build time in milliseconds
+    pub build_ms: u64,
+    /// Time for cargo-component build step in milliseconds
+    pub cargo_component_ms: u64,
+    /// Time for jco transpile step in milliseconds (0 if transpile disabled)
+    pub transpile_ms: u64,
+}
+
+/// Collection of plugin build timings.
+#[derive(Debug, Clone, facet::Facet)]
+#[facet(rename_all = "snake_case")]
+pub struct PluginTimings {
+    /// When these timings were recorded
+    pub recorded_at: String,
+    /// Individual grammar timings
+    pub timings: Vec<PluginTiming>,
+}
+
+impl PluginTimings {
+    /// Load timings from a JSON file.
+    pub fn load(path: &Utf8Path) -> miette::Result<Self> {
+        let content = fs_err::read_to_string(path)
+            .map_err(|e| miette::miette!("failed to read {}: {}", path, e))?;
+        facet_json::from_str(&content)
+            .map_err(|e| miette::miette!("failed to parse {}: {}", path, e))
+    }
+
+    /// Save timings to a JSON file.
+    pub fn save(&self, path: &Utf8Path) -> miette::Result<()> {
+        let content = facet_json::to_string_pretty(self);
+        fs_err::write(path, content)
+            .map_err(|e| miette::miette!("failed to write {}: {}", path, e))?;
+        Ok(())
     }
 }
 
@@ -94,7 +139,11 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         None
     };
 
+    // Track timings if profiling is enabled
+    let mut timings: Vec<PluginTiming> = Vec::new();
+
     for grammar in &grammars {
+        let grammar_start = Instant::now();
         println!("{} {}", "Building plugin:".cyan().bold(), grammar);
 
         let plugin_crate = format!("arborium-{}-plugin", grammar);
@@ -112,6 +161,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
 
         // Build with cargo component from the plugin crate directory
         // (plugin crates are excluded from workspace, so we build from their directory)
+        let cargo_start = Instant::now();
         let status = cargo_component
             .command()
             .args(["build", "--release"])
@@ -119,6 +169,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
             .status()
             .into_diagnostic()
             .context("failed to run cargo-component")?;
+        let cargo_component_ms = cargo_start.elapsed().as_millis() as u64;
 
         if !status.success() {
             miette::bail!("cargo-component build failed for {}", grammar);
@@ -133,19 +184,6 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
             miette::bail!("expected wasm file not found: {}", wasm_file);
         }
 
-        // Check size
-        let size = std::fs::metadata(&wasm_file).into_diagnostic()?.len() as usize;
-        if size > options.size_budget {
-            println!(
-                "  {} Size {} exceeds budget {} ({:.1}x)",
-                "⚠".yellow(),
-                format_size(size),
-                format_size(options.size_budget),
-                size as f64 / options.size_budget as f64
-            );
-        } else {
-            println!("  {} Size: {}", "✓".green(), format_size(size));
-        }
 
         // Copy to output directory
         let plugin_output = output_dir.join(grammar);
@@ -159,8 +197,10 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
             .context("failed to copy wasm file")?;
 
         // Transpile with jco if enabled
+        let mut transpile_ms = 0u64;
         if let Some(ref jco) = jco {
             println!("  {} Transpiling with jco...", "→".blue());
+            let transpile_start = Instant::now();
             let status = jco
                 .command()
                 .args([
@@ -168,18 +208,53 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                     dest_wasm.as_str(),
                     "--instantiation",
                     "async",
+                    "--quiet",
                     "-o",
                     plugin_output.as_str(),
                 ])
                 .status()
                 .into_diagnostic()
                 .context("failed to run jco")?;
+            transpile_ms = transpile_start.elapsed().as_millis() as u64;
 
             if !status.success() {
                 miette::bail!("jco transpile failed for {}", grammar);
             }
-            println!("  {} Transpiled successfully", "✓".green());
+
+            // Calculate total wasm bundle size
+            let total_wasm_size: u64 = std::fs::read_dir(&plugin_output)
+                .into_diagnostic()?
+                .filter_map(|e| e.ok())
+                .filter(|e| e.path().extension().is_some_and(|ext| ext == "wasm"))
+                .filter_map(|e| e.metadata().ok())
+                .map(|m| m.len())
+                .sum();
+
+            println!(
+                "  {} Transpiled ({})",
+                "✓".green(),
+                format_size(total_wasm_size as usize)
+            );
         }
+
+        let build_ms = grammar_start.elapsed().as_millis() as u64;
+
+        if options.profile {
+            println!(
+                "  {} Timing: {}ms total (cargo-component: {}ms, transpile: {}ms)",
+                "⏱".dimmed(),
+                build_ms,
+                cargo_component_ms,
+                transpile_ms
+            );
+        }
+
+        timings.push(PluginTiming {
+            grammar: grammar.clone(),
+            build_ms,
+            cargo_component_ms,
+            transpile_ms,
+        });
 
         println!("  {} Built {}", "✓".green(), grammar);
     }
@@ -188,6 +263,44 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
     if options.transpile && grammars.len() > 1 {
         println!("\n{} Deduplicating shared WASM modules...", "→".blue());
         deduplicate_wasm_modules(&output_dir)?;
+    }
+
+    // Optimize and compress all wasm files
+    if options.transpile {
+        println!("\n{} Optimizing and compressing WASM files...", "→".blue());
+        let compression_config = CompressionConfig::load(repo_root)
+            .map_err(|e| miette::miette!("failed to load compression.kdl: {}", e))?;
+        optimize_and_compress_wasm(&output_dir, &compression_config)?;
+    }
+
+    // Save timings if profiling is enabled
+    if options.profile {
+        let timings_path = repo_root.join("plugin-timings.json");
+        let plugin_timings = PluginTimings {
+            recorded_at: Utc::now().to_rfc3339(),
+            timings,
+        };
+        plugin_timings.save(&timings_path)?;
+        println!(
+            "\n{} Saved timings to {}",
+            "✓".green(),
+            timings_path.cyan()
+        );
+
+        // Print summary
+        let total_ms: u64 = plugin_timings.timings.iter().map(|t| t.build_ms).sum();
+        println!("\n{} Build time summary:", "●".cyan());
+        for timing in &plugin_timings.timings {
+            let pct = (timing.build_ms as f64 / total_ms as f64) * 100.0;
+            println!(
+                "  {} {}: {}ms ({:.1}%)",
+                "→".dimmed(),
+                timing.grammar,
+                timing.build_ms,
+                pct
+            );
+        }
+        println!("  {} Total: {}ms", "=".dimmed(), total_ms);
     }
 
     Ok(())
@@ -560,4 +673,389 @@ fn deduplicate_wasm_modules(plugins_dir: &Utf8Path) -> Result<()> {
     }
 
     Ok(())
+}
+
+/// Optimize WASM files with wasm-opt and create compressed versions.
+///
+/// For each .wasm file:
+/// 1. Run wasm-opt -Oz to optimize for size
+/// 2. Create .wasm.br (brotli), .wasm.gz (gzip), and .wasm.zst (zstd) versions
+fn optimize_and_compress_wasm(plugins_dir: &Utf8Path, config: &CompressionConfig) -> Result<()> {
+    use std::io::Write;
+
+    // Find all wasm files (in plugins and shared directories)
+    let mut wasm_files = Vec::new();
+
+    // Check plugins directory
+    for entry in std::fs::read_dir(plugins_dir).into_diagnostic()? {
+        let entry = entry.into_diagnostic()?;
+        let path = Utf8PathBuf::try_from(entry.path()).into_diagnostic()?;
+        if path.is_dir() {
+            for file in std::fs::read_dir(&path).into_diagnostic()? {
+                let file = file.into_diagnostic()?;
+                let file_path = Utf8PathBuf::try_from(file.path()).into_diagnostic()?;
+                // Only optimize .core*.wasm files (core wasm from jco transpile)
+                // Skip grammar.wasm which is the component model wasm
+                let file_name = file_path.file_name().unwrap_or("");
+                if file_path.extension() == Some("wasm") && file_name.contains(".core") {
+                    wasm_files.push(file_path);
+                }
+            }
+        }
+    }
+
+    // Check shared directory
+    let shared_dir = plugins_dir.parent().unwrap().join("shared");
+    if shared_dir.exists() {
+        for entry in std::fs::read_dir(&shared_dir).into_diagnostic()? {
+            let entry = entry.into_diagnostic()?;
+            let path = Utf8PathBuf::try_from(entry.path()).into_diagnostic()?;
+            if path.extension() == Some("wasm") {
+                wasm_files.push(path);
+            }
+        }
+    }
+
+    if wasm_files.is_empty() {
+        println!("  {} No WASM files found", "○".dimmed());
+        return Ok(());
+    }
+
+    use rayon::prelude::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    let total_files = wasm_files.len();
+    let processed = AtomicUsize::new(0);
+    let total_original = AtomicUsize::new(0);
+    let total_optimized = AtomicUsize::new(0);
+    let total_br = AtomicUsize::new(0);
+    let total_gz = AtomicUsize::new(0);
+    let total_zst = AtomicUsize::new(0);
+
+    // Process files in parallel (up to 4 at a time)
+    let pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(4)
+        .build()
+        .into_diagnostic()?;
+
+    let results: Vec<Result<()>> = pool.install(|| {
+        wasm_files
+            .par_iter()
+            .map(|wasm_path| {
+                let original_size = std::fs::metadata(wasm_path)
+                    .map_err(|e| miette::miette!("failed to read {}: {}", wasm_path, e))?
+                    .len() as usize;
+                total_original.fetch_add(original_size, Ordering::Relaxed);
+
+                // Optimize with wasm-opt
+                let optimized_path = wasm_path.with_extension("wasm.opt");
+                wasm_opt::OptimizationOptions::new_optimize_for_size()
+                    .run(wasm_path.as_std_path(), optimized_path.as_std_path())
+                    .map_err(|e| miette::miette!("wasm-opt failed for {}: {}", wasm_path, e))?;
+
+                // Replace original with optimized
+                std::fs::rename(&optimized_path, wasm_path)
+                    .map_err(|e| miette::miette!("failed to rename {}: {}", wasm_path, e))?;
+                let optimized_size = std::fs::metadata(wasm_path)
+                    .map_err(|e| miette::miette!("failed to read {}: {}", wasm_path, e))?
+                    .len() as usize;
+                total_optimized.fetch_add(optimized_size, Ordering::Relaxed);
+
+                // Read optimized wasm
+                let wasm_data = std::fs::read(wasm_path)
+                    .map_err(|e| miette::miette!("failed to read {}: {}", wasm_path, e))?;
+
+                // Create brotli compressed version
+                let br_path = format!("{}.br", wasm_path);
+                let mut br_encoder = brotli::CompressorWriter::new(
+                    std::fs::File::create(&br_path)
+                        .map_err(|e| miette::miette!("failed to create {}: {}", br_path, e))?,
+                    4096,
+                    config.brotli_quality(),
+                    config.brotli_window(),
+                );
+                br_encoder
+                    .write_all(&wasm_data)
+                    .map_err(|e| miette::miette!("failed to write {}: {}", br_path, e))?;
+                drop(br_encoder);
+                total_br.fetch_add(
+                    std::fs::metadata(&br_path)
+                        .map_err(|e| miette::miette!("failed to read {}: {}", br_path, e))?
+                        .len() as usize,
+                    Ordering::Relaxed,
+                );
+
+                // Create gzip compressed version
+                let gz_path = format!("{}.gz", wasm_path);
+                if config.gzip_use_zopfli() {
+                    // Use zopfli for best compression
+                    let options = zopfli::Options {
+                        iteration_count: std::num::NonZeroU64::new(config.gzip_iterations() as u64)
+                            .unwrap_or(std::num::NonZeroU64::new(15).unwrap()),
+                        ..Default::default()
+                    };
+                    let mut gz_data = Vec::new();
+                    zopfli::compress(options, zopfli::Format::Gzip, &wasm_data[..], &mut gz_data)
+                        .map_err(|e| miette::miette!("zopfli failed for {}: {}", wasm_path, e))?;
+                    std::fs::write(&gz_path, gz_data)
+                        .map_err(|e| miette::miette!("failed to write {}: {}", gz_path, e))?;
+                } else {
+                    // Use flate2 for fast compression
+                    let gz_file = std::fs::File::create(&gz_path)
+                        .map_err(|e| miette::miette!("failed to create {}: {}", gz_path, e))?;
+                    let mut gz_encoder = flate2::write::GzEncoder::new(
+                        gz_file,
+                        flate2::Compression::new(config.gzip_level()),
+                    );
+                    gz_encoder
+                        .write_all(&wasm_data)
+                        .map_err(|e| miette::miette!("failed to write {}: {}", gz_path, e))?;
+                    gz_encoder
+                        .finish()
+                        .map_err(|e| miette::miette!("failed to finish {}: {}", gz_path, e))?;
+                }
+                total_gz.fetch_add(
+                    std::fs::metadata(&gz_path)
+                        .map_err(|e| miette::miette!("failed to read {}: {}", gz_path, e))?
+                        .len() as usize,
+                    Ordering::Relaxed,
+                );
+
+                // Create zstd compressed version
+                let zst_path = format!("{}.zst", wasm_path);
+                let zst_data = zstd::encode_all(&wasm_data[..], config.zstd_level())
+                    .map_err(|e| miette::miette!("zstd failed for {}: {}", wasm_path, e))?;
+                std::fs::write(&zst_path, zst_data)
+                    .map_err(|e| miette::miette!("failed to write {}: {}", zst_path, e))?;
+                total_zst.fetch_add(
+                    std::fs::metadata(&zst_path)
+                        .map_err(|e| miette::miette!("failed to read {}: {}", zst_path, e))?
+                        .len() as usize,
+                    Ordering::Relaxed,
+                );
+
+                let done = processed.fetch_add(1, Ordering::Relaxed) + 1;
+                println!(
+                    "  {} [{}/{}] {}",
+                    "→".dimmed(),
+                    done,
+                    total_files,
+                    wasm_path.file_name().unwrap_or("?")
+                );
+
+                Ok(())
+            })
+            .collect()
+    });
+
+    // Check for errors
+    for result in results {
+        result?;
+    }
+
+    let total_original = total_original.load(Ordering::Relaxed);
+    let total_optimized = total_optimized.load(Ordering::Relaxed);
+    let total_br = total_br.load(Ordering::Relaxed);
+    let total_gz = total_gz.load(Ordering::Relaxed);
+    let total_zst = total_zst.load(Ordering::Relaxed);
+
+    println!(
+        "  {} Processed {} files:",
+        "✓".green(),
+        total_files
+    );
+    println!(
+        "      Original:  {} → Optimized: {} ({:.1}% reduction)",
+        format_size(total_original),
+        format_size(total_optimized),
+        (1.0 - total_optimized as f64 / total_original as f64) * 100.0
+    );
+    println!(
+        "      Brotli:    {} ({:.1}% of optimized)",
+        format_size(total_br),
+        total_br as f64 / total_optimized as f64 * 100.0
+    );
+    println!(
+        "      Gzip:      {} ({:.1}% of optimized)",
+        format_size(total_gz),
+        total_gz as f64 / total_optimized as f64 * 100.0
+    );
+    println!(
+        "      Zstd:      {} ({:.1}% of optimized)",
+        format_size(total_zst),
+        total_zst as f64 / total_optimized as f64 * 100.0
+    );
+
+    Ok(())
+}
+
+// =============================================================================
+// Plugin grouping for CI parallelization
+// =============================================================================
+
+/// A group of plugins to build together.
+#[derive(Debug, Clone, facet::Facet)]
+#[facet(rename_all = "snake_case")]
+pub struct PluginGroup {
+    /// Group index (0-based)
+    pub index: usize,
+    /// Grammars in this group
+    pub grammars: Vec<String>,
+    /// Total estimated build time for this group in milliseconds
+    pub total_ms: u64,
+}
+
+/// Result of grouping plugins for parallel builds.
+#[derive(Debug, Clone, facet::Facet)]
+#[facet(rename_all = "snake_case")]
+pub struct PluginGroups {
+    /// The groups
+    pub groups: Vec<PluginGroup>,
+    /// Maximum group time (determines total CI time)
+    pub max_group_ms: u64,
+    /// Theoretical minimum time if perfectly balanced
+    pub ideal_per_group_ms: u64,
+    /// Efficiency: ideal_per_group_ms / max_group_ms (1.0 = perfect)
+    pub efficiency: f64,
+}
+
+impl PluginGroups {
+    /// Compute balanced groups using a greedy bin-packing algorithm.
+    ///
+    /// Uses "Longest Processing Time First" (LPT) algorithm:
+    /// 1. Sort plugins by build time (longest first)
+    /// 2. For each plugin, assign to the group with the smallest total time
+    ///
+    /// This is a simple 4/3-approximation algorithm that works well in practice.
+    pub fn from_timings(timings: &PluginTimings, num_groups: usize) -> Self {
+        let num_groups = num_groups.max(1);
+
+        // Sort by build time, descending
+        let mut sorted_timings: Vec<_> = timings.timings.iter().collect();
+        sorted_timings.sort_by(|a, b| b.build_ms.cmp(&a.build_ms));
+
+        // Initialize groups
+        let mut groups: Vec<PluginGroup> = (0..num_groups)
+            .map(|i| PluginGroup {
+                index: i,
+                grammars: Vec::new(),
+                total_ms: 0,
+            })
+            .collect();
+
+        // Greedy assignment: always add to the group with smallest total time
+        for timing in sorted_timings {
+            // Find group with minimum total time
+            let min_group = groups
+                .iter_mut()
+                .min_by_key(|g| g.total_ms)
+                .expect("at least one group exists");
+
+            min_group.grammars.push(timing.grammar.clone());
+            min_group.total_ms += timing.build_ms;
+        }
+
+        // Remove empty groups (if num_groups > num_plugins)
+        groups.retain(|g| !g.grammars.is_empty());
+
+        // Renumber groups after filtering
+        for (i, group) in groups.iter_mut().enumerate() {
+            group.index = i;
+        }
+
+        // Calculate statistics
+        let total_ms: u64 = timings.timings.iter().map(|t| t.build_ms).sum();
+        let max_group_ms = groups.iter().map(|g| g.total_ms).max().unwrap_or(0);
+        let ideal_per_group_ms = total_ms / groups.len().max(1) as u64;
+        let efficiency = if max_group_ms > 0 {
+            ideal_per_group_ms as f64 / max_group_ms as f64
+        } else {
+            1.0
+        };
+
+        Self {
+            groups,
+            max_group_ms,
+            ideal_per_group_ms,
+            efficiency,
+        }
+    }
+
+    /// Get the grammars for a specific group index.
+    pub fn grammars_for_group(&self, index: usize) -> Option<&[String]> {
+        self.groups.get(index).map(|g| g.grammars.as_slice())
+    }
+}
+
+/// Show plugin build groups based on timings.
+pub fn show_groups(timings_path: &Utf8Path, num_groups: usize) -> Result<()> {
+    let timings = PluginTimings::load(timings_path)?;
+
+    println!(
+        "{} Loaded timings from {} (recorded: {})",
+        "●".cyan(),
+        timings_path.cyan(),
+        timings.recorded_at.dimmed()
+    );
+
+    let groups = PluginGroups::from_timings(&timings, num_groups);
+
+    println!(
+        "\n{} Plugin groups ({} groups, {:.1}% efficiency):",
+        "●".cyan(),
+        groups.groups.len(),
+        groups.efficiency * 100.0
+    );
+
+    for group in &groups.groups {
+        let time_str = format_duration_ms(group.total_ms);
+        println!(
+            "\n  {} Group {} ({}):",
+            "→".blue(),
+            group.index,
+            time_str.yellow()
+        );
+        for grammar in &group.grammars {
+            // Find the timing for this grammar
+            let timing = timings.timings.iter().find(|t| &t.grammar == grammar);
+            if let Some(t) = timing {
+                println!("      {} {} ({})", "•".dimmed(), grammar, format_duration_ms(t.build_ms));
+            } else {
+                println!("      {} {}", "•".dimmed(), grammar);
+            }
+        }
+    }
+
+    println!(
+        "\n{} Summary:",
+        "●".cyan()
+    );
+    println!(
+        "  Max group time: {} (determines CI time)",
+        format_duration_ms(groups.max_group_ms).yellow()
+    );
+    println!(
+        "  Ideal per group: {}",
+        format_duration_ms(groups.ideal_per_group_ms)
+    );
+
+    // Output as JSON for machine consumption
+    println!("\n{} JSON output:", "●".cyan());
+    let json = facet_json::to_string_pretty(&groups);
+    println!("{}", json);
+
+    Ok(())
+}
+
+/// Format milliseconds as human-readable duration.
+fn format_duration_ms(ms: u64) -> String {
+    if ms >= 60_000 {
+        let minutes = ms / 60_000;
+        let seconds = (ms % 60_000) / 1000;
+        format!("{}m {}s", minutes, seconds)
+    } else if ms >= 1000 {
+        format!("{:.1}s", ms as f64 / 1000.0)
+    } else {
+        format!("{}ms", ms)
+    }
 }

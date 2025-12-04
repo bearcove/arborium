@@ -775,3 +775,111 @@ impl CrateRegistry {
             })
     }
 }
+
+// =============================================================================
+// Compression Configuration (compression.kdl)
+// =============================================================================
+
+structstruck::strike! {
+    /// Compression settings for WASM plugin builds.
+    #[strikethrough[derive(Debug, Clone, facet::Facet)]]
+    pub struct CompressionConfig {
+        #[facet(kdl::child, default)]
+        pub brotli: Option<pub struct BrotliConfig {
+            /// Quality level: 0-11 (11 = best compression, slowest)
+            #[facet(kdl::child)]
+            pub quality: pub struct BrotliQuality(#[facet(kdl::argument)] pub u32),
+
+            /// Window size: 10-24 (larger = better compression, more memory)
+            #[facet(kdl::child)]
+            pub window: pub struct BrotliWindow(#[facet(kdl::argument)] pub u32),
+        }>,
+
+        #[facet(kdl::child, default)]
+        pub gzip: Option<pub struct GzipConfig {
+            /// Backend: "flate2" (fast) or "zopfli" (best compression, slow)
+            #[facet(kdl::child, default)]
+            pub backend: Option<pub struct GzipBackend(#[facet(kdl::argument)] pub String)>,
+
+            /// Compression level for flate2: 0-9 (9 = best compression, slowest)
+            #[facet(kdl::child, default)]
+            pub level: Option<pub struct GzipLevel(#[facet(kdl::argument)] pub u32)>,
+
+            /// Number of iterations for zopfli (15 = default, higher = better but slower)
+            #[facet(kdl::child, default)]
+            pub iterations: Option<pub struct GzipIterations(#[facet(kdl::argument)] pub u8)>,
+        }>,
+
+        #[facet(kdl::child, default)]
+        pub zstd: Option<pub struct ZstdConfig {
+            /// Compression level: 1-22 (19 is a good balance, 22 = max)
+            #[facet(kdl::child)]
+            pub level: pub struct ZstdLevel(#[facet(kdl::argument)] pub i32),
+        }>,
+    }
+}
+
+impl CompressionConfig {
+    /// Load compression config from the repo root.
+    pub fn load(repo_root: &camino::Utf8Path) -> Result<Self, rootcause::Report> {
+        let config_path = repo_root.join("compression.kdl");
+        if !config_path.exists() {
+            return Ok(Self::default());
+        }
+        let content = std::fs::read_to_string(&config_path)?;
+        let config: CompressionConfig = facet_kdl::from_str(&content)?;
+        Ok(config)
+    }
+
+    /// Get brotli quality (default: 11)
+    pub fn brotli_quality(&self) -> u32 {
+        self.brotli.as_ref().map(|b| b.quality.0).unwrap_or(11)
+    }
+
+    /// Get brotli window size (default: 22)
+    pub fn brotli_window(&self) -> u32 {
+        self.brotli.as_ref().map(|b| b.window.0).unwrap_or(22)
+    }
+
+    /// Check if using zopfli backend for gzip (default: false/flate2)
+    pub fn gzip_use_zopfli(&self) -> bool {
+        self.gzip
+            .as_ref()
+            .and_then(|g| g.backend.as_ref())
+            .map(|b| b.0 == "zopfli")
+            .unwrap_or(false)
+    }
+
+    /// Get gzip level for flate2 (default: 9)
+    pub fn gzip_level(&self) -> u32 {
+        self.gzip
+            .as_ref()
+            .and_then(|g| g.level.as_ref())
+            .map(|l| l.0)
+            .unwrap_or(9)
+    }
+
+    /// Get zopfli iterations (default: 15)
+    pub fn gzip_iterations(&self) -> u8 {
+        self.gzip
+            .as_ref()
+            .and_then(|g| g.iterations.as_ref())
+            .map(|i| i.0)
+            .unwrap_or(15)
+    }
+
+    /// Get zstd level (default: 19)
+    pub fn zstd_level(&self) -> i32 {
+        self.zstd.as_ref().map(|z| z.level.0).unwrap_or(19)
+    }
+}
+
+impl Default for CompressionConfig {
+    fn default() -> Self {
+        Self {
+            brotli: None,
+            gzip: None,
+            zstd: None,
+        }
+    }
+}

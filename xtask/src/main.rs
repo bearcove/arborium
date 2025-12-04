@@ -9,6 +9,7 @@
 //! - `serve` - Build and serve the WASM demo locally
 
 mod cache;
+mod ci;
 mod generate;
 mod lint_new;
 mod plan;
@@ -76,6 +77,12 @@ enum Command {
         #[facet(args::subcommand)]
         action: PluginsAction,
     },
+
+    /// Generate CI workflow files
+    Ci {
+        #[facet(args::subcommand)]
+        action: CiAction,
+    },
 }
 
 /// Plugin subcommands
@@ -96,6 +103,10 @@ enum PluginsAction {
         /// Skip jco transpile step
         #[facet(args::named, default)]
         no_transpile: bool,
+
+        /// Profile build times and write to plugin-timings.json
+        #[facet(args::named, default)]
+        profile: bool,
     },
 
     /// Clean plugin build artifacts
@@ -103,6 +114,30 @@ enum PluginsAction {
         /// Output directory to clean
         #[facet(args::named, args::short = 'o', default)]
         output: Option<String>,
+    },
+
+    /// Show plugin build groups based on recorded timings
+    Groups {
+        /// Number of groups to create
+        #[facet(args::named, args::short = 'n', default)]
+        count: Option<usize>,
+
+        /// Path to timings file (default: plugin-timings.json)
+        #[facet(args::named, default)]
+        timings: Option<String>,
+    },
+}
+
+/// CI workflow subcommands
+#[derive(Debug, Facet)]
+#[repr(u8)]
+#[allow(dead_code)]
+enum CiAction {
+    /// Generate CI workflow files from Rust code
+    Generate {
+        /// Check if files are up to date instead of generating
+        #[facet(args::named, default)]
+        check: bool,
     },
 }
 
@@ -207,6 +242,7 @@ fn main() {
                     grammars,
                     output,
                     no_transpile,
+                    profile,
                 } => {
                     let options = plugins::BuildOptions {
                         grammars,
@@ -214,7 +250,7 @@ fn main() {
                             .map(camino::Utf8PathBuf::from)
                             .unwrap_or_else(|| camino::Utf8PathBuf::from("dist/plugins")),
                         transpile: !no_transpile,
-                        ..Default::default()
+                        profile,
                     };
 
                     if let Err(e) = plugins::build_plugins(&repo_root, &options) {
@@ -225,6 +261,30 @@ fn main() {
                 PluginsAction::Clean { output } => {
                     let output_dir = output.as_deref().unwrap_or("dist/plugins");
                     if let Err(e) = plugins::clean_plugins(&repo_root, output_dir) {
+                        eprintln!("{:?}", e);
+                        std::process::exit(1);
+                    }
+                }
+                PluginsAction::Groups { count, timings } => {
+                    let timings_path = timings
+                        .map(camino::Utf8PathBuf::from)
+                        .unwrap_or_else(|| repo_root.join("plugin-timings.json"));
+                    let num_groups = count.unwrap_or(2);
+
+                    if let Err(e) = plugins::show_groups(&timings_path, num_groups) {
+                        eprintln!("{:?}", e);
+                        std::process::exit(1);
+                    }
+                }
+            }
+        }
+        Command::Ci { action } => {
+            let repo_root = util::find_repo_root().expect("Could not find repo root");
+            let repo_root = camino::Utf8PathBuf::from_path_buf(repo_root).expect("non-UTF8 path");
+
+            match action {
+                CiAction::Generate { check } => {
+                    if let Err(e) = ci::generate(&repo_root, check) {
                         eprintln!("{:?}", e);
                         std::process::exit(1);
                     }

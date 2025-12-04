@@ -133,3 +133,7 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = true
+
+# Optimize dependencies in dev builds for faster xtask execution
+[profile.dev.package."*"]
+opt-level = 2
