@@ -35,6 +35,9 @@ struct Args {
 #[repr(u8)]
 #[allow(dead_code)] // variants used by facet_args derive
 enum Command {
+    /// Print version information
+    Version,
+
     /// Check for required external tools
     Doctor,
 
@@ -153,12 +156,19 @@ fn main() {
         std::process::exit(1);
     });
 
+    // Handle version early - doesn't need repo root
+    if matches!(args.command, Command::Version) {
+        println!("arborium-xtask {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
+
     let crates_dir = util::find_repo_root()
         .expect("Could not find repo root")
         .join("crates");
     let crates_dir = camino::Utf8PathBuf::from_path_buf(crates_dir).expect("non-UTF8 path");
 
     match args.command {
+        Command::Version => unreachable!(),
         Command::Doctor => {
             tool::print_tools_report();
         }

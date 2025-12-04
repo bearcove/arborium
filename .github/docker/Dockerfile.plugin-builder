@@ -1,22 +1,44 @@
-# Docker image for building WASM plugins
+# Docker image for arborium CI
 # Build: docker build -t ghcr.io/bearcove/arborium-plugin-builder:latest -f .github/docker/Dockerfile.plugin-builder .
 # Push:  docker push ghcr.io/bearcove/arborium-plugin-builder:latest
+#
+# NOTE: Rebuild this image when xtask changes!
 
 FROM rust:1.91.1-bookworm
 
-# Install Node.js 20.x
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
+# Install build dependencies, wabt (wasm-objdump), and Node.js 20.x
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends clang wabt \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Add wasm32 targets
-RUN rustup target add wasm32-unknown-unknown wasm32-wasip1
+# Add wasm32 targets and components (clippy, rustfmt)
+RUN rustup target add wasm32-unknown-unknown wasm32-wasip1 \
+    && rustup component add clippy rustfmt
 
-# Install cargo-component
-RUN cargo install cargo-component
+# Install wild linker for fast link times
+RUN cargo install --locked wild-linker
+
+# Configure Rust to use wild linker
+RUN mkdir -p /root/.cargo && printf '[target.x86_64-unknown-linux-gnu]\nlinker = "clang"\nrustflags = ["-C", "link-arg=--ld-path=/usr/local/cargo/bin/wild"]\n' > /root/.cargo/config.toml
+
+# Install cargo tools: cargo-component, tree-sitter-cli, cargo-nextest
+RUN cargo install --locked cargo-component tree-sitter-cli cargo-nextest
 
 # Install jco globally
 RUN npm install -g @bytecodealliance/jco
+
+# Copy arborium source and build xtask (with cache mounts for fast rebuilds)
+WORKDIR /arborium
+COPY . .
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/arborium/target \
+    cargo build --release -p xtask \
+    && cp target/release/xtask /usr/local/bin/arborium-xtask
+
+# Clean up source (target is a cache mount so already gone)
+RUN rm -rf /arborium
 
 # Verify installations
 RUN cargo --version \
@@ -24,6 +46,8 @@ RUN cargo --version \
     && node --version \
     && npm --version \
     && cargo-component --version \
-    && jco --version
+    && cargo nextest --version \
+    && jco --version \
+    && arborium-xtask version
 
 WORKDIR /workspace

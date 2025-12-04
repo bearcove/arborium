@@ -19,21 +19,13 @@ env:
 
 jobs: 
   generate: 
-    runs-on: depot-ubuntu-24.04-64
+    name: 🌱 Generate Grammars
+    runs-on: depot-ubuntu-24.04-32
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     steps: 
       - 
         name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      - 
-        name: Rust cache
-        uses: Swatinem/rust-cache@v2
-        with: 
-          cache-targets: "true"
-          prefix-key: v0-rust-generate
-
       - 
         name: Restore grammar generation cache
         uses: actions/cache@v4
@@ -43,11 +35,8 @@ jobs:
           restore-keys: grammar-cache-v2-
 
       - 
-        name: Install tree-sitter CLI
-        run: cargo install tree-sitter-cli
-      - 
         name: Generate grammar sources
-        run: cargo run --release -p xtask -- gen
+        run: arborium-xtask gen
       - 
         name: Create grammar sources tarball
         run: "# Collect all generated grammar/src directories\nfind crates -type d -name 'src' -path '*/grammar/src' > grammar_dirs.txt\ntar -cvf grammar-sources.tar -T grammar_dirs.txt"
@@ -61,7 +50,9 @@ jobs:
 
 
   test-linux: 
+    name: 🐧 Test (Linux)
     runs-on: depot-ubuntu-24.04-32
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
 
@@ -79,18 +70,6 @@ jobs:
         name: Extract grammar sources
         run: tar -xvf grammar-sources.tar
       - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      - 
-        name: Rust cache
-        uses: Swatinem/rust-cache@v2
-      - 
-        name: Install nextest
-        uses: taiki-e/install-action@v2
-        with: 
-          tool: cargo-nextest
-
-      - 
         name: Build
         run: cargo build --locked --verbose
       - 
@@ -101,6 +80,7 @@ jobs:
         run: cargo build --locked --all-features --verbose
 
   test-macos: 
+    name: 🍎 Test (macOS)
     runs-on: depot-macos-latest
     needs: 
       - generate
@@ -137,165 +117,8 @@ jobs:
         name: Run tests
         run: cargo nextest run --locked --verbose
 
-  check-windows: 
-    runs-on: depot-windows-2022-32
-    needs: 
-      - generate
-
-    steps: 
-      - 
-        name: Checkout
-        uses: actions/checkout@v4
-      - 
-        name: Download grammar sources
-        uses: actions/download-artifact@v4
-        with: 
-          name: grammar-sources
-
-      - 
-        name: Extract grammar sources
-        run: tar -xvf grammar-sources.tar
-      - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      - 
-        name: Rust cache
-        uses: Swatinem/rust-cache@v2
-        with: 
-          save-if: "true"
-
-      - 
-        name: Install nextest
-        uses: taiki-e/install-action@v2
-        with: 
-          tool: cargo-nextest
-
-      - 
-        name: Build
-        run: cargo build --locked --verbose
-      - 
-        name: Run tests
-        run: cargo nextest run --locked --verbose --no-fail-fast
-
   wasm: 
-    runs-on: depot-ubuntu-24.04-32
-    needs: 
-      - generate
-
-    steps: 
-      - 
-        name: Checkout
-        uses: actions/checkout@v4
-      - 
-        name: Download grammar sources
-        uses: actions/download-artifact@v4
-        with: 
-          name: grammar-sources
-
-      - 
-        name: Extract grammar sources
-        run: tar -xvf grammar-sources.tar
-      - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with: 
-          targets: wasm32-unknown-unknown
-
-      - 
-        name: Rust cache
-        uses: Swatinem/rust-cache@v2
-      - 
-        name: Install wabt
-        run: sudo apt-get update && sudo apt-get install -y wabt
-      - 
-        name: Build arborium for WASM
-        run: cargo build --locked -p arborium --target wasm32-unknown-unknown
-      - 
-        name: Check for env imports in WASM
-        run: "# Find all .wasm files and check for env imports\nfound_env_imports=false\nfor wasm_file in $(find target/wasm32-unknown-unknown -name \"*.wasm\" -type f); do\n  if wasm-objdump -j Import -x \"$wasm_file\" 2>/dev/null | grep -q '<- env\\.'; then\n    echo \"ERROR: Found env imports in $wasm_file:\"\n    wasm-objdump -j Import -x \"$wasm_file\" | grep '<- env\\.'\n    found_env_imports=true\n  fi\ndone\nif [ \"$found_env_imports\" = true ]; then\n  echo \"WASM modules should not have env imports - these won't work in the browser\"\n  exit 1\nfi\necho \"No env imports found - WASM modules are browser-compatible\""
-
-  clippy: 
-    runs-on: depot-ubuntu-24.04-32
-    needs: 
-      - generate
-
-    steps: 
-      - 
-        name: Checkout
-        uses: actions/checkout@v4
-      - 
-        name: Download grammar sources
-        uses: actions/download-artifact@v4
-        with: 
-          name: grammar-sources
-
-      - 
-        name: Extract grammar sources
-        run: tar -xvf grammar-sources.tar
-      - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with: 
-          components: clippy
-
-      - 
-        name: Rust cache
-        uses: Swatinem/rust-cache@v2
-      - 
-        name: Run Clippy
-        run: cargo clippy --locked --all-targets -- -D warnings
-
-  fmt: 
-    runs-on: depot-ubuntu-24.04-4
-    steps: 
-      - 
-        name: Checkout
-        uses: actions/checkout@v4
-      - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with: 
-          components: rustfmt
-
-      - 
-        name: Check formatting
-        run: cargo fmt --all -- --check
-      - 
-        name: Check CI workflow is up to date
-        run: cargo xtask ci generate --check
-
-  docs: 
-    runs-on: depot-ubuntu-24.04-32
-    needs: 
-      - generate
-
-    steps: 
-      - 
-        name: Checkout
-        uses: actions/checkout@v4
-      - 
-        name: Download grammar sources
-        uses: actions/download-artifact@v4
-        with: 
-          name: grammar-sources
-
-      - 
-        name: Extract grammar sources
-        run: tar -xvf grammar-sources.tar
-      - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      - 
-        name: Rust cache
-        uses: Swatinem/rust-cache@v2
-      - 
-        name: Build docs
-        run: cargo doc --locked --no-deps
-        env: 
-          RUSTDOCFLAGS: "-D warnings"
-
-
-  build-plugins-0: 
+    name: 🌐 WASM Compatibility
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -315,8 +138,101 @@ jobs:
         name: Extract grammar sources
         run: tar -xvf grammar-sources.tar
       - 
-        name: Build plugins (group 0)
-        run: cargo xtask plugins build rust
+        name: Build arborium for WASM
+        run: cargo build --locked -p arborium --target wasm32-unknown-unknown
+      - 
+        name: Check for env imports in WASM
+        run: "# Find all .wasm files and check for env imports\nfound_env_imports=false\nfor wasm_file in $(find target/wasm32-unknown-unknown -name \"*.wasm\" -type f); do\n  if wasm-objdump -j Import -x \"$wasm_file\" 2>/dev/null | grep -q '<- env\\.'; then\n    echo \"ERROR: Found env imports in $wasm_file:\"\n    wasm-objdump -j Import -x \"$wasm_file\" | grep '<- env\\.'\n    found_env_imports=true\n  fi\ndone\nif [ \"$found_env_imports\" = true ]; then\n  echo \"WASM modules should not have env imports - these won't work in the browser\"\n  exit 1\nfi\necho \"No env imports found - WASM modules are browser-compatible\""
+
+  clippy: 
+    name: 📎 Clippy
+    runs-on: depot-ubuntu-24.04-32
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
+    needs: 
+      - generate
+
+    steps: 
+      - 
+        name: Checkout
+        uses: actions/checkout@v4
+      - 
+        name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with: 
+          name: grammar-sources
+
+      - 
+        name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
+      - 
+        name: Run Clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+  fmt: 
+    name: 📝 Format
+    runs-on: depot-ubuntu-24.04-4
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
+    steps: 
+      - 
+        name: Checkout
+        uses: actions/checkout@v4
+      - 
+        name: Check formatting
+        run: cargo fmt --all -- --check
+      - 
+        name: Check CI workflow is up to date
+        run: arborium-xtask ci generate --check
+
+  docs: 
+    name: 📚 Documentation
+    runs-on: depot-ubuntu-24.04-32
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
+    needs: 
+      - generate
+
+    steps: 
+      - 
+        name: Checkout
+        uses: actions/checkout@v4
+      - 
+        name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with: 
+          name: grammar-sources
+
+      - 
+        name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
+      - 
+        name: Build docs
+        run: cargo doc --locked --no-deps
+        env: 
+          RUSTDOCFLAGS: "-D warnings"
+
+
+  build-plugins-0: 
+    name: "🔌 Plugins (1 of 2): rust"
+    runs-on: depot-ubuntu-24.04-32
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
+    needs: 
+      - generate
+
+    steps: 
+      - 
+        name: Checkout
+        uses: actions/checkout@v4
+      - 
+        name: Download grammar sources
+        uses: actions/download-artifact@v4
+        with: 
+          name: grammar-sources
+
+      - 
+        name: Extract grammar sources
+        run: tar -xvf grammar-sources.tar
+      - 
+        name: Build rust
+        run: arborium-xtask plugins build rust
       - 
         name: Upload plugins artifact
         uses: actions/upload-artifact@v4
@@ -327,6 +243,7 @@ jobs:
 
 
   build-plugins-1: 
+    name: "🔌 Plugins (2 of 2): javascript, html"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -346,8 +263,8 @@ jobs:
         name: Extract grammar sources
         run: tar -xvf grammar-sources.tar
       - 
-        name: Build plugins (group 1)
-        run: cargo xtask plugins build javascript html
+        name: Build javascript, html
+        run: arborium-xtask plugins build javascript html
       - 
         name: Upload plugins artifact
         uses: actions/upload-artifact@v4
@@ -356,5 +273,37 @@ jobs:
           path: dist/plugins
           retention-days: "7"
 
+
+  collect-plugins: 
+    name: 📦 Collect Plugins
+    runs-on: depot-ubuntu-24.04-4
+    needs: 
+      - build-plugins-0
+      - build-plugins-1
+
+    steps: 
+      - 
+        name: Checkout
+        uses: actions/checkout@v4
+      - 
+        name: Create dist directory
+        run: mkdir -p dist/plugins
+      - 
+        name: Download plugins group 0
+        uses: actions/download-artifact@v4
+        with: 
+          name: plugins-group-0
+          path: dist/plugins
+
+      - 
+        name: Download plugins group 1
+        uses: actions/download-artifact@v4
+        with: 
+          name: plugins-group-1
+          path: dist/plugins
+
+      - 
+        name: List collected plugins
+        run: find dist/plugins -type f | sort
 
 

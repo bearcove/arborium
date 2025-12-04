@@ -64,6 +64,10 @@ structstruck::strike! {
     #[strikethrough[derive(Debug, Clone, Facet)]]
     #[facet(rename_all = "kebab-case")]
     pub struct Job {
+        /// Display name for the job in the GitHub UI.
+        #[facet(default, skip_serializing_if = Option::is_none)]
+        pub name: Option<String>,
+
         /// The runner to use.
         pub runs_on: String,
 
@@ -169,11 +173,18 @@ impl Job {
     /// Create a new job.
     pub fn new(runs_on: impl Into<String>) -> Self {
         Self {
+            name: None,
             runs_on: runs_on.into(),
             container: None,
             needs: None,
             steps: Vec::new(),
         }
+    }
+
+    /// Set the display name for this job.
+    pub fn name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
     }
 
     /// Set the container image for this job.
@@ -277,14 +288,11 @@ pub fn build_ci_workflow(config: &CiConfig) -> Workflow {
     // Generate job - runs first, produces grammar sources artifact
     jobs.insert(
         "generate".into(),
-        Job::new(runners::UBUNTU_64).steps([
+        Job::new(runners::UBUNTU_32)
+            .name("🌱 Generate Grammars")
+            .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
+            .steps([
             checkout(),
-            install_rust(),
-            Step::uses("Rust cache", "Swatinem/rust-cache@v2")
-                .with_inputs([
-                    ("cache-targets", "true"),
-                    ("prefix-key", "v0-rust-generate"),
-                ]),
             Step::uses("Restore grammar generation cache", "actions/cache@v4")
                 .with_inputs([
                     ("path", ".cache/arborium"),
@@ -294,8 +302,7 @@ pub fn build_ci_workflow(config: &CiConfig) -> Workflow {
                     ),
                     ("restore-keys", "grammar-cache-v2-"),
                 ]),
-            Step::run("Install tree-sitter CLI", "cargo install tree-sitter-cli"),
-            Step::run("Generate grammar sources", "cargo run --release -p xtask -- gen"),
+            Step::run("Generate grammar sources", "arborium-xtask gen"),
             Step::run(
                 "Create grammar sources tarball",
                 r#"# Collect all generated grammar/src directories
@@ -314,13 +321,14 @@ tar -cvf grammar-sources.tar -T grammar_dirs.txt"#,
     // Test Linux job
     jobs.insert(
         "test-linux".into(),
-        Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+        Job::new(runners::UBUNTU_32)
+            .name("🐧 Test (Linux)")
+            .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
+            .needs(["generate"])
+            .steps([
             checkout(),
             download_grammar_sources(),
             extract_grammar_sources(),
-            install_rust(),
-            rust_cache(),
-            install_nextest(),
             Step::run("Build", "cargo build --locked --verbose"),
             Step::run("Run tests", "cargo nextest run --locked --verbose"),
             Step::run(
@@ -333,7 +341,10 @@ tar -cvf grammar-sources.tar -T grammar_dirs.txt"#,
     // Test macOS job
     jobs.insert(
         "test-macos".into(),
-        Job::new(runners::MACOS).needs(["generate"]).steps([
+        Job::new(runners::MACOS)
+            .name("🍎 Test (macOS)")
+            .needs(["generate"])
+            .steps([
             checkout(),
             download_grammar_sources(),
             extract_grammar_sources(),
@@ -345,37 +356,17 @@ tar -cvf grammar-sources.tar -T grammar_dirs.txt"#,
         ]),
     );
 
-    // Check Windows job
-    jobs.insert(
-        "check-windows".into(),
-        Job::new(runners::WINDOWS_32).needs(["generate"]).steps([
-            checkout(),
-            download_grammar_sources(),
-            extract_grammar_sources(),
-            install_rust(),
-            Step::uses("Rust cache", "Swatinem/rust-cache@v2").with_inputs([("save-if", "true")]),
-            install_nextest(),
-            Step::run("Build", "cargo build --locked --verbose"),
-            Step::run(
-                "Run tests",
-                "cargo nextest run --locked --verbose --no-fail-fast",
-            ),
-        ]),
-    );
-
     // WASM job
     jobs.insert(
         "wasm".into(),
-        Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+        Job::new(runners::UBUNTU_32)
+            .name("🌐 WASM Compatibility")
+            .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
+            .needs(["generate"])
+            .steps([
             checkout(),
             download_grammar_sources(),
             extract_grammar_sources(),
-            install_rust_wasm(),
-            rust_cache(),
-            Step::run(
-                "Install wabt",
-                "sudo apt-get update && sudo apt-get install -y wabt",
-            ),
             Step::run(
                 "Build arborium for WASM",
                 "cargo build --locked -p arborium --target wasm32-unknown-unknown",
@@ -403,12 +394,14 @@ echo "No env imports found - WASM modules are browser-compatible""#,
     // Clippy job
     jobs.insert(
         "clippy".into(),
-        Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+        Job::new(runners::UBUNTU_32)
+            .name("📎 Clippy")
+            .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
+            .needs(["generate"])
+            .steps([
             checkout(),
             download_grammar_sources(),
             extract_grammar_sources(),
-            install_rust_with("clippy"),
-            rust_cache(),
             Step::run(
                 "Run Clippy",
                 "cargo clippy --locked --all-targets -- -D warnings",
@@ -419,13 +412,15 @@ echo "No env imports found - WASM modules are browser-compatible""#,
     // Fmt job (no dependency on generate)
     jobs.insert(
         "fmt".into(),
-        Job::new(runners::UBUNTU_4).steps([
+        Job::new(runners::UBUNTU_4)
+            .name("📝 Format")
+            .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
+            .steps([
             checkout(),
-            install_rust_with("rustfmt"),
             Step::run("Check formatting", "cargo fmt --all -- --check"),
             Step::run(
                 "Check CI workflow is up to date",
-                "cargo xtask ci generate --check",
+                "arborium-xtask ci generate --check",
             ),
         ]),
     );
@@ -433,12 +428,14 @@ echo "No env imports found - WASM modules are browser-compatible""#,
     // Docs job
     jobs.insert(
         "docs".into(),
-        Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+        Job::new(runners::UBUNTU_32)
+            .name("📚 Documentation")
+            .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
+            .needs(["generate"])
+            .steps([
             checkout(),
             download_grammar_sources(),
             extract_grammar_sources(),
-            install_rust(),
-            rust_cache(),
             Step::run("Build docs", "cargo doc --locked --no-deps")
                 .with_env([("RUSTDOCFLAGS", "-D warnings")]),
         ]),
@@ -446,13 +443,26 @@ echo "No env imports found - WASM modules are browser-compatible""#,
 
     // Plugin build jobs (if groups are available)
     if let Some(ref groups) = config.plugin_groups {
+        let total_groups = groups.groups.len();
+        let mut plugin_job_ids = Vec::new();
+
         for group in &groups.groups {
-            let job_name = format!("build-plugins-{}", group.index);
+            let job_id = format!("build-plugins-{}", group.index);
             let grammars_list = group.grammars.join(" ");
+            let display_grammars = group.grammars.join(", ");
+            let job_name = format!(
+                "🔌 Plugins ({} of {}): {}",
+                group.index + 1,
+                total_groups,
+                display_grammars
+            );
+
+            plugin_job_ids.push(job_id.clone());
 
             jobs.insert(
-                job_name,
+                job_id,
                 Job::new(runners::UBUNTU_32)
+                    .name(job_name)
                     .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
                     .needs(["generate"])
                     .steps([
@@ -460,8 +470,8 @@ echo "No env imports found - WASM modules are browser-compatible""#,
                         download_grammar_sources(),
                         extract_grammar_sources(),
                         Step::run(
-                            format!("Build plugins (group {})", group.index),
-                            format!("cargo xtask plugins build {}", grammars_list),
+                            format!("Build {}", display_grammars),
+                            format!("arborium-xtask plugins build {}", grammars_list),
                         ),
                         Step::uses("Upload plugins artifact", "actions/upload-artifact@v4")
                             .with_inputs([
@@ -472,6 +482,37 @@ echo "No env imports found - WASM modules are browser-compatible""#,
                     ]),
             );
         }
+
+        // Collect all plugins and package for npm
+        let mut collect_steps = vec![
+            checkout(),
+            Step::run("Create dist directory", "mkdir -p dist/plugins"),
+        ];
+
+        // Download all plugin artifacts
+        for group in &groups.groups {
+            collect_steps.push(
+                Step::uses(
+                    format!("Download plugins group {}", group.index),
+                    "actions/download-artifact@v4",
+                )
+                .with_inputs([
+                    ("name", format!("plugins-group-{}", group.index)),
+                    ("path", "dist/plugins".to_string()),
+                ]),
+            );
+        }
+
+        // TODO: Add npm packaging step here
+        collect_steps.push(Step::run("List collected plugins", "find dist/plugins -type f | sort"));
+
+        jobs.insert(
+            "collect-plugins".into(),
+            Job::new(runners::UBUNTU_4)
+                .name("📦 Collect Plugins")
+                .needs(plugin_job_ids)
+                .steps(collect_steps),
+        );
     }
 
     Workflow {

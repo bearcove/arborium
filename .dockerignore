@@ -1,0 +1,27 @@
+# Build artifacts
+target/
+dist/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+.docker/
+
+# CI artifacts
+grammar-sources.tar
+grammar_dirs.txt
+
+# Cache
+.cache/
+node_modules/
+
+# Misc
+*.log

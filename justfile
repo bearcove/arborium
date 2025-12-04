@@ -4,9 +4,9 @@
 docker_image := "ghcr.io/bearcove/arborium-plugin-builder"
 docker_tag := "latest"
 
-# Build the plugin-builder Docker image
+# Build the plugin-builder Docker image (for linux/amd64 - GitHub Actions runners)
 docker-build:
-    docker build -t {{docker_image}}:{{docker_tag}} -f .github/docker/Dockerfile.plugin-builder .
+    docker build --platform linux/amd64 -t {{docker_image}}:{{docker_tag}} -f .github/docker/Dockerfile.plugin-builder .
 
 # Push the plugin-builder Docker image to GHCR
 docker-push: docker-build
@@ -14,7 +14,7 @@ docker-push: docker-build
 
 # Build and push with a specific tag
 docker-release tag:
-    docker build -t {{docker_image}}:{{tag}} -f .github/docker/Dockerfile.plugin-builder .
+    docker build --platform linux/amd64 -t {{docker_image}}:{{tag}} -f .github/docker/Dockerfile.plugin-builder .
     docker push {{docker_image}}:{{tag}}
 
 # Login to GitHub Container Registry (requires GITHUB_TOKEN env var or gh auth)
