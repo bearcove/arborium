@@ -1055,7 +1055,7 @@ fn format_duration_ms(ms: u64) -> String {
 /// Generate npm package.json files for all grammar plugins.
 ///
 /// This creates a package.json in each plugin directory under output_dir,
-/// making them publishable to npm as @arborium/<language> packages.
+/// making them publishable to npm as `@arborium/<language>` packages.
 pub fn generate_npm_packages(
     repo_root: &Utf8Path,
     output_dir: &Utf8Path,
