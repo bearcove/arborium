@@ -67,6 +67,10 @@ structstruck::strike! {
         /// The runner to use.
         pub runs_on: String,
 
+        /// Container to run the job in.
+        #[facet(default, skip_serializing_if = Option::is_none)]
+        pub container: Option<String>,
+
         /// Jobs that must complete before this one.
         #[facet(default, skip_serializing_if = Option::is_none)]
         pub needs: Option<Vec<String>>,
@@ -166,9 +170,16 @@ impl Job {
     pub fn new(runs_on: impl Into<String>) -> Self {
         Self {
             runs_on: runs_on.into(),
+            container: None,
             needs: None,
             steps: Vec::new(),
         }
+    }
+
+    /// Set the container image for this job.
+    pub fn container(mut self, image: impl Into<String>) -> Self {
+        self.container = Some(image.into());
+        self
     }
 
     /// Add dependencies to this job.
@@ -441,27 +452,24 @@ echo "No env imports found - WASM modules are browser-compatible""#,
 
             jobs.insert(
                 job_name,
-                Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
-                    checkout(),
-                    download_grammar_sources(),
-                    extract_grammar_sources(),
-                    install_rust_wasm(),
-                    rust_cache(),
-                    Step::run("Install cargo-component", "cargo install cargo-component"),
-                    Step::uses("Install Node.js", "actions/setup-node@v4")
-                        .with_inputs([("node-version", "20")]),
-                    Step::run("Install jco", "npm install -g @bytecodealliance/jco"),
-                    Step::run(
-                        format!("Build plugins (group {})", group.index),
-                        format!("cargo xtask plugins build {}", grammars_list),
-                    ),
-                    Step::uses("Upload plugins artifact", "actions/upload-artifact@v4")
-                        .with_inputs([
-                            ("name", format!("plugins-group-{}", group.index)),
-                            ("path", "dist/plugins".to_string()),
-                            ("retention-days", "7".to_string()),
-                        ]),
-                ]),
+                Job::new(runners::UBUNTU_32)
+                    .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
+                    .needs(["generate"])
+                    .steps([
+                        checkout(),
+                        download_grammar_sources(),
+                        extract_grammar_sources(),
+                        Step::run(
+                            format!("Build plugins (group {})", group.index),
+                            format!("cargo xtask plugins build {}", grammars_list),
+                        ),
+                        Step::uses("Upload plugins artifact", "actions/upload-artifact@v4")
+                            .with_inputs([
+                                ("name", format!("plugins-group-{}", group.index)),
+                                ("path", "dist/plugins".to_string()),
+                                ("retention-days", "7".to_string()),
+                            ]),
+                    ]),
             );
         }
     }

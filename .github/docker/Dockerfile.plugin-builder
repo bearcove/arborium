@@ -1,0 +1,29 @@
+# Docker image for building WASM plugins
+# Build: docker build -t ghcr.io/bearcove/arborium-plugin-builder:latest -f .github/docker/Dockerfile.plugin-builder .
+# Push:  docker push ghcr.io/bearcove/arborium-plugin-builder:latest
+
+FROM rust:1.91.1-bookworm
+
+# Install Node.js 20.x
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add wasm32 targets
+RUN rustup target add wasm32-unknown-unknown wasm32-wasip1
+
+# Install cargo-component
+RUN cargo install cargo-component
+
+# Install jco globally
+RUN npm install -g @bytecodealliance/jco
+
+# Verify installations
+RUN cargo --version \
+    && rustc --version \
+    && node --version \
+    && npm --version \
+    && cargo-component --version \
+    && jco --version
+
+WORKDIR /workspace

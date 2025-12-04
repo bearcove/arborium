@@ -297,6 +297,7 @@ jobs:
 
   build-plugins-0: 
     runs-on: depot-ubuntu-24.04-32
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
 
@@ -313,27 +314,6 @@ jobs:
       - 
         name: Extract grammar sources
         run: tar -xvf grammar-sources.tar
-      - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with: 
-          targets: wasm32-unknown-unknown
-
-      - 
-        name: Rust cache
-        uses: Swatinem/rust-cache@v2
-      - 
-        name: Install cargo-component
-        run: cargo install cargo-component
-      - 
-        name: Install Node.js
-        uses: actions/setup-node@v4
-        with: 
-          node-version: "20"
-
-      - 
-        name: Install jco
-        run: npm install -g @bytecodealliance/jco
       - 
         name: Build plugins (group 0)
         run: cargo xtask plugins build rust
@@ -348,6 +328,7 @@ jobs:
 
   build-plugins-1: 
     runs-on: depot-ubuntu-24.04-32
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
 
@@ -364,27 +345,6 @@ jobs:
       - 
         name: Extract grammar sources
         run: tar -xvf grammar-sources.tar
-      - 
-        name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with: 
-          targets: wasm32-unknown-unknown
-
-      - 
-        name: Rust cache
-        uses: Swatinem/rust-cache@v2
-      - 
-        name: Install cargo-component
-        run: cargo install cargo-component
-      - 
-        name: Install Node.js
-        uses: actions/setup-node@v4
-        with: 
-          node-version: "20"
-
-      - 
-        name: Install jco
-        run: npm install -g @bytecodealliance/jco
       - 
         name: Build plugins (group 1)
         run: cargo xtask plugins build javascript html
