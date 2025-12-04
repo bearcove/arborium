@@ -225,12 +225,14 @@ pub mod common {
     }
 
     /// Install Rust with specific components.
+    #[allow(dead_code)]
     pub fn install_rust_with(components: &str) -> Step {
         Step::uses("Install Rust", "dtolnay/rust-toolchain@stable")
             .with_inputs([("components", components)])
     }
 
     /// Install Rust with WASM target.
+    #[allow(dead_code)]
     pub fn install_rust_wasm() -> Step {
         Step::uses("Install Rust", "dtolnay/rust-toolchain@stable")
             .with_inputs([("targets", "wasm32-unknown-unknown")])
@@ -264,6 +266,7 @@ pub mod common {
 // =============================================================================
 
 /// Depot runner sizes.
+#[allow(dead_code)]
 pub mod runners {
     pub const UBUNTU_4: &str = "depot-ubuntu-24.04-4";
     pub const UBUNTU_32: &str = "depot-ubuntu-24.04-32";
