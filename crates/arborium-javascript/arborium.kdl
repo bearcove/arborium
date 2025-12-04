@@ -8,6 +8,7 @@ grammar {
     tag "code"
     tier 1
     has-scanner #true
+    generate-component #true
     icon "devicon-plain:javascript"
     aliases "js" "jsx" "mjs" "cjs"
 

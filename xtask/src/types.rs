@@ -245,6 +245,13 @@ pub struct TestsCursed {
     pub value: bool,
 }
 
+/// Generate WASM component marker (bool value) - build this grammar as a plugin.
+#[derive(Debug, Clone, Facet)]
+pub struct GenerateComponent {
+    #[facet(kdl::argument)]
+    pub value: bool,
+}
+
 /// Aliases child node (multiple string arguments).
 #[derive(Debug, Clone, Facet)]
 pub struct Aliases {
@@ -299,6 +306,10 @@ pub struct GrammarConfig {
     /// Tests are cursed (skip test generation due to platform issues).
     #[facet(kdl::child, default, rename = "tests-cursed")]
     pub tests_cursed: Option<TestsCursed>,
+
+    /// Generate a WASM component plugin for this grammar.
+    #[facet(kdl::child, default, rename = "generate-component")]
+    pub generate_component: Option<GenerateComponent>,
 
     /// Whether this grammar has a scanner.c file.
     #[facet(kdl::child, default, rename = "has-scanner")]
@@ -366,6 +377,14 @@ impl GrammarConfig {
     /// Whether tests are cursed (skip test generation).
     pub fn tests_cursed(&self) -> bool {
         self.tests_cursed.as_ref().map(|t| t.value).unwrap_or(false)
+    }
+
+    /// Whether to generate a WASM component plugin for this grammar.
+    pub fn generate_component(&self) -> bool {
+        self.generate_component
+            .as_ref()
+            .map(|g| g.value)
+            .unwrap_or(false)
     }
 }
 
