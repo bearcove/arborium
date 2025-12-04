@@ -326,16 +326,16 @@ tar -cvf grammar-sources.tar -T grammar_dirs.txt"#,
             .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
             .needs(["generate"])
             .steps([
-            checkout(),
-            download_grammar_sources(),
-            extract_grammar_sources(),
-            Step::run("Build", "cargo build --locked --verbose"),
-            Step::run("Run tests", "cargo nextest run --locked --verbose"),
-            Step::run(
-                "Build with all features",
-                "cargo build --locked --all-features --verbose",
-            ),
-        ]),
+                checkout(),
+                download_grammar_sources(),
+                extract_grammar_sources(),
+                Step::run("Build", "cargo build --locked --verbose"),
+                Step::run("Run tests", "cargo nextest run --locked --verbose"),
+                Step::run(
+                    "Build with all features",
+                    "cargo build --locked --all-features --verbose",
+                ),
+            ]),
     );
 
     // Test macOS job
@@ -345,15 +345,15 @@ tar -cvf grammar-sources.tar -T grammar_dirs.txt"#,
             .name("🍎 Test (macOS)")
             .needs(["generate"])
             .steps([
-            checkout(),
-            download_grammar_sources(),
-            extract_grammar_sources(),
-            install_rust(),
-            rust_cache(),
-            install_nextest(),
-            Step::run("Build", "cargo build --locked --verbose"),
-            Step::run("Run tests", "cargo nextest run --locked --verbose"),
-        ]),
+                checkout(),
+                download_grammar_sources(),
+                extract_grammar_sources(),
+                install_rust(),
+                rust_cache(),
+                install_nextest(),
+                Step::run("Build", "cargo build --locked --verbose"),
+                Step::run("Run tests", "cargo nextest run --locked --verbose"),
+            ]),
     );
 
     // WASM job
@@ -364,16 +364,16 @@ tar -cvf grammar-sources.tar -T grammar_dirs.txt"#,
             .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
             .needs(["generate"])
             .steps([
-            checkout(),
-            download_grammar_sources(),
-            extract_grammar_sources(),
-            Step::run(
-                "Build arborium for WASM",
-                "cargo build --locked -p arborium --target wasm32-unknown-unknown",
-            ),
-            Step::run(
-                "Check for env imports in WASM",
-                r#"# Find all .wasm files and check for env imports
+                checkout(),
+                download_grammar_sources(),
+                extract_grammar_sources(),
+                Step::run(
+                    "Build arborium for WASM",
+                    "cargo build --locked -p arborium --target wasm32-unknown-unknown",
+                ),
+                Step::run(
+                    "Check for env imports in WASM",
+                    r#"# Find all .wasm files and check for env imports
 found_env_imports=false
 for wasm_file in $(find target/wasm32-unknown-unknown -name "*.wasm" -type f); do
   if wasm-objdump -j Import -x "$wasm_file" 2>/dev/null | grep -q '<- env\.'; then
@@ -387,8 +387,8 @@ if [ "$found_env_imports" = true ]; then
   exit 1
 fi
 echo "No env imports found - WASM modules are browser-compatible""#,
-            ),
-        ]),
+                ),
+            ]),
     );
 
     // Clippy job
@@ -399,14 +399,14 @@ echo "No env imports found - WASM modules are browser-compatible""#,
             .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
             .needs(["generate"])
             .steps([
-            checkout(),
-            download_grammar_sources(),
-            extract_grammar_sources(),
-            Step::run(
-                "Run Clippy",
-                "cargo clippy --locked --all-targets -- -D warnings",
-            ),
-        ]),
+                checkout(),
+                download_grammar_sources(),
+                extract_grammar_sources(),
+                Step::run(
+                    "Run Clippy",
+                    "cargo clippy --locked --all-targets -- -D warnings",
+                ),
+            ]),
     );
 
     // Fmt job (no dependency on generate)
@@ -416,13 +416,13 @@ echo "No env imports found - WASM modules are browser-compatible""#,
             .name("📝 Format")
             .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
             .steps([
-            checkout(),
-            Step::run("Check formatting", "cargo fmt --all -- --check"),
-            Step::run(
-                "Check CI workflow is up to date",
-                "arborium-xtask ci generate --check",
-            ),
-        ]),
+                checkout(),
+                Step::run("Check formatting", "cargo fmt --all -- --check"),
+                Step::run(
+                    "Check CI workflow is up to date",
+                    "arborium-xtask ci generate --check",
+                ),
+            ]),
     );
 
     // Docs job
@@ -433,12 +433,12 @@ echo "No env imports found - WASM modules are browser-compatible""#,
             .container("ghcr.io/bearcove/arborium-plugin-builder:latest")
             .needs(["generate"])
             .steps([
-            checkout(),
-            download_grammar_sources(),
-            extract_grammar_sources(),
-            Step::run("Build docs", "cargo doc --locked --no-deps")
-                .with_env([("RUSTDOCFLAGS", "-D warnings")]),
-        ]),
+                checkout(),
+                download_grammar_sources(),
+                extract_grammar_sources(),
+                Step::run("Build docs", "cargo doc --locked --no-deps")
+                    .with_env([("RUSTDOCFLAGS", "-D warnings")]),
+            ]),
     );
 
     // Plugin build jobs (if groups are available)
@@ -504,7 +504,10 @@ echo "No env imports found - WASM modules are browser-compatible""#,
         }
 
         // TODO: Add npm packaging step here
-        collect_steps.push(Step::run("List collected plugins", "find dist/plugins -type f | sort"));
+        collect_steps.push(Step::run(
+            "List collected plugins",
+            "find dist/plugins -type f | sort",
+        ));
 
         jobs.insert(
             "collect-plugins".into(),
