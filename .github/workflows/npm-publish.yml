@@ -1,0 +1,155 @@
+# npm publishing workflow for @arborium packages
+name: npm Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 0.1.0)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (do not actually publish)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Build all grammar plugins
+  build-plugins:
+    runs-on: depot-ubuntu-24.04-32
+    container: ghcr.io/bearcove/arborium-plugin-builder:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate grammar sources
+        run: arborium-xtask gen
+
+      - name: Build all plugins
+        run: arborium-xtask plugins build
+
+      - name: Generate npm package.json files
+        run: |
+          VERSION="${{ github.event.inputs.version || github.event.release.tag_name }}"
+          # Remove 'v' prefix if present
+          VERSION="${VERSION#v}"
+          arborium-xtask plugins npm --version "$VERSION"
+
+      - name: Upload plugin artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-packages
+          path: dist/plugins/
+          retention-days: 1
+
+  # Build the main @arborium/arborium package
+  build-main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        working-directory: packages/arborium
+        run: npm ci
+
+      - name: Build
+        working-directory: packages/arborium
+        run: npm run build
+
+      - name: Update version
+        working-directory: packages/arborium
+        run: |
+          VERSION="${{ github.event.inputs.version || github.event.release.tag_name }}"
+          VERSION="${VERSION#v}"
+          npm version "$VERSION" --no-git-tag-version
+
+      - name: Upload main package
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-package
+          path: packages/arborium/
+          retention-days: 1
+
+  # Publish all packages to npm
+  publish:
+    needs: [build-plugins, build-main]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for npm provenance
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download plugin packages
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+          path: packages/
+
+      - name: Download main package
+        uses: actions/download-artifact@v4
+        with:
+          name: main-package
+          path: packages/arborium/
+
+      - name: List packages to publish
+        run: |
+          echo "=== Main package ==="
+          ls -la packages/arborium/
+          cat packages/arborium/package.json
+          echo ""
+          echo "=== Grammar packages ==="
+          for dir in packages/*/; do
+            if [ -f "$dir/package.json" ] && [ "$dir" != "packages/arborium/" ]; then
+              echo "--- $dir ---"
+              cat "$dir/package.json" | head -5
+            fi
+          done
+
+      - name: Publish main package
+        if: ${{ !github.event.inputs.dry_run }}
+        working-directory: packages/arborium
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish grammar packages
+        if: ${{ !github.event.inputs.dry_run }}
+        run: |
+          for dir in packages/*/; do
+            if [ -f "$dir/package.json" ] && [ "$dir" != "packages/arborium/" ]; then
+              echo "Publishing $dir..."
+              cd "$dir"
+              npm publish --provenance --access public || echo "Failed to publish $dir (may already exist)"
+              cd -
+            fi
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry run summary
+        if: ${{ github.event.inputs.dry_run }}
+        run: |
+          echo "=== DRY RUN - Would publish the following packages ==="
+          echo "Main: @arborium/arborium"
+          for dir in packages/*/; do
+            if [ -f "$dir/package.json" ] && [ "$dir" != "packages/arborium/" ]; then
+              name=$(cat "$dir/package.json" | grep '"name"' | head -1 | cut -d'"' -f4)
+              echo "Grammar: $name"
+            fi
+          done

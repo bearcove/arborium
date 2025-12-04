@@ -1047,3 +1047,133 @@ fn format_duration_ms(ms: u64) -> String {
         format!("{}ms", ms)
     }
 }
+
+// =============================================================================
+// npm package generation
+// =============================================================================
+
+/// Generate npm package.json files for all grammar plugins.
+///
+/// This creates a package.json in each plugin directory under output_dir,
+/// making them publishable to npm as @arborium/<language> packages.
+pub fn generate_npm_packages(
+    repo_root: &Utf8Path,
+    output_dir: &Utf8Path,
+    version: &str,
+) -> Result<()> {
+    let output_path = if output_dir.is_absolute() {
+        output_dir.to_owned()
+    } else {
+        repo_root.join(output_dir)
+    };
+
+    if !output_path.exists() {
+        miette::bail!(
+            "Output directory does not exist: {}\nRun `arborium-xtask plugins build` first.",
+            output_path
+        );
+    }
+
+    println!(
+        "{} Generating npm packages (version {})...",
+        "→".blue(),
+        version.yellow()
+    );
+
+    let mut count = 0;
+
+    // Iterate over plugin directories
+    for entry in std::fs::read_dir(&output_path).into_diagnostic()? {
+        let entry = entry.into_diagnostic()?;
+        let plugin_path = Utf8PathBuf::from_path_buf(entry.path()).ok();
+        let Some(plugin_path) = plugin_path else {
+            continue;
+        };
+
+        if !plugin_path.is_dir() {
+            continue;
+        }
+
+        let language = plugin_path.file_name().unwrap_or("");
+
+        // Check that grammar.js exists (indicates a transpiled plugin)
+        let grammar_js = plugin_path.join("grammar.js");
+        if !grammar_js.exists() {
+            continue;
+        }
+
+        // Generate package.json
+        let package_json = generate_package_json(language, version);
+        let package_json_path = plugin_path.join("package.json");
+
+        std::fs::write(&package_json_path, package_json)
+            .into_diagnostic()
+            .context(format!("failed to write {}", package_json_path))?;
+
+        println!("  {} @arborium/{}", "✓".green(), language);
+        count += 1;
+    }
+
+    println!(
+        "\n{} Generated {} package.json files",
+        "✓".green(),
+        count.to_string().yellow()
+    );
+
+    Ok(())
+}
+
+/// Generate a package.json for a grammar plugin.
+fn generate_package_json(language: &str, version: &str) -> String {
+    // Escape any special characters in the language name for JSON
+    let safe_language = language.replace('\\', "\\\\").replace('"', "\\\"");
+
+    format!(
+        r#"{{
+  "name": "@arborium/{language}",
+  "version": "{version}",
+  "description": "Arborium syntax highlighting grammar for {language}",
+  "type": "module",
+  "main": "./grammar.js",
+  "module": "./grammar.js",
+  "types": "./grammar.d.ts",
+  "exports": {{
+    ".": {{
+      "import": "./grammar.js",
+      "types": "./grammar.d.ts"
+    }},
+    "./grammar.js": "./grammar.js",
+    "./grammar.core.wasm": "./grammar.core.wasm"
+  }},
+  "files": [
+    "grammar.js",
+    "grammar.d.ts",
+    "grammar.core.wasm",
+    "interfaces"
+  ],
+  "keywords": [
+    "arborium",
+    "syntax-highlighting",
+    "tree-sitter",
+    "{language}",
+    "wasm"
+  ],
+  "author": "Amos Wenger <amos@bearcove.net>",
+  "license": "MIT OR Apache-2.0",
+  "repository": {{
+    "type": "git",
+    "url": "https://github.com/bearcove/arborium.git"
+  }},
+  "homepage": "https://github.com/bearcove/arborium",
+  "bugs": {{
+    "url": "https://github.com/bearcove/arborium/issues"
+  }},
+  "publishConfig": {{
+    "access": "public"
+  }}
+}}
+"#,
+        language = safe_language,
+        version = version
+    )
+}

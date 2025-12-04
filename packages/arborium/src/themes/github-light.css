@@ -1,0 +1,123 @@
+/**
+ * GitHub Light theme for Arborium
+ * Based on https://github.com/primer/github-syntax-light
+ */
+
+/* Code block styling */
+pre:has(code[data-highlighted]) {
+  background-color: #f6f8fa;
+  color: #24292e;
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+  border: 1px solid #e1e4e8;
+}
+
+code[data-highlighted] {
+  background: transparent;
+  font-family: inherit;
+}
+
+/* Keywords: if, else, for, while, fn, let, const, etc. */
+a-k {
+  color: #d73a49;
+}
+
+/* Strings */
+a-s {
+  color: #032f62;
+}
+
+/* Comments */
+a-c {
+  color: #6a737d;
+  font-style: italic;
+}
+
+/* Functions */
+a-f {
+  color: #6f42c1;
+}
+
+/* Types */
+a-t {
+  color: #6f42c1;
+}
+
+/* Variables */
+a-v {
+  color: #24292e;
+}
+
+/* Built-in variables (self, this, etc.) */
+a-vb {
+  color: #005cc5;
+}
+
+/* Numbers */
+a-n {
+  color: #005cc5;
+}
+
+/* Operators */
+a-o {
+  color: #d73a49;
+}
+
+/* Punctuation (brackets, delimiters) */
+a-p {
+  color: #24292e;
+}
+
+/* Constants */
+a-ct {
+  color: #005cc5;
+}
+
+/* Built-in constants (true, false, null, etc.) */
+a-cb {
+  color: #005cc5;
+}
+
+/* Properties */
+a-pr {
+  color: #005cc5;
+}
+
+/* Attributes (HTML/XML attributes, decorators) */
+a-at {
+  color: #6f42c1;
+}
+
+/* Tags (HTML/XML tags) */
+a-tg {
+  color: #22863a;
+}
+
+/* Namespaces */
+a-ns {
+  color: #6f42c1;
+}
+
+/* Labels */
+a-lb {
+  color: #e36209;
+}
+
+/* Escape sequences */
+a-e {
+  color: #005cc5;
+}
+
+/* Embedded code */
+a-em {
+  color: #24292e;
+}
+
+/* Unknown/fallback */
+a-x {
+  color: #24292e;
+}

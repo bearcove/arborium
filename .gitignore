@@ -16,3 +16,5 @@ demo/*.br
 demo/*.gz
 /dist/
 crates/arborium-host/target/
+packages/arborium/dist/
+packages/arborium/node_modules/

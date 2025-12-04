@@ -1,0 +1,122 @@
+/**
+ * Tokyo Night theme for Arborium
+ * Based on https://github.com/tokyo-night/tokyo-night-vscode-theme
+ */
+
+/* Code block styling */
+pre:has(code[data-highlighted]) {
+  background-color: #1a1b26;
+  color: #a9b1d6;
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+code[data-highlighted] {
+  background: transparent;
+  font-family: inherit;
+}
+
+/* Keywords: if, else, for, while, fn, let, const, etc. */
+a-k {
+  color: #bb9af7;
+}
+
+/* Strings */
+a-s {
+  color: #9ece6a;
+}
+
+/* Comments */
+a-c {
+  color: #565f89;
+  font-style: italic;
+}
+
+/* Functions */
+a-f {
+  color: #7aa2f7;
+}
+
+/* Types */
+a-t {
+  color: #2ac3de;
+}
+
+/* Variables */
+a-v {
+  color: #c0caf5;
+}
+
+/* Built-in variables (self, this, etc.) */
+a-vb {
+  color: #f7768e;
+}
+
+/* Numbers */
+a-n {
+  color: #ff9e64;
+}
+
+/* Operators */
+a-o {
+  color: #89ddff;
+}
+
+/* Punctuation (brackets, delimiters) */
+a-p {
+  color: #a9b1d6;
+}
+
+/* Constants */
+a-ct {
+  color: #ff9e64;
+}
+
+/* Built-in constants (true, false, null, etc.) */
+a-cb {
+  color: #ff9e64;
+}
+
+/* Properties */
+a-pr {
+  color: #73daca;
+}
+
+/* Attributes (HTML/XML attributes, decorators) */
+a-at {
+  color: #bb9af7;
+}
+
+/* Tags (HTML/XML tags) */
+a-tg {
+  color: #f7768e;
+}
+
+/* Namespaces */
+a-ns {
+  color: #7dcfff;
+}
+
+/* Labels */
+a-lb {
+  color: #e0af68;
+}
+
+/* Escape sequences */
+a-e {
+  color: #89ddff;
+}
+
+/* Embedded code */
+a-em {
+  color: #c0caf5;
+}
+
+/* Unknown/fallback */
+a-x {
+  color: #c0caf5;
+}

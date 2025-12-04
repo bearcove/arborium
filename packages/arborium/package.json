@@ -1,0 +1,53 @@
+{
+  "name": "@arborium/arborium",
+  "version": "0.1.0",
+  "description": "High-performance syntax highlighting powered by tree-sitter and WebAssembly",
+  "type": "module",
+  "main": "./dist/arborium.js",
+  "module": "./dist/arborium.js",
+  "types": "./dist/arborium.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/arborium.js",
+      "types": "./dist/arborium.d.ts"
+    },
+    "./iife": {
+      "import": "./dist/arborium.iife.js"
+    },
+    "./themes/tokyo-night.css": "./dist/themes/tokyo-night.css",
+    "./themes/github-light.css": "./dist/themes/github-light.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "syntax-highlighting",
+    "tree-sitter",
+    "wasm",
+    "webassembly",
+    "code",
+    "highlight"
+  ],
+  "author": "Amos Wenger <amos@bearcove.net>",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bearcove/arborium.git",
+    "directory": "packages/arborium"
+  },
+  "homepage": "https://github.com/bearcove/arborium",
+  "bugs": {
+    "url": "https://github.com/bearcove/arborium/issues"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vite": "^7.2.6",
+    "vite-plugin-dts": "^4.5.0"
+  }
+}

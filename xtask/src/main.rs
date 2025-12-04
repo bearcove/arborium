@@ -129,6 +129,17 @@ enum PluginsAction {
         #[facet(args::named, default)]
         timings: Option<String>,
     },
+
+    /// Generate npm package.json files for grammar packages
+    Npm {
+        /// Output directory containing built plugins (default: dist/plugins)
+        #[facet(args::named, args::short = 'o', default)]
+        output: Option<String>,
+
+        /// Package version to use
+        #[facet(args::named, args::short = 'v', default)]
+        version: Option<String>,
+    },
 }
 
 /// CI workflow subcommands
@@ -282,6 +293,18 @@ fn main() {
                     let num_groups = count.unwrap_or(2);
 
                     if let Err(e) = plugins::show_groups(&timings_path, num_groups) {
+                        eprintln!("{:?}", e);
+                        std::process::exit(1);
+                    }
+                }
+                PluginsAction::Npm { output, version } => {
+                    let output_dir = output
+                        .map(camino::Utf8PathBuf::from)
+                        .unwrap_or_else(|| camino::Utf8PathBuf::from("dist/plugins"));
+                    let version = version.as_deref().unwrap_or("0.1.0");
+
+                    if let Err(e) = plugins::generate_npm_packages(&repo_root, &output_dir, version)
+                    {
                         eprintln!("{:?}", e);
                         std::process::exit(1);
                     }
