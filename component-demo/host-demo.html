@@ -238,6 +238,8 @@
 
     // Plugin cache (by language name)
     const pluginModules = new Map();
+    // Cache for compiled WASM modules (shared shims get reused)
+    const compiledModules = new Map();
 
     async function loadPluginModule(lang) {
       if (pluginModules.has(lang)) return pluginModules.get(lang);
@@ -249,10 +251,26 @@
       const { instantiate } = await import(pluginUrl);
 
       const getCoreModule = async (path) => {
-        const url = `${pluginsUrl}/${lang}/${path}`;
+        // Resolve the path relative to the plugin directory
+        // path can be 'grammar.core.wasm' or '../shared/shim.core2.wasm'
+        let url;
+        if (path.startsWith('../')) {
+          // Shared module - resolve relative to plugins dir
+          url = `${pluginsUrl}/${path}`;
+        } else {
+          url = `${pluginsUrl}/${lang}/${path}`;
+        }
+
+        // Check cache first (important for shared modules!)
+        if (compiledModules.has(url)) {
+          return compiledModules.get(url);
+        }
+
         const response = await fetch(url);
         const bytes = await response.arrayBuffer();
-        return WebAssembly.compile(bytes);
+        const module = await WebAssembly.compile(bytes);
+        compiledModules.set(url, module);
+        return module;
       };
 
       const component = await instantiate(getCoreModule, wasiStubs);
