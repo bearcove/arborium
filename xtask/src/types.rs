@@ -782,7 +782,7 @@ impl CrateRegistry {
 
 structstruck::strike! {
     /// Compression settings for WASM plugin builds.
-    #[strikethrough[derive(Debug, Clone, facet::Facet)]]
+    #[strikethrough[derive(Debug, Clone, Default, facet::Facet)]]
     pub struct CompressionConfig {
         #[facet(kdl::child, default)]
         pub brotli: Option<pub struct BrotliConfig {
@@ -871,15 +871,5 @@ impl CompressionConfig {
     /// Get zstd level (default: 19)
     pub fn zstd_level(&self) -> i32 {
         self.zstd.as_ref().map(|z| z.level.0).unwrap_or(19)
-    }
-}
-
-impl Default for CompressionConfig {
-    fn default() -> Self {
-        Self {
-            brotli: None,
-            gzip: None,
-            zstd: None,
-        }
     }
 }

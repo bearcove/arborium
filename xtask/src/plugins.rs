@@ -184,7 +184,6 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
             miette::bail!("expected wasm file not found: {}", wasm_file);
         }
 
-
         // Copy to output directory
         let plugin_output = output_dir.join(grammar);
         std::fs::create_dir_all(&plugin_output)
@@ -281,11 +280,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
             timings,
         };
         plugin_timings.save(&timings_path)?;
-        println!(
-            "\n{} Saved timings to {}",
-            "✓".green(),
-            timings_path.cyan()
-        );
+        println!("\n{} Saved timings to {}", "✓".green(), timings_path.cyan());
 
         // Print summary
         let total_ms: u64 = plugin_timings.timings.iter().map(|t| t.build_ms).sum();
@@ -859,11 +854,7 @@ fn optimize_and_compress_wasm(plugins_dir: &Utf8Path, config: &CompressionConfig
     let total_gz = total_gz.load(Ordering::Relaxed);
     let total_zst = total_zst.load(Ordering::Relaxed);
 
-    println!(
-        "  {} Processed {} files:",
-        "✓".green(),
-        total_files
-    );
+    println!("  {} Processed {} files:", "✓".green(), total_files);
     println!(
         "      Original:  {} → Optimized: {} ({:.1}% reduction)",
         format_size(total_original),
@@ -980,11 +971,6 @@ impl PluginGroups {
             efficiency,
         }
     }
-
-    /// Get the grammars for a specific group index.
-    pub fn grammars_for_group(&self, index: usize) -> Option<&[String]> {
-        self.groups.get(index).map(|g| g.grammars.as_slice())
-    }
 }
 
 /// Show plugin build groups based on timings.
@@ -1019,17 +1005,19 @@ pub fn show_groups(timings_path: &Utf8Path, num_groups: usize) -> Result<()> {
             // Find the timing for this grammar
             let timing = timings.timings.iter().find(|t| &t.grammar == grammar);
             if let Some(t) = timing {
-                println!("      {} {} ({})", "•".dimmed(), grammar, format_duration_ms(t.build_ms));
+                println!(
+                    "      {} {} ({})",
+                    "•".dimmed(),
+                    grammar,
+                    format_duration_ms(t.build_ms)
+                );
             } else {
                 println!("      {} {}", "•".dimmed(), grammar);
             }
         }
     }
 
-    println!(
-        "\n{} Summary:",
-        "●".cyan()
-    );
+    println!("\n{} Summary:", "●".cyan());
     println!(
         "  Max group time: {} (determines CI time)",
         format_duration_ms(groups.max_group_ms).yellow()

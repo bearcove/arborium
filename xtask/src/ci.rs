@@ -137,22 +137,26 @@ impl Step {
     }
 
     /// Add inputs to this step.
-    pub fn with_inputs(mut self, inputs: impl IntoIterator<Item = (impl Into<String>, impl Into<String>)>) -> Self {
-        let map: IndexMap<String, String> = inputs.into_iter().map(|(k, v)| (k.into(), v.into())).collect();
+    pub fn with_inputs(
+        mut self,
+        inputs: impl IntoIterator<Item = (impl Into<String>, impl Into<String>)>,
+    ) -> Self {
+        let map: IndexMap<String, String> = inputs
+            .into_iter()
+            .map(|(k, v)| (k.into(), v.into()))
+            .collect();
         self.with = Some(map);
         self
     }
 
     /// Add environment variables to this step.
-    pub fn with_env(mut self, env: impl IntoIterator<Item = (impl Into<String>, impl Into<String>)>) -> Self {
-        let map: IndexMap<String, String> = env.into_iter().map(|(k, v)| (k.into(), v.into())).collect();
+    pub fn with_env(
+        mut self,
+        env: impl IntoIterator<Item = (impl Into<String>, impl Into<String>)>,
+    ) -> Self {
+        let map: IndexMap<String, String> =
+            env.into_iter().map(|(k, v)| (k.into(), v.into())).collect();
         self.env = Some(map);
-        self
-    }
-
-    /// Set the step ID.
-    pub fn with_id(mut self, id: impl Into<String>) -> Self {
-        self.id = Some(id.into());
         self
     }
 }
@@ -247,17 +251,10 @@ pub mod runners {
 }
 
 /// Configuration for CI workflow generation.
+#[derive(Default)]
 pub struct CiConfig {
     /// Plugin build groups (if available)
     pub plugin_groups: Option<PluginGroups>,
-}
-
-impl Default for CiConfig {
-    fn default() -> Self {
-        Self {
-            plugin_groups: None,
-        }
-    }
 }
 
 /// Build the CI workflow.
@@ -306,72 +303,75 @@ tar -cvf grammar-sources.tar -T grammar_dirs.txt"#,
     // Test Linux job
     jobs.insert(
         "test-linux".into(),
-        Job::new(runners::UBUNTU_32)
-            .needs(["generate"])
-            .steps([
-                checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
-                install_rust(),
-                rust_cache(),
-                install_nextest(),
-                Step::run("Build", "cargo build --locked --verbose"),
-                Step::run("Run tests", "cargo nextest run --locked --verbose"),
-                Step::run("Build with all features", "cargo build --locked --all-features --verbose"),
-            ]),
+        Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+            checkout(),
+            download_grammar_sources(),
+            extract_grammar_sources(),
+            install_rust(),
+            rust_cache(),
+            install_nextest(),
+            Step::run("Build", "cargo build --locked --verbose"),
+            Step::run("Run tests", "cargo nextest run --locked --verbose"),
+            Step::run(
+                "Build with all features",
+                "cargo build --locked --all-features --verbose",
+            ),
+        ]),
     );
 
     // Test macOS job
     jobs.insert(
         "test-macos".into(),
-        Job::new(runners::MACOS)
-            .needs(["generate"])
-            .steps([
-                checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
-                install_rust(),
-                rust_cache(),
-                install_nextest(),
-                Step::run("Build", "cargo build --locked --verbose"),
-                Step::run("Run tests", "cargo nextest run --locked --verbose"),
-            ]),
+        Job::new(runners::MACOS).needs(["generate"]).steps([
+            checkout(),
+            download_grammar_sources(),
+            extract_grammar_sources(),
+            install_rust(),
+            rust_cache(),
+            install_nextest(),
+            Step::run("Build", "cargo build --locked --verbose"),
+            Step::run("Run tests", "cargo nextest run --locked --verbose"),
+        ]),
     );
 
     // Check Windows job
     jobs.insert(
         "check-windows".into(),
-        Job::new(runners::WINDOWS_32)
-            .needs(["generate"])
-            .steps([
-                checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
-                install_rust(),
-                Step::uses("Rust cache", "Swatinem/rust-cache@v2")
-                    .with_inputs([("save-if", "true")]),
-                install_nextest(),
-                Step::run("Build", "cargo build --locked --verbose"),
-                Step::run("Run tests", "cargo nextest run --locked --verbose --no-fail-fast"),
-            ]),
+        Job::new(runners::WINDOWS_32).needs(["generate"]).steps([
+            checkout(),
+            download_grammar_sources(),
+            extract_grammar_sources(),
+            install_rust(),
+            Step::uses("Rust cache", "Swatinem/rust-cache@v2").with_inputs([("save-if", "true")]),
+            install_nextest(),
+            Step::run("Build", "cargo build --locked --verbose"),
+            Step::run(
+                "Run tests",
+                "cargo nextest run --locked --verbose --no-fail-fast",
+            ),
+        ]),
     );
 
     // WASM job
     jobs.insert(
         "wasm".into(),
-        Job::new(runners::UBUNTU_32)
-            .needs(["generate"])
-            .steps([
-                checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
-                install_rust_wasm(),
-                rust_cache(),
-                Step::run("Install wabt", "sudo apt-get update && sudo apt-get install -y wabt"),
-                Step::run("Build arborium for WASM", "cargo build --locked -p arborium --target wasm32-unknown-unknown"),
-                Step::run(
-                    "Check for env imports in WASM",
-                    r#"# Find all .wasm files and check for env imports
+        Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+            checkout(),
+            download_grammar_sources(),
+            extract_grammar_sources(),
+            install_rust_wasm(),
+            rust_cache(),
+            Step::run(
+                "Install wabt",
+                "sudo apt-get update && sudo apt-get install -y wabt",
+            ),
+            Step::run(
+                "Build arborium for WASM",
+                "cargo build --locked -p arborium --target wasm32-unknown-unknown",
+            ),
+            Step::run(
+                "Check for env imports in WASM",
+                r#"# Find all .wasm files and check for env imports
 found_env_imports=false
 for wasm_file in $(find target/wasm32-unknown-unknown -name "*.wasm" -type f); do
   if wasm-objdump -j Import -x "$wasm_file" 2>/dev/null | grep -q '<- env\.'; then
@@ -385,23 +385,24 @@ if [ "$found_env_imports" = true ]; then
   exit 1
 fi
 echo "No env imports found - WASM modules are browser-compatible""#,
-                ),
-            ]),
+            ),
+        ]),
     );
 
     // Clippy job
     jobs.insert(
         "clippy".into(),
-        Job::new(runners::UBUNTU_32)
-            .needs(["generate"])
-            .steps([
-                checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
-                install_rust_with("clippy"),
-                rust_cache(),
-                Step::run("Run Clippy", "cargo clippy --locked --all-targets -- -D warnings"),
-            ]),
+        Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+            checkout(),
+            download_grammar_sources(),
+            extract_grammar_sources(),
+            install_rust_with("clippy"),
+            rust_cache(),
+            Step::run(
+                "Run Clippy",
+                "cargo clippy --locked --all-targets -- -D warnings",
+            ),
+        ]),
     );
 
     // Fmt job (no dependency on generate)
@@ -421,17 +422,15 @@ echo "No env imports found - WASM modules are browser-compatible""#,
     // Docs job
     jobs.insert(
         "docs".into(),
-        Job::new(runners::UBUNTU_32)
-            .needs(["generate"])
-            .steps([
-                checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
-                install_rust(),
-                rust_cache(),
-                Step::run("Build docs", "cargo doc --locked --no-deps")
-                    .with_env([("RUSTDOCFLAGS", "-D warnings")]),
-            ]),
+        Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+            checkout(),
+            download_grammar_sources(),
+            extract_grammar_sources(),
+            install_rust(),
+            rust_cache(),
+            Step::run("Build docs", "cargo doc --locked --no-deps")
+                .with_env([("RUSTDOCFLAGS", "-D warnings")]),
+        ]),
     );
 
     // Plugin build jobs (if groups are available)
@@ -442,29 +441,27 @@ echo "No env imports found - WASM modules are browser-compatible""#,
 
             jobs.insert(
                 job_name,
-                Job::new(runners::UBUNTU_32)
-                    .needs(["generate"])
-                    .steps([
-                        checkout(),
-                        download_grammar_sources(),
-                        extract_grammar_sources(),
-                        install_rust_wasm(),
-                        rust_cache(),
-                        Step::run("Install cargo-component", "cargo install cargo-component"),
-                        Step::uses("Install Node.js", "actions/setup-node@v4")
-                            .with_inputs([("node-version", "20")]),
-                        Step::run("Install jco", "npm install -g @bytecodealliance/jco"),
-                        Step::run(
-                            &format!("Build plugins (group {})", group.index),
-                            format!("cargo xtask plugins build {}", grammars_list),
-                        ),
-                        Step::uses("Upload plugins artifact", "actions/upload-artifact@v4")
-                            .with_inputs([
-                                ("name", format!("plugins-group-{}", group.index)),
-                                ("path", "dist/plugins".to_string()),
-                                ("retention-days", "7".to_string()),
-                            ]),
-                    ]),
+                Job::new(runners::UBUNTU_32).needs(["generate"]).steps([
+                    checkout(),
+                    download_grammar_sources(),
+                    extract_grammar_sources(),
+                    install_rust_wasm(),
+                    rust_cache(),
+                    Step::run("Install cargo-component", "cargo install cargo-component"),
+                    Step::uses("Install Node.js", "actions/setup-node@v4")
+                        .with_inputs([("node-version", "20")]),
+                    Step::run("Install jco", "npm install -g @bytecodealliance/jco"),
+                    Step::run(
+                        format!("Build plugins (group {})", group.index),
+                        format!("cargo xtask plugins build {}", grammars_list),
+                    ),
+                    Step::uses("Upload plugins artifact", "actions/upload-artifact@v4")
+                        .with_inputs([
+                            ("name", format!("plugins-group-{}", group.index)),
+                            ("path", "dist/plugins".to_string()),
+                            ("retention-days", "7".to_string()),
+                        ]),
+                ]),
             );
         }
     }
@@ -503,7 +500,8 @@ use facet_diff::FacetDiff;
 use facet_pretty::FacetPretty;
 use miette::Result;
 
-const GENERATED_HEADER: &str = "# GENERATED BY: cargo xtask ci generate\n# DO NOT EDIT - edit xtask/src/ci.rs instead\n";
+const GENERATED_HEADER: &str =
+    "# GENERATED BY: cargo xtask ci generate\n# DO NOT EDIT - edit xtask/src/ci.rs instead\n";
 
 /// Default number of plugin build groups for CI.
 const DEFAULT_NUM_GROUPS: usize = 2;
@@ -525,8 +523,7 @@ pub fn generate(repo_root: &Utf8Path, check: bool) -> Result<()> {
             Err(e) => {
                 eprintln!(
                     "Warning: failed to load plugin timings from {}: {}",
-                    timings_path,
-                    e
+                    timings_path, e
                 );
                 None
             }
@@ -536,9 +533,7 @@ pub fn generate(repo_root: &Utf8Path, check: bool) -> Result<()> {
             "No plugin timings file found at {} - skipping plugin jobs",
             timings_path
         );
-        println!(
-            "Run `cargo xtask plugins build --profile` to generate timings"
-        );
+        println!("Run `cargo xtask plugins build --profile` to generate timings");
         None
     };
 
