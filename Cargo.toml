@@ -1,6 +1,0 @@
-[workspace]
-resolver = "2"
-members = []
-
-[workspace.metadata.facet-dev]
-generate-readmes = false
