@@ -61,24 +61,44 @@ function getConfigFromScript(): Partial<ArboriumConfig> {
   return config;
 }
 
+/** Detect if we're running on docs.rs */
+function isDocsRsEnvironment(): boolean {
+  return document.documentElement.hasAttribute('data-docs-rs-theme');
+}
+
+/** Map docs.rs theme names to Arborium theme IDs */
+function mapDocsRsTheme(value?: string): string | null {
+  if (!value) return null;
+  if (value === 'light') return 'docsrs-light';
+  if (value === 'dark') return 'docsrs-dark';
+  if (value === 'ayu') return 'docsrs-ayu';
+  return null;
+}
+
 /** Detect the current theme from docs.rs or environment */
 function getAutoTheme(): string {
-  // Check for docs.rs theme (data-theme attribute with values: light, dark, ayu)
-  const docsRsTheme = document.documentElement.dataset.theme;
-  if (docsRsTheme) {
-    if (docsRsTheme === 'light') {
-      return 'docsrs-light';
-    } else if (docsRsTheme === 'dark') {
-      return 'docsrs-dark';
-    } else if (docsRsTheme === 'ayu') {
-      return 'docsrs-ayu';
+  if (isDocsRsEnvironment()) {
+    // Prefer the new docs.rs data-theme attribute, fall back to legacy one
+    const docsRsTheme = mapDocsRsTheme(document.documentElement.dataset.theme);
+    if (docsRsTheme) {
+      return docsRsTheme;
+    }
+
+    const legacyDocsRsTheme = mapDocsRsTheme(
+      document.documentElement.dataset.docsRsTheme
+    );
+    if (legacyDocsRsTheme) {
+      return legacyDocsRsTheme;
     }
   }
 
-  // Check for legacy docs.rs theme attribute (data-docs-rs-theme)
-  const legacyDocsRsTheme = document.documentElement.dataset.docsRsTheme;
-  if (legacyDocsRsTheme) {
-    return legacyDocsRsTheme === 'light' ? 'docsrs-light' : 'docsrs-dark';
+  // Local rustdoc: data-theme toggles between light/dark but lacks docs.rs marker
+  const rustdocTheme = document.documentElement.dataset.theme;
+  if (rustdocTheme === 'light') {
+    return 'github-light';
+  }
+  if (rustdocTheme === 'dark') {
+    return 'tokyo-night';
   }
 
   // Fall back to system preference
@@ -364,10 +384,10 @@ function watchThemeChanges(): void {
   // Watch for docs.rs/rustdoc theme attribute changes
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-      // Monitor both data-theme (docs.rs) and data-docs-rs-theme (legacy)
+      const attr = mutation.attributeName;
       if (
-        mutation.attributeName === 'data-theme' ||
-        mutation.attributeName === 'data-docs-rs-theme'
+        attr === 'data-docs-rs-theme' ||
+        (attr === 'data-theme' && isDocsRsEnvironment())
       ) {
         onThemeChange();
         break;

@@ -513,6 +513,9 @@ pub mod builtin {
     builtin_theme!(melange_light, "melange-light.toml");
     builtin_theme!(light_owl, "light-owl.toml");
     builtin_theme!(lucius_light, "lucius-light.toml");
+    builtin_theme!(docsrs_light, "docsrs-light.toml");
+    builtin_theme!(docsrs_dark, "docsrs-dark.toml");
+    builtin_theme!(docsrs_ayu, "docsrs-ayu.toml");
 
     /// Get all built-in themes.
     pub fn all() -> Vec<&'static Theme> {
@@ -541,6 +544,9 @@ pub mod builtin {
             melange_light(),
             light_owl(),
             lucius_light(),
+            docsrs_light(),
+            docsrs_dark(),
+            docsrs_ayu(),
         ]
     }
 }

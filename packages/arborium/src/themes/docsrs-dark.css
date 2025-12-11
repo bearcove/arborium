@@ -1,0 +1,124 @@
+/**
+ * Docs.rs Dark theme for Arborium
+ * Matches the dark appearance of docs.rs/rustdoc
+ */
+
+/* Code block styling */
+pre:has(code[data-highlighted]) {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+  border: 1px solid #2a2a2a;
+}
+
+code[data-highlighted] {
+  background: transparent;
+  font-family: inherit;
+}
+
+/* Keywords: if, else, for, while, fn, let, const, etc. */
+a-k {
+  color: #ff7b72;
+}
+
+/* Strings */
+a-s {
+  color: #a5d6ff;
+}
+
+/* Comments */
+a-c {
+  color: #7a7a7a;
+  font-style: italic;
+}
+
+/* Functions */
+a-f {
+  color: #d2a8ff;
+}
+
+/* Types */
+a-t {
+  color: #d2a8ff;
+}
+
+/* Variables */
+a-v {
+  color: #e0e0e0;
+}
+
+/* Built-in variables (self, this, etc.) */
+a-vb {
+  color: #79c0ff;
+}
+
+/* Numbers */
+a-n {
+  color: #79c0ff;
+}
+
+/* Operators */
+a-o {
+  color: #ff7b72;
+}
+
+/* Punctuation (brackets, delimiters) */
+a-p {
+  color: #e0e0e0;
+}
+
+/* Constants */
+a-ct {
+  color: #79c0ff;
+}
+
+/* Built-in constants (true, false, null, etc.) */
+a-cb {
+  color: #79c0ff;
+}
+
+/* Properties */
+a-pr {
+  color: #79c0ff;
+}
+
+/* Attributes (HTML/XML attributes, decorators) */
+a-at {
+  color: #79c0ff;
+}
+
+/* Tags (HTML/XML tags) */
+a-tg {
+  color: #7ee787;
+}
+
+/* Namespaces */
+a-ns {
+  color: #d2a8ff;
+}
+
+/* Labels */
+a-lb {
+  color: #d2a8ff;
+}
+
+/* Escape sequences */
+a-e {
+  color: #ff7b72;
+}
+
+/* Embedded code */
+a-em {
+  color: #e0e0e0;
+}
+
+/* Unknown/fallback */
+a-x {
+  color: #e0e0e0;
+}
+
