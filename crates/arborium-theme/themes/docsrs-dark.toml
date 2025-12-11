@@ -4,7 +4,7 @@
 
 name = "Docsrs Dark"
 variant = "dark"
-background = "#353535"
+background = "#2a2a2a"
 foreground = "#dddddd"
 
 "attribute" = { fg = "attribute" }
@@ -25,7 +25,7 @@ foreground = "#dddddd"
 "variable" = { fg = "foreground" }
 "variable.builtin" = { fg = "self" }
 "variable.parameter" = { fg = "foreground" }
-"comment" = { fg = "comment", modifiers = ["italic"] }
+"comment" = { fg = "comment" }
 "macro" = { fg = "macro" }
 "label" = { fg = "lifetime" }
 "diff.plus" = { fg = "string" }

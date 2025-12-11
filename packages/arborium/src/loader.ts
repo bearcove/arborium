@@ -16,7 +16,7 @@ export const defaultConfig: Required<ArboriumConfig> = {
   theme: 'tokyo-night',
   selector: 'pre code',
   cdn: 'jsdelivr',
-  version: '0.700.0',
+  version: 'latest',
   pluginsUrl: 'https://arborium.bearcove.eu/plugins.json',
   hostUrl: '', // Empty means use CDN based on version
 };

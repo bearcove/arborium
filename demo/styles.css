@@ -2331,6 +2331,22 @@ footer a:hover {
     border-radius: 0;
 }
 
+/* Highlighted code blocks (demo output & inline samples) */
+pre:has(code[data-highlighted]) {
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+    font-family: 'Iosevka', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+pre:has(code[data-highlighted]) code {
+    font-family: inherit;
+    background: none;
+}
+
 /* Section navigation */
 .section-nav {
     position: sticky;

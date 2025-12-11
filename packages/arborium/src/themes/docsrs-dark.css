@@ -1,19 +1,11 @@
 /* Docs.rs Dark theme */
 pre:has(code[data-highlighted]) {
-  background-color: #353535;
+  background-color: #2a2a2a;
   color: #dddddd;
-  padding: 1em;
-  border-radius: 6px;
-  overflow-x: auto;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 0.9em;
-  line-height: 1.5;
-  border: 1px solid #444444;
 }
 
 code[data-highlighted] {
   background: transparent;
-  font-family: inherit;
 }
 
   a-at { color: #ee6868; }
@@ -50,8 +42,8 @@ code[data-highlighted] {
   a-v { color: #dddddd; }
   a-vb { color: #ee6868; }
   a-vp { color: #dddddd; }
-  a-c { color: #8d8d8b; font-style: italic; }
-  a-cd { color: #8d8d8b; font-style: italic; }
+  a-c { color: #8d8d8b; }
+  a-cd { color: #8d8d8b; }
   a-m { color: #3e999f; }
   a-l { color: #d97f26; }
   a-da { color: #83a300; }

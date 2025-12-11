@@ -1,19 +1,11 @@
 /* Docs.rs Ayu theme */
 pre:has(code[data-highlighted]) {
-  background-color: #0f1419;
+  background-color: #191f26;
   color: #c5c5c5;
-  padding: 1em;
-  border-radius: 6px;
-  overflow-x: auto;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 0.9em;
-  line-height: 1.5;
-  border: 1px solid #1f2733;
 }
 
 code[data-highlighted] {
   background: transparent;
-  font-family: inherit;
 }
 
   a-at { color: #e6e1cf; }
@@ -50,8 +42,8 @@ code[data-highlighted] {
   a-v { color: #c5c5c5; }
   a-vb { color: #36a3d9; }
   a-vp { color: #c5c5c5; }
-  a-c { color: #788797; font-style: italic; }
-  a-cd { color: #788797; font-style: italic; }
+  a-c { color: #788797; }
+  a-cd { color: #788797; }
   a-m { color: #a37acc; }
   a-l { color: #ff7733; }
   a-da { color: #b8cc52; }

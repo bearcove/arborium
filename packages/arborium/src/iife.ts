@@ -196,15 +196,6 @@ function injectThemeCSS(theme: string): void {
   const themeId = `arborium-theme-${theme}`;
   if (document.getElementById(themeId)) return;
 
-  // Check if theme styles already loaded (e.g. via themes.generated.css)
-  for (const link of document.querySelectorAll('link[rel="stylesheet"]')) {
-    const href = (link as HTMLLinkElement).href || '';
-    if (href.includes('theme')) {
-      console.debug(`[arborium] Theme already loaded: ${href}`);
-      return;
-    }
-  }
-
   // Get the base URL for CSS
   const config = getMergedConfig();
 
