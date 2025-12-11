@@ -5,17 +5,70 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 
 use rand::seq::SliceRandom;
+use owo_colors::OwoColorize;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use chrono::Utc;
 use miette::{Context, IntoDiagnostic, Result};
-use owo_colors::OwoColorize;
 use rayon::prelude::*;
 use sailfish::TemplateSimple;
 
 use crate::tool::Tool;
 use crate::types::CrateRegistry;
 use crate::version_store;
+
+/// Ensure nightly toolchain and wasm32-unknown-unknown target are installed
+fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
+    // Check if nightly toolchain is installed
+    let output = Command::new("rustup")
+        .args(["toolchain", "list"])
+        .output()
+        .into_diagnostic()
+        .context("failed to run rustup toolchain list")?;
+
+    let toolchains = String::from_utf8_lossy(&output.stdout);
+    let has_nightly = toolchains.lines().any(|line| line.contains("nightly"));
+
+    if !has_nightly {
+        println!("{} Installing nightly toolchain...", "●".cyan());
+        let status = Command::new("rustup")
+            .args(["toolchain", "install", "nightly"])
+            .status()
+            .into_diagnostic()
+            .context("failed to install nightly toolchain")?;
+
+        if !status.success() {
+            miette::bail!("failed to install nightly toolchain");
+        }
+        println!("{} Nightly toolchain installed", "✓".green());
+    }
+
+    // Check if wasm32-unknown-unknown target is installed for nightly
+    let output = Command::new("rustup")
+        .args(["+nightly", "target", "list", "--installed"])
+        .output()
+        .into_diagnostic()
+        .context("failed to check installed targets")?;
+
+    let targets = String::from_utf8_lossy(&output.stdout);
+    let has_wasm_target = targets.lines().any(|line| line.trim() == "wasm32-unknown-unknown");
+
+    if !has_wasm_target {
+        println!("{} Installing wasm32-unknown-unknown target for nightly...", "●".cyan());
+        let status = Command::new("rustup")
+            .args(["+nightly", "target", "add", "wasm32-unknown-unknown"])
+            .status()
+            .into_diagnostic()
+            .context("failed to add wasm32-unknown-unknown target")?;
+
+        if !status.success() {
+            miette::bail!("failed to add wasm32-unknown-unknown target");
+        }
+        println!("{} wasm32-unknown-unknown target installed", "✓".green());
+    }
+
+    Ok(())
+}
 
 /// Thread-safe output printer for parallel builds.
 #[derive(Clone)]
@@ -243,10 +296,19 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         options.jobs
     );
 
+    // Ensure nightly toolchain and wasm32-unknown-unknown target are installed
+    println!("{} Checking nightly toolchain and wasm target...", "●".cyan());
+    ensure_rust_nightly_with_wasm_target()?;
+
     let wasm_bindgen = Tool::WasmBindgen
         .find()
         .into_diagnostic()
         .context("wasm-bindgen not found")?;
+
+    let wasm_opt = Tool::WasmOpt
+        .find()
+        .into_diagnostic()
+        .context("wasm-opt not found")?;
 
     let errors: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
     let failed = Arc::new(AtomicBool::new(false));
@@ -271,6 +333,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                 options.output_dir.as_deref(),
                 &version,
                 &wasm_bindgen,
+                &wasm_opt,
                 &printer,
             );
 
@@ -479,6 +542,7 @@ fn build_single_plugin(
     output_override: Option<&Utf8Path>,
     _version: &str,
     wasm_bindgen: &crate::tool::ToolPath,
+    wasm_opt: &crate::tool::ToolPath,
     printer: &OutputPrinter,
 ) -> Result<()> {
     printer.print_line(grammar, "Building...", false);
@@ -601,23 +665,48 @@ fn build_single_plugin(
         miette::bail!("wasm-bindgen failed (see output above)");
     }
 
-    // Step 4: Copy and rename output files
+    // Step 4: Optimize WASM with wasm-opt
+    let src_wasm = bindgen_out.join(format!("{}_bg.wasm", wasm_name));
+    let optimized_wasm = bindgen_out.join(format!("{}_bg.opt.wasm", wasm_name));
+
+    let mut opt_cmd = wasm_opt.command();
+    opt_cmd
+        .args([
+            "-O3",  // Aggressive optimization
+            "--enable-bulk-memory",
+            "--enable-mutable-globals",
+            "--enable-nontrapping-float-to-int",
+            "--enable-sign-ext",
+            "--enable-simd",
+            "-o",
+            optimized_wasm.as_str(),
+            src_wasm.as_str(),
+        ])
+        .current_dir(&plugin_source);
+
+    let status = run_streaming(opt_cmd, grammar, printer)
+        .into_diagnostic()
+        .context("failed to run wasm-opt")?;
+
+    if !status.success() {
+        miette::bail!("wasm-opt failed (see output above)");
+    }
+
+    // Step 5: Copy and rename output files
     fs_err::create_dir_all(&plugin_output)
         .into_diagnostic()
         .context("failed to create output directory")?;
 
-    // wasm-bindgen generates files like arborium_X_plugin.js and arborium_X_plugin_bg.wasm
-    // We need to rename them to grammar.js and grammar_bg.wasm for loader compatibility
-    let src_wasm = bindgen_out.join(format!("{}_bg.wasm", wasm_name));
+    // Use optimized WASM and generated JS
     let src_js = bindgen_out.join(format!("{}.js", wasm_name));
 
     let dest_wasm = plugin_output.join("grammar_bg.wasm");
     let dest_js = plugin_output.join("grammar.js");
 
-    // Copy and rename files
-    std::fs::copy(&src_wasm, &dest_wasm)
+    // Copy and rename files (use optimized WASM)
+    std::fs::copy(&optimized_wasm, &dest_wasm)
         .into_diagnostic()
-        .with_context(|| format!("failed to copy wasm file from {} to {}", src_wasm, dest_wasm))?;
+        .with_context(|| format!("failed to copy optimized wasm file from {} to {}", optimized_wasm, dest_wasm))?;
 
     std::fs::copy(&src_js, &dest_js)
         .into_diagnostic()

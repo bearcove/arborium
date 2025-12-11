@@ -747,7 +747,7 @@ dependencies = [
 
 [[package]]
 name = "arborium-highlight"
-version = "1.0.8"
+version = "1.0.11"
 dependencies = [
  "arborium-theme",
  "arborium-tree-sitter",
@@ -1264,7 +1264,7 @@ dependencies = [
 
 [[package]]
 name = "arborium-plugin-runtime"
-version = "1.0.8"
+version = "1.0.11"
 dependencies = [
  "arborium-tree-sitter",
  "arborium-wire",
@@ -1335,7 +1335,7 @@ dependencies = [
 
 [[package]]
 name = "arborium-python"
-version = "1.0.8"
+version = "1.0.11"
 dependencies = [
  "arborium-sysroot",
  "arborium-test-harness",
@@ -1349,7 +1349,6 @@ version = "0.1.0"
 dependencies = [
  "arborium-plugin-runtime",
  "arborium-python",
- "arborium-sysroot",
  "arborium-wire",
  "serde-wasm-bindgen",
  "wasm-bindgen",
@@ -1674,11 +1673,11 @@ dependencies = [
 
 [[package]]
 name = "arborium-sysroot"
-version = "1.0.8"
+version = "1.0.11"
 
 [[package]]
 name = "arborium-test-harness"
-version = "1.0.8"
+version = "1.0.11"
 dependencies = [
  "arborium-highlight",
  "arborium-theme",
@@ -1708,7 +1707,7 @@ dependencies = [
 
 [[package]]
 name = "arborium-theme"
-version = "1.0.8"
+version = "1.0.11"
 dependencies = [
  "toml",
 ]
@@ -1778,7 +1777,7 @@ dependencies = [
 
 [[package]]
 name = "arborium-tree-sitter"
-version = "1.0.8"
+version = "1.0.11"
 dependencies = [
  "arborium-sysroot",
  "cc",
@@ -1982,7 +1981,7 @@ dependencies = [
 
 [[package]]
 name = "arborium-wire"
-version = "1.0.8"
+version = "1.0.11"
 dependencies = [
  "facet",
  "facet-postcard",

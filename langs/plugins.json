@@ -1,14 +1,14 @@
 {
-  "generated_at": "2025-12-11T20:40:36.362878+00:00",
+  "generated_at": "2025-12-11T21:13:42.997579+00:00",
   "entries": [
     {
       "language": "python",
       "package": "@arborium/python",
-      "version": "1.0.8",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/python@1.0.8/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/python@1.0.8/grammar.core.wasm",
-      "local_js": "//tmp/test-plugin3/grammar.js",
-      "local_wasm": "//tmp/test-plugin3/grammar.core.wasm"
+      "version": "1.0.11",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/python@1.0.11/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/python@1.0.11/grammar_bg.wasm",
+      "local_js": "//tmp/test-plugin12/grammar.js",
+      "local_wasm": "//tmp/test-plugin12/grammar_bg.wasm"
     }
   ]
 }
