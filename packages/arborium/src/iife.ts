@@ -69,9 +69,18 @@ function isDocsRsEnvironment(): boolean {
 /** Map docs.rs theme names to Arborium theme IDs */
 function mapDocsRsTheme(value?: string): string | null {
   if (!value) return null;
-  if (value === 'light') return 'docsrs-light';
-  if (value === 'dark') return 'docsrs-dark';
-  if (value === 'ayu') return 'docsrs-ayu';
+
+  const themeMap: Record<string, string> = {
+    light: 'docsrs-light',
+    dark: 'docsrs-dark',
+    ayu: 'docsrs-ayu',
+  };
+
+  if (themeMap[value]) {
+    return themeMap[value];
+  }
+
+  // Unknown theme value: return as-is or fallback to null
   return null;
 }
 
