@@ -571,11 +571,15 @@ fn publish_single_crate(crate_dir: &Utf8Path, dry_run: bool) -> Result<CratePubl
 
     // For grammar crates, check if content hash matches published version
     // Skip publishing if nothing changed (grammar source files + tree-sitter version)
-    if !dry_run && is_grammar_crate(crate_dir) {
+    if is_grammar_crate(crate_dir) {
         match should_skip_grammar_publish(crate_dir, &name, &version) {
             Ok(true) => {
-                println!(" {}", "unchanged (hash match), skipping".dimmed());
-                return Ok(CratePublishResult::AlreadyExists);
+                if dry_run {
+                    println!(" {} {}", "[dry-run]".yellow(), "unchanged (hash match), would skip".dimmed());
+                } else {
+                    println!(" {}", "unchanged (hash match), skipping".dimmed());
+                    return Ok(CratePublishResult::AlreadyExists);
+                }
             }
             Ok(false) => {
                 // Hash different or no published version, continue to publish

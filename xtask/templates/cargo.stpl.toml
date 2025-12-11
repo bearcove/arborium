@@ -12,6 +12,17 @@ homepage = "https://github.com/bearcove/arborium"
 documentation = "https://docs.rs/<%= crate_name %>"
 keywords = ["tree-sitter", "<%= grammar_id %>", "syntax-highlighting", "<%= tag %>"]
 categories = ["parsing", "text-processing"]
+include = [
+    "src/**/*",
+    "grammar/**/*",
+    "queries/**/*",
+    "sample.*",
+    "samples/**/*",
+    "build.rs",
+    "Cargo.toml",
+    "README.md",
+    ".arborium-hash",
+]
 
 [lib]
 path = "src/lib.rs"
