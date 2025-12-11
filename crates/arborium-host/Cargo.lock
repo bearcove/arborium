@@ -4,14 +4,14 @@ version = 4
 
 [[package]]
 name = "arborium-highlight"
-version = "0.900.0"
+version = "1.0.1"
 dependencies = [
  "arborium-theme",
 ]
 
 [[package]]
 name = "arborium-host"
-version = "0.900.0"
+version = "1.0.1"
 dependencies = [
  "arborium-highlight",
  "js-sys",
@@ -22,7 +22,7 @@ dependencies = [
 
 [[package]]
 name = "arborium-theme"
-version = "0.900.0"
+version = "1.0.1"
 dependencies = [
  "toml",
 ]

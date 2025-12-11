@@ -151,6 +151,51 @@
     --tag-query: #8250df;
 }
 
+[data-theme="docsrs-light"] {
+    /* docs.rs Light */
+    --bg: #f5f5f5;          /* code background */
+    --fg: #1b1b1b;
+    --surface: #ffffff;
+    --accent: #4271ae;
+    --muted: #6d6d6d;
+    --tag-prog: #4271ae;     /* prelude/link blue */
+    --tag-markup: #718c00;   /* string green */
+    --tag-config: #ad7c37;   /* function/link amber */
+    --tag-data: #c82829;     /* literal red */
+    --tag-shell: #3e999f;    /* macro teal */
+    --tag-query: #8959a8;    /* keyword purple */
+}
+
+[data-theme="docsrs-dark"] {
+    /* docs.rs Dark */
+    --bg: #2a2a2a;          /* code background */
+    --fg: #dddddd;
+    --surface: #353535;
+    --accent: #769acb;
+    --muted: #8d8d8b;
+    --tag-prog: #769acb;     /* prelude/link blue */
+    --tag-markup: #83a300;   /* string green */
+    --tag-config: #2bab63;   /* function/link green */
+    --tag-data: #ee6868;     /* literal red */
+    --tag-shell: #3e999f;    /* macro teal */
+    --tag-query: #ab8ac1;    /* keyword purple */
+}
+
+[data-theme="docsrs-ayu"] {
+    /* docs.rs Ayu */
+    --bg: #191f26;          /* code background */
+    --fg: #c5c5c5;
+    --surface: #0f1419;
+    --accent: #ff7733;
+    --muted: #788797;
+    --tag-prog: #ff7733;     /* keyword orange */
+    --tag-markup: #b8cc52;   /* string green */
+    --tag-config: #fdd687;   /* function/link gold */
+    --tag-data: #ff7733;     /* literal orange */
+    --tag-shell: #69f2df;    /* prelude aqua */
+    --tag-query: #a37acc;    /* macro purple */
+}
+
 [data-theme="one-dark"] {
     /* One Dark Pro */
     --bg: #282c34;
@@ -2395,4 +2440,3 @@ footer a:hover {
         font-size: 0.8rem;
     }
 }
-
