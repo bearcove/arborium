@@ -1735,6 +1735,15 @@ fn plan_plugin_crate_files(
     // already compiles parser.c/scanner.c via its own build.rs. We don't need to
     // duplicate that here - the plugin just links to the grammar crate's static lib.
 
+    // Remove any stray build.rs file if it exists (leftover from old WIT setup)
+    let build_rs_path = npm_path.join("build.rs");
+    if build_rs_path.exists() {
+        plan.add(Operation::DeleteFile {
+            path: build_rs_path,
+            description: "Remove unnecessary build.rs (plugins don't build C code)".to_string(),
+        });
+    }
+
     Ok(plan)
 }
 

@@ -271,7 +271,6 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                 options.output_dir.as_deref(),
                 &version,
                 &wasm_pack,
-                None,
                 &printer,
             );
 
@@ -473,7 +472,6 @@ pub fn build_demo(repo_root: &Utf8Path, crates_dir: &Utf8Path, dev: bool) -> Res
     Ok(())
 }
 
-#[allow(clippy::too_many_arguments)]
 fn build_single_plugin(
     repo_root: &Utf8Path,
     registry: &CrateRegistry,
@@ -481,7 +479,6 @@ fn build_single_plugin(
     output_override: Option<&Utf8Path>,
     _version: &str,
     wasm_pack: &crate::tool::ToolPath,
-    _unused: Option<&crate::tool::ToolPath>,
     printer: &OutputPrinter,
 ) -> Result<()> {
     printer.print_line(grammar, "Building...", false);
@@ -544,42 +541,33 @@ fn build_single_plugin(
         .into_diagnostic()
         .context("failed to create output directory")?;
 
-    // Copy the wasm-pack output to the target directory
-    if plugin_output != plugin_source {
-        // Copy .wasm file
-        let src_wasm = pkg_dir.join(format!(
-            "arborium_{}_plugin_bg.wasm",
-            grammar.replace('-', "_")
-        ));
-        let dest_wasm = plugin_output.join(format!(
-            "arborium_{}_plugin_bg.wasm",
-            grammar.replace('-', "_")
-        ));
-        std::fs::copy(&src_wasm, &dest_wasm)
-            .into_diagnostic()
-            .context("failed to copy wasm file")?;
+    // wasm-bindgen generates files like arborium_X_plugin.js and arborium_X_plugin_bg.wasm
+    // We need to rename them to grammar.js and grammar_bg.wasm for loader compatibility
+    let wasm_bindgen_name = format!("arborium_{}_plugin", grammar.replace('-', "_"));
 
-        // Copy .js file
-        let src_js = pkg_dir.join(format!(
-            "arborium_{}_plugin.js",
-            grammar.replace('-', "_")
-        ));
-        let dest_js = plugin_output.join(format!(
-            "arborium_{}_plugin.js",
-            grammar.replace('-', "_")
-        ));
-        std::fs::copy(&src_js, &dest_js)
-            .into_diagnostic()
-            .context("failed to copy js file")?;
+    // Source files in pkg/
+    let src_wasm = pkg_dir.join(format!("{}_bg.wasm", wasm_bindgen_name));
+    let src_js = pkg_dir.join(format!("{}.js", wasm_bindgen_name));
+    let src_package_json = pkg_dir.join("package.json");
 
-        // Copy package.json
-        let src_package_json = pkg_dir.join("package.json");
-        if src_package_json.exists() {
-            let dest_package_json = plugin_output.join("package.json");
-            std::fs::copy(&src_package_json, &dest_package_json)
-                .into_diagnostic()
-                .context("failed to copy package.json")?;
-        }
+    // Destination files with standardized names
+    let dest_wasm = plugin_output.join("grammar_bg.wasm");
+    let dest_js = plugin_output.join("grammar.js");
+    let dest_package_json = plugin_output.join("package.json");
+
+    // Copy and rename files
+    std::fs::copy(&src_wasm, &dest_wasm)
+        .into_diagnostic()
+        .with_context(|| format!("failed to copy wasm file from {} to {}", src_wasm, dest_wasm))?;
+
+    std::fs::copy(&src_js, &dest_js)
+        .into_diagnostic()
+        .with_context(|| format!("failed to copy js file from {} to {}", src_js, dest_js))?;
+
+    if src_package_json.exists() {
+        std::fs::copy(&src_package_json, &dest_package_json)
+            .into_diagnostic()
+            .context("failed to copy package.json")?;
     }
 
     Ok(())
@@ -686,7 +674,7 @@ fn build_manifest(
                 .join("npm")
         };
         let local_js = local_root.join("grammar.js");
-        let local_wasm = local_root.join("grammar.core.wasm");
+        let local_wasm = local_root.join("grammar_bg.wasm");
 
         // Make local paths relative to repo root for serving
         let rel_js = local_js.strip_prefix(repo_root).unwrap_or(&local_js);
@@ -703,7 +691,7 @@ fn build_manifest(
             package: package.clone(),
             version: version.to_string(),
             cdn_js: format!("{}/grammar.js", cdn_base),
-            cdn_wasm: format!("{}/grammar.core.wasm", cdn_base),
+            cdn_wasm: format!("{}/grammar_bg.wasm", cdn_base),
             local_js: format!("/{}", rel_js),
             local_wasm: format!("/{}", rel_wasm),
         });

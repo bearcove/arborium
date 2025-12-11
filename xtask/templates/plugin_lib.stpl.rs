@@ -2,7 +2,7 @@
 
 use wasm_bindgen::prelude::*;
 use arborium_plugin_runtime::{HighlightConfig, PluginRuntime};
-use arborium_wire::{Edit, ParseResult as WireParseResult};
+use arborium_wire::ParseResult as WireParseResult;
 use std::cell::RefCell;
 
 thread_local! {
@@ -31,6 +31,13 @@ fn get_or_init_runtime() -> &'static RefCell<Option<PluginRuntime>> {
 #[wasm_bindgen]
 pub fn language_id() -> String {
     "<%= grammar_id %>".to_string()
+}
+
+/// Returns the list of languages this grammar can inject into (e.g., for embedded languages).
+/// Most grammars return an empty array.
+#[wasm_bindgen]
+pub fn injection_languages() -> Vec<String> {
+    vec![]
 }
 
 /// Creates a new parser session and returns its ID.
@@ -65,7 +72,7 @@ pub fn set_text(session: u32, text: &str) {
 
 /// Parses the text in a session and returns the result as a JS value.
 ///
-/// The result is a JSON-serialized ParseResult containing spans and injections.
+/// The result is a JavaScript object representation of ParseResult containing spans and injections.
 #[wasm_bindgen]
 pub fn parse(session: u32) -> Result<JsValue, JsValue> {
     let result: Result<WireParseResult, _> = get_or_init_runtime()
