@@ -25,15 +25,17 @@ pub enum Tool {
     WasmOpt,
     /// curl for HTTP requests
     Curl,
-    /// wasm-pack for building wasm-bindgen projects
+    /// wasm-pack for building wasm-bindgen projects (deprecated, use WasmBindgen)
     WasmPack,
+    /// wasm-bindgen CLI for generating JS bindings
+    WasmBindgen,
 }
 
 /// Tools needed for `cargo xtask gen` (generation).
 pub const GEN_TOOLS: &[Tool] = &[Tool::TreeSitter, Tool::Git];
 
 /// Tools needed for `cargo xtask build` (WASM plugins).
-pub const PLUGIN_TOOLS: &[Tool] = &[Tool::WasmPack];
+pub const PLUGIN_TOOLS: &[Tool] = &[Tool::WasmBindgen];
 
 /// Tools needed for `cargo xtask serve` (demo assets fetch).
 pub const SERVE_TOOLS: &[Tool] = &[Tool::Curl];
@@ -49,6 +51,7 @@ impl Tool {
             Tool::WasmOpt => "wasm-opt",
             Tool::Curl => "curl",
             Tool::WasmPack => "wasm-pack",
+            Tool::WasmBindgen => "wasm-bindgen",
         }
     }
 
@@ -62,6 +65,7 @@ impl Tool {
             Tool::WasmOpt => "wasm-opt",
             Tool::Curl => "curl",
             Tool::WasmPack => "wasm-pack",
+            Tool::WasmBindgen => "wasm-bindgen",
         }
     }
 
@@ -75,6 +79,7 @@ impl Tool {
             Tool::WasmOpt => Some("binaryen"),
             Tool::Curl => Some("curl"),
             Tool::WasmPack => None, // cargo install
+            Tool::WasmBindgen => None, // cargo install
         }
     }
 
@@ -116,6 +121,7 @@ impl Tool {
                 }
             }
             Tool::WasmPack => "cargo install wasm-pack",
+            Tool::WasmBindgen => "cargo install wasm-bindgen-cli",
         }
     }
 
@@ -129,6 +135,7 @@ impl Tool {
             Tool::WasmOpt => None, // binary release, not cargo
             Tool::Curl => None,    // system tool, not cargo
             Tool::WasmPack => Some("wasm-pack"),
+            Tool::WasmBindgen => Some("wasm-bindgen-cli"),
         }
     }
 
@@ -154,6 +161,7 @@ impl Tool {
             Tool::WasmOpt => "--version",
             Tool::Curl => "--version",
             Tool::WasmPack => "--version",
+            Tool::WasmBindgen => "--version",
         };
 
         let output = tool_path.command().arg(version_arg).output()?;

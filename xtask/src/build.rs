@@ -243,10 +243,10 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         options.jobs
     );
 
-    let wasm_pack = Tool::WasmPack
+    let wasm_bindgen = Tool::WasmBindgen
         .find()
         .into_diagnostic()
-        .context("wasm-pack not found")?;
+        .context("wasm-bindgen not found")?;
 
     let errors: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
     let failed = Arc::new(AtomicBool::new(false));
@@ -270,7 +270,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                 grammar,
                 options.output_dir.as_deref(),
                 &version,
-                &wasm_pack,
+                &wasm_bindgen,
                 &printer,
             );
 
@@ -478,7 +478,7 @@ fn build_single_plugin(
     grammar: &str,
     output_override: Option<&Utf8Path>,
     _version: &str,
-    wasm_pack: &crate::tool::ToolPath,
+    wasm_bindgen: &crate::tool::ToolPath,
     printer: &OutputPrinter,
 ) -> Result<()> {
     printer.print_line(grammar, "Building...", false);
@@ -521,39 +521,98 @@ fn build_single_plugin(
         );
     }
 
-    // Use wasm-pack to build the plugin
-    let mut cmd = wasm_pack.command();
-    cmd.args(["build", "--target", "web", "--release", "--out-dir", "pkg"])
+    // Step 1: Build with cargo +nightly using unstable features
+    // Note: We use nightly features for faster builds, but not -Zbuild-std
+    // because that would switch to wasm32-wasip1 which isn't compatible with wasm-bindgen
+    let mut cargo_cmd = Command::new("cargo");
+    cargo_cmd
+        .args([
+            "+nightly",
+            "build",
+            "--lib",
+            "--release",
+            "--target",
+            "wasm32-unknown-unknown",
+            "-Zunstable-options",
+            "-Zbuild-dir-new-layout",
+            "-Zbinary-dep-depinfo",
+            "-Zchecksum-freshness",
+        ])
         .current_dir(&plugin_source);
-    let status = run_streaming(cmd, grammar, printer)
+
+    let status = run_streaming(cargo_cmd, grammar, printer)
         .into_diagnostic()
-        .context("failed to run wasm-pack")?;
+        .context("failed to run cargo build")?;
 
     if !status.success() {
-        miette::bail!("wasm-pack build failed (see output above)");
+        miette::bail!("cargo build failed (see output above)");
     }
 
-    // wasm-pack outputs to pkg/ directory in the plugin source
-    let pkg_dir = plugin_source.join("pkg");
+    // Step 2: Locate the .wasm file
+    // The workspace uses a shared target directory at langs/target
+    let wasm_name = format!("arborium_{}_plugin", grammar.replace('-', "_"));
 
-    // Create output directory if it doesn't exist
+    // Try workspace target first (langs/target)
+    let workspace_target = repo_root.join("langs/target/wasm32-unknown-unknown/release");
+    let wasm_file = workspace_target.join(format!("{}.wasm", wasm_name));
+
+    // Fallback to local target if workspace target doesn't exist
+    let wasm_file = if wasm_file.exists() {
+        wasm_file
+    } else {
+        let local_target = plugin_source.join("target/wasm32-unknown-unknown/release");
+        let local_wasm = local_target.join(format!("{}.wasm", wasm_name));
+        if local_wasm.exists() {
+            local_wasm
+        } else {
+            miette::bail!(
+                "WASM file not found at {} or {}. Build may have failed.",
+                wasm_file,
+                local_wasm
+            );
+        }
+    };
+
+    // Step 3: Run wasm-bindgen to generate JS bindings
+    // Create a temporary output directory for wasm-bindgen
+    let bindgen_out = plugin_source.join("pkg");
+    fs_err::create_dir_all(&bindgen_out)
+        .into_diagnostic()
+        .context("failed to create bindgen output directory")?;
+
+    let mut bindgen_cmd = wasm_bindgen.command();
+    bindgen_cmd
+        .args([
+            "--target",
+            "web",
+            "--out-dir",
+            bindgen_out.as_str(),
+            "--out-name",
+            &wasm_name,
+            wasm_file.as_str(),
+        ])
+        .current_dir(&plugin_source);
+
+    let status = run_streaming(bindgen_cmd, grammar, printer)
+        .into_diagnostic()
+        .context("failed to run wasm-bindgen")?;
+
+    if !status.success() {
+        miette::bail!("wasm-bindgen failed (see output above)");
+    }
+
+    // Step 4: Copy and rename output files
     fs_err::create_dir_all(&plugin_output)
         .into_diagnostic()
         .context("failed to create output directory")?;
 
     // wasm-bindgen generates files like arborium_X_plugin.js and arborium_X_plugin_bg.wasm
     // We need to rename them to grammar.js and grammar_bg.wasm for loader compatibility
-    let wasm_bindgen_name = format!("arborium_{}_plugin", grammar.replace('-', "_"));
+    let src_wasm = bindgen_out.join(format!("{}_bg.wasm", wasm_name));
+    let src_js = bindgen_out.join(format!("{}.js", wasm_name));
 
-    // Source files in pkg/
-    let src_wasm = pkg_dir.join(format!("{}_bg.wasm", wasm_bindgen_name));
-    let src_js = pkg_dir.join(format!("{}.js", wasm_bindgen_name));
-    let src_package_json = pkg_dir.join("package.json");
-
-    // Destination files with standardized names
     let dest_wasm = plugin_output.join("grammar_bg.wasm");
     let dest_js = plugin_output.join("grammar.js");
-    let dest_package_json = plugin_output.join("package.json");
 
     // Copy and rename files
     std::fs::copy(&src_wasm, &dest_wasm)
@@ -564,11 +623,17 @@ fn build_single_plugin(
         .into_diagnostic()
         .with_context(|| format!("failed to copy js file from {} to {}", src_js, dest_js))?;
 
-    if src_package_json.exists() {
-        std::fs::copy(&src_package_json, &dest_package_json)
-            .into_diagnostic()
-            .context("failed to copy package.json")?;
-    }
+    // Generate package.json
+    let package_json_content = serde_json::json!({
+        "name": format!("@arborium/{}", grammar),
+        "version": _version,
+        "type": "module",
+        "files": ["grammar.js", "grammar_bg.wasm"]
+    });
+    let dest_package_json = plugin_output.join("package.json");
+    std::fs::write(&dest_package_json, serde_json::to_string_pretty(&package_json_content).unwrap())
+        .into_diagnostic()
+        .context("failed to write package.json")?;
 
     Ok(())
 }
