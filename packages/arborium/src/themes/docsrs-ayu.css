@@ -1,19 +1,14 @@
-/**
- * Docs.rs Ayu theme for Arborium
- * Matches the Ayu appearance offered by docs.rs
- */
-
-/* Code block styling */
+/* Docs.rs Ayu theme */
 pre:has(code[data-highlighted]) {
-  background-color: #191f26;
-  color: #e6e1cf;
+  background-color: #0f1419;
+  color: #c5c5c5;
   padding: 1em;
   border-radius: 6px;
   overflow-x: auto;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.9em;
   line-height: 1.5;
-  border: 1px solid #222832;
+  border: 1px solid #1f2733;
 }
 
 code[data-highlighted] {
@@ -21,104 +16,69 @@ code[data-highlighted] {
   font-family: inherit;
 }
 
-/* Keywords: if, else, for, while, fn, let, const, etc. */
-a-k {
-  color: #ff7733;
+  a-at { color: #e6e1cf; }
+  a-co { color: #ff7733; }
+  a-cb { color: #ff7733; }
+  a-fb { color: #69f2df; }
+  a-f { color: #fdd687; }
+  a-fm { color: #fdd687; }
+  a-k { color: #ff7733; }
+  a-kc { color: #ff7733; }
+  a-ko { color: #ff7733; }
+  a-kd { color: #ff7733; }
+  a-ke { color: #ff7733; }
+  a-kf { color: #ff7733; }
+  a-ki { color: #ff7733; }
+  a-kp { color: #ff7733; }
+  a-kr { color: #ff7733; }
+  a-kt { color: #ff7733; }
+  a-ky { color: #ff7733; }
+  a-o { color: #ff7733; }
+  a-pr { color: #69f2df; }
+  a-p { color: #c5c5c5; }
+  a-pb { color: #c5c5c5; }
+  a-pd { color: #c5c5c5; }
+  a-ps { color: #ff9011; }
+  a-s { color: #b8cc52; }
+  a-ss { color: #b8cc52; }
+  a-tg { color: #a37acc; }
+  a-td { color: #a37acc; }
+  a-te { color: #a37acc; }
+  a-t { color: #ffa0a5; }
+  a-tb { color: #69f2df; }
+  a-tq { color: #ffa0a5; }
+  a-v { color: #c5c5c5; }
+  a-vb { color: #36a3d9; }
+  a-vp { color: #c5c5c5; }
+  a-c { color: #788797; font-style: italic; }
+  a-cd { color: #788797; font-style: italic; }
+  a-m { color: #a37acc; }
+  a-l { color: #ff7733; }
+  a-da { color: #b8cc52; }
+  a-dd { color: #ff7733; }
+  a-n { color: #b8cc52; }
+  a-tl { color: #c5c5c5; }
+  a-em { font-style: italic; }
+  a-st { font-weight: bold; }
+  a-tu { color: #69f2df; text-decoration: underline; }
+  a-tr { color: #ffa0a5; }
+  a-se { color: #ff7733; }
+  a-tt { color: #ffa0a5; font-weight: bold; }
+  a-tx { text-decoration: line-through; }
+  a-sp { color: #c5c5c5; }
+  a-in { color: #ff7733; }
+  a-sc { color: #ff7733; }
+  a-rp { color: #ff7733; }
+  a-cn { color: #ff7733; }
+  a-ex { color: #ff7733; }
+  a-pp { color: #ff7733; }
+  a-ch { color: #b8cc52; }
+  a-cs { color: #b8cc52; }
+  a-vm { color: #c5c5c5; }
+  a-fd { color: #fdd687; }
+  a-tf { color: #ffa0a5; }
+  a-fc { color: #fdd687; }
+  a-km { color: #ff7733; }
+  a-dr { color: #ff7733; }
+  a-rx { color: #b8cc52; }
 }
-
-/* Strings */
-a-s {
-  color: #b8cc52;
-}
-
-/* Comments */
-a-c {
-  color: #5c6773;
-  font-style: italic;
-}
-
-/* Functions */
-a-f {
-  color: #ffb454;
-}
-
-/* Types */
-a-t {
-  color: #ffb454;
-}
-
-/* Variables */
-a-v {
-  color: #e6e1cf;
-}
-
-/* Built-in variables (self, this, etc.) */
-a-vb {
-  color: #ffb454;
-}
-
-/* Numbers */
-a-n {
-  color: #ffee99;
-}
-
-/* Operators */
-a-o {
-  color: #ff7733;
-}
-
-/* Punctuation (brackets, delimiters) */
-a-p {
-  color: #e6e1cf;
-}
-
-/* Constants */
-a-ct {
-  color: #ffee99;
-}
-
-/* Built-in constants (true, false, null, etc.) */
-a-cb {
-  color: #ffee99;
-}
-
-/* Properties */
-a-pr {
-  color: #ff7733;
-}
-
-/* Attributes (HTML/XML attributes, decorators) */
-a-at {
-  color: #ff7733;
-}
-
-/* Tags (HTML/XML tags) */
-a-tg {
-  color: #00568d;
-}
-
-/* Namespaces */
-a-ns {
-  color: #ffb454;
-}
-
-/* Labels */
-a-lb {
-  color: #00568d;
-}
-
-/* Escape sequences */
-a-e {
-  color: #b8cc52;
-}
-
-/* Embedded code */
-a-em {
-  color: #e6e1cf;
-}
-
-/* Unknown/fallback */
-a-x {
-  color: #e6e1cf;
-}
-

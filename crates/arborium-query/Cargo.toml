@@ -1,6 +1,6 @@
 [package]
 name = "arborium-query"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 description = "query grammar for arborium (tree-sitter bindings)"
 license = "MIT"
@@ -12,11 +12,11 @@ categories = ["parsing", "text-processing"]
 path = "src/lib.rs"
 
 [dependencies]
-arborium-tree-sitter = { version = "1.0.0", path = "../arborium-tree-sitter" }
-arborium-sysroot = { version = "1.0.0", path = "../arborium-sysroot" }
+arborium-tree-sitter = { version = "1.0.1", path = "../arborium-tree-sitter" }
+arborium-sysroot = { version = "1.0.1", path = "../arborium-sysroot" }
 
 [dev-dependencies]
-arborium-test-harness = { version = "1.0.0", path = "../arborium-test-harness" }
+arborium-test-harness = { version = "1.0.1", path = "../arborium-test-harness" }
 
 [build-dependencies]
 cc = { version = "1", features = ["parallel"] }

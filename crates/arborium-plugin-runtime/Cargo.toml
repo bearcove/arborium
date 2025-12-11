@@ -1,7 +1,7 @@
 [package]
 publish = false
 name = "arborium-plugin-runtime"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 description = "Runtime library for arborium grammar plugins"
 license = "MIT"
@@ -11,7 +11,7 @@ repository = "https://github.com/bearcove/arborium"
 default = []
 
 [dependencies]
-arborium-tree-sitter = { version = "1.0.0", path = "../arborium-tree-sitter" }
+arborium-tree-sitter = { version = "1.0.1", path = "../arborium-tree-sitter" }
 arborium-wire = { path = "../arborium-wire" }
 
 [dev-dependencies]

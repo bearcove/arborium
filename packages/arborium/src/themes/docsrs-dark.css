@@ -1,19 +1,14 @@
-/**
- * Docs.rs Dark theme for Arborium
- * Matches the dark appearance of docs.rs/rustdoc
- */
-
-/* Code block styling */
+/* Docs.rs Dark theme */
 pre:has(code[data-highlighted]) {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+  background-color: #353535;
+  color: #dddddd;
   padding: 1em;
   border-radius: 6px;
   overflow-x: auto;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.9em;
   line-height: 1.5;
-  border: 1px solid #2a2a2a;
+  border: 1px solid #444444;
 }
 
 code[data-highlighted] {
@@ -21,104 +16,69 @@ code[data-highlighted] {
   font-family: inherit;
 }
 
-/* Keywords: if, else, for, while, fn, let, const, etc. */
-a-k {
-  color: #ff7b72;
+  a-at { color: #ee6868; }
+  a-co { color: #ee6868; }
+  a-cb { color: #ee6868; }
+  a-fb { color: #769acb; }
+  a-f { color: #2bab63; }
+  a-fm { color: #2bab63; }
+  a-k { color: #ab8ac1; }
+  a-kc { color: #ab8ac1; }
+  a-ko { color: #ab8ac1; }
+  a-kd { color: #ab8ac1; }
+  a-ke { color: #ab8ac1; }
+  a-kf { color: #ab8ac1; }
+  a-ki { color: #ab8ac1; }
+  a-kp { color: #ab8ac1; }
+  a-kr { color: #ab8ac1; }
+  a-kt { color: #ab8ac1; }
+  a-ky { color: #ab8ac1; }
+  a-o { color: #ab8ac1; }
+  a-pr { color: #769acb; }
+  a-p { color: #dddddd; }
+  a-pb { color: #dddddd; }
+  a-pd { color: #dddddd; }
+  a-ps { color: #ff9011; }
+  a-s { color: #83a300; }
+  a-ss { color: #83a300; }
+  a-tg { color: #3e999f; }
+  a-td { color: #3e999f; }
+  a-te { color: #3e999f; }
+  a-t { color: #2dbfb8; }
+  a-tb { color: #769acb; }
+  a-tq { color: #2dbfb8; }
+  a-v { color: #dddddd; }
+  a-vb { color: #ee6868; }
+  a-vp { color: #dddddd; }
+  a-c { color: #8d8d8b; font-style: italic; }
+  a-cd { color: #8d8d8b; font-style: italic; }
+  a-m { color: #3e999f; }
+  a-l { color: #d97f26; }
+  a-da { color: #83a300; }
+  a-dd { color: #ee6868; }
+  a-n { color: #83a300; }
+  a-tl { color: #dddddd; }
+  a-em { font-style: italic; }
+  a-st { font-weight: bold; }
+  a-tu { color: #769acb; text-decoration: underline; }
+  a-tr { color: #2dbfb8; }
+  a-se { color: #d97f26; }
+  a-tt { color: #2dbfb8; font-weight: bold; }
+  a-tx { text-decoration: line-through; }
+  a-sp { color: #dddddd; }
+  a-in { color: #ab8ac1; }
+  a-sc { color: #ab8ac1; }
+  a-rp { color: #ab8ac1; }
+  a-cn { color: #ab8ac1; }
+  a-ex { color: #ab8ac1; }
+  a-pp { color: #ab8ac1; }
+  a-ch { color: #83a300; }
+  a-cs { color: #83a300; }
+  a-vm { color: #dddddd; }
+  a-fd { color: #2bab63; }
+  a-tf { color: #2dbfb8; }
+  a-fc { color: #2bab63; }
+  a-km { color: #ab8ac1; }
+  a-dr { color: #ab8ac1; }
+  a-rx { color: #83a300; }
 }
-
-/* Strings */
-a-s {
-  color: #a5d6ff;
-}
-
-/* Comments */
-a-c {
-  color: #7a7a7a;
-  font-style: italic;
-}
-
-/* Functions */
-a-f {
-  color: #d2a8ff;
-}
-
-/* Types */
-a-t {
-  color: #d2a8ff;
-}
-
-/* Variables */
-a-v {
-  color: #e0e0e0;
-}
-
-/* Built-in variables (self, this, etc.) */
-a-vb {
-  color: #79c0ff;
-}
-
-/* Numbers */
-a-n {
-  color: #79c0ff;
-}
-
-/* Operators */
-a-o {
-  color: #ff7b72;
-}
-
-/* Punctuation (brackets, delimiters) */
-a-p {
-  color: #e0e0e0;
-}
-
-/* Constants */
-a-ct {
-  color: #79c0ff;
-}
-
-/* Built-in constants (true, false, null, etc.) */
-a-cb {
-  color: #79c0ff;
-}
-
-/* Properties */
-a-pr {
-  color: #79c0ff;
-}
-
-/* Attributes (HTML/XML attributes, decorators) */
-a-at {
-  color: #79c0ff;
-}
-
-/* Tags (HTML/XML tags) */
-a-tg {
-  color: #7ee787;
-}
-
-/* Namespaces */
-a-ns {
-  color: #d2a8ff;
-}
-
-/* Labels */
-a-lb {
-  color: #d2a8ff;
-}
-
-/* Escape sequences */
-a-e {
-  color: #ff7b72;
-}
-
-/* Embedded code */
-a-em {
-  color: #e0e0e0;
-}
-
-/* Unknown/fallback */
-a-x {
-  color: #e0e0e0;
-}
-

@@ -1,6 +1,6 @@
 [package]
 name = "arborium-tree-sitter"
-version = "1.0.0"
+version = "1.0.1"
 description = "Rust bindings to the Tree-sitter parsing library (vendored for arborium WASM support)"
 authors = ["Max Brunsfeld <maxbrunsfeld@gmail.com>", "Amaan Qureshi <amaanq12@gmail.com>"]
 edition = "2021"
@@ -30,7 +30,7 @@ tree-sitter-language = { version = "0.1", path = "language" }
 streaming-iterator = "0.1.9"
 
 [dependencies.arborium-sysroot]
-version = "1.0.0"
+version = "1.0.1"
 path = "../arborium-sysroot"
 
 [build-dependencies]
