@@ -93,7 +93,6 @@ pub struct BuildOptions {
     pub grammars: Vec<String>,
     pub group: Option<String>,
     pub output_dir: Option<Utf8PathBuf>,
-    pub transpile: bool,
     pub jobs: usize,
 }
 
@@ -103,7 +102,6 @@ impl Default for BuildOptions {
             grammars: Vec::new(),
             group: None,
             output_dir: None,
-            transpile: true,
             jobs: 16,
         }
     }
