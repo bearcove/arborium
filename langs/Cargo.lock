@@ -1351,7 +1351,6 @@ dependencies = [
  "arborium-python",
  "arborium-sysroot",
  "arborium-wire",
- "cc",
  "serde-wasm-bindgen",
  "wasm-bindgen",
 ]
