@@ -1,61 +1,63 @@
 # Docs.rs Dark Theme
-# A dark theme matching docs.rs's dark mode appearance
+# Based on the actual docs.rs/rustdoc dark theme colors
+# Extended with additional token types while preserving the palette feel
 
-name = "Docs.rs Dark"
+name = "Docsrs Dark"
 variant = "dark"
-background = "#1a1a1a"
-foreground = "#e0e0e0"
+background = "#353535"
+foreground = "#dddddd"
 
 "attribute" = { fg = "attribute" }
-"constant" = { fg = "constant" }
-"function.builtin" = { fg = "function" }
+"constant" = { fg = "literal" }
+"function.builtin" = { fg = "prelude" }
 "function" = { fg = "function" }
 "keyword" = { fg = "keyword" }
-"operator" = { fg = "operator" }
-"property" = { fg = "property" }
-"punctuation" = { fg = "punctuation" }
-"punctuation.bracket" = { fg = "punctuation" }
-"punctuation.delimiter" = { fg = "punctuation" }
+"operator" = { fg = "keyword" }
+"property" = { fg = "prelude" }
+"punctuation" = { fg = "foreground" }
+"punctuation.bracket" = { fg = "foreground" }
+"punctuation.delimiter" = { fg = "foreground" }
 "string" = { fg = "string" }
 "string.special" = { fg = "string" }
-"tag" = { fg = "tag" }
+"tag" = { fg = "macro" }
 "type" = { fg = "type" }
-"type.builtin" = { fg = "type" }
+"type.builtin" = { fg = "prelude" }
 "variable" = { fg = "foreground" }
-"variable.builtin" = { fg = "builtin" }
+"variable.builtin" = { fg = "self" }
 "variable.parameter" = { fg = "foreground" }
 "comment" = { fg = "comment", modifiers = ["italic"] }
 "macro" = { fg = "macro" }
-"label" = { fg = "label" }
+"label" = { fg = "lifetime" }
 "diff.plus" = { fg = "string" }
-"diff.minus" = { fg = "error" }
+"diff.minus" = { fg = "literal" }
 "number" = { fg = "number" }
 "text.literal" = { fg = "foreground" }
 "text.emphasis" = { modifiers = ["italic"] }
 "text.strong" = { modifiers = ["bold"] }
-"text.uri" = { fg = "tag", modifiers = ["underlined"] }
+"text.uri" = { fg = "prelude", modifiers = ["underlined"] }
 "text.reference" = { fg = "type" }
-"string.escape" = { fg = "string" }
+"string.escape" = { fg = "lifetime" }
 "text.title" = { fg = "type", modifiers = ["bold"] }
-"punctuation.special" = { fg = "operator" }
+"punctuation.special" = { fg = "question" }
 "text.strikethrough" = { modifiers = ["crossed_out"] }
 "spell" = { fg = "foreground" }
 
 [palette]
-foreground = "#e0e0e0"
-comment = "#7a7a7a"
-keyword = "#ff7b72"
-attribute = "#79c0ff"
-constant = "#79c0ff"
-function = "#d2a8ff"
-property = "#79c0ff"
-punctuation = "#e0e0e0"
-string = "#a5d6ff"
-type = "#d2a8ff"
-builtin = "#79c0ff"
-macro = "#d2a8ff"
-label = "#d2a8ff"
-number = "#79c0ff"
-operator = "#ff7b72"
-error = "#ff9896"
-tag = "#7ee787"
+# Core docs.rs dark theme colors
+foreground = "#dddddd"
+keyword = "#ab8ac1"        # --code-highlight-kw-color
+keyword2 = "#769acb"       # --code-highlight-kw-2-color
+lifetime = "#d97f26"       # --code-highlight-lifetime-color
+prelude = "#769acb"        # --code-highlight-prelude-color
+self = "#ee6868"           # --code-highlight-self-color
+number = "#83a300"         # --code-highlight-number-color
+string = "#83a300"         # --code-highlight-string-color
+literal = "#ee6868"        # --code-highlight-literal-color
+attribute = "#ee6868"      # --code-highlight-attribute-color
+macro = "#3e999f"          # --code-highlight-macro-color
+question = "#ff9011"       # --code-highlight-question-mark-color
+comment = "#8d8d8b"        # --code-highlight-comment-color
+doc_comment = "#8ca375"    # --code-highlight-doc-comment-color
+# Extended colors (derived from docs.rs link colors)
+type = "#2dbfb8"           # --type-link-color
+function = "#2bab63"       # --function-link-color

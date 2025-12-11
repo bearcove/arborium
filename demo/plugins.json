@@ -866,5 +866,5 @@
       "local_wasm": "/langs/group-maple/yaml/npm/grammar.core.wasm"
     }
   ],
-  "dev_mode": true
+  "dev_mode": false
 }

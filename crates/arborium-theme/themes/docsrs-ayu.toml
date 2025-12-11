@@ -1,53 +1,62 @@
 # Docs.rs Ayu Theme
-# Based on the Ayu color scheme used by docs.rs
-# https://github.com/dempfi/ayu
+# Based on the actual docs.rs/rustdoc Ayu theme colors
+# Extended with additional token types while preserving the palette feel
 
-name = "Docs.rs Ayu"
+name = "Docsrs Ayu"
 variant = "dark"
-background = "#191f26"
-foreground = "#e6e1cf"
+background = "#0f1419"
+foreground = "#c5c5c5"
 
-"attribute" = { fg = "variable" }
-"constant" = { fg = "number" }
-"function.builtin" = { fg = "function" }
+"attribute" = { fg = "attribute" }
+"constant" = { fg = "literal" }
+"function.builtin" = { fg = "prelude" }
 "function" = { fg = "function" }
-"keyword" = { fg = "variable" }
-"operator" = { fg = "variable" }
-"property" = { fg = "variable" }
+"keyword" = { fg = "keyword" }
+"operator" = { fg = "keyword" }
+"property" = { fg = "prelude" }
 "punctuation" = { fg = "foreground" }
 "punctuation.bracket" = { fg = "foreground" }
 "punctuation.delimiter" = { fg = "foreground" }
 "string" = { fg = "string" }
 "string.special" = { fg = "string" }
-"tag" = { fg = "tag" }
-"type" = { fg = "function" }
-"type.builtin" = { fg = "function" }
-"variable" = { fg = "variable" }
-"variable.builtin" = { fg = "function" }
+"tag" = { fg = "macro" }
+"type" = { fg = "type" }
+"type.builtin" = { fg = "prelude" }
+"variable" = { fg = "foreground" }
+"variable.builtin" = { fg = "self" }
 "variable.parameter" = { fg = "foreground" }
 "comment" = { fg = "comment", modifiers = ["italic"] }
-"macro" = { fg = "function" }
-"label" = { fg = "tag" }
+"macro" = { fg = "macro" }
+"label" = { fg = "lifetime" }
 "diff.plus" = { fg = "string" }
-"diff.minus" = { fg = "error" }
+"diff.minus" = { fg = "literal" }
 "number" = { fg = "number" }
 "text.literal" = { fg = "foreground" }
 "text.emphasis" = { modifiers = ["italic"] }
 "text.strong" = { modifiers = ["bold"] }
-"text.uri" = { fg = "tag", modifiers = ["underlined"] }
-"text.reference" = { fg = "function" }
-"string.escape" = { fg = "string" }
-"text.title" = { fg = "function", modifiers = ["bold"] }
-"punctuation.special" = { fg = "variable" }
+"text.uri" = { fg = "prelude", modifiers = ["underlined"] }
+"text.reference" = { fg = "type" }
+"string.escape" = { fg = "lifetime" }
+"text.title" = { fg = "type", modifiers = ["bold"] }
+"punctuation.special" = { fg = "question" }
 "text.strikethrough" = { modifiers = ["crossed_out"] }
 "spell" = { fg = "foreground" }
 
 [palette]
-foreground = "#e6e1cf"
-comment = "#5c6773"
-variable = "#ff7733"
-number = "#ffee99"
-string = "#b8cc52"
-function = "#ffb454"
-tag = "#00568d"
-error = "#d96c75"
+# Core docs.rs Ayu theme colors
+foreground = "#c5c5c5"
+keyword = "#ff7733"        # --code-highlight-kw-color
+lifetime = "#ff7733"       # --code-highlight-lifetime-color
+prelude = "#69f2df"        # --code-highlight-prelude-color
+self = "#36a3d9"           # --code-highlight-self-color
+number = "#b8cc52"         # --code-highlight-number-color
+string = "#b8cc52"         # --code-highlight-string-color
+literal = "#ff7733"        # --code-highlight-literal-color
+attribute = "#e6e1cf"      # --code-highlight-attribute-color
+macro = "#a37acc"          # --code-highlight-macro-color
+question = "#ff9011"       # --code-highlight-question-mark-color
+comment = "#788797"        # --code-highlight-comment-color
+doc_comment = "#a1ac88"    # --code-highlight-doc-comment-color
+# Extended colors (derived from docs.rs link colors)
+type = "#ffa0a5"           # --type-link-color
+function = "#fdd687"       # --function-link-color

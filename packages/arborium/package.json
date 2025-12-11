@@ -17,11 +17,11 @@
     "./iife": {
       "import": "./dist/arborium.iife.js"
     },
-    "./themes/github-light.css": "./dist/themes/github-light.css",
-    "./themes/tokyo-night.css": "./dist/themes/tokyo-night.css",
-    "./themes/docsrs-light.css": "./dist/themes/docsrs-light.css",
+    "./themes/docsrs-ayu.css": "./dist/themes/docsrs-ayu.css",
     "./themes/docsrs-dark.css": "./dist/themes/docsrs-dark.css",
-    "./themes/docsrs-ayu.css": "./dist/themes/docsrs-ayu.css"
+    "./themes/docsrs-light.css": "./dist/themes/docsrs-light.css",
+    "./themes/github-light.css": "./dist/themes/github-light.css",
+    "./themes/tokyo-night.css": "./dist/themes/tokyo-night.css"
   },
   "files": [
     "dist"
@@ -55,5 +55,5 @@
   },
   "type": "module",
   "types": "./dist/arborium.d.ts",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
