@@ -24,7 +24,6 @@ thiserror = "2"
 structstruck = "0.4"
 rootcause = "0.10"
 tiny_http = "0.12"
-
 indicatif = "0.17"
 owo-colors = "4"
 rayon = "1.10"
@@ -46,3 +45,7 @@ arborium-theme = { path = "../crates/arborium-theme" }  # For theme CSS generati
 arborium = { version = "1", features = ["lang-html", "lang-toml", "lang-rust", "lang-javascript"] }
 toml_edit = "0.23.9"
 serde_json = "1.0.145"
+
+[package.metadata.facet-dev]
+generate-readmes = false
+
