@@ -20,9 +20,14 @@ pub fn write_version(repo_root: &Utf8Path, version: &str) -> Result<()> {
         .context("failed to write version.json")?;
 
     // Also update packages/arborium/package.json
-    update_main_npm_package_version(repo_root, version)?;
+    sync_main_npm_package_version(repo_root, version)?;
 
     Ok(())
+}
+
+/// Ensure packages/arborium/package.json matches the canonical version.
+pub fn sync_main_npm_package_version(repo_root: &Utf8Path, version: &str) -> Result<()> {
+    update_main_npm_package_version(repo_root, version)
 }
 
 /// Update the version in packages/arborium/package.json

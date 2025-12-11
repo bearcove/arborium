@@ -23,6 +23,7 @@ use std::collections::HashMap;
 use std::process::{Command, Stdio};
 
 use crate::types::CrateRegistry;
+use crate::version_store;
 
 /// Crates in the "pre" group - must be published before grammar crates.
 /// These are shared dependencies that grammar crates rely on.
@@ -118,7 +119,10 @@ pub fn publish_crates(repo_root: &Utf8Path, group: Option<&str>, dry_run: bool) 
                 "grammar crates".bold()
             );
             let sorted_crates = topological_sort_grammar_crates(repo_root, &langs_dir)?;
-            println!("    {} crates to publish in dependency order", sorted_crates.len());
+            println!(
+                "    {} crates to publish in dependency order",
+                sorted_crates.len()
+            );
             publish_crate_paths(&sorted_crates, dry_run)?;
             println!();
 
@@ -216,6 +220,11 @@ pub fn publish_npm(
         println!("{}", "  (dry run)".yellow());
     }
 
+    let canonical_version = version_store::read_version(repo_root)?;
+    ensure_release_version(&canonical_version)?;
+    version_store::sync_main_npm_package_version(repo_root, &canonical_version)?;
+    println!("  Using release version {}", canonical_version.cyan());
+
     let packages = match group {
         Some(group_name) => {
             println!("  Publishing {} group", group_name.cyan());
@@ -239,7 +248,7 @@ pub fn publish_npm(
     let mut failed = 0;
 
     for package_dir in &packages {
-        match publish_single_npm_package(package_dir, dry_run)? {
+        match publish_single_npm_package(package_dir, &canonical_version, dry_run)? {
             NpmPublishResult::Published => published += 1,
             NpmPublishResult::AlreadyExists => skipped += 1,
             NpmPublishResult::Failed => failed += 1,
@@ -251,7 +260,7 @@ pub fn publish_npm(
         let main_package = repo_root.join("packages/arborium");
         if main_package.exists() && main_package.join("package.json").exists() {
             println!("  Publishing main package @arborium/arborium...");
-            match publish_single_npm_package(&main_package, dry_run)? {
+            match publish_single_npm_package(&main_package, &canonical_version, dry_run)? {
                 NpmPublishResult::Published => published += 1,
                 NpmPublishResult::AlreadyExists => skipped += 1,
                 NpmPublishResult::Failed => failed += 1,
@@ -280,6 +289,17 @@ pub fn publish_npm(
 
     if failed > 0 {
         return Err(miette::miette!("{} packages failed to publish", failed));
+    }
+
+    Ok(())
+}
+
+fn ensure_release_version(version: &str) -> Result<()> {
+    if version.ends_with("-dev") || version.ends_with("-test") {
+        return Err(miette::miette!(
+            "Refusing to publish development version {} - run `cargo xtask gen --version <x.y.z>` first",
+            version
+        ));
     }
 
     Ok(())
@@ -368,7 +388,10 @@ fn read_crate_info(crate_dir: &Utf8Path) -> Result<(String, String)> {
 /// Extract a string value from TOML [package] section.
 fn extract_toml_string(toml_str: &str, key: &str) -> Option<String> {
     let doc: toml_edit::DocumentMut = toml_str.parse().ok()?;
-    doc.get("package")?.get(key)?.as_str().map(|s| s.to_string())
+    doc.get("package")?
+        .get(key)?
+        .as_str()
+        .map(|s| s.to_string())
 }
 
 /// Check if a crate version already exists on crates.io.
@@ -652,10 +675,7 @@ fn topological_sort_grammar_crates(
 
     // Check for cycles
     if sorted.len() != crate_paths.len() {
-        let remaining: Vec<_> = crate_paths
-            .keys()
-            .filter(|k| !sorted.contains(k))
-            .collect();
+        let remaining: Vec<_> = crate_paths.keys().filter(|k| !sorted.contains(k)).collect();
         return Err(miette::miette!(
             "Dependency cycle detected involving: {:?}",
             remaining
@@ -816,8 +836,21 @@ fn npm_version_exists(package_name: &str, version: &str) -> Result<bool> {
 }
 
 /// Publish a single npm package.
-fn publish_single_npm_package(package_dir: &Utf8Path, dry_run: bool) -> Result<NpmPublishResult> {
+fn publish_single_npm_package(
+    package_dir: &Utf8Path,
+    expected_version: &str,
+    dry_run: bool,
+) -> Result<NpmPublishResult> {
     let (name, version) = read_package_info(package_dir)?;
+
+    if version != expected_version {
+        return Err(miette::miette!(
+            "{} has version {} but version.json expects {}",
+            package_dir.join("package.json"),
+            version,
+            expected_version
+        ));
+    }
 
     print!("  {} {}@{}...", "→".blue(), name, version);
 
