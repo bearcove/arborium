@@ -38,6 +38,9 @@ tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 sailfish = "0.10"
 rand = "0.9.2"
 toml = "0.8"
+walkdir = "2"
+flate2 = "1"
+tar = "0.4"
 
 arborium-theme = { path = "../crates/arborium-theme" }  # For theme CSS generation
 arborium = { version = "1", features = ["lang-html", "lang-toml", "lang-rust", "lang-javascript"] }

@@ -1,6 +1,6 @@
 [package]
 name = "arborium-sysroot"
-version = "1.0.11"
+version = "1.1.11"
 edition = "2024"
 description = "WASM sysroot for arborium grammar crates"
 license = "MIT"

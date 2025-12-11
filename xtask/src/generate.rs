@@ -1563,6 +1563,21 @@ fn plan_crate_files_only(
         }
     }
 
+    // Generate .arborium-hash file for publish change detection
+    // This hash includes all grammar source files + tree-sitter CLI version
+    // It's used during publishing to skip re-publishing if nothing changed
+    let hash_file_path = crate_path.join(".arborium-hash");
+    let new_hash = crate::publish::compute_grammar_hash(crate_path)
+        .unwrap_or_else(|_| "error-computing-hash".to_string());
+
+    plan_file_update(
+        &mut plan,
+        &hash_file_path,
+        new_hash,
+        ".arborium-hash (for publish change detection)",
+        mode,
+    )?;
+
     Ok(plan)
 }
 

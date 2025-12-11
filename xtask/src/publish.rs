@@ -24,6 +24,7 @@ use std::process::{Command, Stdio};
 
 use crate::types::CrateRegistry;
 use crate::version_store;
+use crate::tool::Tool;
 
 /// Crates in the "pre" group - must be published before grammar crates.
 /// These are shared dependencies that grammar crates rely on.
@@ -51,6 +52,136 @@ const POST_CRATES: &[&str] = &[
     // Depends on arborium
     "crates/miette-arborium",
 ];
+
+/// Name of the file that contains the grammar content hash
+const HASH_FILE: &str = ".arborium-hash";
+
+/// Check if a crate directory is a grammar crate (has grammar/ subdirectory).
+fn is_grammar_crate(crate_dir: &Utf8Path) -> bool {
+    crate_dir.join("grammar").exists()
+}
+
+/// Check if we should skip publishing a grammar crate by comparing content hashes.
+///
+/// Returns:
+/// - Ok(true) if published version exists and hash matches (should skip)
+/// - Ok(false) if hash differs or no published version (should publish)
+/// - Err if couldn't check (e.g., download failed)
+fn should_skip_grammar_publish(
+    crate_dir: &Utf8Path,
+    name: &str,
+    version: &str,
+) -> Result<bool> {
+    // Compute current hash
+    let current_hash = compute_grammar_hash(crate_dir)?;
+
+    // Try to get hash from published version
+    match get_published_crate_hash(name, version) {
+        Ok(Some(published_hash)) => {
+            // Compare hashes
+            Ok(current_hash == published_hash)
+        }
+        Ok(None) => {
+            // No published version or no hash file in it
+            Ok(false)
+        }
+        Err(_) => {
+            // Couldn't download/check, assume we should publish
+            Ok(false)
+        }
+    }
+}
+
+/// Download a published crate and extract its .arborium-hash file if present.
+fn get_published_crate_hash(name: &str, version: &str) -> Result<Option<String>> {
+    // Download the .crate file from crates.io
+    let url = format!("https://crates.io/api/v1/crates/{}/{}/download", name, version);
+
+    let temp_dir = tempfile::tempdir().into_diagnostic()?;
+    let crate_file = temp_dir.path().join("crate.tar.gz");
+
+    // Download
+    let output = std::process::Command::new("curl")
+        .args(["-sL", "-o", crate_file.to_str().unwrap(), &url])
+        .output()
+        .into_diagnostic()?;
+
+    if !output.status.success() {
+        return Ok(None); // Crate doesn't exist yet
+    }
+
+    // Extract .arborium-hash from tar.gz
+    let tar_gz = std::fs::File::open(&crate_file).into_diagnostic()?;
+    let tar = flate2::read::GzDecoder::new(tar_gz);
+    let mut archive = tar::Archive::new(tar);
+
+    for entry in archive.entries().into_diagnostic()? {
+        let mut entry = entry.into_diagnostic()?;
+        let path = entry.path().into_diagnostic()?;
+
+        // The file will be in the archive like: {name}-{version}/.arborium-hash
+        if path.file_name() == Some(std::ffi::OsStr::new(HASH_FILE)) {
+            let mut contents = String::new();
+            std::io::Read::read_to_string(&mut entry, &mut contents).into_diagnostic()?;
+            return Ok(Some(contents.trim().to_string()));
+        }
+    }
+
+    Ok(None) // No hash file found
+}
+
+/// Compute hash of grammar crate contents for change detection.
+///
+/// Hashes:
+/// - All source files in grammar/ directory (parser.c, scanner.c, grammar.json, etc.)
+/// - tree-sitter CLI version
+///
+/// Returns hex-encoded blake3 hash.
+pub fn compute_grammar_hash(crate_dir: &Utf8Path) -> Result<String> {
+    let mut hasher = blake3::Hasher::new();
+
+    // Hash tree-sitter CLI version
+    let ts_version = Tool::TreeSitter
+        .get_version()
+        .unwrap_or_else(|_| "unknown".to_string());
+    hasher.update(b"tree-sitter-version:");
+    hasher.update(ts_version.as_bytes());
+    hasher.update(b"\n");
+
+    // Hash all files in grammar/ directory in sorted order
+    let grammar_dir = crate_dir.join("grammar");
+    if !grammar_dir.exists() {
+        miette::bail!("grammar/ directory not found in {}", crate_dir);
+    }
+
+    let mut files = Vec::new();
+    for entry in walkdir::WalkDir::new(&grammar_dir)
+        .sort_by_file_name()
+        .into_iter()
+        .filter_map(|e| e.ok())
+    {
+        if entry.file_type().is_file() {
+            files.push(entry.path().to_path_buf());
+        }
+    }
+
+    for file_path in files {
+        let relative = file_path.strip_prefix(&grammar_dir).unwrap();
+        let contents = std::fs::read(&file_path)
+            .into_diagnostic()
+            .with_context(|| format!("Failed to read {}", file_path.display()))?;
+
+        // Hash file path and contents
+        hasher.update(b"file:");
+        hasher.update(relative.to_string_lossy().as_bytes());
+        hasher.update(b"\n");
+        hasher.update(&contents);
+        hasher.update(b"\n");
+    }
+
+    let hash = hasher.finalize();
+    Ok(hash.to_hex().to_string())
+}
 
 /// Publish crates to crates.io.
 ///
@@ -437,6 +568,24 @@ fn publish_single_crate(crate_dir: &Utf8Path, dry_run: bool) -> Result<CratePubl
     };
 
     print!("  {} {}@{}...", "→".blue(), name, display_version);
+
+    // For grammar crates, check if content hash matches published version
+    // Skip publishing if nothing changed (grammar source files + tree-sitter version)
+    if !dry_run && is_grammar_crate(crate_dir) {
+        match should_skip_grammar_publish(crate_dir, &name, &version) {
+            Ok(true) => {
+                println!(" {}", "unchanged (hash match), skipping".dimmed());
+                return Ok(CratePublishResult::AlreadyExists);
+            }
+            Ok(false) => {
+                // Hash different or no published version, continue to publish
+            }
+            Err(e) => {
+                // Couldn't check hash, continue with normal version check
+                eprintln!(" {} checking hash: {}", "warning".yellow(), e);
+            }
+        }
+    }
 
     // Check if version already exists (skip for workspace versions - cargo publish will handle it)
     if !dry_run && version != "workspace" {

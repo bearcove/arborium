@@ -1,6 +1,6 @@
 [package]
 name = "arborium"
-version = "1.0.11"
+version = "1.1.11"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/bearcove/arborium"
@@ -21,12 +21,12 @@ all-languages = [
 lang-python = ["dep:arborium-python"]
 
 [dependencies]
-arborium-tree-sitter = { version = "1.0.11", path = "../arborium-tree-sitter" }
-arborium-theme = { version = "1.0.11", path = "../arborium-theme" }
-arborium-highlight = { version = "1.0.11", path = "../arborium-highlight", features = ["tree-sitter"] }
+arborium-tree-sitter = { version = "1.1.11", path = "../arborium-tree-sitter" }
+arborium-theme = { version = "1.1.11", path = "../arborium-theme" }
+arborium-highlight = { version = "1.1.11", path = "../arborium-highlight", features = ["tree-sitter"] }
 
 # Optional grammar dependencies
-arborium-python = { version = "1.0.11", path = "../../langs/group-hazel/python/crate", optional = true }
+arborium-python = { version = "1.1.11", path = "../../langs/group-hazel/python/crate", optional = true }
 
 [dev-dependencies]
 indoc = "2"
