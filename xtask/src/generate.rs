@@ -753,10 +753,7 @@ fn generate_readme(crate_name: &str, config: &crate::types::CrateConfig) -> Stri
 }
 
 /// Generate plugin Cargo.toml content.
-fn generate_plugin_cargo_toml(
-    grammar_id: &str,
-    grammar_crate_name: &str,
-) -> String {
+fn generate_plugin_cargo_toml(grammar_id: &str, grammar_crate_name: &str) -> String {
     // Paths relative to npm/:
     // npm/ is at langs/group-*/lang/npm/
     // crate/ is at langs/group-*/lang/crate/ (sibling)
@@ -1819,13 +1816,16 @@ all-languages = [
         content.push_str(&format!("lang-{} = [\"dep:{}\"]\n", grammar_id, name));
     }
 
+    // Extract major version (e.g., "1.2.3" -> "1")
+    let major_version = version.split('.').next().unwrap_or("1");
+
     // Dependencies section
     content.push_str(&format!(
         r#"
 [dependencies]
-arborium-tree-sitter = {{ version = "{version}", path = "../arborium-tree-sitter" }}
-arborium-theme = {{ version = "{version}", path = "../arborium-theme" }}
-arborium-highlight = {{ version = "{version}", path = "../arborium-highlight", features = ["tree-sitter"] }}
+arborium-tree-sitter = {{ version = "{major_version}", path = "../arborium-tree-sitter" }}
+arborium-theme = {{ version = "{major_version}", path = "../arborium-theme" }}
+arborium-highlight = {{ version = "{major_version}", path = "../arborium-highlight", features = ["tree-sitter"] }}
 
 # Optional grammar dependencies
 "#
@@ -1838,7 +1838,7 @@ arborium-highlight = {{ version = "{version}", path = "../arborium-highlight", f
             .unwrap_or(crate_path);
         content.push_str(&format!(
             "{} = {{ version = \"{}\", path = \"../../{}\", optional = true }}\n",
-            name, version, rel_path
+            name, major_version, rel_path
         ));
     }
 
