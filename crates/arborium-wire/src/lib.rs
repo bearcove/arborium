@@ -1,8 +1,8 @@
 //! Wire protocol types for arborium WASM plugins.
 //!
 //! This crate defines the data structures used for communication between
-//! the arborium host and grammar plugins. All types use facet-postcard
-//! for serialization (no serde on the WASM path).
+//! the arborium host and grammar plugins. All types use serde for
+//! serialization with wasm-bindgen.
 //!
 //! # Wire Version
 //!
@@ -16,7 +16,6 @@ extern crate alloc;
 
 use alloc::string::String;
 use alloc::vec::Vec;
-use facet::Facet;
 use serde::{Deserialize, Serialize};
 
 /// Wire protocol version.
@@ -26,7 +25,7 @@ use serde::{Deserialize, Serialize};
 pub const WIRE_VERSION: u32 = 1;
 
 /// A span of highlighted text with a capture name.
-#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Span {
     /// Byte offset where the span starts.
     pub start: u32,
@@ -37,7 +36,7 @@ pub struct Span {
 }
 
 /// An injection point where another language should be parsed.
-#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Injection {
     /// Byte offset where the injection starts.
     pub start: u32,
@@ -50,7 +49,7 @@ pub struct Injection {
 }
 
 /// Result of parsing text.
-#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ParseResult {
     /// Highlighted spans from this parse.
     pub spans: Vec<Span>,
@@ -69,7 +68,7 @@ impl ParseResult {
 }
 
 /// An edit to apply to the text (for incremental parsing).
-#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Edit {
     /// Byte offset where the edit starts.
     pub start_byte: u32,
@@ -92,7 +91,7 @@ pub struct Edit {
 }
 
 /// Error that can occur during parsing.
-#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ParseError {
     /// Error message.
     pub message: String,
@@ -113,51 +112,4 @@ impl ParseError {
 /// backwards-compatible versions.
 pub fn is_version_compatible(version: u32) -> bool {
     version == WIRE_VERSION
-}
-
-/// Re-export facet-postcard for consumers.
-pub use facet_postcard;
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use alloc::string::ToString;
-    use alloc::vec;
-
-    #[test]
-    fn test_parse_result_roundtrip() {
-        let result = ParseResult {
-            spans: vec![
-                Span {
-                    start: 0,
-                    end: 5,
-                    capture: "keyword".to_string(),
-                },
-                Span {
-                    start: 6,
-                    end: 10,
-                    capture: "function".to_string(),
-                },
-            ],
-            injections: vec![Injection {
-                start: 20,
-                end: 50,
-                language: "javascript".to_string(),
-                include_children: false,
-            }],
-        };
-
-        // Round-trip through facet-postcard
-        let bytes = facet_postcard::to_vec(&result).expect("serialize");
-        let decoded: ParseResult = facet_postcard::from_bytes(&bytes).expect("deserialize");
-
-        assert_eq!(result, decoded);
-    }
-
-    #[test]
-    fn test_version_compatibility() {
-        assert!(is_version_compatible(WIRE_VERSION));
-        assert!(!is_version_compatible(WIRE_VERSION + 1));
-        assert!(!is_version_compatible(0));
-    }
 }

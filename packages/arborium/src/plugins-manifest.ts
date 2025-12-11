@@ -2,5 +2,5 @@
 
 /** All available languages */
 export const availableLanguages: string[] = [
-  "python",
+  "dart",
 ];

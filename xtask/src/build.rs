@@ -482,19 +482,52 @@ pub fn build_host(repo_root: &Utf8Path) -> Result<()> {
 }
 
 pub fn clean_plugins(repo_root: &Utf8Path, _output_dir: &str) -> Result<()> {
-    // Clean the workspace target directory (langs/target/)
-    // With a workspace, all crates share this single target directory
+    // Clean all individual plugin crate target directories
     let langs_dir = repo_root.join("langs");
-    let workspace_target = langs_dir.join("target");
 
-    if workspace_target.exists() {
-        std::fs::remove_dir_all(&workspace_target)
+    let mut cleaned_count = 0;
+
+    // Find all plugin npm/ directories and clean their target and artifact directories
+    for group_entry in std::fs::read_dir(&langs_dir)
+        .into_diagnostic()
+        .context("failed to read langs dir")?
+    {
+        let group_entry = group_entry.into_diagnostic()?;
+        let group_path = group_entry.path();
+
+        if !group_path.is_dir() || !group_entry.file_name().to_string_lossy().starts_with("group-") {
+            continue;
+        }
+
+        for lang_entry in std::fs::read_dir(&group_path)
             .into_diagnostic()
-            .context(format!("failed to remove {}", workspace_target))?;
+            .context(format!("failed to read {:?}", group_path))?
+        {
+            let lang_entry = lang_entry.into_diagnostic()?;
+            let npm_dir = lang_entry.path().join("npm");
+            let target_dir = npm_dir.join("target");
+            let artifact_dir = npm_dir.join("artifact-out");
+
+            if target_dir.exists() {
+                std::fs::remove_dir_all(&target_dir)
+                    .into_diagnostic()
+                    .context(format!("failed to remove {:?}", target_dir))?;
+                cleaned_count += 1;
+            }
+
+            if artifact_dir.exists() {
+                std::fs::remove_dir_all(&artifact_dir)
+                    .into_diagnostic()
+                    .context(format!("failed to remove {:?}", artifact_dir))?;
+            }
+        }
+    }
+
+    if cleaned_count > 0 {
         println!(
-            "{} Cleaned workspace target directory: {}",
+            "{} Cleaned {} plugin target directories",
             "✓".green(),
-            workspace_target
+            cleaned_count
         );
     } else {
         println!("{} Nothing to clean", "○".dimmed());
@@ -588,6 +621,13 @@ fn build_single_plugin(
     // Step 1: Build with cargo +nightly using unstable features
     // Note: We use nightly features for faster builds, but not -Zbuild-std
     // because that would switch to wasm32-wasip1 which isn't compatible with wasm-bindgen
+
+    // Create a unique artifact directory for this plugin to avoid locking
+    let artifact_dir = plugin_source.join("artifact-out");
+    std::fs::create_dir_all(&artifact_dir)
+        .into_diagnostic()
+        .context("failed to create artifact directory")?;
+
     let mut cargo_cmd = Command::new("cargo");
     cargo_cmd
         .args([
@@ -601,6 +641,8 @@ fn build_single_plugin(
             "-Zbuild-dir-new-layout",
             "-Zbinary-dep-depinfo",
             "-Zchecksum-freshness",
+            "--artifact-dir",
+            artifact_dir.as_str(),
         ])
         .current_dir(&plugin_source);
 
@@ -612,30 +654,17 @@ fn build_single_plugin(
         miette::bail!("cargo build failed (see output above)");
     }
 
-    // Step 2: Locate the .wasm file
-    // The workspace uses a shared target directory at langs/target
+    // Step 2: Locate the .wasm file in the artifact directory
+    // With -Zartifact-dir, the final artifact is placed directly in artifact-out/
     let wasm_name = format!("arborium_{}_plugin", grammar.replace('-', "_"));
+    let wasm_file = artifact_dir.join(format!("{}.wasm", wasm_name));
 
-    // Try workspace target first (langs/target)
-    let workspace_target = repo_root.join("langs/target/wasm32-unknown-unknown/release");
-    let wasm_file = workspace_target.join(format!("{}.wasm", wasm_name));
-
-    // Fallback to local target if workspace target doesn't exist
-    let wasm_file = if wasm_file.exists() {
-        wasm_file
-    } else {
-        let local_target = plugin_source.join("target/wasm32-unknown-unknown/release");
-        let local_wasm = local_target.join(format!("{}.wasm", wasm_name));
-        if local_wasm.exists() {
-            local_wasm
-        } else {
-            miette::bail!(
-                "WASM file not found at {} or {}. Build may have failed.",
-                wasm_file,
-                local_wasm
-            );
-        }
-    };
+    if !wasm_file.exists() {
+        miette::bail!(
+            "WASM file not found at {}. Build may have failed.",
+            wasm_file
+        );
+    }
 
     // Step 3: Run wasm-bindgen to generate JS bindings
     // Create a temporary output directory for wasm-bindgen
