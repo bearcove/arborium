@@ -610,7 +610,11 @@ fn main() {
                         std::process::exit(1);
                     }
                 }
-                PublishAction::Npm { dry_run, group, output } => {
+                PublishAction::Npm {
+                    dry_run,
+                    group,
+                    output,
+                } => {
                     let packages_dir = output
                         .map(|o| repo_root.join(o))
                         .unwrap_or_else(|| repo_root.join("langs"));

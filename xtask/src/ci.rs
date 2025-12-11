@@ -556,8 +556,11 @@ echo "No env imports found - WASM modules are browser-compatible""#,
                 checkout(),
                 download_grammar_sources(),
                 extract_grammar_sources(),
-                Step::run("Build docs", "cargo doc --manifest-path crates/arborium/Cargo.toml --no-deps")
-                    .with_env([("RUSTDOCFLAGS", "-D warnings")]),
+                Step::run(
+                    "Build docs",
+                    "cargo doc --manifest-path crates/arborium/Cargo.toml --no-deps",
+                )
+                .with_env([("RUSTDOCFLAGS", "-D warnings")]),
             ]),
     );
 
@@ -618,10 +621,15 @@ echo "No env imports found - WASM modules are browser-compatible""#,
                 download_grammar_sources(),
                 extract_grammar_sources(),
                 // Exchange OIDC token for crates.io access token
-                Step::uses("Authenticate with crates.io", "rust-lang/crates-io-auth-action@v1")
-                    .with_id("crates-io-auth"),
-                Step::run("Publish to crates.io", "arborium-xtask publish crates")
-                    .with_env([("CARGO_REGISTRY_TOKEN", "${{ steps.crates-io-auth.outputs.token }}")]),
+                Step::uses(
+                    "Authenticate with crates.io",
+                    "rust-lang/crates-io-auth-action@v1",
+                )
+                .with_id("crates-io-auth"),
+                Step::run("Publish to crates.io", "arborium-xtask publish crates").with_env([(
+                    "CARGO_REGISTRY_TOKEN",
+                    "${{ steps.crates-io-auth.outputs.token }}",
+                )]),
             ]),
     );
 
@@ -658,7 +666,10 @@ echo "No env imports found - WASM modules are browser-compatible""#,
                 "List plugins",
                 "find dist/plugins -name 'package.json' | head -20",
             ),
-            Step::run("Publish to npm", "arborium-xtask publish npm -o dist/plugins")
+            Step::run(
+                "Publish to npm",
+                "arborium-xtask publish npm -o dist/plugins",
+            )
             .with_env([("NODE_AUTH_TOKEN", "${{ secrets.NPM_TOKEN }}")]),
         ]);
 

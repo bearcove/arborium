@@ -28,10 +28,7 @@ pub fn deploy_website(repo_root: &Utf8Path, version: &str, dry_run: bool) -> Res
         .map_err(|e| miette::miette!("failed to load crate registry: {}", e))?;
 
     // Build the demo site first (generates index.html, app.generated.js, etc.)
-    println!(
-        "  {} Building demo site...",
-        "•".dimmed()
-    );
+    println!("  {} Building demo site...", "•".dimmed());
     build_static_site(&crates_dir, false)
         .map_err(|e| miette::miette!("failed to build static site: {}", e))?;
 

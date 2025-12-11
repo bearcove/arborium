@@ -557,7 +557,10 @@ fn plan_copy_dir_recursive(
     if !dest_dir.exists() {
         plan.add(Operation::CreateDir {
             path: dest_dir.to_owned(),
-            description: format!("Create {}", dest_dir.file_name().unwrap_or(dest_dir.as_str())),
+            description: format!(
+                "Create {}",
+                dest_dir.file_name().unwrap_or(dest_dir.as_str())
+            ),
         });
     }
 
@@ -574,7 +577,13 @@ fn plan_copy_dir_recursive(
             // Copy file
             let content = fs::read_to_string(&src_path)?;
             let dest_path = dest_dir.join(file_name);
-            plan_file_update(plan, &dest_path, content, &format!("samples/{}", file_name), mode)?;
+            plan_file_update(
+                plan,
+                &dest_path,
+                content,
+                &format!("samples/{}", file_name),
+                mode,
+            )?;
         }
     }
 
@@ -820,7 +829,6 @@ fn generate_plugin_readme(
         .render_once()
         .expect("PluginReadmeTemplate render failed")
 }
-
 
 // Data structures for temp directory preparation (shared by validation & generation)
 struct PreparedTemp {
@@ -1417,7 +1425,12 @@ fn plan_crate_files_only(
 
     // Generate src/lib.rs
     let lib_rs_path = crate_path.join("src/lib.rs");
-    let new_lib_rs = generate_lib_rs(&crate_state.name, def_path, config, highlight_prepends.lib_prepends);
+    let new_lib_rs = generate_lib_rs(
+        &crate_state.name,
+        def_path,
+        config,
+        highlight_prepends.lib_prepends,
+    );
 
     if lib_rs_path.exists() {
         let old_content = fs::read_to_string(&lib_rs_path)?;
@@ -1517,7 +1530,13 @@ fn plan_crate_files_only(
     if def_kdl.exists() {
         let kdl_content = fs::read_to_string(&def_kdl)?;
         let crate_kdl = crate_path.join("arborium.kdl");
-        plan_file_update(&mut plan, &crate_kdl, kdl_content, "arborium.kdl for tests", mode)?;
+        plan_file_update(
+            &mut plan,
+            &crate_kdl,
+            kdl_content,
+            "arborium.kdl for tests",
+            mode,
+        )?;
 
         // Copy samples directory if it exists
         let def_samples = def_path.join("samples");
@@ -1534,7 +1553,13 @@ fn plan_crate_files_only(
                 if name.starts_with("sample.") && path.is_file() {
                     let content = fs::read_to_string(&path)?;
                     let dest = crate_path.join(name);
-                    plan_file_update(&mut plan, &dest, content, &format!("{} for tests", name), mode)?;
+                    plan_file_update(
+                        &mut plan,
+                        &dest,
+                        content,
+                        &format!("{} for tests", name),
+                        mode,
+                    )?;
                 }
             }
         }
@@ -1888,9 +1913,9 @@ fn update_cargo_toml_version(
     }
 
     let old_content = fs::read_to_string(cargo_toml_path)?;
-    let mut doc: DocumentMut = old_content
-        .parse()
-        .map_err(|e| std::io::Error::other(format!("Failed to parse {}: {}", cargo_toml_path, e)))?;
+    let mut doc: DocumentMut = old_content.parse().map_err(|e| {
+        std::io::Error::other(format!("Failed to parse {}: {}", cargo_toml_path, e))
+    })?;
 
     // Update package version
     if let Some(package) = doc.get_mut("package") {
@@ -1961,14 +1986,26 @@ fn plan_docsrs_demo_crate(prepared: &PreparedStructures, mode: PlanMode) -> Resu
     let new_cargo_toml = DocsrsDemoCargoTomlTemplate { version }
         .render_once()
         .expect("DocsrsDemoCargoTomlTemplate render failed");
-    plan_file_update(&mut plan, &cargo_toml_path, new_cargo_toml, "Cargo.toml", mode)?;
+    plan_file_update(
+        &mut plan,
+        &cargo_toml_path,
+        new_cargo_toml,
+        "Cargo.toml",
+        mode,
+    )?;
 
     // Generate arborium-header.html
     let header_path = demo_path.join("arborium-header.html");
     let new_header = DocsrsDemoHeaderTemplate { version }
         .render_once()
         .expect("DocsrsDemoHeaderTemplate render failed");
-    plan_file_update(&mut plan, &header_path, new_header, "arborium-header.html", mode)?;
+    plan_file_update(
+        &mut plan,
+        &header_path,
+        new_header,
+        "arborium-header.html",
+        mode,
+    )?;
 
     // Generate src/lib.rs
     let src_dir = demo_path.join("src");
