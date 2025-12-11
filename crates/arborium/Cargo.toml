@@ -14,11 +14,11 @@ default = []
 
 # All languages
 all-languages = [
-    "lang-javascript",
+    "lang-python",
 ]
 
 # Individual language features
-lang-javascript = ["dep:arborium-javascript"]
+lang-python = ["dep:arborium-python"]
 
 [dependencies]
 arborium-tree-sitter = { version = "1.0.8", path = "../arborium-tree-sitter" }
@@ -26,7 +26,7 @@ arborium-theme = { version = "1.0.8", path = "../arborium-theme" }
 arborium-highlight = { version = "1.0.8", path = "../arborium-highlight", features = ["tree-sitter"] }
 
 # Optional grammar dependencies
-arborium-javascript = { version = "1.0.8", path = "../../langs/group-acorn/javascript/crate", optional = true }
+arborium-python = { version = "1.0.8", path = "../../langs/group-hazel/python/crate", optional = true }
 
 [dev-dependencies]
 indoc = "2"

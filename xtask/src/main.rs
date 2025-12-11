@@ -115,10 +115,6 @@ enum Command {
         #[facet(args::named, args::short = 'j', default)]
         jobs: Option<usize>,
 
-        /// Skip jco transpile step
-        #[facet(args::named, default)]
-        no_transpile: bool,
-
         /// Dev mode: use local plugin paths in demo instead of CDN
         #[facet(args::named, default)]
         dev: bool,
@@ -376,7 +372,6 @@ fn main() {
             group,
             output,
             jobs,
-            no_transpile,
             dev,
         } => {
             let repo_root = util::find_repo_root().expect("Could not find repo root");
@@ -398,7 +393,6 @@ fn main() {
                 grammars,
                 group,
                 output_dir: output.map(camino::Utf8PathBuf::from),
-                transpile: !no_transpile,
                 jobs: jobs.unwrap_or(16),
             };
             if let Err(e) = build::build_plugins(&repo_root, &options) {
@@ -492,7 +486,6 @@ fn main() {
                 grammars: grammar_ids.clone(),
                 group: None,
                 output_dir: Some(camino::Utf8PathBuf::from("dist/plugins-e2e")),
-                transpile: true,
                 jobs: 4,
             };
 

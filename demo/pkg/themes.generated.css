@@ -1670,7 +1670,7 @@
   a-rx { color: #af5f00; }
 }
 
-[data-theme="docsrs-light"] {
+[data-theme="rustdoc-light"] {
   background: #f5f5f5;
   color: #24292e;
   a-at { color: #c82829; }
@@ -1740,7 +1740,7 @@
   a-rx { color: #718c00; }
 }
 
-[data-theme="docsrs-dark"] {
+[data-theme="rustdoc-dark"] {
   background: #2a2a2a;
   color: #dddddd;
   a-at { color: #ee6868; }
@@ -1810,7 +1810,7 @@
   a-rx { color: #83a300; }
 }
 
-[data-theme="docsrs-ayu"] {
+[data-theme="rustdoc-ayu"] {
   background: #191f26;
   color: #c5c5c5;
   a-at { color: #e6e1cf; }
