@@ -61,27 +61,29 @@ function getConfigFromScript(): Partial<ArboriumConfig> {
   return config;
 }
 
-/** Detect if we're in a light theme environment */
-function detectLightTheme(): boolean {
-  // Check docs.rs/rustdoc theme attribute
-  const docsRsTheme = document.documentElement.dataset.docsRsTheme;
+/** Detect the current theme from docs.rs or environment */
+function getAutoTheme(): string {
+  // Check for docs.rs theme (data-theme attribute with values: light, dark, ayu)
+  const docsRsTheme = document.documentElement.dataset.theme;
   if (docsRsTheme) {
-    return docsRsTheme === 'light';
+    if (docsRsTheme === 'light') {
+      return 'docsrs-light';
+    } else if (docsRsTheme === 'dark') {
+      return 'docsrs-dark';
+    } else if (docsRsTheme === 'ayu') {
+      return 'docsrs-ayu';
+    }
   }
 
-  // Check rustdoc theme attribute (local rustdoc)
-  const rustdocTheme = document.documentElement.dataset.theme;
-  if (rustdocTheme) {
-    return rustdocTheme === 'light';
+  // Check for legacy docs.rs theme attribute (data-docs-rs-theme)
+  const legacyDocsRsTheme = document.documentElement.dataset.docsRsTheme;
+  if (legacyDocsRsTheme) {
+    return legacyDocsRsTheme === 'light' ? 'docsrs-light' : 'docsrs-dark';
   }
 
   // Fall back to system preference
-  return window.matchMedia('(prefers-color-scheme: light)').matches;
-}
-
-/** Get the appropriate theme based on environment */
-function getAutoTheme(): string {
-  return detectLightTheme() ? 'github-light' : 'tokyo-night';
+  const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  return isLight ? 'github-light' : 'tokyo-night';
 }
 
 /** Get merged configuration from all sources and apply to loader */
@@ -362,9 +364,10 @@ function watchThemeChanges(): void {
   // Watch for docs.rs/rustdoc theme attribute changes
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
+      // Monitor both data-theme (docs.rs) and data-docs-rs-theme (legacy)
       if (
-        mutation.attributeName === 'data-docs-rs-theme' ||
-        mutation.attributeName === 'data-theme'
+        mutation.attributeName === 'data-theme' ||
+        mutation.attributeName === 'data-docs-rs-theme'
       ) {
         onThemeChange();
         break;

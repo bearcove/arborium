@@ -1,0 +1,61 @@
+# Docs.rs Dark Theme
+# A dark theme matching docs.rs's dark mode appearance
+
+name = "Docs.rs Dark"
+variant = "dark"
+background = "#1a1a1a"
+foreground = "#e0e0e0"
+
+"attribute" = { fg = "attribute" }
+"constant" = { fg = "constant" }
+"function.builtin" = { fg = "function" }
+"function" = { fg = "function" }
+"keyword" = { fg = "keyword" }
+"operator" = { fg = "operator" }
+"property" = { fg = "property" }
+"punctuation" = { fg = "punctuation" }
+"punctuation.bracket" = { fg = "punctuation" }
+"punctuation.delimiter" = { fg = "punctuation" }
+"string" = { fg = "string" }
+"string.special" = { fg = "string" }
+"tag" = { fg = "tag" }
+"type" = { fg = "type" }
+"type.builtin" = { fg = "type" }
+"variable" = { fg = "foreground" }
+"variable.builtin" = { fg = "builtin" }
+"variable.parameter" = { fg = "foreground" }
+"comment" = { fg = "comment", modifiers = ["italic"] }
+"macro" = { fg = "macro" }
+"label" = { fg = "label" }
+"diff.plus" = { fg = "string" }
+"diff.minus" = { fg = "error" }
+"number" = { fg = "number" }
+"text.literal" = { fg = "foreground" }
+"text.emphasis" = { modifiers = ["italic"] }
+"text.strong" = { modifiers = ["bold"] }
+"text.uri" = { fg = "tag", modifiers = ["underlined"] }
+"text.reference" = { fg = "type" }
+"string.escape" = { fg = "string" }
+"text.title" = { fg = "type", modifiers = ["bold"] }
+"punctuation.special" = { fg = "operator" }
+"text.strikethrough" = { modifiers = ["crossed_out"] }
+"spell" = { fg = "foreground" }
+
+[palette]
+foreground = "#e0e0e0"
+comment = "#7a7a7a"
+keyword = "#ff7b72"
+attribute = "#79c0ff"
+constant = "#79c0ff"
+function = "#d2a8ff"
+property = "#79c0ff"
+punctuation = "#e0e0e0"
+string = "#a5d6ff"
+type = "#d2a8ff"
+builtin = "#79c0ff"
+macro = "#d2a8ff"
+label = "#d2a8ff"
+number = "#79c0ff"
+operator = "#ff7b72"
+error = "#ff9896"
+tag = "#7ee787"

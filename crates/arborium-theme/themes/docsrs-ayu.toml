@@ -1,0 +1,53 @@
+# Docs.rs Ayu Theme
+# Based on the Ayu color scheme used by docs.rs
+# https://github.com/dempfi/ayu
+
+name = "Docs.rs Ayu"
+variant = "dark"
+background = "#191f26"
+foreground = "#e6e1cf"
+
+"attribute" = { fg = "variable" }
+"constant" = { fg = "number" }
+"function.builtin" = { fg = "function" }
+"function" = { fg = "function" }
+"keyword" = { fg = "variable" }
+"operator" = { fg = "variable" }
+"property" = { fg = "variable" }
+"punctuation" = { fg = "foreground" }
+"punctuation.bracket" = { fg = "foreground" }
+"punctuation.delimiter" = { fg = "foreground" }
+"string" = { fg = "string" }
+"string.special" = { fg = "string" }
+"tag" = { fg = "tag" }
+"type" = { fg = "function" }
+"type.builtin" = { fg = "function" }
+"variable" = { fg = "variable" }
+"variable.builtin" = { fg = "function" }
+"variable.parameter" = { fg = "foreground" }
+"comment" = { fg = "comment", modifiers = ["italic"] }
+"macro" = { fg = "function" }
+"label" = { fg = "tag" }
+"diff.plus" = { fg = "string" }
+"diff.minus" = { fg = "error" }
+"number" = { fg = "number" }
+"text.literal" = { fg = "foreground" }
+"text.emphasis" = { modifiers = ["italic"] }
+"text.strong" = { modifiers = ["bold"] }
+"text.uri" = { fg = "tag", modifiers = ["underlined"] }
+"text.reference" = { fg = "function" }
+"string.escape" = { fg = "string" }
+"text.title" = { fg = "function", modifiers = ["bold"] }
+"punctuation.special" = { fg = "variable" }
+"text.strikethrough" = { modifiers = ["crossed_out"] }
+"spell" = { fg = "foreground" }
+
+[palette]
+foreground = "#e6e1cf"
+comment = "#5c6773"
+variable = "#ff7733"
+number = "#ffee99"
+string = "#b8cc52"
+function = "#ffb454"
+tag = "#00568d"
+error = "#d96c75"
