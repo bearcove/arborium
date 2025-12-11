@@ -1995,6 +1995,10 @@ const themeInfo = {
     // GitHub
     'github-dark': { name: 'GitHub Dark', variant: 'dark' },
     'github-light': { name: 'GitHub Light', variant: 'light' },
+    // Docs.rs
+    'docsrs-light': { name: 'Docs.rs Light', variant: 'light' },
+    'docsrs-dark': { name: 'Docs.rs Dark', variant: 'dark' },
+    'docsrs-ayu': { name: 'Docs.rs Ayu', variant: 'dark' },
     // Light themes
     'gruvbox-light': { name: 'Gruvbox Light', variant: 'light' },
     'alabaster': { name: 'Alabaster', variant: 'light' },
@@ -2021,6 +2025,10 @@ const themePairs = {
     // GitHub
     'github-dark': 'github-light',
     'github-light': 'github-dark',
+    // Docs.rs
+    'docsrs-light': 'docsrs-dark',
+    'docsrs-dark': 'docsrs-light',
+    'docsrs-ayu': 'docsrs-light',
     // Gruvbox
     'gruvbox-dark': 'gruvbox-light',
     'gruvbox-light': 'gruvbox-dark',
