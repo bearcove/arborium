@@ -17,6 +17,7 @@ extern crate alloc;
 use alloc::string::String;
 use alloc::vec::Vec;
 use facet::Facet;
+use serde::{Deserialize, Serialize};
 
 /// Wire protocol version.
 ///
@@ -25,7 +26,7 @@ use facet::Facet;
 pub const WIRE_VERSION: u32 = 1;
 
 /// A span of highlighted text with a capture name.
-#[derive(Debug, Clone, PartialEq, Eq, Facet)]
+#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
 pub struct Span {
     /// Byte offset where the span starts.
     pub start: u32,
@@ -36,7 +37,7 @@ pub struct Span {
 }
 
 /// An injection point where another language should be parsed.
-#[derive(Debug, Clone, PartialEq, Eq, Facet)]
+#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
 pub struct Injection {
     /// Byte offset where the injection starts.
     pub start: u32,
@@ -49,7 +50,7 @@ pub struct Injection {
 }
 
 /// Result of parsing text.
-#[derive(Debug, Clone, PartialEq, Eq, Facet)]
+#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
 pub struct ParseResult {
     /// Highlighted spans from this parse.
     pub spans: Vec<Span>,
@@ -68,7 +69,7 @@ impl ParseResult {
 }
 
 /// An edit to apply to the text (for incremental parsing).
-#[derive(Debug, Clone, PartialEq, Eq, Facet)]
+#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
 pub struct Edit {
     /// Byte offset where the edit starts.
     pub start_byte: u32,
@@ -91,7 +92,7 @@ pub struct Edit {
 }
 
 /// Error that can occur during parsing.
-#[derive(Debug, Clone, PartialEq, Eq, Facet)]
+#[derive(Debug, Clone, PartialEq, Eq, Facet, Serialize, Deserialize)]
 pub struct ParseError {
     /// Error message.
     pub message: String,

@@ -244,20 +244,10 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         options.jobs
     );
 
-    let cargo_component = Tool::CargoComponent
+    let wasm_pack = Tool::WasmPack
         .find()
         .into_diagnostic()
-        .context("cargo-component not found")?;
-    let jco = if options.transpile {
-        Some(
-            Tool::Jco
-                .find()
-                .into_diagnostic()
-                .context("jco not found")?,
-        )
-    } else {
-        None
-    };
+        .context("wasm-pack not found")?;
 
     let errors: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
     let printer = OutputPrinter::new();
@@ -275,8 +265,8 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                 grammar,
                 options.output_dir.as_deref(),
                 &version,
-                &cargo_component,
-                jco.as_ref(),
+                &wasm_pack,
+                None,
                 &printer,
             );
 
@@ -484,8 +474,8 @@ fn build_single_plugin(
     grammar: &str,
     output_override: Option<&Utf8Path>,
     _version: &str,
-    cargo_component: &crate::tool::ToolPath,
-    jco: Option<&crate::tool::ToolPath>,
+    wasm_pack: &crate::tool::ToolPath,
+    _unused: Option<&crate::tool::ToolPath>,
     printer: &OutputPrinter,
 ) -> Result<()> {
     printer.print_line(grammar, "Building...", false);
@@ -528,62 +518,56 @@ fn build_single_plugin(
         );
     }
 
-    let mut cmd = cargo_component.command();
-    cmd.args(["build", "--release", "--target", "wasm32-wasip1"])
+    // Use wasm-pack to build the plugin
+    let mut cmd = wasm_pack.command();
+    cmd.args(["build", "--target", "web", "--release", "--out-dir", "pkg"])
         .current_dir(&plugin_source);
     let status = run_streaming(cmd, grammar, printer)
         .into_diagnostic()
-        .context("failed to run cargo-component")?;
+        .context("failed to run wasm-pack")?;
 
     if !status.success() {
-        miette::bail!("cargo-component build failed (see output above)");
+        miette::bail!("wasm-pack build failed (see output above)");
     }
 
-    // With a workspace, Cargo outputs to the workspace root's target directory (langs/target/)
-    // not each crate's individual target directory
-    let langs_dir = repo_root.join("langs");
-    let wasm_file = langs_dir.join("target/wasm32-wasip1/release").join(format!(
-        "arborium_{}_plugin.wasm",
-        grammar.replace('-', "_")
-    ));
-
-    if !wasm_file.exists() {
-        miette::bail!("expected wasm file not found: {}", wasm_file);
-    }
+    // wasm-pack outputs to pkg/ directory in the plugin source
+    let pkg_dir = plugin_source.join("pkg");
 
     // Create output directory if it doesn't exist
     fs_err::create_dir_all(&plugin_output)
         .into_diagnostic()
         .context("failed to create output directory")?;
 
-    let dest_wasm = plugin_output.join("grammar.wasm");
-    std::fs::copy(&wasm_file, &dest_wasm)
-        .into_diagnostic()
-        .context("failed to copy wasm file")?;
-
-    if let Some(jco) = jco {
-        let mut cmd = jco.command();
-        cmd.args([
-            "transpile",
-            dest_wasm.as_str(),
-            "--instantiation",
-            "async",
-            "--quiet",
-            "-o",
-            plugin_output.as_str(),
-        ]);
-        let status = run_streaming(cmd, grammar, printer)
-            .into_diagnostic()
-            .context("failed to run jco")?;
-
-        if !status.success() {
-            miette::bail!("jco transpile failed (see output above)");
-        }
-    }
-
-    // Copy package.json to output directory if different from source
+    // Copy the wasm-pack output to the target directory
     if plugin_output != plugin_source {
-        let src_package_json = plugin_source.join("package.json");
+        // Copy .wasm file
+        let src_wasm = pkg_dir.join(format!(
+            "arborium_{}_plugin_bg.wasm",
+            grammar.replace('-', "_")
+        ));
+        let dest_wasm = plugin_output.join(format!(
+            "arborium_{}_plugin_bg.wasm",
+            grammar.replace('-', "_")
+        ));
+        std::fs::copy(&src_wasm, &dest_wasm)
+            .into_diagnostic()
+            .context("failed to copy wasm file")?;
+
+        // Copy .js file
+        let src_js = pkg_dir.join(format!(
+            "arborium_{}_plugin.js",
+            grammar.replace('-', "_")
+        ));
+        let dest_js = plugin_output.join(format!(
+            "arborium_{}_plugin.js",
+            grammar.replace('-', "_")
+        ));
+        std::fs::copy(&src_js, &dest_js)
+            .into_diagnostic()
+            .context("failed to copy js file")?;
+
+        // Copy package.json
+        let src_package_json = pkg_dir.join("package.json");
         if src_package_json.exists() {
             let dest_package_json = plugin_output.join("package.json");
             std::fs::copy(&src_package_json, &dest_package_json)

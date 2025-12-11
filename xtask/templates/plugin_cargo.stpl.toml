@@ -16,11 +16,5 @@ cc = "1"
 arborium-plugin-runtime = { path = "<%= shared_rel %>/arborium-plugin-runtime" }
 arborium-wire = { path = "<%= shared_rel %>/arborium-wire" }
 "<%= grammar_crate_name %>" = { path = "<%= crate_rel %>" }
-wit-bindgen = "0.36"
-
-[package.metadata.component]
-package = "arborium:grammar"
-
-[package.metadata.component.target]
-world = "grammar-plugin"
-path = "<%= wit_path %>"
+wasm-bindgen = "0.2"
+serde-wasm-bindgen = "0.6"

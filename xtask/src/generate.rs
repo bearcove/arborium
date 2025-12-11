@@ -103,7 +103,6 @@ struct PluginCargoTomlTemplate<'a> {
     grammar_crate_name: &'a str,
     crate_rel: &'a str,
     shared_rel: &'a str,
-    wit_path: &'a str,
 }
 
 #[derive(TemplateSimple)]
@@ -111,7 +110,6 @@ struct PluginCargoTomlTemplate<'a> {
 struct PluginLibRsTemplate<'a> {
     grammar_id: &'a str,
     grammar_crate_name_snake: &'a str,
-    wit_path: &'a str,
 }
 
 #[derive(TemplateSimple)]
@@ -759,7 +757,6 @@ fn generate_readme(crate_name: &str, config: &crate::types::CrateConfig) -> Stri
 fn generate_plugin_cargo_toml(
     grammar_id: &str,
     grammar_crate_name: &str,
-    wit_path: &str,
 ) -> String {
     // Paths relative to npm/:
     // npm/ is at langs/group-*/lang/npm/
@@ -774,7 +771,6 @@ fn generate_plugin_cargo_toml(
         grammar_crate_name,
         crate_rel,
         shared_rel,
-        wit_path,
     };
     template
         .render_once()
@@ -782,13 +778,12 @@ fn generate_plugin_cargo_toml(
 }
 
 /// Generate plugin src/lib.rs content.
-fn generate_plugin_lib_rs(grammar_id: &str, grammar_crate_name: &str, wit_path: &str) -> String {
+fn generate_plugin_lib_rs(grammar_id: &str, grammar_crate_name: &str) -> String {
     let grammar_crate_name_snake = grammar_crate_name.replace('-', "_");
 
     let template = PluginLibRsTemplate {
         grammar_id,
         grammar_crate_name_snake: &grammar_crate_name_snake,
-        wit_path,
     };
     template
         .render_once()
@@ -1604,9 +1599,6 @@ fn plan_plugin_crate_files(
         .parent()
         .expect("crate_path should have parent");
     let npm_path = lang_dir.join("npm");
-    // Use relative path from npm/ to wit/grammar.wit
-    // npm/ is at langs/group-*/lang/npm/, so: npm -> lang -> group-* -> langs -> repo-root -> wit
-    let wit_path = "../../../../wit/grammar.wit";
 
     // Ensure npm directory exists
     if !npm_path.exists() {
@@ -1618,7 +1610,7 @@ fn plan_plugin_crate_files(
 
     // Generate npm/Cargo.toml
     let cargo_toml_path = npm_path.join("Cargo.toml");
-    let new_cargo_toml = generate_plugin_cargo_toml(grammar_id, crate_name, wit_path);
+    let new_cargo_toml = generate_plugin_cargo_toml(grammar_id, crate_name);
 
     if cargo_toml_path.exists() {
         let old_content = fs::read_to_string(&cargo_toml_path)?;
@@ -1640,7 +1632,7 @@ fn plan_plugin_crate_files(
 
     // Generate npm/src/lib.rs
     let lib_rs_path = npm_path.join("src/lib.rs");
-    let new_lib_rs = generate_plugin_lib_rs(grammar_id, crate_name, wit_path);
+    let new_lib_rs = generate_plugin_lib_rs(grammar_id, crate_name);
 
     if lib_rs_path.exists() {
         let old_content = fs::read_to_string(&lib_rs_path)?;

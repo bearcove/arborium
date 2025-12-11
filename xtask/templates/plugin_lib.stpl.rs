@@ -1,17 +1,9 @@
 //! <%= grammar_id %> grammar plugin for arborium.
-#![allow(unsafe_op_in_unsafe_fn)]
 
-wit_bindgen::generate!({
-    world: "grammar-plugin",
-    path: "<%= wit_path %>",
-});
-
+use wasm_bindgen::prelude::*;
 use arborium_plugin_runtime::{HighlightConfig, PluginRuntime};
-use arborium_wire::Edit as WireEdit;
+use arborium_wire::{Edit, ParseResult as WireParseResult};
 use std::cell::RefCell;
-
-// Import the generated types
-use arborium::grammar::types::{Edit, Injection, ParseError, ParseResult, Span};
 
 thread_local! {
     static RUNTIME: RefCell<Option<PluginRuntime>> = const { RefCell::new(None) };
@@ -35,102 +27,66 @@ fn get_or_init_runtime() -> &'static RefCell<Option<PluginRuntime>> {
     })
 }
 
-struct PluginImpl;
+/// Returns the language ID for this grammar plugin.
+#[wasm_bindgen]
+pub fn language_id() -> String {
+    "<%= grammar_id %>".to_string()
+}
 
-impl exports::arborium::grammar::plugin::Guest for PluginImpl {
-    fn language_id() -> String {
-        "<%= grammar_id %>".to_string()
-    }
+/// Creates a new parser session and returns its ID.
+#[wasm_bindgen]
+pub fn create_session() -> u32 {
+    get_or_init_runtime()
+        .borrow_mut()
+        .as_mut()
+        .expect("runtime not initialized")
+        .create_session()
+}
 
-    fn injection_languages() -> Vec<String> {
-        Vec::new()
-    }
+/// Frees a parser session.
+#[wasm_bindgen]
+pub fn free_session(session: u32) {
+    get_or_init_runtime()
+        .borrow_mut()
+        .as_mut()
+        .expect("runtime not initialized")
+        .free_session(session);
+}
 
-    fn create_session() -> u32 {
-        get_or_init_runtime()
-            .borrow_mut()
-            .as_mut()
-            .expect("runtime not initialized")
-            .create_session()
-    }
+/// Sets the text for a parser session.
+#[wasm_bindgen]
+pub fn set_text(session: u32, text: &str) {
+    get_or_init_runtime()
+        .borrow_mut()
+        .as_mut()
+        .expect("runtime not initialized")
+        .set_text(session, text);
+}
 
-    fn free_session(session: u32) {
-        get_or_init_runtime()
-            .borrow_mut()
-            .as_mut()
-            .expect("runtime not initialized")
-            .free_session(session);
-    }
+/// Parses the text in a session and returns the result as a JS value.
+///
+/// The result is a JSON-serialized ParseResult containing spans and injections.
+#[wasm_bindgen]
+pub fn parse(session: u32) -> Result<JsValue, JsValue> {
+    let result: Result<WireParseResult, _> = get_or_init_runtime()
+        .borrow_mut()
+        .as_mut()
+        .expect("runtime not initialized")
+        .parse(session);
 
-    fn set_text(session: u32, text: String) {
-        get_or_init_runtime()
-            .borrow_mut()
-            .as_mut()
-            .expect("runtime not initialized")
-            .set_text(session, &text);
-    }
-
-    fn apply_edit(session: u32, text: String, edit: Edit) {
-        let wire_edit = WireEdit {
-            start_byte: edit.start_byte,
-            old_end_byte: edit.old_end_byte,
-            new_end_byte: edit.new_end_byte,
-            start_row: edit.start_row,
-            start_col: edit.start_col,
-            old_end_row: edit.old_end_row,
-            old_end_col: edit.old_end_col,
-            new_end_row: edit.new_end_row,
-            new_end_col: edit.new_end_col,
-        };
-        get_or_init_runtime()
-            .borrow_mut()
-            .as_mut()
-            .expect("runtime not initialized")
-            .apply_edit(session, &text, &wire_edit);
-    }
-
-    fn parse(session: u32) -> Result<ParseResult, ParseError> {
-        let result = get_or_init_runtime()
-            .borrow_mut()
-            .as_mut()
-            .expect("runtime not initialized")
-            .parse(session);
-
-        match result {
-            Ok(r) => Ok(ParseResult {
-                spans: r
-                    .spans
-                    .into_iter()
-                    .map(|s| Span {
-                        start: s.start,
-                        end: s.end,
-                        capture: s.capture,
-                    })
-                    .collect(),
-                injections: r
-                    .injections
-                    .into_iter()
-                    .map(|i| Injection {
-                        start: i.start,
-                        end: i.end,
-                        language: i.language,
-                        include_children: i.include_children,
-                    })
-                    .collect(),
-            }),
-            Err(e) => Err(ParseError {
-                message: e.message,
-            }),
-        }
-    }
-
-    fn cancel(session: u32) {
-        get_or_init_runtime()
-            .borrow_mut()
-            .as_mut()
-            .expect("runtime not initialized")
-            .cancel(session);
+    match result {
+        Ok(r) => serde_wasm_bindgen::to_value(&r)
+            .map_err(|e| JsValue::from_str(&format!("serialization error: {}", e))),
+        Err(e) => Err(JsValue::from_str(&e.message)),
     }
 }
 
-export!(PluginImpl);
+/// Cancels an ongoing parse operation.
+#[wasm_bindgen]
+pub fn cancel(session: u32) {
+    get_or_init_runtime()
+        .borrow_mut()
+        .as_mut()
+        .expect("runtime not initialized")
+        .cancel(session);
+}
