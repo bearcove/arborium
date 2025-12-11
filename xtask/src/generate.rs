@@ -1563,7 +1563,7 @@ fn plan_crate_files_only(
     // It's used during publishing to skip re-publishing if nothing changed
     let hash_file_path = crate_path.join(".arborium-hash");
     let new_hash = crate::publish::compute_grammar_hash(crate_path)
-        .map_err(|e| e.wrap_err("failed to compute grammar hash"))?;
+        .context("failed to compute grammar hash")?;
 
     plan_file_update(
         &mut plan,
