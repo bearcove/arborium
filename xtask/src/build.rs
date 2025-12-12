@@ -10,9 +10,10 @@ use rand::seq::SliceRandom;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use chrono::Utc;
-use miette::{Context, IntoDiagnostic, Result};
+use miette::{Context, IntoDiagnostic, Result, miette};
 use rayon::prelude::*;
 use sailfish::TemplateSimple;
+use walrus::Module;
 
 use crate::tool::Tool;
 use crate::types::CrateRegistry;
@@ -1016,6 +1017,11 @@ fn build_single_plugin(
         .into_diagnostic()
         .with_context(|| format!("failed to copy js file from {} to {}", src_js, dest_js))?;
 
+    // Check WASM browser compatibility on final WASM file
+    println!("  {} Checking WASM browser compatibility...", "●".yellow());
+    check_wasm_browser_compatibility(&dest_wasm)?;
+    println!("  {} No browser-incompatible imports found", "✓".green());
+
     // Generate package.json
     let package_json_content = serde_json::json!({
         "name": format!("@arborium/{}", grammar),
@@ -1162,4 +1168,39 @@ fn build_manifest(
         generated_at: Utc::now().to_rfc3339(),
         entries,
     })
+}
+
+/// Analyzes a WASM file for browser compatibility issues
+/// Returns an error if any "env" imports are found (which won't work in browsers)
+fn check_wasm_browser_compatibility(wasm_file: &camino::Utf8Path) -> Result<()> {
+    let wasm_bytes = std::fs::read(wasm_file)
+        .map_err(|e| miette!("Failed to read WASM file {}: {}", wasm_file, e))?;
+
+    let module = Module::from_buffer(&wasm_bytes)
+        .map_err(|e| miette!("Failed to parse WASM file {}: {}", wasm_file, e))?;
+
+    let mut env_imports = Vec::new();
+
+    for import in module.imports.iter() {
+        if import.module == "env" {
+            env_imports.push(import.name.clone());
+        }
+    }
+
+    if !env_imports.is_empty() {
+        return Err(miette!(
+            "WASM module {} has {} browser-incompatible imports from 'env':\n{}\n\n\
+             These imports won't work in web browsers. Provide these symbols in the WASM sysroot or \
+             remove the dependencies that require them.",
+            wasm_file,
+            env_imports.len(),
+            env_imports
+                .iter()
+                .map(|name| format!("  - env.{}", name))
+                .collect::<Vec<_>>()
+                .join("\n")
+        ));
+    }
+
+    Ok(())
 }

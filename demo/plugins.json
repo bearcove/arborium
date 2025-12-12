@@ -1,15 +1,78 @@
 {
-  "generated_at": "2025-12-11T21:43:09.300471+00:00",
+  "generated_at": "2025-12-12T11:12:41.029805+00:00",
   "entries": [
     {
-      "language": "dart",
-      "package": "@arborium/dart",
-      "version": "1.1.11",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/dart@1.1.11/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/dart@1.1.11/grammar_bg.wasm",
-      "local_js": "/langs/group-pine/dart/npm/grammar.js",
-      "local_wasm": "/langs/group-pine/dart/npm/grammar_bg.wasm"
+      "language": "scss",
+      "package": "@arborium/scss",
+      "version": "1.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/scss@1.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/scss@1.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-acorn/scss/npm/grammar.js",
+      "local_wasm": "/langs/group-acorn/scss/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "tsx",
+      "package": "@arborium/tsx",
+      "version": "1.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/tsx@1.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/tsx@1.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-acorn/tsx/npm/grammar.js",
+      "local_wasm": "/langs/group-acorn/tsx/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "json",
+      "package": "@arborium/json",
+      "version": "1.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/json@1.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/json@1.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-acorn/json/npm/grammar.js",
+      "local_wasm": "/langs/group-acorn/json/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "typescript",
+      "package": "@arborium/typescript",
+      "version": "1.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/typescript@1.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/typescript@1.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-acorn/typescript/npm/grammar.js",
+      "local_wasm": "/langs/group-acorn/typescript/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "html",
+      "package": "@arborium/html",
+      "version": "1.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/html@1.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/html@1.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-acorn/html/npm/grammar.js",
+      "local_wasm": "/langs/group-acorn/html/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "xml",
+      "package": "@arborium/xml",
+      "version": "1.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/xml@1.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/xml@1.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-acorn/xml/npm/grammar.js",
+      "local_wasm": "/langs/group-acorn/xml/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "css",
+      "package": "@arborium/css",
+      "version": "1.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/css@1.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/css@1.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-acorn/css/npm/grammar.js",
+      "local_wasm": "/langs/group-acorn/css/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "javascript",
+      "package": "@arborium/javascript",
+      "version": "1.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/javascript@1.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/javascript@1.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-acorn/javascript/npm/grammar.js",
+      "local_wasm": "/langs/group-acorn/javascript/npm/grammar_bg.wasm"
     }
   ],
-  "dev_mode": false
+  "dev_mode": true
 }

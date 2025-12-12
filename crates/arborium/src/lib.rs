@@ -49,7 +49,7 @@ pub use arborium_highlight::{
 };
 
 #[cfg(target_family = "wasm")]
-mod wasm;
+use arborium_sysroot as _;
 
 // Language grammar re-exports based on enabled features.
 // Each module provides:

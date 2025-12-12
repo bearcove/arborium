@@ -214,6 +214,7 @@ lang-zsh = ["dep:arborium-zsh"]
 arborium-tree-sitter = { version = "1", path = "../arborium-tree-sitter" }
 arborium-theme = { version = "1", path = "../arborium-theme" }
 arborium-highlight = { version = "1", path = "../arborium-highlight", features = ["tree-sitter"] }
+arborium-sysroot = { version = "1", path = "../arborium-sysroot" }
 
 # Optional grammar dependencies
 arborium-ada = { version = "1", path = "../../langs/group-moss/ada/crate", optional = true }

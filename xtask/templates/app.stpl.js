@@ -105,36 +105,19 @@ async function loadGrammarPlugin(langId) {
 
     // Determine paths based on dev mode
     const jsPath = registry.dev_mode ? entry.local_js : entry.cdn_js;
+    const wasmPath = registry.dev_mode ? entry.local_wasm : entry.cdn_wasm;
 
     try {
-        // Import the grammar.js module
+        // Import the wasm-bindgen generated JS module and initialize it.
+        //
+        // Plugins are built by `cargo xtask build` using wasm-bindgen `--target web`,
+        // so the generated `grammar.js` exports a default init function and the
+        // plugin API as named exports.
         const module = await import(jsPath);
+        await module.default(wasmPath);
 
-        // Instantiate with WASM fetch function and WASI stubs
-        // Make jsPath absolute for URL resolution
-        const baseUrl = new URL(jsPath, window.location.href).href;
-        const instance = await module.instantiate(
-            async (name) => {
-                // Handle multiple core modules (grammar.core.wasm, grammar.core2.wasm, etc.)
-                const wasmUrl = new URL(name, baseUrl).href;
-                const response = await fetch(wasmUrl);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch WASM ${name}: ${response.status}`);
-                }
-                return WebAssembly.compile(await response.arrayBuffer());
-            },
-            createWasiStubs()
-        );
-
-        // Get the plugin interface
-        const plugin = instance.plugin || instance['arborium:grammar/plugin@0.1.0'];
-        if (!plugin) {
-            console.error(`Grammar '${langId}' missing plugin interface`);
-            return null;
-        }
-
-        grammarCache[langId] = plugin;
-        return plugin;
+        grammarCache[langId] = module;
+        return module;
     } catch (e) {
         console.error(`Failed to load grammar '${langId}':`, e);
         return null;
@@ -175,20 +158,16 @@ function setupArboriumHost() {
             if (!entry) return { spans: [], injections: [] };
 
             const { plugin } = entry;
-            const session = plugin.createSession();
+            const session = plugin.create_session();
             try {
-                plugin.setText(session, text);
-                const result = plugin.parse(session);
-
-                // Unwrap WIT Result type
-                if (result.tag === 'err') {
-                    console.error(`Parse error: ${result.val?.message}`);
-                    return { spans: [], injections: [] };
-                }
-                const val = result.tag === 'ok' ? result.val : result;
-                return { spans: val.spans || [], injections: val.injections || [] };
+                plugin.set_text(session, text);
+                const val = plugin.parse(session);
+                return { spans: val?.spans || [], injections: val?.injections || [] };
+            } catch (e) {
+                console.error(`Parse error for handle ${handle}:`, e);
+                return { spans: [], injections: [] };
             } finally {
-                plugin.freeSession(session);
+                plugin.free_session(session);
             }
         },
     };

@@ -29,6 +29,9 @@
 
 extern crate alloc;
 
+#[cfg(target_family = "wasm")]
+use arborium_sysroot as _;
+
 use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::vec::Vec;

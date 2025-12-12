@@ -11,3 +11,10 @@ links = "arborium_sysroot"
 
 [lib]
 path = "src/lib.rs"
+
+[dependencies]
+# For WASM allocator implementation
+dlmalloc = "0.2"
+
+[build-dependencies]
+cc = "1"

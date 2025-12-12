@@ -93,6 +93,7 @@ dependencies = [
  "arborium-starlark",
  "arborium-svelte",
  "arborium-swift",
+ "arborium-sysroot",
  "arborium-textproto",
  "arborium-theme",
  "arborium-thrift",
@@ -829,6 +830,10 @@ dependencies = [
 [[package]]
 name = "arborium-sysroot"
 version = "1.0.0"
+dependencies = [
+ "cc",
+ "dlmalloc",
+]
 
 [[package]]
 name = "arborium-textproto"

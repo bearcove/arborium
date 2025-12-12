@@ -2,5 +2,12 @@
 
 /** All available languages */
 export const availableLanguages: string[] = [
-  "dart",
+  "css",
+  "html",
+  "javascript",
+  "json",
+  "scss",
+  "tsx",
+  "typescript",
+  "xml",
 ];

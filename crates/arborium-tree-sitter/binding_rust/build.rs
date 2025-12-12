@@ -29,16 +29,15 @@ fn main() {
         println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
     }
 
-    // For wasm32 targets, add the wasm-sysroot with stub headers and implementations
+    // For wasm32 targets, add the wasm-sysroot stub headers.
+    // Implementations are provided by the `arborium-sysroot` crate, which is linked
+    // into final WASM binaries (e.g. plugins) to avoid generating `env.*` imports.
     let target = env::var("TARGET").unwrap_or_default();
     if target.contains("wasm") {
         // wasm-sysroot is provided by arborium-sysroot via links = "arborium_sysroot"
         if let Ok(sysroot) = env::var("DEP_ARBORIUM_SYSROOT_PATH") {
             let wasm_sysroot = PathBuf::from(&sysroot);
             config.include(&wasm_sysroot);
-            config.file(wasm_sysroot.join("src/stdio.c"));
-            config.file(wasm_sysroot.join("src/ctype.c"));
-            // wctype functions are provided by arborium/src/wasm.rs - don't duplicate
             println!("cargo:rerun-if-changed={}", wasm_sysroot.display());
         }
         // Suppress format warnings on wasm32 where uint32_t is unsigned long

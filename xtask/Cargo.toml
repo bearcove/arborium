@@ -45,6 +45,7 @@ arborium-theme = { path = "../crates/arborium-theme" }  # For theme CSS generati
 arborium = { version = "1", features = ["lang-html", "lang-toml", "lang-rust", "lang-javascript"] }
 toml_edit = "0.23.9"
 serde_json = "1.0.145"
+walrus = "0.20"
 
 [package.metadata.facet-dev]
 generate-readmes = false

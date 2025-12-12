@@ -13,5 +13,6 @@ crate-type = ["cdylib"]
 arborium-plugin-runtime = { path = "<%= shared_rel %>/arborium-plugin-runtime" }
 arborium-wire = { path = "<%= shared_rel %>/arborium-wire" }
 "<%= grammar_crate_name %>" = { path = "<%= crate_rel %>" }
+arborium-sysroot = { path = "<%= shared_rel %>/arborium-sysroot" }
 wasm-bindgen = "=0.2.106"
 serde-wasm-bindgen = "0.6"
