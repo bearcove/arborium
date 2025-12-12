@@ -1904,6 +1904,7 @@ fn plan_shared_crates(prepared: &PreparedStructures, mode: PlanMode) -> Result<P
         "arborium-plugin-runtime",
         "arborium-wire",
         "arborium-query",
+        "miette-arborium",
     ];
 
     for crate_name in shared_crates {
@@ -1918,7 +1919,9 @@ fn plan_shared_crates(prepared: &PreparedStructures, mode: PlanMode) -> Result<P
     Ok(plan)
 }
 
-/// Update a Cargo.toml file's version and all arborium-* dependency versions.
+/// Update a Cargo.toml file's version and all arborium dependency versions.
+/// The package version is set to the full version (e.g., "1.1.11").
+/// Dependency versions are set to just the major version (e.g., "1") for SemVer compatibility.
 fn update_cargo_toml_version(
     plan: &mut Plan,
     cargo_toml_path: &Utf8Path,
@@ -1936,23 +1939,29 @@ fn update_cargo_toml_version(
         std::io::Error::other(format!("Failed to parse {}: {}", cargo_toml_path, e))
     })?;
 
-    // Update package version
+    // Extract major version for dependencies (e.g., "1.1.11" -> "1")
+    let major_version = new_version.split('.').next().unwrap_or(new_version);
+
+    // Update package version (full version)
     if let Some(package) = doc.get_mut("package") {
         if let Some(version) = package.get_mut("version") {
             *version = Item::Value(Value::from(new_version));
         }
     }
 
-    // Update arborium-* dependencies in all dependency sections
+    // Update arborium dependencies in all dependency sections (major version only)
     let dep_sections = ["dependencies", "dev-dependencies", "build-dependencies"];
     for section_name in dep_sections {
         if let Some(deps) = doc.get_mut(section_name) {
             if let Some(table) = deps.as_table_mut() {
                 for (name, value) in table.iter_mut() {
-                    if name.get().starts_with("arborium-") {
+                    // Match "arborium" or "arborium-*"
+                    let dep_name = name.get();
+                    if dep_name == "arborium" || dep_name.starts_with("arborium-") {
                         if let Some(dep_table) = value.as_table_like_mut() {
                             if dep_table.contains_key("version") {
-                                dep_table.insert("version", Item::Value(Value::from(new_version)));
+                                dep_table
+                                    .insert("version", Item::Value(Value::from(major_version)));
                             }
                         }
                     }
