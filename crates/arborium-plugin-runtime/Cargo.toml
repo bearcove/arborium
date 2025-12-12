@@ -1,7 +1,7 @@
 [package]
 publish = false
 name = "arborium-plugin-runtime"
-version = "1.2.3"
+version = "1.0.0"
 edition = "2024"
 description = "Runtime library for arborium grammar plugins"
 license = "MIT"
