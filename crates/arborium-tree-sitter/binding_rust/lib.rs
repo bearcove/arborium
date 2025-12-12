@@ -15,7 +15,7 @@ extern crate alloc;
 #[cfg(not(feature = "std"))]
 use alloc::{boxed::Box, format, string::String, string::ToString, vec::Vec};
 use core::{
-    ffi::{c_char, c_void, CStr},
+    ffi::{CStr, c_char, c_void},
     fmt::{self, Write},
     hash, iter,
     marker::PhantomData,
@@ -34,7 +34,7 @@ use std::os::fd::AsRawFd;
 use std::os::windows::io::AsRawHandle;
 
 pub use streaming_iterator::{StreamingIterator, StreamingIteratorMut};
-use tree_sitter_language::LanguageFn;
+pub use tree_sitter_language::LanguageFn;
 
 /// The latest ABI version that is supported by the current version of the
 /// library.
@@ -2367,7 +2367,7 @@ impl Iterator for LookaheadNamesIterator<'_> {
 
     #[doc(alias = "ts_lookahead_iterator_next")]
     fn next(&mut self) -> Option<Self::Item> {
-        unsafe { ffi::ts_lookahead_iterator_next(self.0 .0.as_ptr()) }
+        unsafe { ffi::ts_lookahead_iterator_next(self.0.0.as_ptr()) }
             .then(|| self.0.current_symbol_name())
     }
 }
@@ -2615,16 +2615,19 @@ impl Query {
                             return Err(predicate_error(
                                 row,
                                 format!(
-                                "Wrong number of arguments to #eq? predicate. Expected 2, got {}.",
-                                p.len() - 1
-                            ),
+                                    "Wrong number of arguments to #eq? predicate. Expected 2, got {}.",
+                                    p.len() - 1
+                                ),
                             ));
                         }
                         if p[1].type_ != TYPE_CAPTURE {
-                            return Err(predicate_error(row, format!(
-                                "First argument to #eq? predicate must be a capture name. Got literal \"{}\".",
-                                string_values[p[1].value_id as usize],
-                            )));
+                            return Err(predicate_error(
+                                row,
+                                format!(
+                                    "First argument to #eq? predicate must be a capture name. Got literal \"{}\".",
+                                    string_values[p[1].value_id as usize],
+                                ),
+                            ));
                         }
 
                         let is_positive = operator_name == "eq?" || operator_name == "any-eq?";
@@ -2652,22 +2655,31 @@ impl Query {
 
                     "match?" | "not-match?" | "any-match?" | "any-not-match?" => {
                         if p.len() != 3 {
-                            return Err(predicate_error(row, format!(
-                                "Wrong number of arguments to #match? predicate. Expected 2, got {}.",
-                                p.len() - 1
-                            )));
+                            return Err(predicate_error(
+                                row,
+                                format!(
+                                    "Wrong number of arguments to #match? predicate. Expected 2, got {}.",
+                                    p.len() - 1
+                                ),
+                            ));
                         }
                         if p[1].type_ != TYPE_CAPTURE {
-                            return Err(predicate_error(row, format!(
-                                "First argument to #match? predicate must be a capture name. Got literal \"{}\".",
-                                string_values[p[1].value_id as usize],
-                            )));
+                            return Err(predicate_error(
+                                row,
+                                format!(
+                                    "First argument to #match? predicate must be a capture name. Got literal \"{}\".",
+                                    string_values[p[1].value_id as usize],
+                                ),
+                            ));
                         }
                         if p[2].type_ == TYPE_CAPTURE {
-                            return Err(predicate_error(row, format!(
-                                "Second argument to #match? predicate must be a literal. Got capture @{}.",
-                                capture_names[p[2].value_id as usize],
-                            )));
+                            return Err(predicate_error(
+                                row,
+                                format!(
+                                    "Second argument to #match? predicate must be a literal. Got capture @{}.",
+                                    capture_names[p[2].value_id as usize],
+                                ),
+                            ));
                         }
 
                         let is_positive =
@@ -2709,26 +2721,35 @@ impl Query {
 
                     "any-of?" | "not-any-of?" => {
                         if p.len() < 2 {
-                            return Err(predicate_error(row, format!(
-                                "Wrong number of arguments to #any-of? predicate. Expected at least 1, got {}.",
-                                p.len() - 1
-                            )));
+                            return Err(predicate_error(
+                                row,
+                                format!(
+                                    "Wrong number of arguments to #any-of? predicate. Expected at least 1, got {}.",
+                                    p.len() - 1
+                                ),
+                            ));
                         }
                         if p[1].type_ != TYPE_CAPTURE {
-                            return Err(predicate_error(row, format!(
-                                "First argument to #any-of? predicate must be a capture name. Got literal \"{}\".",
-                                string_values[p[1].value_id as usize],
-                            )));
+                            return Err(predicate_error(
+                                row,
+                                format!(
+                                    "First argument to #any-of? predicate must be a capture name. Got literal \"{}\".",
+                                    string_values[p[1].value_id as usize],
+                                ),
+                            ));
                         }
 
                         let is_positive = operator_name == "any-of?";
                         let mut values = Vec::new();
                         for arg in &p[2..] {
                             if arg.type_ == TYPE_CAPTURE {
-                                return Err(predicate_error(row, format!(
-                                    "Arguments to #any-of? predicate must be literals. Got capture @{}.",
-                                    capture_names[arg.value_id as usize],
-                                )));
+                                return Err(predicate_error(
+                                    row,
+                                    format!(
+                                        "Arguments to #any-of? predicate must be literals. Got capture @{}.",
+                                        capture_names[arg.value_id as usize],
+                                    ),
+                                ));
                             }
                             values.push(string_values[arg.value_id as usize]);
                         }

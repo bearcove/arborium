@@ -13,7 +13,6 @@ default = []
 [dependencies]
 arborium-tree-sitter = { version = "1", path = "../arborium-tree-sitter" }
 arborium-wire = { path = "../arborium-wire" }
-tree-sitter-language = "0.1"
 
 [dev-dependencies]
 arborium-rust = { path = "../arborium-rust" }
