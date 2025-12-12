@@ -650,7 +650,7 @@ fn build_single_plugin(
             "--target",
             "wasm32-unknown-unknown",
             "-Zbuild-std=std,panic_abort",
-            "-Zbuild-std-features=panic_immediate_abort",
+            "-Cpanic=immediate-abort",
             "-Zunstable-options",
             "-Zbuild-dir-new-layout",
             "-Zbinary-dep-depinfo",
