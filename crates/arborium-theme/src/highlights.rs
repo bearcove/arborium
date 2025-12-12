@@ -89,18 +89,76 @@ impl ThemeSlot {
             ThemeSlot::Label => Some("l"),
             ThemeSlot::Namespace => Some("ns"),
             ThemeSlot::Constructor => Some("cr"),
+            /// Markup: headings, titles
             ThemeSlot::Title => Some("tt"),
+            /// Markup: bold text
             ThemeSlot::Strong => Some("st"),
+            /// Markup: italic text
             ThemeSlot::Emphasis => Some("em"),
+            /// Markup: links/URLs
             ThemeSlot::Link => Some("tu"),
+            /// Markup: raw/literal/code blocks
             ThemeSlot::Literal => Some("tl"),
+            /// Markup: strikethrough
             ThemeSlot::Strikethrough => Some("tx"),
+            /// Diff additions
             ThemeSlot::DiffAdd => Some("da"),
+            /// Diff deletions
             ThemeSlot::DiffDelete => Some("dd"),
+            /// Embedded content
             ThemeSlot::Embedded => Some("eb"),
+            /// Errors
             ThemeSlot::Error => Some("er"),
+            /// No styling (invisible captures like spell, nospell)
             ThemeSlot::None => None,
         }
+    }
+}
+
+/// Map a theme slot to a canonical highlight index.
+///
+/// This is useful for ANSI rendering, where we want to
+/// look up a single representative style for each slot.
+pub fn slot_to_highlight_index(slot: ThemeSlot) -> Option<usize> {
+    match slot {
+        ThemeSlot::Keyword => HIGHLIGHTS.iter().position(|h| h.name == "keyword"),
+        ThemeSlot::Function => HIGHLIGHTS.iter().position(|h| h.name == "function"),
+        ThemeSlot::String => HIGHLIGHTS.iter().position(|h| h.name == "string"),
+        ThemeSlot::Comment => HIGHLIGHTS.iter().position(|h| h.name == "comment"),
+        ThemeSlot::Type => HIGHLIGHTS.iter().position(|h| h.name == "type"),
+        ThemeSlot::Variable => HIGHLIGHTS.iter().position(|h| h.name == "variable"),
+        ThemeSlot::Constant => HIGHLIGHTS.iter().position(|h| h.name == "constant"),
+        ThemeSlot::Number => HIGHLIGHTS.iter().position(|h| h.name == "number"),
+        ThemeSlot::Operator => HIGHLIGHTS.iter().position(|h| h.name == "operator"),
+        ThemeSlot::Punctuation => HIGHLIGHTS.iter().position(|h| h.name == "punctuation"),
+        ThemeSlot::Property => HIGHLIGHTS.iter().position(|h| h.name == "property"),
+        ThemeSlot::Attribute => HIGHLIGHTS.iter().position(|h| h.name == "attribute"),
+        ThemeSlot::Tag => HIGHLIGHTS.iter().position(|h| h.name == "tag"),
+        ThemeSlot::Macro => HIGHLIGHTS.iter().position(|h| h.name == "macro"),
+        ThemeSlot::Label => HIGHLIGHTS.iter().position(|h| h.name == "label"),
+        ThemeSlot::Namespace => HIGHLIGHTS.iter().position(|h| h.name == "namespace"),
+        ThemeSlot::Constructor => HIGHLIGHTS.iter().position(|h| h.name == "constructor"),
+        ThemeSlot::Title => HIGHLIGHTS
+            .iter()
+            .position(|h| h.name == "text.title" || h.name == "markup.heading"),
+        ThemeSlot::Strong => HIGHLIGHTS
+            .iter()
+            .position(|h| h.name == "text.strong" || h.name == "markup.bold"),
+        ThemeSlot::Emphasis => HIGHLIGHTS
+            .iter()
+            .position(|h| h.name == "text.emphasis" || h.name == "markup.italic"),
+        ThemeSlot::Link => HIGHLIGHTS
+            .iter()
+            .position(|h| h.name == "text.uri" || h.name == "text.reference"),
+        ThemeSlot::Literal => HIGHLIGHTS.iter().position(|h| h.name == "text.literal"),
+        ThemeSlot::Strikethrough => HIGHLIGHTS
+            .iter()
+            .position(|h| h.name == "text.strikethrough"),
+        ThemeSlot::DiffAdd => HIGHLIGHTS.iter().position(|h| h.name == "diff.addition"),
+        ThemeSlot::DiffDelete => HIGHLIGHTS.iter().position(|h| h.name == "diff.deletion"),
+        ThemeSlot::Embedded => HIGHLIGHTS.iter().position(|h| h.name == "embedded"),
+        ThemeSlot::Error => HIGHLIGHTS.iter().position(|h| h.name == "error"),
+        ThemeSlot::None => None,
     }
 }
 
