@@ -620,7 +620,8 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                 }
                 Err(e) => {
                     printer.print_error(grammar, &format!("{}", e));
-                    panic!("Build failed for grammar `{}`: {:?}", grammar, e);
+                    eprintln!("Build failed for grammar `{}`: {:?}", grammar, e);
+                    std::process::exit(1);
                 }
             }
         })

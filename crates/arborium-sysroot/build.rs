@@ -22,12 +22,14 @@ fn main() {
             .target(&target)
             .host(&target);
 
-        // Compile stdlib implementations
+        // Compile sysroot C implementations.
+        //
+        // Note: wctype symbols are implemented in Rust (`src/wasm.rs`) to avoid
+        // duplicate symbol errors when linking with LTO.
         build.file(wasm_sysroot.join("src/stdlib.c"));
         build.file(wasm_sysroot.join("src/stdio.c"));
         build.file(wasm_sysroot.join("src/ctype.c"));
         build.file(wasm_sysroot.join("src/string.c"));
-        build.file(wasm_sysroot.join("src/wctype.c"));
 
         build.compile("arborium_sysroot");
 
