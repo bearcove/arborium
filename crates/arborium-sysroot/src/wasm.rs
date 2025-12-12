@@ -370,6 +370,13 @@ pub extern "C" fn iswlower(wc: u32) -> c_int {
     0
 }
 
+/// iswpunct implementation - check if wide char is punctuation
+#[unsafe(no_mangle)]
+pub extern "C" fn iswpunct(wc: u32) -> c_int {
+    // ASCII punctuation ranges
+    matches!(wc, 0x21..=0x2F | 0x3A..=0x40 | 0x5B..=0x60 | 0x7B..=0x7E) as c_int
+}
+
 /// iswalpha implementation for wide characters
 #[unsafe(no_mangle)]
 pub extern "C" fn iswalpha(wc: u32) -> c_int {
@@ -464,6 +471,7 @@ static _FORCE_INCLUDE: () = {
     let _ = iswalpha as *const ();
     let _ = iswlower as *const ();
     let _ = iswupper as *const ();
+    let _ = iswpunct as *const ();
     let _ = iswspace as *const ();
     let _ = iswdigit as *const ();
     let _ = iswxdigit as *const ();
