@@ -18,12 +18,36 @@ use crate::tool::Tool;
 use crate::types::CrateRegistry;
 use crate::version_store;
 
+/// Print command before execution (for non-streaming commands)
+fn print_cmd(cmd: &Command) {
+    let program = cmd.get_program().to_string_lossy();
+    let args: Vec<_> = cmd.get_args().map(|a| a.to_string_lossy()).collect();
+    let full_cmd = if args.is_empty() {
+        program.to_string()
+    } else {
+        format!("{} {}", program, args.join(" "))
+    };
+    println!("  {} {}", "$".dimmed(), full_cmd.dimmed());
+}
+
+/// Run a command, print it first, and return output
+fn run_cmd_output(mut cmd: Command) -> std::io::Result<std::process::Output> {
+    print_cmd(&cmd);
+    cmd.output()
+}
+
+/// Run a command, print it first, and return status
+fn run_cmd_status(mut cmd: Command) -> std::io::Result<ExitStatus> {
+    print_cmd(&cmd);
+    cmd.status()
+}
+
 /// Ensure nightly toolchain and wasm32-unknown-unknown target are installed
 fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
     // Check if nightly toolchain is installed
-    let output = Command::new("rustup")
-        .args(["toolchain", "list"])
-        .output()
+    let mut cmd = Command::new("rustup");
+    cmd.args(["toolchain", "list"]);
+    let output = run_cmd_output(cmd)
         .into_diagnostic()
         .context("failed to run rustup toolchain list")?;
 
@@ -32,9 +56,9 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
 
     if !has_nightly {
         println!("{} Installing nightly toolchain...", "●".cyan());
-        let status = Command::new("rustup")
-            .args(["toolchain", "install", "nightly"])
-            .status()
+        let mut cmd = Command::new("rustup");
+        cmd.args(["toolchain", "install", "nightly"]);
+        let status = run_cmd_status(cmd)
             .into_diagnostic()
             .context("failed to install nightly toolchain")?;
 
@@ -45,9 +69,9 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
     }
 
     // Check if wasm32-unknown-unknown target is installed for nightly
-    let output = Command::new("rustup")
-        .args(["+nightly", "target", "list", "--installed"])
-        .output()
+    let mut cmd = Command::new("rustup");
+    cmd.args(["+nightly", "target", "list", "--installed"]);
+    let output = run_cmd_output(cmd)
         .into_diagnostic()
         .context("failed to check installed targets")?;
 
@@ -61,9 +85,9 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
             "{} Installing wasm32-unknown-unknown target for nightly...",
             "●".cyan()
         );
-        let status = Command::new("rustup")
-            .args(["+nightly", "target", "add", "wasm32-unknown-unknown"])
-            .status()
+        let mut cmd = Command::new("rustup");
+        cmd.args(["+nightly", "target", "add", "wasm32-unknown-unknown"]);
+        let status = run_cmd_status(cmd)
             .into_diagnostic()
             .context("failed to add wasm32-unknown-unknown target")?;
 
@@ -293,6 +317,17 @@ impl OutputPrinter {
     }
 }
 
+/// Format a command for display (program path + all arguments).
+fn format_command(cmd: &Command) -> String {
+    let program = cmd.get_program().to_string_lossy();
+    let args: Vec<_> = cmd.get_args().map(|a| a.to_string_lossy()).collect();
+    if args.is_empty() {
+        program.to_string()
+    } else {
+        format!("{} {}", program, args.join(" "))
+    }
+}
+
 /// Run a command and stream its output with prefixed lines.
 fn run_streaming(
     cmd: Command,
@@ -308,6 +343,10 @@ fn run_streaming_with_phase(
     printer: &OutputPrinter,
     phase: Option<BuildPhase>,
 ) -> std::io::Result<ExitStatus> {
+    // Print the full command being executed
+    let cmd_str = format_command(&cmd);
+    printer.print_line_with_phase(grammar, &format!("$ {}", cmd_str), false, phase);
+
     cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
 
     let mut child = cmd.spawn()?;
@@ -540,7 +579,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                 }
                 Err(e) => {
                     printer.print_error(grammar, &format!("{}", e));
-                    std::process::exit(1);
+                    panic!("Build failed for grammar `{}`: {:?}", grammar, e);
                 }
             }
         })
@@ -642,8 +681,7 @@ pub fn build_host(repo_root: &Utf8Path) -> Result<()> {
     ])
     .current_dir(&host_crate);
 
-    let output = cmd
-        .output()
+    let output = run_cmd_output(cmd)
         .into_diagnostic()
         .context("failed to run wasm-pack")?;
 
