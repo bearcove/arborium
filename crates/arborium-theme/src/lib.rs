@@ -17,6 +17,8 @@ pub mod highlights;
 pub mod theme;
 
 pub use highlights::{
-    capture_to_slot, tag_for_capture, ThemeSlot, CAPTURE_NAMES, COUNT, HIGHLIGHTS, HighlightDef,
+    CAPTURE_NAMES, COUNT, HIGHLIGHTS, HighlightDef, ThemeSlot, capture_to_slot,
+    slot_to_highlight_index, tag_for_capture,
 };
-pub use theme::{builtin, Color, Modifiers, Style, Theme, ThemeError};
+
+pub use theme::{Color, Modifiers, Style, Theme, ThemeError, builtin};

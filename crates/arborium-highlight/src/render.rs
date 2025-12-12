@@ -13,7 +13,7 @@
 //! Both map to the "keyword" slot (`k` tag), so they become a single `<a-k>` element.
 
 use crate::Span;
-use arborium_theme::tag_for_capture;
+use arborium_theme::{Theme, capture_to_slot, slot_to_highlight_index, tag_for_capture};
 use std::collections::HashMap;
 use std::io::{self, Write};
 
@@ -125,8 +125,7 @@ pub fn spans_to_html(source: &str, spans: Vec<Span>) -> String {
 
     // Sort events: by position, then ends before starts at same position
     events.sort_by(|a, b| {
-        a.0.cmp(&b.0)
-            .then_with(|| a.1.cmp(&b.1)) // false (end) < true (start)
+        a.0.cmp(&b.0).then_with(|| a.1.cmp(&b.1)) // false (end) < true (start)
     });
 
     // Process events with a stack
@@ -208,6 +207,185 @@ pub fn html_escape(text: &str) -> String {
         }
     }
     result
+}
+
+/// Deduplicate spans and convert to ANSI-colored text using a theme.
+///
+/// This mirrors the HTML rendering logic but emits ANSI escape sequences
+/// instead of `<a-*>` tags, using `Theme::ansi_style` for each slot.
+pub fn spans_to_ansi(source: &str, spans: Vec<Span>, theme: &Theme) -> String {
+    if spans.is_empty() {
+        return source.to_string();
+    }
+
+    // Sort spans by (start, -end) so longer spans come first at same start
+    let mut spans = spans;
+    spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
+
+    // Deduplicate ranges the same way as HTML, but based on whether the
+    // capture maps to a themed slot.
+    let mut deduped: HashMap<(u32, u32), Span> = HashMap::new();
+    for span in spans {
+        let key = (span.start, span.end);
+        let new_has_slot = slot_to_highlight_index(capture_to_slot(&span.capture)).is_some();
+
+        if let Some(existing) = deduped.get(&key) {
+            let existing_has_slot =
+                slot_to_highlight_index(capture_to_slot(&existing.capture)).is_some();
+            if new_has_slot || !existing_has_slot {
+                deduped.insert(key, span);
+            }
+        } else {
+            deduped.insert(key, span);
+        }
+    }
+
+    let spans: Vec<Span> = deduped.into_values().collect();
+
+    // Normalize to highlight indices and coalesce adjacent spans with same style
+    #[derive(Debug, Clone)]
+    struct StyledSpan {
+        start: u32,
+        end: u32,
+        index: usize,
+    }
+
+    let mut normalized: Vec<StyledSpan> = spans
+        .into_iter()
+        .filter_map(|span| {
+            let slot = capture_to_slot(&span.capture);
+            let index = slot_to_highlight_index(slot)?;
+            Some(StyledSpan {
+                start: span.start,
+                end: span.end,
+                index,
+            })
+        })
+        .collect();
+
+    if normalized.is_empty() {
+        return source.to_string();
+    }
+
+    // Sort by start
+    normalized.sort_by_key(|s| (s.start, s.end));
+
+    // Coalesce adjacent/overlapping spans with the same style index
+    let mut coalesced: Vec<StyledSpan> = Vec::with_capacity(normalized.len());
+    for span in normalized {
+        if let Some(last) = coalesced.last_mut() {
+            if span.index == last.index && span.start <= last.end {
+                last.end = last.end.max(span.end);
+                continue;
+            }
+        }
+        coalesced.push(span);
+    }
+
+    if coalesced.is_empty() {
+        return source.to_string();
+    }
+
+    // Build events from spans
+    let mut events: Vec<(u32, bool, usize)> = Vec::new();
+    for (i, span) in coalesced.iter().enumerate() {
+        events.push((span.start, true, i));
+        events.push((span.end, false, i));
+    }
+
+    events.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
+
+    let mut out = String::with_capacity(source.len() * 2);
+    let mut last_pos: usize = 0;
+    let mut stack: Vec<usize> = Vec::new();
+    let mut active_style: Option<usize> = None;
+
+    for (pos, is_start, span_idx) in events {
+        let pos = pos as usize;
+        if pos > last_pos && pos <= source.len() {
+            let text = &source[last_pos..pos];
+            let desired = stack.last().copied();
+
+            match (active_style, desired) {
+                (Some(a), Some(d)) if a == d => {
+                    out.push_str(text);
+                }
+                (Some(_), Some(d)) => {
+                    out.push_str(Theme::ANSI_RESET);
+                    out.push_str(&theme.ansi_style(d));
+                    out.push_str(text);
+                    active_style = Some(d);
+                }
+                (None, Some(d)) => {
+                    out.push_str(&theme.ansi_style(d));
+                    out.push_str(text);
+                    active_style = Some(d);
+                }
+                (Some(_), None) => {
+                    out.push_str(Theme::ANSI_RESET);
+                    out.push_str(text);
+                    active_style = None;
+                }
+                (None, None) => {
+                    out.push_str(text);
+                }
+            }
+
+            last_pos = pos;
+        }
+
+        if is_start {
+            stack.push(span_idx);
+        } else if let Some(idx) = stack.iter().rposition(|&x| x == span_idx) {
+            stack.remove(idx);
+        }
+    }
+
+    if last_pos < source.len() {
+        let text = &source[last_pos..];
+        let desired = stack.last().copied();
+        match (active_style, desired) {
+            (Some(a), Some(d)) if a == d => {
+                out.push_str(text);
+            }
+            (Some(_), Some(d)) => {
+                out.push_str(Theme::ANSI_RESET);
+                out.push_str(&theme.ansi_style(d));
+                out.push_str(text);
+                active_style = Some(d);
+            }
+            (None, Some(d)) => {
+                out.push_str(&theme.ansi_style(d));
+                out.push_str(text);
+                active_style = Some(d);
+            }
+            (Some(_), None) => {
+                out.push_str(Theme::ANSI_RESET);
+                out.push_str(text);
+                active_style = None;
+            }
+            (None, None) => {
+                out.push_str(text);
+            }
+        }
+    }
+
+    if active_style.is_some() {
+        out.push_str(Theme::ANSI_RESET);
+    }
+
+    out
+}
+
+/// Write spans as ANSI-colored text to a writer.
+pub fn write_spans_as_ansi<W: Write>(
+    w: &mut W,
+    source: &str,
+    spans: Vec<Span>,
+    theme: &Theme,
+) -> io::Result<()> {
+    let ansi = spans_to_ansi(source, spans, theme);
+    w.write_all(ansi.as_bytes())
 }
 
 #[cfg(test)]

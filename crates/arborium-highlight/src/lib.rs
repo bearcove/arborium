@@ -52,7 +52,9 @@ mod types;
 #[cfg(feature = "tree-sitter")]
 pub mod tree_sitter;
 
-pub use render::{html_escape, spans_to_html, write_spans_as_html};
+pub use render::{
+    html_escape, spans_to_ansi, spans_to_html, write_spans_as_ansi, write_spans_as_html,
+};
 pub use types::{HighlightError, Injection, ParseResult, Span};
 
 #[cfg(feature = "tree-sitter")]
@@ -164,8 +166,13 @@ impl<P: GrammarProvider> HighlighterCore<P> {
         Self { provider, config }
     }
 
-    /// The main highlight function - written once, used by both wrappers.
-    async fn highlight(&mut self, language: &str, source: &str) -> Result<String, HighlightError> {
+    /// Highlight and return raw spans for the full document,
+    /// including any recursively processed injections.
+    async fn highlight_spans(
+        &mut self,
+        language: &str,
+        source: &str,
+    ) -> Result<Vec<Span>, HighlightError> {
         // 1. Get the primary grammar
         let grammar = self
             .provider
@@ -181,11 +188,23 @@ impl<P: GrammarProvider> HighlighterCore<P> {
 
         // 4. Process injections recursively
         if self.config.max_injection_depth > 0 {
-            self.process_injections(source, result.injections, 0, self.config.max_injection_depth, &mut all_spans).await;
+            self.process_injections(
+                source,
+                result.injections,
+                0,
+                self.config.max_injection_depth,
+                &mut all_spans,
+            )
+            .await;
         }
 
-        // 5. Render to HTML
-        Ok(spans_to_html(source, all_spans))
+        Ok(all_spans)
+    }
+
+    /// The main highlight function - written once, used by both wrappers.
+    async fn highlight(&mut self, language: &str, source: &str) -> Result<String, HighlightError> {
+        let spans = self.highlight_spans(language, source).await?;
+        Ok(spans_to_html(source, spans))
     }
 
     /// Process injections recursively.
@@ -279,7 +298,7 @@ impl<P: GrammarProvider> SyncHighlighter<P> {
         &mut self.core.provider
     }
 
-    /// Highlight source code synchronously.
+    /// Highlight source code synchronously and return HTML.
     ///
     /// # Panics
     ///
@@ -298,6 +317,34 @@ impl<P: GrammarProvider> SyncHighlighter<P> {
         // Poll once - sync providers complete immediately
         match future.as_mut().poll(&mut cx) {
             Poll::Ready(result) => result,
+            Poll::Pending => {
+                panic!(
+                    "SyncHighlighter: provider yielded. Use AsyncHighlighter for async providers."
+                )
+            }
+        }
+    }
+
+    /// Highlight source code synchronously and return ANSI-colored text
+    /// using the provided theme.
+    ///
+    /// This uses the same span computation as HTML output but renders
+    /// with ANSI escape sequences.
+    pub fn highlight_to_ansi(
+        &mut self,
+        language: &str,
+        source: &str,
+        theme: &arborium_theme::Theme,
+    ) -> Result<String, HighlightError> {
+        let future = self.core.highlight_spans(language, source);
+
+        let mut future = std::pin::pin!(future);
+        let waker = noop_waker();
+        let mut cx = Context::from_waker(&waker);
+
+        match future.as_mut().poll(&mut cx) {
+            Poll::Ready(Ok(spans)) => Ok(spans_to_ansi(source, spans, theme)),
+            Poll::Ready(Err(e)) => Err(e),
             Poll::Pending => {
                 panic!(
                     "SyncHighlighter: provider yielded. Use AsyncHighlighter for async providers."
@@ -472,7 +519,10 @@ mod tests {
 
         let mut highlighter = SyncHighlighter::new(provider);
         let result = highlighter.highlight("unknown", "code");
-        assert!(matches!(result, Err(HighlightError::UnsupportedLanguage(_))));
+        assert!(matches!(
+            result,
+            Err(HighlightError::UnsupportedLanguage(_))
+        ));
     }
 
     #[test]
