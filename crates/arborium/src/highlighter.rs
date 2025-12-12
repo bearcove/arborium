@@ -151,4 +151,38 @@ mod tests {
         // Should contain some highlighted elements
         assert!(html.contains("<a-"), "Should contain highlight tags");
     }
+
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_ansi_highlighting() {
+        let mut highlighter = Highlighter::new();
+        let source = r#"
+fn main() {
+    let message = "Hello, world!";
+    println!("{}", message);
+    
+    if let Some(count) = Some(42) {
+        for i in 0..count {
+            println!("Iteration: {}", i);
+        }
+    }
+}
+"#;
+
+        let theme = arborium_theme::theme::builtin::catppuccin_mocha();
+        let ansi_output = highlighter
+            .highlight_to_ansi("rust", source, theme)
+            .unwrap();
+
+        // Should contain ANSI escape sequences
+        assert!(
+            ansi_output.contains("\x1b["),
+            "Should contain ANSI escape sequences"
+        );
+
+        // Print colored output (use --nocapture to see)
+        println!("\n=== ANSI colored Rust code ===");
+        println!("{}", ansi_output);
+        println!("=== End of colored output ===\n");
+    }
 }
