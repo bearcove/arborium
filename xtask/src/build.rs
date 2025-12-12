@@ -97,6 +97,33 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
         println!("{} wasm32-unknown-unknown target installed", "✓".green());
     }
 
+    // Check if rust-src component is installed for nightly (needed for -Zbuild-std)
+    let mut cmd = Command::new("rustup");
+    cmd.args(["+nightly", "component", "list", "--installed"]);
+    let output = run_cmd_output(cmd)
+        .into_diagnostic()
+        .context("failed to check installed components")?;
+
+    let components = String::from_utf8_lossy(&output.stdout);
+    let has_rust_src = components.lines().any(|line| line.starts_with("rust-src"));
+
+    if !has_rust_src {
+        println!(
+            "{} Installing rust-src component for nightly (needed for -Zbuild-std)...",
+            "●".cyan()
+        );
+        let mut cmd = Command::new("rustup");
+        cmd.args(["+nightly", "component", "add", "rust-src"]);
+        let status = run_cmd_status(cmd)
+            .into_diagnostic()
+            .context("failed to add rust-src component")?;
+
+        if !status.success() {
+            miette::bail!("failed to add rust-src component");
+        }
+        println!("{} rust-src component installed", "✓".green());
+    }
+
     Ok(())
 }
 
