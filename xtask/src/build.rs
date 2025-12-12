@@ -1,6 +1,5 @@
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Command, ExitStatus, Stdio};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -318,8 +317,6 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         .into_diagnostic()
         .context("wasm-opt not found")?;
 
-    let errors: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
-    let failed = Arc::new(AtomicBool::new(false));
     let printer = OutputPrinter::new();
 
     let pool = rayon::ThreadPoolBuilder::new()
@@ -329,11 +326,6 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
 
     pool.install(|| {
         grammars.par_iter().for_each(|grammar| {
-            // Stop processing new builds if any have failed
-            if failed.load(Ordering::Relaxed) {
-                return;
-            }
-
             let result = build_single_plugin(
                 repo_root,
                 &registry,
@@ -350,29 +342,16 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                     println!("{} {}", format!("[{}]", grammar).green(), "done".green());
                 }
                 Err(e) => {
-                    failed.store(true, Ordering::Relaxed);
                     eprintln!(
                         "{} {}",
                         format!("[{}]", grammar).red(),
                         format!("{}", e).red()
                     );
-                    errors
-                        .lock()
-                        .unwrap()
-                        .push((grammar.clone(), format!("{}", e)));
+                    std::process::exit(1);
                 }
             }
         })
     });
-
-    let errors = errors.into_inner().unwrap();
-    if !errors.is_empty() {
-        eprintln!("\n{} {} plugin(s) failed:", "✗".red(), errors.len());
-        for (grammar, err) in &errors {
-            eprintln!("  {} {}", format!("[{}]", grammar).red(), err);
-        }
-        miette::bail!("{} plugin(s) failed to build", errors.len());
-    }
 
     let manifest = build_manifest(
         repo_root,
