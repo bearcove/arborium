@@ -89,6 +89,79 @@ const ICON_GEAR: &str = "\u{f013}"; //
 /// Separator between prefix and log
 const SEP: &str = "│"; // U+2502 box drawings light vertical
 
+/// Get the nerd font icon for a language based on its grammar name
+fn language_icon(grammar: &str) -> &'static str {
+    // Extract the base language name from arborium-{lang}-plugin or arborium-{lang}
+    let lang = grammar
+        .strip_prefix("arborium-")
+        .and_then(|s| s.strip_suffix("-plugin"))
+        .or_else(|| grammar.strip_prefix("arborium-"))
+        .unwrap_or(grammar);
+
+    match lang {
+        // Programming languages with official icons
+        "rust" => "\u{e7a8}",            //
+        "python" => "\u{e73c}",          //
+        "javascript" => "\u{e74e}",      //
+        "typescript" => "\u{e628}",      //
+        "java" => "\u{e738}",            //
+        "c" => "\u{e61e}",               //
+        "cpp" | "c-sharp" => "\u{e61d}", //
+        "go" => "\u{e626}",              //
+        "ruby" => "\u{e21e}",            //
+        "php" => "\u{e73d}",             //
+        "swift" => "\u{e755}",           //
+        "kotlin" => "\u{e634}",          //
+        "scala" => "\u{e737}",           //
+        "clojure" => "\u{e768}",         //
+        "elixir" => "\u{e62d}",          //
+        "erlang" => "\u{e7b1}",          //
+        "haskell" => "\u{e777}",         //
+        "ocaml" => "\u{e91a}",           //
+        "lua" => "\u{e620}",             //
+        "r" => "\u{f25d}",               //
+        "julia" => "\u{e624}",           //
+        "dart" => "\u{e798}",            //
+        "elm" => "\u{e62c}",             //
+        "fsharp" => "\u{e7a7}",          //
+        "nim" => "\u{e677}",             //
+        "zig" => "\u{e6a9}",             //
+
+        // Markup & data
+        "html" => "\u{e736}",                  //
+        "css" | "scss" | "sass" => "\u{e749}", //
+        "json" => "\u{e60b}",                  //
+        "yaml" | "yml" => "\u{f481}",          //
+        "toml" => "\u{e6b2}",                  //
+        "xml" => "\u{e619}",                   //
+        "markdown" => "\u{e609}",              //
+        "latex" | "tex" => "\u{e6a4}",         //
+
+        // Shell & config
+        "bash" | "sh" => "\u{e795}", //
+        "fish" => "\u{f739}",        //
+        "powershell" => "\u{e683}",  //
+        "vim" => "\u{e62b}",         //
+        "dockerfile" => "\u{f308}",  //
+        "nginx" => "\u{f308}",       //
+
+        // Build & tools
+        "makefile" | "make" => "\u{e779}", //
+        "cmake" => "\u{e615}",             //
+        "meson" => "\u{e615}",             //
+
+        // Databases
+        "sql" | "mysql" | "postgresql" => "\u{e706}", //
+
+        // Other
+        "git" => "\u{e702}",     //
+        "graphql" => "\u{e602}", //
+
+        // Default fallback
+        _ => "\u{f15c}", // generic file icon
+    }
+}
+
 /// Build phase for display
 #[derive(Clone, Copy)]
 #[allow(dead_code)]
@@ -160,9 +233,10 @@ impl OutputPrinter {
     }
 
     fn format_prefix(grammar: &str, phase: Option<BuildPhase>) -> String {
+        let icon = language_icon(grammar);
         match phase {
             Some(p) => format!("{:>14} {} {}", grammar, p.icon(), SEP),
-            None => format!("{:>14} {} {}", grammar, SEP, SEP),
+            None => format!("{:>14} {} {}", grammar, icon, SEP),
         }
     }
 
