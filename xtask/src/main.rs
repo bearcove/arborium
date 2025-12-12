@@ -118,6 +118,10 @@ enum Command {
         /// Dev mode: use local plugin paths in demo instead of CDN
         #[facet(args::named, default)]
         dev: bool,
+
+        /// Continue building other plugins even if some fail
+        #[facet(args::named, default)]
+        no_fail_fast: bool,
     },
 
     /// Clean plugin build artifacts (standard layout)
@@ -362,6 +366,7 @@ fn main() {
             output,
             jobs,
             dev,
+            no_fail_fast,
         } => {
             let repo_root = util::find_repo_root().expect("Could not find repo root");
             let repo_root = camino::Utf8PathBuf::from_path_buf(repo_root).expect("non-UTF8 path");
@@ -383,6 +388,7 @@ fn main() {
                 group,
                 output_dir: output.map(camino::Utf8PathBuf::from),
                 jobs: jobs.unwrap_or(16),
+                no_fail_fast,
             };
             if let Err(e) = build::build_plugins(&repo_root, &options) {
                 eprintln!("{:?}", e);

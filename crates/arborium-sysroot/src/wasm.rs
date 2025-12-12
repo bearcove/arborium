@@ -334,6 +334,14 @@ pub extern "C" fn iswdigit(wc: u32) -> c_int {
     matches!(wc, 0x30..=0x39) as c_int
 }
 
+/// iswxdigit implementation for wide characters (hex digits: 0-9, A-F, a-f)
+#[unsafe(no_mangle)]
+pub extern "C" fn iswxdigit(wc: u32) -> c_int {
+    (iswdigit(wc) != 0
+        || matches!(wc, 0x41..=0x46) // A-F
+        || matches!(wc, 0x61..=0x66)) as c_int // a-f
+}
+
 /// iswalpha implementation for wide characters
 #[unsafe(no_mangle)]
 pub extern "C" fn iswalpha(wc: u32) -> c_int {
@@ -406,6 +414,7 @@ static _FORCE_INCLUDE: () = {
     let _ = iswalpha as *const ();
     let _ = iswspace as *const ();
     let _ = iswdigit as *const ();
+    let _ = iswxdigit as *const ();
     let _ = strncmp as *const ();
     let _ = abort as *const ();
     let _ = fputc as *const ();

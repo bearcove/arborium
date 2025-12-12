@@ -1,6 +1,7 @@
 use std::io::{BufRead, BufReader};
 use std::process::{Command, ExitStatus, Stdio};
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 
@@ -429,6 +430,7 @@ pub struct BuildOptions {
     pub group: Option<String>,
     pub output_dir: Option<Utf8PathBuf>,
     pub jobs: usize,
+    pub no_fail_fast: bool,
 }
 
 impl Default for BuildOptions {
@@ -438,6 +440,7 @@ impl Default for BuildOptions {
             group: None,
             output_dir: None,
             jobs: 16,
+            no_fail_fast: false,
         }
     }
 }
@@ -595,6 +598,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         .context("wasm-opt not found")?;
 
     let printer = OutputPrinter::new(grammars.len());
+    let errors: Arc<Mutex<Vec<(String, String)>>> = Arc::new(Mutex::new(Vec::new()));
 
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(options.jobs)
@@ -620,14 +624,35 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
                 }
                 Err(e) => {
                     printer.print_error(grammar, &format!("{}", e));
-                    eprintln!("Build failed for grammar `{}`: {:?}", grammar, e);
-                    std::process::exit(1);
+                    if options.no_fail_fast {
+                        let mut errors = errors.lock().expect("errors mutex poisoned");
+                        errors.push((grammar.clone(), format!("{}", e)));
+                    } else {
+                        eprintln!("Build failed for grammar `{}`: {:?}", grammar, e);
+                        std::process::exit(1);
+                    }
                 }
             }
         })
     });
 
     printer.finish();
+
+    if options.no_fail_fast {
+        let errors = errors.lock().expect("errors mutex poisoned");
+        if !errors.is_empty() {
+            let summary = errors
+                .iter()
+                .map(|(g, e)| format!("  - {}: {}", g, e.lines().next().unwrap_or("")))
+                .collect::<Vec<_>>()
+                .join("\n");
+            miette::bail!(
+                "Build completed with {} failure(s):\n{}",
+                errors.len(),
+                summary
+            );
+        }
+    }
 
     let manifest = build_manifest(
         repo_root,
