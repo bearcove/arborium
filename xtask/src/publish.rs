@@ -188,7 +188,12 @@ pub fn compute_grammar_hash(crate_dir: &Utf8Path) -> Result<String> {
 /// If `group` is Some("pre"), publishes only the pre crates.
 /// If `group` is Some("post"), publishes only the post crates.
 /// If `group` is Some(name), publishes only crates from that language group.
-pub fn publish_crates(repo_root: &Utf8Path, group: Option<&str>, dry_run: bool) -> Result<()> {
+pub fn publish_crates(
+    repo_root: &Utf8Path,
+    group: Option<&str>,
+    dry_run: bool,
+    verbose: bool,
+) -> Result<()> {
     println!("{}", "Publishing to crates.io...".cyan().bold());
 
     if dry_run {
@@ -202,7 +207,7 @@ pub fn publish_crates(repo_root: &Utf8Path, group: Option<&str>, dry_run: bool) 
             println!("  Publishing {} group", "pre".cyan());
             let crate_paths: Vec<Utf8PathBuf> =
                 PRE_CRATES.iter().map(|c| repo_root.join(c)).collect();
-            publish_crate_paths(&crate_paths, dry_run)?;
+            publish_crate_paths(&crate_paths, dry_run, verbose)?;
             print_crates_next_steps(&langs_dir, Some("pre"))?;
             Ok(())
         }
@@ -210,7 +215,7 @@ pub fn publish_crates(repo_root: &Utf8Path, group: Option<&str>, dry_run: bool) 
             println!("  Publishing {} group", "post".cyan());
             let crate_paths: Vec<Utf8PathBuf> =
                 POST_CRATES.iter().map(|c| repo_root.join(c)).collect();
-            publish_crate_paths(&crate_paths, dry_run)?;
+            publish_crate_paths(&crate_paths, dry_run, verbose)?;
             print_crates_next_steps(&langs_dir, Some("post"))?;
             Ok(())
         }
@@ -226,7 +231,7 @@ pub fn publish_crates(repo_root: &Utf8Path, group: Option<&str>, dry_run: bool) 
                 );
                 return Ok(());
             }
-            publish_crate_paths(&crates, dry_run)?;
+            publish_crate_paths(&crates, dry_run, verbose)?;
             print_crates_next_steps(&langs_dir, Some(group_name))?;
             Ok(())
         }
@@ -239,7 +244,7 @@ pub fn publish_crates(repo_root: &Utf8Path, group: Option<&str>, dry_run: bool) 
             println!("  {} Publishing {} group...", "●".cyan(), "pre".bold());
             let pre_paths: Vec<Utf8PathBuf> =
                 PRE_CRATES.iter().map(|c| repo_root.join(c)).collect();
-            publish_crate_paths(&pre_paths, dry_run)?;
+            publish_crate_paths(&pre_paths, dry_run, verbose)?;
             println!();
 
             // 2. All grammar crates in dependency order (leaves first)
@@ -253,14 +258,14 @@ pub fn publish_crates(repo_root: &Utf8Path, group: Option<&str>, dry_run: bool) 
                 "    {} crates to publish in dependency order",
                 sorted_crates.len()
             );
-            publish_crate_paths(&sorted_crates, dry_run)?;
+            publish_crate_paths(&sorted_crates, dry_run, verbose)?;
             println!();
 
             // 3. Post crates
             println!("  {} Publishing {} group...", "●".cyan(), "post".bold());
             let post_paths: Vec<Utf8PathBuf> =
                 POST_CRATES.iter().map(|c| repo_root.join(c)).collect();
-            publish_crate_paths(&post_paths, dry_run)?;
+            publish_crate_paths(&post_paths, dry_run, verbose)?;
 
             println!();
             println!("{} All crates published!", "✓".green().bold());
@@ -418,9 +423,14 @@ fn ensure_release_version(version: &str) -> Result<()> {
 }
 
 /// Publish everything (crates.io + npm).
-pub fn publish_all(repo_root: &Utf8Path, langs_dir: &Utf8Path, dry_run: bool) -> Result<()> {
+pub fn publish_all(
+    repo_root: &Utf8Path,
+    langs_dir: &Utf8Path,
+    dry_run: bool,
+    verbose: bool,
+) -> Result<()> {
     // Publish to crates.io first (all groups in order)
-    publish_crates(repo_root, None, dry_run)?;
+    publish_crates(repo_root, None, dry_run, verbose)?;
 
     println!();
 
@@ -445,13 +455,13 @@ enum CratePublishResult {
 }
 
 /// Publish crates from a list of paths.
-fn publish_crate_paths(crates: &[Utf8PathBuf], dry_run: bool) -> Result<()> {
+fn publish_crate_paths(crates: &[Utf8PathBuf], dry_run: bool, verbose: bool) -> Result<()> {
     let mut published = 0;
     let mut skipped = 0;
     let mut failed = 0;
 
     for crate_dir in crates {
-        match publish_single_crate(crate_dir, dry_run)? {
+        match publish_single_crate(crate_dir, dry_run, verbose)? {
             CratePublishResult::Published => published += 1,
             CratePublishResult::AlreadyExists => skipped += 1,
             CratePublishResult::Failed => failed += 1,
@@ -533,7 +543,11 @@ fn crate_version_exists(crate_name: &str, version: &str) -> Result<bool> {
 }
 
 /// Publish a single crate.
-fn publish_single_crate(crate_dir: &Utf8Path, dry_run: bool) -> Result<CratePublishResult> {
+fn publish_single_crate(
+    crate_dir: &Utf8Path,
+    dry_run: bool,
+    verbose: bool,
+) -> Result<CratePublishResult> {
     // Check if Cargo.toml exists
     if !crate_dir.join("Cargo.toml").exists() {
         println!(
@@ -615,6 +629,29 @@ fn publish_single_crate(crate_dir: &Utf8Path, dry_run: bool) -> Result<CratePubl
     let mut args = vec!["publish", "--allow-dirty"];
     if dry_run {
         args.push("--dry-run");
+    }
+
+    // In verbose mode, let output stream directly to terminal
+    if verbose {
+        println!(); // newline after the "→ crate@version..." prefix
+        let status = Command::new("cargo")
+            .args(&args)
+            .current_dir(crate_dir)
+            .status()
+            .into_diagnostic()
+            .wrap_err("Failed to run cargo publish")?;
+
+        if status.success() {
+            if dry_run {
+                println!("  {}", "dry-run ok".green());
+            } else {
+                println!("  {}", "published".green());
+            }
+            return Ok(CratePublishResult::Published);
+        } else {
+            println!("  {}", "FAILED".red());
+            return Ok(CratePublishResult::Failed);
+        }
     }
 
     let output = Command::new("cargo")

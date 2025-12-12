@@ -181,6 +181,10 @@ enum PublishAction {
         /// Specific group to publish (pre, post, or a group name like cedar)
         #[facet(args::named, default)]
         group: Option<String>,
+
+        /// Show full output from cargo publish
+        #[facet(args::named, default)]
+        verbose: bool,
     },
 
     /// Publish packages to npm
@@ -206,6 +210,10 @@ enum PublishAction {
         /// Dry run - don't actually publish
         #[facet(args::named, default)]
         dry_run: bool,
+
+        /// Show full output from cargo publish
+        #[facet(args::named, default)]
+        verbose: bool,
     },
 }
 
@@ -414,8 +422,14 @@ fn main() {
             let repo_root = camino::Utf8PathBuf::from_path_buf(repo_root).expect("non-UTF8 path");
 
             match action {
-                PublishAction::Crates { dry_run, group } => {
-                    if let Err(e) = publish::publish_crates(&repo_root, group.as_deref(), dry_run) {
+                PublishAction::Crates {
+                    dry_run,
+                    group,
+                    verbose,
+                } => {
+                    if let Err(e) =
+                        publish::publish_crates(&repo_root, group.as_deref(), dry_run, verbose)
+                    {
                         eprintln!("{:?}", e);
                         std::process::exit(1);
                     }
@@ -435,9 +449,10 @@ fn main() {
                         std::process::exit(1);
                     }
                 }
-                PublishAction::All { dry_run } => {
+                PublishAction::All { dry_run, verbose } => {
                     let output_dir = repo_root.join("langs");
-                    if let Err(e) = publish::publish_all(&repo_root, &output_dir, dry_run) {
+                    if let Err(e) = publish::publish_all(&repo_root, &output_dir, dry_run, verbose)
+                    {
                         eprintln!("{:?}", e);
                         std::process::exit(1);
                     }
