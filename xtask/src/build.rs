@@ -328,12 +328,18 @@ fn format_command(cmd: &Command) -> String {
     }
 }
 
+/// Result of running a streaming command - includes captured stderr for error reporting.
+struct StreamingResult {
+    status: ExitStatus,
+    stderr: String,
+}
+
 /// Run a command and stream its output with prefixed lines.
 fn run_streaming(
     cmd: Command,
     grammar: &str,
     printer: &OutputPrinter,
-) -> std::io::Result<ExitStatus> {
+) -> std::io::Result<StreamingResult> {
     run_streaming_with_phase(cmd, grammar, printer, None)
 }
 
@@ -342,7 +348,7 @@ fn run_streaming_with_phase(
     grammar: &str,
     printer: &OutputPrinter,
     phase: Option<BuildPhase>,
-) -> std::io::Result<ExitStatus> {
+) -> std::io::Result<StreamingResult> {
     // Print the full command being executed
     let cmd_str = format_command(&cmd);
     printer.print_line_with_phase(grammar, &format!("$ {}", cmd_str), false, phase);
@@ -367,20 +373,27 @@ fn run_streaming_with_phase(
         }
     });
 
+    // Capture stderr while also printing it
     let stderr_thread = thread::spawn(move || {
         let reader = BufReader::new(stderr);
+        let mut captured = Vec::new();
         for line in reader.lines() {
             let Ok(line) = line else { break };
             printer_err.print_line_with_phase(&grammar_err, &line, true, phase);
+            captured.push(line);
         }
+        captured
     });
 
     let status = child.wait()?;
 
     stdout_thread.join().expect("stdout thread panicked");
-    stderr_thread.join().expect("stderr thread panicked");
+    let stderr_lines = stderr_thread.join().expect("stderr thread panicked");
 
-    Ok(status)
+    Ok(StreamingResult {
+        status,
+        stderr: stderr_lines.join("\n"),
+    })
 }
 
 pub struct BuildOptions {
@@ -793,6 +806,7 @@ pub fn build_demo(repo_root: &Utf8Path, crates_dir: &Utf8Path, dev: bool) -> Res
     Ok(())
 }
 
+#[allow(clippy::complexity)]
 fn build_single_plugin(
     repo_root: &Utf8Path,
     registry: &CrateRegistry,
@@ -875,12 +889,12 @@ fn build_single_plugin(
         )
         .current_dir(&plugin_source);
 
-    let status = run_streaming(cargo_cmd, grammar, printer)
+    let result = run_streaming(cargo_cmd, grammar, printer)
         .into_diagnostic()
         .context("failed to run cargo build")?;
 
-    if !status.success() {
-        miette::bail!("cargo build failed (see output above)");
+    if !result.status.success() {
+        miette::bail!("cargo build failed:\n{}", result.stderr);
     }
 
     // Step 2: Locate the .wasm file in the artifact directory
@@ -915,12 +929,12 @@ fn build_single_plugin(
         ])
         .current_dir(&plugin_source);
 
-    let status = run_streaming(bindgen_cmd, grammar, printer)
+    let result = run_streaming(bindgen_cmd, grammar, printer)
         .into_diagnostic()
         .context("failed to run wasm-bindgen")?;
 
-    if !status.success() {
-        miette::bail!("wasm-bindgen failed (see output above)");
+    if !result.status.success() {
+        miette::bail!("wasm-bindgen failed:\n{}", result.stderr);
     }
 
     // Step 4: Optimize WASM with wasm-opt
@@ -942,12 +956,12 @@ fn build_single_plugin(
         ])
         .current_dir(&plugin_source);
 
-    let status = run_streaming(opt_cmd, grammar, printer)
+    let result = run_streaming(opt_cmd, grammar, printer)
         .into_diagnostic()
         .context("failed to run wasm-opt")?;
 
-    if !status.success() {
-        miette::bail!("wasm-opt failed (see output above)");
+    if !result.status.success() {
+        miette::bail!("wasm-opt failed:\n{}", result.stderr);
     }
 
     // Step 5: Copy and rename output files

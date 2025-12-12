@@ -1542,18 +1542,19 @@ fn plan_crate_files_only(
         for entry in fs::read_dir(def_path)? {
             let entry = entry?;
             let path = Utf8PathBuf::try_from(entry.path())?;
-            if let Some(name) = path.file_name() {
-                if name.starts_with("sample.") && path.is_file() {
-                    let content = fs::read_to_string(&path)?;
-                    let dest = crate_path.join(name);
-                    plan_file_update(
-                        &mut plan,
-                        &dest,
-                        content,
-                        &format!("{} for tests", name),
-                        mode,
-                    )?;
-                }
+            if let Some(name) = path.file_name()
+                && name.starts_with("sample.")
+                && path.is_file()
+            {
+                let content = fs::read_to_string(&path)?;
+                let dest = crate_path.join(name);
+                plan_file_update(
+                    &mut plan,
+                    &dest,
+                    content,
+                    &format!("{} for tests", name),
+                    mode,
+                )?;
             }
         }
     }
@@ -1937,28 +1938,26 @@ fn update_cargo_toml_version(
     let major_version = new_version.split('.').next().unwrap_or(new_version);
 
     // Update package version (full version)
-    if let Some(package) = doc.get_mut("package") {
-        if let Some(version) = package.get_mut("version") {
-            *version = Item::Value(Value::from(new_version));
-        }
+    if let Some(package) = doc.get_mut("package")
+        && let Some(version) = package.get_mut("version")
+    {
+        *version = Item::Value(Value::from(new_version));
     }
 
     // Update arborium dependencies in all dependency sections (major version only)
     let dep_sections = ["dependencies", "dev-dependencies", "build-dependencies"];
     for section_name in dep_sections {
-        if let Some(deps) = doc.get_mut(section_name) {
-            if let Some(table) = deps.as_table_mut() {
-                for (name, value) in table.iter_mut() {
-                    // Match "arborium" or "arborium-*"
-                    let dep_name = name.get();
-                    if dep_name == "arborium" || dep_name.starts_with("arborium-") {
-                        if let Some(dep_table) = value.as_table_like_mut() {
-                            if dep_table.contains_key("version") {
-                                dep_table
-                                    .insert("version", Item::Value(Value::from(major_version)));
-                            }
-                        }
-                    }
+        if let Some(deps) = doc.get_mut(section_name)
+            && let Some(table) = deps.as_table_mut()
+        {
+            for (name, value) in table.iter_mut() {
+                // Match "arborium" or "arborium-*"
+                let dep_name = name.get();
+                if (dep_name == "arborium" || dep_name.starts_with("arborium-"))
+                    && let Some(dep_table) = value.as_table_like_mut()
+                    && dep_table.contains_key("version")
+                {
+                    dep_table.insert("version", Item::Value(Value::from(major_version)));
                 }
             }
         }

@@ -1181,10 +1181,11 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
         let mut tag_to_style: std::collections::HashMap<&str, &arborium_theme::Style> =
             std::collections::HashMap::new();
         for (i, def) in HIGHLIGHTS.iter().enumerate() {
-            if let Some(style) = theme.style(i) {
-                if !def.tag.is_empty() && !style.is_empty() {
-                    tag_to_style.insert(def.tag, style);
-                }
+            if let Some(style) = theme.style(i)
+                && !def.tag.is_empty()
+                && !style.is_empty()
+            {
+                tag_to_style.insert(def.tag, style);
             }
         }
 

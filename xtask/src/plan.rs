@@ -584,10 +584,8 @@ impl PlanSet {
         let start = Instant::now();
 
         for plan in &self.plans {
-            if !quiet {
-                if let Some(ref name) = plan.crate_name {
-                    println!("Processing {}...", name);
-                }
+            if !quiet && let Some(ref name) = plan.crate_name {
+                println!("Processing {}...", name);
             }
             plan.execute()?;
         }
