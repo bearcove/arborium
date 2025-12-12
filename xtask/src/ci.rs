@@ -411,7 +411,7 @@ case "$GITHUB_REF" in
     IS_RELEASE="true"
     ;;
   *)
-    VERSION="1.0.0-dev"
+    VERSION="1.0.0"
     IS_RELEASE="false"
     ;;
 esac

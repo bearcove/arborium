@@ -42,6 +42,9 @@ RUN cargo binstall -y --locked cargo-nextest
 # Install wasm-pack (binstall)
 RUN cargo binstall -y --locked wasm-pack
 
+# Install wasm-bindgen-cli (binstall)
+RUN cargo binstall -y --locked wasm-bindgen-cli
+
 # Install cargo-workspaces (binstall)
 RUN cargo binstall -y --locked cargo-workspaces
 
