@@ -1,6 +1,6 @@
 [package]
 name = "arborium-query"
-version = "1.1.11"
+version = "1.1.5"
 edition = "2024"
 description = "query grammar for arborium (tree-sitter bindings)"
 license = "MIT"

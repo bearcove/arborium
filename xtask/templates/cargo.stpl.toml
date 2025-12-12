@@ -28,14 +28,14 @@ include = [
 path = "src/lib.rs"
 
 [dependencies]
-arborium-tree-sitter = { version = "<%= workspace_version %>", path = "<%= shared_rel %>/arborium-tree-sitter" }
-arborium-sysroot = { version = "<%= workspace_version %>", path = "<%= shared_rel %>/arborium-sysroot" }
+arborium-tree-sitter = { version = "<%= dep_version %>", path = "<%= shared_rel %>/arborium-tree-sitter" }
+arborium-sysroot = { version = "<%= dep_version %>", path = "<%= shared_rel %>/arborium-sysroot" }
 <% for dep in highlights_prepend_deps { %>
-<%= dep.crate_name %> = { version = "<%= dep.version %>", path = "<%= dep.rel_path %>" }
+<%= dep.crate_name %> = { version = "<%= dep_version %>", path = "<%= dep.rel_path %>" }
 <% } %>
 
 [dev-dependencies]
-arborium-test-harness = { version = "<%= workspace_version %>", path = "<%= shared_rel %>/arborium-test-harness" }
+arborium-test-harness = { version = "<%= dep_version %>", path = "<%= shared_rel %>/arborium-test-harness" }
 
 [build-dependencies]
 cc = "1"

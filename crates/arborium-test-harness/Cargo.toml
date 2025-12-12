@@ -1,6 +1,6 @@
 [package]
 name = "arborium-test-harness"
-version = "1.1.11"
+version = "1.1.5"
 edition = "2024"
 rust-version = "1.85"
 description = "Test harness for arborium grammar crates"

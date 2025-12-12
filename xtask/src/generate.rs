@@ -47,6 +47,8 @@ struct ValidateGrammarTemplate<'a> {
 struct CargoTomlTemplate<'a> {
     crate_name: &'a str,
     workspace_version: &'a str,
+    /// Major version for dependencies (e.g., "1" instead of "1.1.5")
+    dep_version: &'a str,
     grammar_id: &'a str,
     grammar_name: &'a str,
     license: &'a str,
@@ -612,9 +614,13 @@ fn generate_cargo_toml(
         if l.is_empty() { "MIT" } else { l }
     };
 
+    // Extract major version for dependencies (e.g., "1.1.5" -> "1")
+    let dep_version = workspace_version.split('.').next().unwrap_or("1");
+
     let template = CargoTomlTemplate {
         crate_name,
         workspace_version,
+        dep_version,
         grammar_id,
         grammar_name,
         license,
@@ -1207,8 +1213,6 @@ struct HighlightDep {
     crate_name: String,
     /// Relative path from the dependent crate (e.g., "../../c/crate")
     rel_path: String,
-    /// Version string
-    version: String,
 }
 
 /// Result of extracting highlight prepend configuration.
@@ -1252,7 +1256,6 @@ fn extract_highlights_prepend(
             result.cargo_deps.push(HighlightDep {
                 crate_name: crate_name.clone(),
                 rel_path,
-                version: registry.workspace_version.clone(),
             });
         }
 

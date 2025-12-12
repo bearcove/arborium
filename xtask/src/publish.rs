@@ -22,9 +22,9 @@ use owo_colors::OwoColorize;
 use std::collections::HashMap;
 use std::process::{Command, Stdio};
 
+use crate::tool::Tool;
 use crate::types::CrateRegistry;
 use crate::version_store;
-use crate::tool::Tool;
 
 /// Crates in the "pre" group - must be published before grammar crates.
 /// These are shared dependencies that grammar crates rely on.
@@ -67,11 +67,7 @@ fn is_grammar_crate(crate_dir: &Utf8Path) -> bool {
 /// - Ok(true) if published version exists and hash matches (should skip)
 /// - Ok(false) if hash differs or no published version (should publish)
 /// - Err if couldn't check (e.g., download failed)
-fn should_skip_grammar_publish(
-    crate_dir: &Utf8Path,
-    name: &str,
-    version: &str,
-) -> Result<bool> {
+fn should_skip_grammar_publish(crate_dir: &Utf8Path, name: &str, version: &str) -> Result<bool> {
     // Compute current hash
     let current_hash = compute_grammar_hash(crate_dir)?;
 
@@ -95,7 +91,10 @@ fn should_skip_grammar_publish(
 /// Download a published crate and extract its .arborium-hash file if present.
 fn get_published_crate_hash(name: &str, version: &str) -> Result<Option<String>> {
     // Download the .crate file from crates.io
-    let url = format!("https://crates.io/api/v1/crates/{}/{}/download", name, version);
+    let url = format!(
+        "https://crates.io/api/v1/crates/{}/{}/download",
+        name, version
+    );
 
     let temp_dir = tempfile::tempdir().into_diagnostic()?;
     let crate_file = temp_dir.path().join("crate.tar.gz");
@@ -575,7 +574,11 @@ fn publish_single_crate(crate_dir: &Utf8Path, dry_run: bool) -> Result<CratePubl
         match should_skip_grammar_publish(crate_dir, &name, &version) {
             Ok(true) => {
                 if dry_run {
-                    println!(" {} {}", "[dry-run]".yellow(), "unchanged (hash match), would skip".dimmed());
+                    println!(
+                        " {} {}",
+                        "[dry-run]".yellow(),
+                        "unchanged (hash match), would skip".dimmed()
+                    );
                 } else {
                     println!(" {}", "unchanged (hash match), skipping".dimmed());
                     return Ok(CratePublishResult::AlreadyExists);
@@ -608,14 +611,14 @@ fn publish_single_crate(crate_dir: &Utf8Path, dry_run: bool) -> Result<CratePubl
         }
     }
 
+    // Publish (or dry-run publish)
+    let mut args = vec!["publish", "--allow-dirty"];
     if dry_run {
-        println!(" {}", "would publish (dry run)".cyan());
-        return Ok(CratePublishResult::Published);
+        args.push("--dry-run");
     }
 
-    // Actually publish
     let output = Command::new("cargo")
-        .args(["publish", "--allow-dirty"])
+        .args(&args)
         .current_dir(crate_dir)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -624,7 +627,11 @@ fn publish_single_crate(crate_dir: &Utf8Path, dry_run: bool) -> Result<CratePubl
         .wrap_err("Failed to run cargo publish")?;
 
     if output.status.success() {
-        println!(" {}", "published".green());
+        if dry_run {
+            println!(" {}", "dry-run ok".green());
+        } else {
+            println!(" {}", "published".green());
+        }
         return Ok(CratePublishResult::Published);
     }
 
@@ -1005,14 +1012,17 @@ fn publish_single_npm_package(
         }
     }
 
-    if dry_run {
-        println!(" {}", "would publish (dry run)".cyan());
-        return Ok(NpmPublishResult::Published);
+    // Publish (or dry-run publish) with provenance for OIDC trusted publishing
+    let mut args = vec!["publish", "--access", "public"];
+    if !dry_run {
+        // Provenance only works for actual publishes, not dry-run
+        args.push("--provenance");
+    } else {
+        args.push("--dry-run");
     }
 
-    // Actually publish with provenance for OIDC trusted publishing
     let output = Command::new("npm")
-        .args(["publish", "--access", "public", "--provenance"])
+        .args(&args)
         .current_dir(package_dir)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -1021,7 +1031,11 @@ fn publish_single_npm_package(
         .wrap_err("Failed to run npm publish")?;
 
     if output.status.success() {
-        println!(" {}", "published".green());
+        if dry_run {
+            println!(" {}", "dry-run ok".green());
+        } else {
+            println!(" {}", "published".green());
+        }
         return Ok(NpmPublishResult::Published);
     }
 
