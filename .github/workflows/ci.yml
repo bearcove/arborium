@@ -4,6 +4,12 @@
 name: CI
 "on": 
   push: 
+    branches: 
+      - main
+
+    tags: 
+      - v*
+
   pull_request: 
     branches: 
       - main
@@ -39,6 +45,9 @@ jobs:
           key: "grammar-cache-v1000-${{ hashFiles('langs/group-*/*/def/grammar/grammar.js', 'langs/group-*/*/def/grammar/package.json') }}"
           restore-keys: grammar-cache-v10-
 
+      - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
       - 
         name: Generate grammar sources
         run: "set -e\narborium-xtask gen --version ${{ steps.version.outputs.version }} --quiet"
@@ -236,6 +245,9 @@ jobs:
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
       - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
+      - 
         name: Build css, html, javascript, json, scss, tsx, typescript, xml
         run: "set -e\narborium-xtask build css html javascript json scss tsx typescript xml -o dist/plugins"
       - 
@@ -268,6 +280,9 @@ jobs:
       - 
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
+      - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
       - 
         name: Build asm, c, cpp, d, go, objc, rust, x86asm, zig
         run: "set -e\narborium-xtask build asm c cpp d go objc rust x86asm zig -o dist/plugins"
@@ -302,6 +317,9 @@ jobs:
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
       - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
+      - 
         name: Build clojure, java, kotlin, scala
         run: "set -e\narborium-xtask build clojure java kotlin scala -o dist/plugins"
       - 
@@ -334,6 +352,9 @@ jobs:
       - 
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
+      - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
       - 
         name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme
         run: "set -e\narborium-xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml scheme -o dist/plugins"
@@ -368,6 +389,9 @@ jobs:
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
       - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
+      - 
         name: Build awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh
         run: "set -e\narborium-xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins"
       - 
@@ -400,6 +424,9 @@ jobs:
       - 
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
+      - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
       - 
         name: Build caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, kdl, meson, nginx, ninja, nix, query, ron, sql, ssh-config, toml, yaml
         run: "set -e\narborium-xtask build caddy cmake dockerfile dot graphql hcl ini jq kdl meson nginx ninja nix query ron sql ssh-config toml yaml -o dist/plugins"
@@ -434,6 +461,9 @@ jobs:
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
       - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
+      - 
         name: Build ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl
         run: "set -e\narborium-xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins"
       - 
@@ -466,6 +496,9 @@ jobs:
       - 
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
+      - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
       - 
         name: Build capnp, dart, devicetree, rescript, starlark, swift, textproto, thrift, uiua, yuri
         run: "set -e\narborium-xtask build capnp dart devicetree rescript starlark swift textproto thrift uiua yuri -o dist/plugins"
@@ -500,6 +533,9 @@ jobs:
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
       - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
+      - 
         name: Build c-sharp, elisp, fsharp, postscript, vb, vim
         run: "set -e\narborium-xtask build c-sharp elisp fsharp postscript vb vim -o dist/plugins"
       - 
@@ -532,6 +568,9 @@ jobs:
       - 
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
+      - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
       - 
         name: Build asciidoc, diff, jinja2, markdown, svelte, typst, vue
         run: "set -e\narborium-xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins"
@@ -573,6 +612,9 @@ jobs:
       - 
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
+      - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
       - 
         name: Authenticate with crates.io
         uses: rust-lang/crates-io-auth-action@v1
@@ -620,6 +662,9 @@ jobs:
       - 
         name: Extract grammar sources
         run: "set -e\ntar -xvf grammar-sources.tar"
+      - 
+        name: Build xtask
+        run: "set -e\ncargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask"
       - 
         name: Download plugins group acorn
         uses: actions/download-artifact@v4

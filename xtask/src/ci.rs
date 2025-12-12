@@ -346,6 +346,15 @@ pub mod common {
     pub fn extract_grammar_sources() -> Step {
         Step::run("Extract grammar sources", "tar -xvf grammar-sources.tar")
     }
+
+    /// Build xtask from source and install it.
+    /// This ensures we use the version from the repo, not the one baked into the container.
+    pub fn build_xtask() -> Step {
+        Step::run(
+            "Build xtask",
+            "cargo build --manifest-path xtask/Cargo.toml --release && cp xtask/target/release/xtask /usr/local/bin/arborium-xtask",
+        )
+    }
 }
 
 // =============================================================================
@@ -421,6 +430,8 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                         ),
                         ("restore-keys", "grammar-cache-v10-"),
                     ]),
+                // Build xtask from source to use the version from the repo
+                build_xtask(),
                 // Generate with version (from tag or 0.0.0-dev for non-release)
                 Step::run(
                     "Generate grammar sources",
@@ -584,6 +595,7 @@ echo "No env imports found - WASM modules are browser-compatible""#,
                         checkout(),
                         download_grammar_sources(),
                         extract_grammar_sources(),
+                        build_xtask(),
                         Step::run(
                             format!("Build {}", display_grammars),
                             format!("arborium-xtask build {} -o dist/plugins", grammars_list),
@@ -614,6 +626,7 @@ echo "No env imports found - WASM modules are browser-compatible""#,
                 checkout(),
                 download_grammar_sources(),
                 extract_grammar_sources(),
+                build_xtask(),
                 // Exchange OIDC token for crates.io access token
                 Step::uses(
                     "Authenticate with crates.io",
@@ -638,6 +651,7 @@ echo "No env imports found - WASM modules are browser-compatible""#,
             checkout(),
             download_grammar_sources(),
             extract_grammar_sources(),
+            build_xtask(),
         ];
 
         // Download all plugin artifacts
@@ -690,8 +704,8 @@ echo "No env imports found - WASM modules are browser-compatible""#,
         name: "CI".into(),
         on: On {
             push: Some(PushTrigger {
-                branches: None, // Trigger on all branches including tag pushes
-                tags: None,
+                branches: Some(vec!["main".into()]),
+                tags: Some(vec!["v*".into()]),
             }),
             pull_request: Some(PullRequestTrigger {
                 branches: Some(vec!["main".into()]),
