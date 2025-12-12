@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "arborium-theme"
-version = "1.0.8"
+version = "1.1.11"
 dependencies = [
  "toml",
 ]
