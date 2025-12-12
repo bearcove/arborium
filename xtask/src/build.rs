@@ -89,11 +89,11 @@ impl OutputPrinter {
 
     fn print_line(&self, grammar: &str, line: &str, is_stderr: bool) {
         let _lock = self.mutex.lock().unwrap();
-        let prefix = format!("[{}]", grammar);
+        let prefix = format!("[{:^18}]", grammar);
         let colored_prefix = if is_stderr {
             prefix.red().to_string()
         } else {
-            prefix.cyan().to_string()
+            prefix.blue().to_string()
         };
         if is_stderr {
             eprintln!("{} {}", colored_prefix, line);
@@ -339,12 +339,16 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
 
             match result {
                 Ok(()) => {
-                    println!("{} {}", format!("[{}]", grammar).green(), "done".green());
+                    println!(
+                        "{} {}",
+                        format!("[{:^18}]", grammar).green(),
+                        "done".green()
+                    );
                 }
                 Err(e) => {
                     eprintln!(
                         "{} {}",
-                        format!("[{}]", grammar).red(),
+                        format!("[{:^18}]", grammar).red(),
                         format!("{}", e).red()
                     );
                     std::process::exit(1);
