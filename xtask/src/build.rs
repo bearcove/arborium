@@ -913,7 +913,7 @@ fn build_single_plugin(
         ])
         .env(
             "RUSTFLAGS",
-            "-Zunstable-options -Cpanic=immediate-abort -Copt-level=s",
+            "-Zunstable-options -Cpanic=immediate-abort -Copt-level=s -Cembed-bitcode=yes -Clto=fat -Ccodegen-units=1 -Cstrip=symbols",
         )
         .current_dir(&plugin_source);
 
@@ -972,7 +972,7 @@ fn build_single_plugin(
     let mut opt_cmd = wasm_opt.command();
     opt_cmd
         .args([
-            "-O3", // Aggressive optimization
+            "-Oz", // Optimize for size
             "--enable-bulk-memory",
             "--enable-mutable-globals",
             "--enable-nontrapping-float-to-int",

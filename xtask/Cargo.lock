@@ -118,16 +118,16 @@ checksum = "5942714de3eb1c3d0c5607e30284e314ddea3698a76a0cf3e7686274ac57802f"
 
 [[package]]
 name = "arborium-theme"
-version = "1.0.0"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cece75c34d5fef8b4fa91ef544f515b85e5e830f2c51270d9dd39a21bf6cf5e1"
 dependencies = [
  "toml",
 ]
 
 [[package]]
 name = "arborium-theme"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cece75c34d5fef8b4fa91ef544f515b85e5e830f2c51270d9dd39a21bf6cf5e1"
+version = "1.1.11"
 dependencies = [
  "toml",
 ]
@@ -2415,7 +2415,7 @@ name = "xtask"
 version = "0.1.0"
 dependencies = [
  "arborium",
- "arborium-theme 1.0.0",
+ "arborium-theme 1.1.11",
  "blake3",
  "camino",
  "chrono",

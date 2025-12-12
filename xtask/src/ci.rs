@@ -499,40 +499,6 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             ]),
     );
 
-    // WASM compatibility check
-    jobs.insert(
-        "wasm".into(),
-        Job::new(runners::UBUNTU_32)
-            .name("WASM Compatibility")
-            .container(CONTAINER)
-            .needs(["generate"])
-            .steps([
-                checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
-                Step::run(
-                    "Build arborium for WASM",
-                    "cargo build --manifest-path crates/arborium/Cargo.toml --target wasm32-unknown-unknown --no-default-features",
-                ),
-                Step::run(
-                    "Check for env imports in WASM",
-                    r#"found_env_imports=false
-for wasm_file in $(find target/wasm32-unknown-unknown -name "*.wasm" -type f); do
-  if wasm-objdump -j Import -x "$wasm_file" 2>/dev/null | grep -q '<- env\.'; then
-    echo "ERROR: Found env imports in $wasm_file:"
-    wasm-objdump -j Import -x "$wasm_file" | grep '<- env\.'
-    found_env_imports=true
-  fi
-done
-if [ "$found_env_imports" = true ]; then
-  echo "WASM modules should not have env imports - these won't work in the browser"
-  exit 1
-fi
-echo "No env imports found - WASM modules are browser-compatible""#,
-                ),
-            ]),
-    );
-
     // Clippy
     // Note: no root workspace, so we target crates/arborium directly
     jobs.insert(

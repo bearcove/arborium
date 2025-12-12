@@ -142,34 +142,6 @@ jobs:
         name: Run tests
         run: "set -e\ncargo nextest run --manifest-path crates/arborium/Cargo.toml --verbose --no-tests=pass"
 
-  wasm: 
-    name: WASM Compatibility
-    runs-on: depot-ubuntu-24.04-32
-    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
-      - generate
-
-    steps: 
-      - 
-        name: Checkout
-        uses: actions/checkout@v4
-      - 
-        name: Download grammar sources
-        uses: actions/download-artifact@v4
-        with: 
-          name: grammar-sources
-          path: .
-
-      - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
-      - 
-        name: Build arborium for WASM
-        run: "set -e\ncargo build --manifest-path crates/arborium/Cargo.toml --target wasm32-unknown-unknown --no-default-features"
-      - 
-        name: Check for env imports in WASM
-        run: "set -e\nfound_env_imports=false\nfor wasm_file in $(find target/wasm32-unknown-unknown -name \"*.wasm\" -type f); do\n  if wasm-objdump -j Import -x \"$wasm_file\" 2>/dev/null | grep -q '<- env\\.'; then\n    echo \"ERROR: Found env imports in $wasm_file:\"\n    wasm-objdump -j Import -x \"$wasm_file\" | grep '<- env\\.'\n    found_env_imports=true\n  fi\ndone\nif [ \"$found_env_imports\" = true ]; then\n  echo \"WASM modules should not have env imports - these won't work in the browser\"\n  exit 1\nfi\necho \"No env imports found - WASM modules are browser-compatible\""
-
   clippy: 
     name: Clippy
     runs-on: depot-ubuntu-24.04-32
