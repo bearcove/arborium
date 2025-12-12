@@ -650,7 +650,6 @@ fn build_single_plugin(
             "--target",
             "wasm32-unknown-unknown",
             "-Zbuild-std=std,panic_abort",
-            "-Cpanic=immediate-abort",
             "-Zunstable-options",
             "-Zbuild-dir-new-layout",
             "-Zbinary-dep-depinfo",
@@ -658,6 +657,7 @@ fn build_single_plugin(
             "--artifact-dir",
             artifact_dir.as_str(),
         ])
+        .env("RUSTFLAGS", "-Cpanic=immediate-abort")
         .current_dir(&plugin_source);
 
     let status = run_streaming(cargo_cmd, grammar, printer)
