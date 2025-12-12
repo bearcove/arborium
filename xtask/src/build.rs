@@ -1,11 +1,11 @@
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Command, ExitStatus, Stdio};
-use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use std::thread;
 
-use rand::seq::SliceRandom;
 use owo_colors::OwoColorize;
+use rand::seq::SliceRandom;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use chrono::Utc;
@@ -51,10 +51,15 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
         .context("failed to check installed targets")?;
 
     let targets = String::from_utf8_lossy(&output.stdout);
-    let has_wasm_target = targets.lines().any(|line| line.trim() == "wasm32-unknown-unknown");
+    let has_wasm_target = targets
+        .lines()
+        .any(|line| line.trim() == "wasm32-unknown-unknown");
 
     if !has_wasm_target {
-        println!("{} Installing wasm32-unknown-unknown target for nightly...", "●".cyan());
+        println!(
+            "{} Installing wasm32-unknown-unknown target for nightly...",
+            "●".cyan()
+        );
         let status = Command::new("rustup")
             .args(["+nightly", "target", "add", "wasm32-unknown-unknown"])
             .status()
@@ -297,7 +302,10 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
     );
 
     // Ensure nightly toolchain and wasm32-unknown-unknown target are installed
-    println!("{} Checking nightly toolchain and wasm target...", "●".cyan());
+    println!(
+        "{} Checking nightly toolchain and wasm target...",
+        "●".cyan()
+    );
     ensure_rust_nightly_with_wasm_target()?;
 
     let wasm_bindgen = Tool::WasmBindgen
@@ -495,7 +503,12 @@ pub fn clean_plugins(repo_root: &Utf8Path, _output_dir: &str) -> Result<()> {
         let group_entry = group_entry.into_diagnostic()?;
         let group_path = group_entry.path();
 
-        if !group_path.is_dir() || !group_entry.file_name().to_string_lossy().starts_with("group-") {
+        if !group_path.is_dir()
+            || !group_entry
+                .file_name()
+                .to_string_lossy()
+                .starts_with("group-")
+        {
             continue;
         }
 
@@ -619,8 +632,7 @@ fn build_single_plugin(
     }
 
     // Step 1: Build with cargo +nightly using unstable features
-    // Note: We use nightly features for faster builds, but not -Zbuild-std
-    // because that would switch to wasm32-wasip1 which isn't compatible with wasm-bindgen
+    // We use -Zbuild-std to rebuild std with optimizations for smaller WASM size
 
     // Create a unique artifact directory for this plugin to avoid locking
     let artifact_dir = plugin_source.join("artifact-out");
@@ -637,6 +649,8 @@ fn build_single_plugin(
             "--release",
             "--target",
             "wasm32-unknown-unknown",
+            "-Zbuild-std=std,panic_abort",
+            "-Zbuild-std-features=panic_immediate_abort",
             "-Zunstable-options",
             "-Zbuild-dir-new-layout",
             "-Zbinary-dep-depinfo",
@@ -701,7 +715,7 @@ fn build_single_plugin(
     let mut opt_cmd = wasm_opt.command();
     opt_cmd
         .args([
-            "-O3",  // Aggressive optimization
+            "-O3", // Aggressive optimization
             "--enable-bulk-memory",
             "--enable-mutable-globals",
             "--enable-nontrapping-float-to-int",
@@ -735,7 +749,12 @@ fn build_single_plugin(
     // Copy and rename files (use optimized WASM)
     std::fs::copy(&optimized_wasm, &dest_wasm)
         .into_diagnostic()
-        .with_context(|| format!("failed to copy optimized wasm file from {} to {}", optimized_wasm, dest_wasm))?;
+        .with_context(|| {
+            format!(
+                "failed to copy optimized wasm file from {} to {}",
+                optimized_wasm, dest_wasm
+            )
+        })?;
 
     std::fs::copy(&src_js, &dest_js)
         .into_diagnostic()
@@ -749,9 +768,12 @@ fn build_single_plugin(
         "files": ["grammar.js", "grammar_bg.wasm"]
     });
     let dest_package_json = plugin_output.join("package.json");
-    std::fs::write(&dest_package_json, serde_json::to_string_pretty(&package_json_content).unwrap())
-        .into_diagnostic()
-        .context("failed to write package.json")?;
+    std::fs::write(
+        &dest_package_json,
+        serde_json::to_string_pretty(&package_json_content).unwrap(),
+    )
+    .into_diagnostic()
+    .context("failed to write package.json")?;
 
     Ok(())
 }
