@@ -28,7 +28,7 @@ include = [
 path = "src/lib.rs"
 
 [dependencies]
-tree-sitter-language = "0.1"
+tree-sitter-language = { version = "0.1", path = "<%= shared_rel %>/arborium-tree-sitter/language" }
 arborium-sysroot = { version = "<%= dep_version %>", path = "<%= shared_rel %>/arborium-sysroot" }
 <% for dep in highlights_prepend_deps { %>
 <%= dep.crate_name %> = { version = "<%= dep_version %>", path = "<%= dep.rel_path %>" }
