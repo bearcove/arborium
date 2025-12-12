@@ -641,11 +641,20 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
     if options.no_fail_fast {
         let errors = errors.lock().expect("errors mutex poisoned");
         if !errors.is_empty() {
+            eprintln!();
+            eprintln!("Build failures ({}):", errors.len());
+            for (grammar, err) in errors.iter() {
+                eprintln!();
+                eprintln!("== {} ==", grammar);
+                eprintln!("{}", err);
+            }
+
             let summary = errors
                 .iter()
                 .map(|(g, e)| format!("  - {}: {}", g, e.lines().next().unwrap_or("")))
                 .collect::<Vec<_>>()
                 .join("\n");
+
             miette::bail!(
                 "Build completed with {} failure(s):\n{}",
                 errors.len(),

@@ -342,6 +342,34 @@ pub extern "C" fn iswxdigit(wc: u32) -> c_int {
         || matches!(wc, 0x61..=0x66)) as c_int // a-f
 }
 
+/// iswupper implementation - check if wide char is uppercase
+#[unsafe(no_mangle)]
+pub extern "C" fn iswupper(wc: u32) -> c_int {
+    // ASCII uppercase
+    if (0x41..=0x5A).contains(&wc) {
+        return 1;
+    }
+    // Latin-1 Supplement uppercase (À-Ö, Ø-Þ)
+    if (0xC0..=0xD6).contains(&wc) || (0xD8..=0xDE).contains(&wc) {
+        return 1;
+    }
+    0
+}
+
+/// iswlower implementation - check if wide char is lowercase
+#[unsafe(no_mangle)]
+pub extern "C" fn iswlower(wc: u32) -> c_int {
+    // ASCII lowercase
+    if (0x61..=0x7A).contains(&wc) {
+        return 1;
+    }
+    // Latin-1 Supplement lowercase (à-ö, ø-ÿ)
+    if (0xE0..=0xF6).contains(&wc) || (0xF8..=0xFF).contains(&wc) {
+        return 1;
+    }
+    0
+}
+
 /// iswalpha implementation for wide characters
 #[unsafe(no_mangle)]
 pub extern "C" fn iswalpha(wc: u32) -> c_int {
@@ -382,6 +410,26 @@ pub extern "C" fn towupper(wc: u32) -> u32 {
     wc
 }
 
+/// memchr implementation for finding a byte in a memory region
+///
+/// # Safety
+/// Caller must ensure `s` points to at least `n` bytes of readable memory.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn memchr(s: *const c_void, c: c_int, n: usize) -> *mut c_void {
+    if s.is_null() || n == 0 {
+        return ptr::null_mut();
+    }
+
+    let bytes = s as *const u8;
+    let needle = c as u8;
+    for i in 0..n {
+        if *bytes.add(i) == needle {
+            return bytes.add(i) as *mut c_void;
+        }
+    }
+    ptr::null_mut()
+}
+
 /// fputs stub - no-op for WASM
 #[unsafe(no_mangle)]
 pub extern "C" fn fputs(_s: *const c_char, _stream: *mut c_void) -> c_int {
@@ -412,9 +460,12 @@ static _FORCE_INCLUDE: () = {
     let _ = realloc as *const ();
     let _ = iswalnum as *const ();
     let _ = iswalpha as *const ();
+    let _ = iswlower as *const ();
+    let _ = iswupper as *const ();
     let _ = iswspace as *const ();
     let _ = iswdigit as *const ();
     let _ = iswxdigit as *const ();
+    let _ = memchr as *const ();
     let _ = strncmp as *const ();
     let _ = abort as *const ();
     let _ = fputc as *const ();
