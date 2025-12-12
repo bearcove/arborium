@@ -1,14 +1,14 @@
 #![doc = include_str!("../README.md")]
 
-use arborium_tree_sitter::Language;
+use tree_sitter_language::LanguageFn;
 
 unsafe extern "C" {
-    fn tree_sitter_<%= c_symbol %>() -> Language;
+    fn tree_sitter_<%= c_symbol %>() -> *const ();
 }
 
-/// Returns the <%= grammar_id %> tree-sitter language.
-pub fn language() -> Language {
-    unsafe { tree_sitter_<%= c_symbol %>() }
+/// Returns the <%= grammar_id %> tree-sitter [`LanguageFn`].
+pub const fn language() -> LanguageFn {
+    unsafe { LanguageFn::from_raw(tree_sitter_<%= c_symbol %>) }
 }
 
 <% if highlights_exists { %>
