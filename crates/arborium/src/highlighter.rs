@@ -23,7 +23,9 @@
 
 use std::io::{self, Write};
 
-use arborium_highlight::{HighlightConfig, HighlightError as CoreError, SyncHighlighter};
+use arborium_highlight::{
+    AnsiOptions, HighlightConfig, HighlightError as CoreError, SyncHighlighter,
+};
 
 use crate::provider::StaticProvider;
 
@@ -134,6 +136,20 @@ impl Highlighter {
     ) -> Result<String, HighlightError> {
         Ok(self.inner.highlight_to_ansi(language, source, theme)?)
     }
+
+    /// Highlight source code and return ANSI-colored text with explicit
+    /// rendering options (e.g., base background and width-aware wrapping).
+    pub fn highlight_to_ansi_with_options(
+        &mut self,
+        language: &str,
+        source: &str,
+        theme: &arborium_theme::Theme,
+        options: &AnsiOptions,
+    ) -> Result<String, HighlightError> {
+        Ok(self
+            .inner
+            .highlight_to_ansi_with_options(language, source, theme, options)?)
+    }
 }
 
 #[cfg(test)]
@@ -157,17 +173,17 @@ mod tests {
     fn test_ansi_highlighting() {
         let mut highlighter = Highlighter::new();
         let source = r#"
-fn main() {
-    let message = "Hello, world!";
-    println!("{}", message);
-    
-    if let Some(count) = Some(42) {
-        for i in 0..count {
-            println!("Iteration: {}", i);
-        }
-    }
-}
-"#;
+ fn main() {
+     let message = "Hello, world!";
+     println!("{}", message);
+     
+     if let Some(count) = Some(42) {
+         for i in 0..count {
+             println!("Iteration: {}", i);
+         }
+     }
+ }
+ "#;
 
         let theme = arborium_theme::theme::builtin::catppuccin_mocha();
         let ansi_output = highlighter
@@ -184,5 +200,119 @@ fn main() {
         println!("\n=== ANSI colored Rust code ===");
         println!("{}", ansi_output);
         println!("=== End of colored output ===\n");
+    }
+
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_ansi_highlighting_with_background_and_wrapping() {
+        let mut highlighter = Highlighter::new();
+
+        // Short source that fits in width
+        let source_short = r#"fn long_function_name(argument: i32) {
+    println!("value: {}", argument);
+}"#;
+
+        // Long source that will wrap
+        let source_long = r#"fn very_long_function_name_that_will_definitely_wrap(first_argument: i32, second_argument: String) {
+    println!("This is a very long string that should cause wrapping: {}", first_argument);
+}"#;
+
+        // Test with multiple themes
+        let themes = vec![
+            (
+                "Catppuccin Mocha",
+                arborium_theme::theme::builtin::catppuccin_mocha(),
+            ),
+            (
+                "GitHub Light",
+                arborium_theme::theme::builtin::github_light(),
+            ),
+            ("Monokai", arborium_theme::theme::builtin::monokai()),
+        ];
+
+        for (name, theme) in &themes {
+            println!("\n=== {} (Rust, with bg+padding) ===", name);
+
+            // With background and padding (w=2, h=1 since chars aren't square)
+            let mut options = AnsiOptions::default();
+            options.use_theme_base_style = true;
+            options.width = Some(50);
+            options.pad_to_width = true;
+            options.padding_x = 2;
+            options.padding_y = 1;
+
+            let ansi_output = highlighter
+                .highlight_to_ansi_with_options("rust", source_short, theme, &options)
+                .unwrap();
+
+            assert!(ansi_output.contains("\x1b["));
+            assert!(ansi_output.contains(&theme.ansi_base_style()));
+            println!("{}", ansi_output);
+
+            // Without background/padding
+            println!("\n=== {} (Rust, no bg/padding) ===", name);
+            let mut options2 = AnsiOptions::default();
+            options2.width = Some(50);
+            options2.pad_to_width = true;
+
+            let ansi_output2 = highlighter
+                .highlight_to_ansi_with_options("rust", source_short, theme, &options2)
+                .unwrap();
+            println!("{}", ansi_output2);
+        }
+
+        // Test wrapping with long source
+        println!("\n=== WRAPPING TEST (Catppuccin Mocha) ===");
+        let theme = arborium_theme::theme::builtin::catppuccin_mocha();
+        let mut options = AnsiOptions::default();
+        options.use_theme_base_style = true;
+        options.width = Some(60);
+        options.pad_to_width = true;
+        options.padding_x = 2;
+        options.padding_y = 1;
+
+        let ansi_output = highlighter
+            .highlight_to_ansi_with_options("rust", source_long, theme, &options)
+            .unwrap();
+        println!("{}", ansi_output);
+
+        // Test with defaults (terminal width, no bg/padding)
+        println!("\n=== DEFAULTS TEST (terminal width auto-detected) ===");
+        let options = AnsiOptions::default();
+        println!("Default options:");
+        println!("  width: {:?}", options.width);
+        println!("  pad_to_width: {}", options.pad_to_width);
+        println!("  use_theme_base_style: {}", options.use_theme_base_style);
+        println!(
+            "  margin_x: {}, margin_y: {}",
+            options.margin_x, options.margin_y
+        );
+        println!(
+            "  padding_x: {}, padding_y: {}",
+            options.padding_x, options.padding_y
+        );
+        println!("  border: {}", options.border);
+        println!("  tab_width: {}", options.tab_width);
+
+        let ansi_output = highlighter
+            .highlight_to_ansi_with_options("rust", source_short, theme, &options)
+            .unwrap();
+        println!("\nOutput with defaults:");
+        println!("{}", ansi_output);
+
+        // Test with border
+        println!("\n=== BORDER TEST (Catppuccin Mocha) ===");
+        let mut options = AnsiOptions::default();
+        options.use_theme_base_style = true;
+        options.width = Some(50);
+        options.pad_to_width = true;
+        options.padding_x = 2;
+        options.padding_y = 1;
+        options.border = true;
+
+        let ansi_output = highlighter
+            .highlight_to_ansi_with_options("rust", source_short, theme, &options)
+            .unwrap();
+        println!("{}", ansi_output);
     }
 }

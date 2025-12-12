@@ -75,7 +75,8 @@ mod types;
 pub mod tree_sitter;
 
 pub use render::{
-    html_escape, spans_to_ansi, spans_to_html, write_spans_as_ansi, write_spans_as_html,
+    AnsiOptions, html_escape, spans_to_ansi, spans_to_ansi_with_options, spans_to_html,
+    write_spans_as_ansi, write_spans_as_html,
 };
 pub use types::{HighlightError, Injection, ParseResult, Span};
 
@@ -414,6 +415,18 @@ impl<P: GrammarProvider> SyncHighlighter<P> {
         source: &str,
         theme: &arborium_theme::Theme,
     ) -> Result<String, HighlightError> {
+        self.highlight_to_ansi_with_options(language, source, theme, &AnsiOptions::default())
+    }
+
+    /// Highlight source code synchronously and return ANSI-colored text
+    /// using the provided theme and explicit ANSI rendering options.
+    pub fn highlight_to_ansi_with_options(
+        &mut self,
+        language: &str,
+        source: &str,
+        theme: &arborium_theme::Theme,
+        options: &AnsiOptions,
+    ) -> Result<String, HighlightError> {
         let future = self.core.highlight_spans(language, source);
 
         let mut future = std::pin::pin!(future);
@@ -421,7 +434,7 @@ impl<P: GrammarProvider> SyncHighlighter<P> {
         let mut cx = Context::from_waker(&waker);
 
         match future.as_mut().poll(&mut cx) {
-            Poll::Ready(Ok(spans)) => Ok(spans_to_ansi(source, spans, theme)),
+            Poll::Ready(Ok(spans)) => Ok(spans_to_ansi_with_options(source, spans, theme, options)),
             Poll::Ready(Err(e)) => Err(e),
             Poll::Pending => {
                 panic!(

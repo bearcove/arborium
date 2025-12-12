@@ -19,6 +19,9 @@ use arborium_theme::{
 use std::collections::HashMap;
 use std::io::{self, Write};
 
+#[cfg(feature = "unicode-width")]
+use unicode_width::UnicodeWidthChar;
+
 /// Generate opening and closing HTML tags based on the configured format.
 ///
 /// Returns (opening_tag, closing_tag) for the given short tag and format.
@@ -250,11 +253,274 @@ pub fn html_escape(text: &str) -> String {
     result
 }
 
+/// Options controlling ANSI rendering behavior.
+#[derive(Debug, Clone)]
+pub struct AnsiOptions {
+    /// If true, apply the theme's foreground/background as a base style
+    /// for all text (including un-highlighted regions).
+    pub use_theme_base_style: bool,
+    /// Optional hard wrap width (in columns). When None, no wrapping is
+    /// performed and the original line structure is preserved.
+    pub width: Option<usize>,
+    /// If true and `width` is set, pad each visual line with spaces up
+    /// to exactly `width` columns.
+    pub pad_to_width: bool,
+    /// Tab width (in columns) used when computing display width.
+    pub tab_width: usize,
+    /// Horizontal margin (in columns) outside the border/background.
+    /// This is empty space with no styling.
+    pub margin_x: usize,
+    /// Vertical margin (in rows) outside the border/background.
+    /// This is empty space with no styling.
+    pub margin_y: usize,
+    /// Horizontal padding (in columns) on left and right sides.
+    /// Inside the background, between border and content.
+    pub padding_x: usize,
+    /// Vertical padding (in rows) on top and bottom.
+    /// Inside the background, between border and content.
+    pub padding_y: usize,
+    /// If true, draw a border around the code block using half-block characters.
+    pub border: bool,
+}
+
+/// Box drawing characters for borders.
+pub struct BoxChars;
+
+impl BoxChars {
+    pub const TOP: char = '▄'; // lower half block
+    pub const BOTTOM: char = '▀'; // upper half block
+    pub const LEFT: char = '█'; // full block
+    pub const RIGHT: char = '█'; // full block
+}
+
+fn detect_terminal_width() -> Option<usize> {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        use terminal_size::{Width, terminal_size};
+        if let Some((Width(w), _)) = terminal_size() {
+            Some(w as usize)
+        } else {
+            None
+        }
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        None
+    }
+}
+
+impl Default for AnsiOptions {
+    fn default() -> Self {
+        let width = detect_terminal_width();
+        Self {
+            use_theme_base_style: false,
+            width,
+            pad_to_width: width.is_some(),
+            tab_width: 4,
+            margin_x: 0,
+            margin_y: 0,
+            padding_x: 0,
+            padding_y: 0,
+            border: false,
+        }
+    }
+}
+
+#[cfg(feature = "unicode-width")]
+
+fn char_display_width(c: char, col: usize, tab_width: usize) -> usize {
+    if c == '\t' {
+        let next_tab = ((col / tab_width) + 1) * tab_width;
+        next_tab - col
+    } else {
+        UnicodeWidthChar::width(c).unwrap_or(0)
+    }
+}
+
+#[cfg(not(feature = "unicode-width"))]
+fn char_display_width(c: char, col: usize, tab_width: usize) -> usize {
+    if c == '\t' {
+        let next_tab = ((col / tab_width) + 1) * tab_width;
+        next_tab - col
+    } else {
+        1
+    }
+}
+
+fn write_wrapped_text(
+    out: &mut String,
+    text: &str,
+    options: &AnsiOptions,
+    current_col: &mut usize,
+    base_ansi: &str,
+    active_style: Option<usize>,
+    theme: &Theme,
+    use_base_bg: bool,
+    border_style: &str,
+) {
+    // No wrapping requested: just track column and append text.
+    let Some(inner_width) = options.width else {
+        for ch in text.chars() {
+            match ch {
+                '\n' | '\r' => {
+                    *current_col = 0;
+                    out.push(ch);
+                }
+                other => {
+                    let w = char_display_width(other, *current_col, options.tab_width);
+                    if other == '\t' {
+                        for _ in 0..w {
+                            out.push(' ');
+                        }
+                    } else {
+                        out.push(other);
+                    }
+                    *current_col += w;
+                }
+            }
+        }
+        return;
+    };
+
+    let padding_x = options.padding_x;
+    let margin_x = options.margin_x;
+    let border = options.border;
+    // Inner width excludes border characters
+    let width = if border { inner_width - 2 } else { inner_width };
+    let content_end = width - padding_x; // where content should stop (before right padding)
+    let pad_to_width = options.pad_to_width;
+
+    for ch in text.chars() {
+        // At the start of a visual line, emit margin + left border + left padding
+        if *current_col == 0 {
+            // Left margin
+            for _ in 0..margin_x {
+                out.push(' ');
+            }
+            // Left border (full block)
+            if border && !border_style.is_empty() {
+                out.push_str(border_style);
+                out.push(BoxChars::LEFT);
+                out.push_str(Theme::ANSI_RESET);
+                if !base_ansi.is_empty() {
+                    out.push_str(base_ansi);
+                }
+            }
+            // Left padding
+            if padding_x > 0 {
+                for _ in 0..padding_x {
+                    out.push(' ');
+                }
+                *current_col += padding_x;
+            }
+        }
+
+        if ch == '\n' || ch == '\r' {
+            // Pad to full width (including right padding)
+            if pad_to_width && *current_col < width {
+                let pad = width - *current_col;
+                for _ in 0..pad {
+                    out.push(' ');
+                }
+            }
+            // Right border (full block)
+            if border && !border_style.is_empty() {
+                out.push_str(Theme::ANSI_RESET);
+                out.push_str(border_style);
+                out.push(BoxChars::RIGHT);
+            }
+            // Reset before newline so background doesn't extend to terminal edge
+            out.push_str(Theme::ANSI_RESET);
+            out.push('\n');
+            *current_col = 0;
+
+            if !base_ansi.is_empty() {
+                out.push_str(base_ansi);
+            }
+            if let Some(idx) = active_style {
+                let style = if use_base_bg {
+                    theme.ansi_style_with_base_bg(idx)
+                } else {
+                    theme.ansi_style(idx)
+                };
+                out.push_str(&style);
+            }
+            continue;
+        }
+
+        let w = char_display_width(ch, *current_col, options.tab_width);
+        // Wrap when we would exceed the content area (before right padding)
+        if w > 0 && *current_col + w > content_end {
+            // Pad to full width (including right padding)
+            if pad_to_width && *current_col < width {
+                let pad = width - *current_col;
+                for _ in 0..pad {
+                    out.push(' ');
+                }
+            }
+            // Right border (full block)
+            if border && !border_style.is_empty() {
+                out.push_str(Theme::ANSI_RESET);
+                out.push_str(border_style);
+                out.push(BoxChars::RIGHT);
+            }
+            // Reset before newline so background doesn't extend to terminal edge
+            out.push_str(Theme::ANSI_RESET);
+            out.push('\n');
+            *current_col = 0;
+
+            if !base_ansi.is_empty() {
+                out.push_str(base_ansi);
+            }
+            if let Some(idx) = active_style {
+                let style = if use_base_bg {
+                    theme.ansi_style_with_base_bg(idx)
+                } else {
+                    theme.ansi_style(idx)
+                };
+                out.push_str(&style);
+            }
+
+            // New visual line: emit left padding again.
+            if padding_x > 0 {
+                for _ in 0..padding_x {
+                    out.push(' ');
+                }
+                *current_col += padding_x;
+            }
+        }
+
+        if ch == '\t' {
+            let w = char_display_width('\t', *current_col, options.tab_width);
+            for _ in 0..w {
+                out.push(' ');
+            }
+            *current_col += w;
+        } else {
+            out.push(ch);
+            *current_col += w;
+        }
+    }
+}
+
 /// Deduplicate spans and convert to ANSI-colored text using a theme.
 ///
 /// This mirrors the HTML rendering logic but emits ANSI escape sequences
 /// instead of `<a-*>` tags, using `Theme::ansi_style` for each slot.
 pub fn spans_to_ansi(source: &str, spans: Vec<Span>, theme: &Theme) -> String {
+    spans_to_ansi_with_options(source, spans, theme, &AnsiOptions::default())
+}
+
+/// ANSI rendering with additional configuration options.
+pub fn spans_to_ansi_with_options(
+    source: &str,
+    spans: Vec<Span>,
+    theme: &Theme,
+    options: &AnsiOptions,
+) -> String {
+    // Trim trailing newlines from source
+    let source = source.trim_end_matches('\n');
+
     if spans.is_empty() {
         return source.to_string();
     }
@@ -296,6 +562,14 @@ pub fn spans_to_ansi(source: &str, spans: Vec<Span>, theme: &Theme) -> String {
         .filter_map(|span| {
             let slot = capture_to_slot(&span.capture);
             let index = slot_to_highlight_index(slot)?;
+            // Filter out empty styles when using base style - they'll just use the base
+            if options.use_theme_base_style {
+                if let Some(style) = theme.style(index) {
+                    if style.is_empty() {
+                        return None;
+                    }
+                }
+            }
             Some(StyledSpan {
                 start: span.start,
                 end: span.end,
@@ -340,35 +614,216 @@ pub fn spans_to_ansi(source: &str, spans: Vec<Span>, theme: &Theme) -> String {
     let mut last_pos: usize = 0;
     let mut stack: Vec<usize> = Vec::new();
     let mut active_style: Option<usize> = None;
+    let mut current_col: usize = 0;
+
+    let base_ansi = if options.use_theme_base_style {
+        theme.ansi_base_style()
+    } else {
+        String::new()
+    };
+    let use_base_bg = options.use_theme_base_style;
+
+    // Track if we've output anything yet to avoid duplicate base style at start
+    let mut output_started = false;
+
+    let padding_y = options.padding_y;
+    let margin_x = options.margin_x;
+    let margin_y = options.margin_y;
+    let border = options.border;
+    let border_style = if border {
+        theme.ansi_border_style()
+    } else {
+        String::new()
+    };
+
+    if let Some(width) = options.width {
+        // Top margin (empty lines)
+        for _ in 0..margin_y {
+            out.push('\n');
+        }
+
+        // Top border row
+        if border {
+            // Left margin spaces
+            for _ in 0..margin_x {
+                out.push(' ');
+            }
+            out.push_str(&border_style);
+            for _ in 0..width {
+                out.push(BoxChars::TOP);
+            }
+            out.push_str(Theme::ANSI_RESET);
+            out.push('\n');
+        }
+
+        // Top padding rows (inside the background)
+        if padding_y > 0 {
+            for _ in 0..padding_y {
+                // Left margin
+                for _ in 0..margin_x {
+                    out.push(' ');
+                }
+                // Left border (full block)
+                if border {
+                    out.push_str(&border_style);
+                    out.push(BoxChars::LEFT);
+                }
+                // Apply base style for the padding content
+                if !base_ansi.is_empty() {
+                    out.push_str(&base_ansi);
+                    output_started = true;
+                }
+                // Inner width (minus border chars if present)
+                let inner = if border { width - 2 } else { width };
+                for _ in 0..inner {
+                    out.push(' ');
+                }
+                // Right border (full block)
+                if border {
+                    out.push_str(Theme::ANSI_RESET);
+                    out.push_str(&border_style);
+                    out.push(BoxChars::RIGHT);
+                }
+                out.push_str(Theme::ANSI_RESET);
+                out.push('\n');
+                // Reapply base style for next line
+                if !base_ansi.is_empty() {
+                    out.push_str(&base_ansi);
+                }
+            }
+        } else if !base_ansi.is_empty() {
+            // No top padding but we need base style for content
+            out.push_str(&base_ansi);
+            output_started = true;
+        }
+    } else {
+        // No width specified, just apply base style if needed
+        if !base_ansi.is_empty() {
+            out.push_str(&base_ansi);
+            output_started = true;
+        }
+    }
 
     for (pos, is_start, span_idx) in events {
         let pos = pos as usize;
         if pos > last_pos && pos <= source.len() {
             let text = &source[last_pos..pos];
-            let desired = stack.last().copied();
+            let desired = stack.last().copied().map(|idx| coalesced[idx].index);
 
             match (active_style, desired) {
                 (Some(a), Some(d)) if a == d => {
-                    out.push_str(text);
+                    // Style hasn't changed, just write text
+                    write_wrapped_text(
+                        &mut out,
+                        text,
+                        options,
+                        &mut current_col,
+                        &base_ansi,
+                        Some(a),
+                        theme,
+                        use_base_bg,
+                        &border_style,
+                    );
                 }
                 (Some(_), Some(d)) => {
+                    // Style change: reset and apply new style
                     out.push_str(Theme::ANSI_RESET);
-                    out.push_str(&theme.ansi_style(d));
-                    out.push_str(text);
+                    let style = if use_base_bg {
+                        theme.ansi_style_with_base_bg(d)
+                    } else {
+                        theme.ansi_style(d)
+                    };
+                    // If using base_bg, the style already includes base colors, so don't emit base_ansi separately
+                    // If the style is identical to base, just emit base once
+                    if use_base_bg {
+                        out.push_str(&style);
+                    } else {
+                        if !base_ansi.is_empty() {
+                            out.push_str(&base_ansi);
+                        }
+                        out.push_str(&style);
+                    }
+                    write_wrapped_text(
+                        &mut out,
+                        text,
+                        options,
+                        &mut current_col,
+                        &base_ansi,
+                        Some(d),
+                        theme,
+                        use_base_bg,
+                        &border_style,
+                    );
                     active_style = Some(d);
                 }
                 (None, Some(d)) => {
-                    out.push_str(&theme.ansi_style(d));
-                    out.push_str(text);
+                    // First styled span or transitioning from unstyled to styled
+                    let style = if use_base_bg {
+                        theme.ansi_style_with_base_bg(d)
+                    } else {
+                        theme.ansi_style(d)
+                    };
+
+                    // When using base_bg, if the style is identical to base_ansi, don't emit it
+                    if !style.is_empty() && style != base_ansi {
+                        // Emit the style code
+                        out.push_str(&style);
+                        output_started = true;
+                    } else if !output_started && !base_ansi.is_empty() {
+                        // No distinct style, just ensure base is active
+                        out.push_str(&base_ansi);
+                        output_started = true;
+                    }
+
+                    write_wrapped_text(
+                        &mut out,
+                        text,
+                        options,
+                        &mut current_col,
+                        &base_ansi,
+                        Some(d),
+                        theme,
+                        use_base_bg,
+                        &border_style,
+                    );
                     active_style = Some(d);
                 }
                 (Some(_), None) => {
+                    // Transitioning from styled to unstyled
                     out.push_str(Theme::ANSI_RESET);
-                    out.push_str(text);
+                    if !base_ansi.is_empty() {
+                        out.push_str(&base_ansi);
+                    }
+                    write_wrapped_text(
+                        &mut out,
+                        text,
+                        options,
+                        &mut current_col,
+                        &base_ansi,
+                        None,
+                        theme,
+                        use_base_bg,
+                        &border_style,
+                    );
                     active_style = None;
                 }
                 (None, None) => {
-                    out.push_str(text);
+                    // No styling, just plain text
+                    if !output_started && !base_ansi.is_empty() {
+                        out.push_str(&base_ansi);
+                        output_started = true;
+                    }
+                    write_wrapped_text(
+                        &mut out,
+                        text,
+                        options,
+                        &mut current_col,
+                        &base_ansi,
+                        None,
+                        theme,
+                        use_base_bg,
+                        &border_style,
+                    );
                 }
             }
 
@@ -384,34 +839,191 @@ pub fn spans_to_ansi(source: &str, spans: Vec<Span>, theme: &Theme) -> String {
 
     if last_pos < source.len() {
         let text = &source[last_pos..];
-        let desired = stack.last().copied();
+        let desired = stack.last().copied().map(|idx| coalesced[idx].index);
         match (active_style, desired) {
             (Some(a), Some(d)) if a == d => {
-                out.push_str(text);
+                write_wrapped_text(
+                    &mut out,
+                    text,
+                    options,
+                    &mut current_col,
+                    &base_ansi,
+                    Some(a),
+                    theme,
+                    use_base_bg,
+                    &border_style,
+                );
             }
             (Some(_), Some(d)) => {
                 out.push_str(Theme::ANSI_RESET);
-                out.push_str(&theme.ansi_style(d));
-                out.push_str(text);
+                let style = if use_base_bg {
+                    theme.ansi_style_with_base_bg(d)
+                } else {
+                    theme.ansi_style(d)
+                };
+                // If using base_bg, the style already includes base colors
+                if use_base_bg {
+                    out.push_str(&style);
+                } else {
+                    if !base_ansi.is_empty() {
+                        out.push_str(&base_ansi);
+                    }
+                    out.push_str(&style);
+                }
+                write_wrapped_text(
+                    &mut out,
+                    text,
+                    options,
+                    &mut current_col,
+                    &base_ansi,
+                    Some(d),
+                    theme,
+                    use_base_bg,
+                    &border_style,
+                );
                 active_style = Some(d);
             }
             (None, Some(d)) => {
-                out.push_str(&theme.ansi_style(d));
-                out.push_str(text);
+                let style = if use_base_bg {
+                    theme.ansi_style_with_base_bg(d)
+                } else {
+                    theme.ansi_style(d)
+                };
+
+                // When using base_bg, if the style is identical to base_ansi, don't emit it
+                if !style.is_empty() && style != base_ansi {
+                    out.push_str(&style);
+                    output_started = true;
+                } else if !output_started && !base_ansi.is_empty() {
+                    out.push_str(&base_ansi);
+                    output_started = true;
+                }
+
+                write_wrapped_text(
+                    &mut out,
+                    text,
+                    options,
+                    &mut current_col,
+                    &base_ansi,
+                    Some(d),
+                    theme,
+                    use_base_bg,
+                    &border_style,
+                );
                 active_style = Some(d);
             }
             (Some(_), None) => {
                 out.push_str(Theme::ANSI_RESET);
-                out.push_str(text);
+                if !base_ansi.is_empty() {
+                    out.push_str(&base_ansi);
+                }
+                write_wrapped_text(
+                    &mut out,
+                    text,
+                    options,
+                    &mut current_col,
+                    &base_ansi,
+                    None,
+                    theme,
+                    use_base_bg,
+                    &border_style,
+                );
                 active_style = None;
             }
             (None, None) => {
-                out.push_str(text);
+                if !output_started && !base_ansi.is_empty() {
+                    out.push_str(&base_ansi);
+                    output_started = true;
+                }
+                write_wrapped_text(
+                    &mut out,
+                    text,
+                    options,
+                    &mut current_col,
+                    &base_ansi,
+                    None,
+                    theme,
+                    use_base_bg,
+                    &border_style,
+                );
             }
         }
     }
 
-    if active_style.is_some() {
+    if let Some(width) = options.width {
+        let padding_y = options.padding_y;
+        let pad_to_width = options.pad_to_width;
+        // Inner width excludes border characters
+        let inner_width = if border { width - 2 } else { width };
+
+        // Pad the final content line out to the full width.
+        if pad_to_width && current_col < inner_width {
+            let pad = inner_width - current_col;
+            for _ in 0..pad {
+                out.push(' ');
+            }
+        }
+
+        // Right border on final content line
+        if border && !border_style.is_empty() {
+            out.push_str(Theme::ANSI_RESET);
+            out.push_str(&border_style);
+            out.push(BoxChars::RIGHT);
+        }
+
+        // Reset before newline so background doesn't extend to terminal edge
+        out.push_str(Theme::ANSI_RESET);
+
+        // Bottom padding rows.
+        if padding_y > 0 {
+            for _ in 0..padding_y {
+                out.push('\n');
+                // Left margin
+                for _ in 0..margin_x {
+                    out.push(' ');
+                }
+                // Left border
+                if border {
+                    out.push_str(&border_style);
+                    out.push(BoxChars::LEFT);
+                }
+                // Background fill
+                if !base_ansi.is_empty() {
+                    out.push_str(&base_ansi);
+                }
+                let inner = if border { width - 2 } else { width };
+                for _ in 0..inner {
+                    out.push(' ');
+                }
+                // Right border
+                if border {
+                    out.push_str(Theme::ANSI_RESET);
+                    out.push_str(&border_style);
+                    out.push(BoxChars::RIGHT);
+                }
+                out.push_str(Theme::ANSI_RESET);
+            }
+        }
+
+        // Bottom border row
+        if border {
+            out.push('\n');
+            // Left margin spaces
+            for _ in 0..margin_x {
+                out.push(' ');
+            }
+            out.push_str(&border_style);
+            for _ in 0..width {
+                out.push(BoxChars::BOTTOM);
+            }
+            out.push_str(Theme::ANSI_RESET);
+        }
+
+        // Bottom margin (empty lines)
+        for _ in 0..margin_y {
+            out.push('\n');
+        }
+    } else if active_style.is_some() || !base_ansi.is_empty() {
         out.push_str(Theme::ANSI_RESET);
     }
 
@@ -550,6 +1162,103 @@ mod tests {
         let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
         // No tags should be emitted
         assert_eq!(html, "hello world");
+    }
+
+    #[test]
+    fn test_simple_ansi_highlight() {
+        let theme = arborium_theme::theme::builtin::catppuccin_mocha();
+        let source = "fn main";
+        let spans = vec![
+            Span {
+                start: 0,
+                end: 2,
+                capture: "keyword".into(),
+            },
+            Span {
+                start: 3,
+                end: 7,
+                capture: "function".into(),
+            },
+        ];
+
+        let kw_idx = slot_to_highlight_index(capture_to_slot("keyword")).unwrap();
+        let fn_idx = slot_to_highlight_index(capture_to_slot("function")).unwrap();
+
+        let ansi = spans_to_ansi(source, spans, theme);
+
+        let expected = format!(
+            "{}fn{} {}main{}",
+            theme.ansi_style(kw_idx),
+            Theme::ANSI_RESET,
+            theme.ansi_style(fn_idx),
+            Theme::ANSI_RESET
+        );
+        assert_eq!(ansi, expected);
+    }
+
+    #[test]
+    fn test_ansi_with_base_background() {
+        let theme = arborium_theme::theme::builtin::tokyo_night();
+        let source = "fn";
+        let spans = vec![Span {
+            start: 0,
+            end: 2,
+            capture: "keyword".into(),
+        }];
+
+        let mut options = AnsiOptions::default();
+        options.use_theme_base_style = true;
+
+        let ansi = spans_to_ansi_with_options(source, spans, theme, &options);
+        let base = theme.ansi_base_style();
+
+        assert!(ansi.starts_with(&base));
+        assert!(ansi.ends_with(Theme::ANSI_RESET));
+    }
+
+    #[test]
+    fn test_ansi_wrapping_inserts_newline() {
+        let theme = arborium_theme::theme::builtin::dracula();
+        let source = "abcdefgh";
+        let spans = vec![Span {
+            start: 0,
+            end: source.len() as u32,
+            capture: "string".into(),
+        }];
+
+        let mut options = AnsiOptions::default();
+        options.use_theme_base_style = true;
+        options.width = Some(4);
+        options.pad_to_width = false;
+
+        let ansi = spans_to_ansi_with_options(source, spans, theme, &options);
+
+        assert!(ansi.contains('\n'));
+        assert!(ansi.ends_with(Theme::ANSI_RESET));
+    }
+
+    #[test]
+    fn test_ansi_coalesces_same_style() {
+        let theme = arborium_theme::theme::builtin::catppuccin_mocha();
+        let source = "keyword";
+        let spans = vec![
+            Span {
+                start: 0,
+                end: 3,
+                capture: "keyword".into(),
+            },
+            Span {
+                start: 3,
+                end: 7,
+                capture: "keyword.function".into(),
+            },
+        ];
+
+        let kw_idx = slot_to_highlight_index(capture_to_slot("keyword")).unwrap();
+        let ansi = spans_to_ansi(source, spans, theme);
+
+        let expected = format!("{}keyword{}", theme.ansi_style(kw_idx), Theme::ANSI_RESET);
+        assert_eq!(ansi, expected);
     }
 
     #[test]

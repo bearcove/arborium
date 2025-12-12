@@ -470,6 +470,106 @@ impl Theme {
         }
     }
 
+    /// Generate ANSI escape sequence for a style, inheriting base foreground/background if not set.
+    ///
+    /// When rendering with a base background color, we want individual styles to
+    /// inherit that background unless they explicitly override it. Similarly, if a style
+    /// doesn't define a foreground, use the base foreground. This avoids the background
+    /// disappearing when switching between styled and unstyled text, and ensures colors
+    /// are complete.
+    pub fn ansi_style_with_base_bg(&self, index: usize) -> String {
+        let Some(style) = self.styles.get(index) else {
+            return String::new();
+        };
+
+        if style.is_empty() {
+            return String::new();
+        }
+
+        let mut codes = Vec::new();
+
+        if style.modifiers.bold {
+            codes.push("1".to_string());
+        }
+        if style.modifiers.italic {
+            codes.push("3".to_string());
+        }
+        if style.modifiers.underline {
+            codes.push("4".to_string());
+        }
+        if style.modifiers.strikethrough {
+            codes.push("9".to_string());
+        }
+
+        // Use style's foreground if defined, otherwise fall back to theme foreground
+        if let Some(fg) = &style.fg {
+            codes.push(format!("38;2;{};{};{}", fg.r, fg.g, fg.b));
+        } else if let Some(fg) = &self.foreground {
+            codes.push(format!("38;2;{};{};{}", fg.r, fg.g, fg.b));
+        }
+
+        // Use style's background if defined, otherwise fall back to theme background
+        if let Some(bg) = &style.bg {
+            codes.push(format!("48;2;{};{};{}", bg.r, bg.g, bg.b));
+        } else if let Some(bg) = &self.background {
+            codes.push(format!("48;2;{};{};{}", bg.r, bg.g, bg.b));
+        }
+
+        if codes.is_empty() {
+            String::new()
+        } else {
+            format!("\x1b[{}m", codes.join(";"))
+        }
+    }
+
+    /// Generate ANSI escape sequence for the theme's base foreground/background.
+    ///
+    /// This uses `background` and `foreground` and does not include any
+    /// per-highlight styling or text modifiers.
+    pub fn ansi_base_style(&self) -> String {
+        let mut codes = Vec::new();
+
+        if let Some(fg) = &self.foreground {
+            codes.push(format!("38;2;{};{};{}", fg.r, fg.g, fg.b));
+        }
+        if let Some(bg) = &self.background {
+            codes.push(format!("48;2;{};{};{}", bg.r, bg.g, bg.b));
+        }
+
+        if codes.is_empty() {
+            String::new()
+        } else {
+            format!("\x1b[{}m", codes.join(";"))
+        }
+    }
+
+    /// Generate ANSI escape sequence for border characters (half-blocks).
+    ///
+    /// Returns fg color only (no bg), slightly darker/lighter than theme background.
+    /// The transparent half of the half-block char shows the terminal background.
+    pub fn ansi_border_style(&self) -> String {
+        let Some(bg) = &self.background else {
+            return String::new();
+        };
+
+        // Border color: darker for dark themes, lighter for light themes
+        let border = if self.is_dark {
+            Color::new(
+                bg.r.saturating_add(30),
+                bg.g.saturating_add(30),
+                bg.b.saturating_add(30),
+            )
+        } else {
+            Color::new(
+                bg.r.saturating_sub(30),
+                bg.g.saturating_sub(30),
+                bg.b.saturating_sub(30),
+            )
+        };
+
+        format!("\x1b[38;2;{};{};{}m", border.r, border.g, border.b)
+    }
+
     /// ANSI reset sequence.
     pub const ANSI_RESET: &'static str = "\x1b[0m";
 }
