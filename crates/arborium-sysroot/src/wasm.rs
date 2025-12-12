@@ -420,14 +420,16 @@ pub unsafe extern "C" fn memchr(s: *const c_void, c: c_int, n: usize) -> *mut c_
         return ptr::null_mut();
     }
 
-    let bytes = s as *const u8;
-    let needle = c as u8;
-    for i in 0..n {
-        if *bytes.add(i) == needle {
-            return bytes.add(i) as *mut c_void;
+    unsafe {
+        let bytes = s as *const u8;
+        let needle = c as u8;
+        for i in 0..n {
+            if *bytes.add(i) == needle {
+                return bytes.add(i) as *mut c_void;
+            }
         }
+        ptr::null_mut()
     }
-    ptr::null_mut()
 }
 
 /// fputs stub - no-op for WASM
