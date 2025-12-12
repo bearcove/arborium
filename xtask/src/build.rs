@@ -912,6 +912,13 @@ fn build_single_plugin(
             "--artifact-dir",
             artifact_dir.as_str(),
         ])
+        // Some environments set global CFLAGS (e.g. `-fembed-bitcode=all`) which are
+        // not applicable to wasm32 builds and can cause noisy warnings or failures
+        // in cc-rs-based build scripts. Clear target-specific flags for wasm32.
+        .env("CFLAGS_wasm32_unknown_unknown", "")
+        .env("CFLAGS_wasm32-unknown-unknown", "")
+        .env("CXXFLAGS_wasm32_unknown_unknown", "")
+        .env("CXXFLAGS_wasm32-unknown-unknown", "")
         .env(
             "RUSTFLAGS",
             "-Zunstable-options -Cpanic=immediate-abort -Copt-level=s -Cembed-bitcode=yes -Clto=fat -Ccodegen-units=1 -Cstrip=symbols",
