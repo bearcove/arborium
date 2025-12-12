@@ -4,11 +4,10 @@
  * Architecture:
  * 1. Grammar registry is bundled at build time (no network request needed in production)
  *    - Can be overridden via pluginsUrl config for local development
- * 2. Load grammar WIT components on demand from @arborium/<lang> packages
+ * 2. Load grammar wasm-bindgen modules on demand from @arborium/<lang> packages
  * 3. Parse and highlight using the grammar's tree-sitter parser
  */
 
-import { createWasiImports, grammarTypesImport } from "./wasi-shims.js";
 import type { ParseResult, ArboriumConfig, Grammar, Span, Injection } from "./types.js";
 import { availableLanguages } from "./plugins-manifest.js";
 
@@ -74,13 +73,14 @@ async function ensureLocalManifest(): Promise<void> {
   return localManifestPromise;
 }
 
-/** Get the CDN URL for a grammar's JS file */
-function getGrammarJsUrl(language: string): string {
+/** Get the CDN base URL for a grammar */
+function getGrammarBaseUrl(language: string): string {
   // If we have a local manifest (dev mode), use the local path
   if (localManifest) {
     const entry = localManifest.entries.find((e) => e.language === language);
     if (entry) {
-      return entry.local_js;
+      // Extract base URL from local_js path (e.g., "/langs/group-hazel/python/npm/grammar.js" -> "/langs/group-hazel/python/npm")
+      return entry.local_js.substring(0, entry.local_js.lastIndexOf("/"));
     }
   }
 
@@ -94,23 +94,22 @@ function getGrammarJsUrl(language: string): string {
   } else {
     baseUrl = cdn;
   }
-  return `${baseUrl}/@arborium/${language}@1/grammar.js`;
+  return `${baseUrl}/@arborium/${language}@1`;
 }
 
-/** WIT Result type as returned by jco-generated code */
-type WitResult<T, E> = { tag: "ok"; val: T } | { tag: "err"; val: E };
-
-/** Plugin interface as exported by jco-generated WIT components */
-interface JcoPlugin {
-  languageId(): string;
-  injectionLanguages(): string[];
-  createSession(): number;
-  freeSession(session: number): void;
-  setText(session: number, text: string): void;
-  parse(session: number): WitResult<ParseResult, { message: string }>;
+/** wasm-bindgen plugin module interface */
+interface WasmBindgenPlugin {
+  default: (wasmUrl: string) => Promise<void>;
+  language_id: () => string;
+  injection_languages: () => string[];
+  create_session: () => number;
+  free_session: (session: number) => void;
+  set_text: (session: number, text: string) => void;
+  parse: (session: number) => ParseResult;
+  cancel: (session: number) => void;
 }
 
-/** A loaded grammar plugin (WIT component) */
+/** A loaded grammar plugin */
 interface GrammarPlugin {
   languageId: string;
   injectionLanguages: string[];
@@ -139,76 +138,46 @@ async function loadGrammarPlugin(language: string): Promise<GrammarPlugin | null
   }
 
   try {
-    // Get the URL for the grammar JS (CDN or local depending on config)
-    const jsUrl = getGrammarJsUrl(language);
-    const baseUrl = jsUrl.substring(0, jsUrl.lastIndexOf("/"));
+    const baseUrl = getGrammarBaseUrl(language);
+    const jsUrl = `${baseUrl}/grammar.js`;
+    const wasmUrl = `${baseUrl}/grammar_bg.wasm`;
 
     console.debug(`[arborium] Loading grammar '${language}' from ${jsUrl}`);
-    // Dynamically import the JS module
-    const module = await import(/* @vite-ignore */ jsUrl);
 
-    // Create a getCoreModule function that fetches WASM files by path
-    const getCoreModule = async (path: string): Promise<WebAssembly.Module> => {
-      const wasmUrl = `${baseUrl}/${path}`;
-      const response = await fetch(wasmUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch WASM ${path}: ${response.status}`);
-      }
-      const bytes = await response.arrayBuffer();
-      return WebAssembly.compile(bytes);
-    };
+    // Dynamically import the wasm-bindgen generated JS module
+    const module = (await import(/* @vite-ignore */ jsUrl)) as WasmBindgenPlugin;
 
-    // Create WASI imports
-    const wasiImports = createWasiImports();
-    const imports = {
-      ...wasiImports,
-      ...grammarTypesImport,
-    };
+    // Initialize the WASM module
+    await module.default(wasmUrl);
 
-    // Instantiate the jco-generated component
-    const instance = await module.instantiate(getCoreModule, imports);
-
-    // Get the plugin interface
-    const jcoPlugin = (instance.plugin || instance["arborium:grammar/plugin@0.1.0"]) as JcoPlugin;
-    if (!jcoPlugin) {
-      console.error(`Grammar '${language}' missing plugin interface`);
-      return null;
+    // Verify it loaded correctly
+    const loadedId = module.language_id();
+    if (loadedId !== language) {
+      console.warn(`[arborium] Language ID mismatch: expected '${language}', got '${loadedId}'`);
     }
+
+    // Get injection languages
+    const injectionLanguages = module.injection_languages();
 
     // Wrap as GrammarPlugin with session-based parsing
     const plugin: GrammarPlugin = {
       languageId: language,
-      injectionLanguages: jcoPlugin.injectionLanguages?.() ?? [],
+      injectionLanguages,
       parse: (text: string) => {
-        const session = jcoPlugin.createSession();
+        const session = module.create_session();
         try {
-          jcoPlugin.setText(session, text);
-          const result = jcoPlugin.parse(session);
-
-          // Handle various result shapes from jco
-          // Some versions return { tag: 'ok', val: ParseResult }
-          // Others might return ParseResult directly
-          if (result.tag === "err") {
-            const err = result.val as { message?: string };
-            console.error(`[arborium] Parse error: ${err?.message}`);
-            return { spans: [], injections: [] };
-          }
-
-          // Extract the actual value - could be result.val or result itself
-          const val = result.tag === "ok" ? result.val : result;
-          if (!val || typeof val !== "object") {
-            console.error(`[arborium] Unexpected parse result:`, result);
-            return { spans: [], injections: [] };
-          }
-
-          // Access spans/injections with type coercion
-          const parsed = val as { spans?: Span[]; injections?: Injection[] };
+          module.set_text(session, text);
+          // wasm-bindgen returns ParseResult directly (or throws on error)
+          const result = module.parse(session);
           return {
-            spans: parsed.spans || [],
-            injections: parsed.injections || [],
+            spans: result.spans || [],
+            injections: result.injections || [],
           };
+        } catch (e) {
+          console.error(`[arborium] Parse error:`, e);
+          return { spans: [], injections: [] };
         } finally {
-          jcoPlugin.freeSession(session);
+          module.free_session(session);
         }
       },
     };

@@ -84,7 +84,7 @@ pub fn parse(session: u32) -> Result<JsValue, JsValue> {
     match result {
         Ok(r) => serde_wasm_bindgen::to_value(&r)
             .map_err(|e| JsValue::from_str(&format!("serialization error: {}", e))),
-        Err(e) => Err(JsValue::from_str(&e.message)),
+        Err(e) => Err(JsValue::from_str(&format!("parse error: {}", e.message))),
     }
 }
 
