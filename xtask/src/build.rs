@@ -657,7 +657,10 @@ fn build_single_plugin(
             "--artifact-dir",
             artifact_dir.as_str(),
         ])
-        .env("RUSTFLAGS", "-Zunstable-options -Cpanic=immediate-abort")
+        .env(
+            "RUSTFLAGS",
+            "-Zunstable-options -Cpanic=immediate-abort -Copt-level=s",
+        )
         .current_dir(&plugin_source);
 
     let status = run_streaming(cargo_cmd, grammar, printer)

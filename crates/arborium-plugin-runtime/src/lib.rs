@@ -34,10 +34,11 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use core::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
-use arborium_wire::{Edit, Injection, ParseError, ParseResult, Span};
 use arborium_tree_sitter::{
     InputEdit, Language, Parser, Point, Query, QueryCursor, QueryError, StreamingIterator, Tree,
 };
+use arborium_wire::{Edit, Injection, ParseError, ParseResult, Span};
+use tree_sitter_language::LanguageFn;
 
 /// Configuration for syntax highlighting.
 ///
@@ -60,11 +61,12 @@ impl HighlightConfig {
     /// * `injections_query` - Query for language injections
     /// * `locals_query` - Query for local variable tracking
     pub fn new(
-        language: Language,
+        language: LanguageFn,
         highlights_query: &str,
         injections_query: &str,
         locals_query: &str,
     ) -> Result<Self, QueryError> {
+        let language: Language = language.into();
         // Concatenate queries: injections, then locals, then highlights
         // Add newline separators to ensure queries don't merge incorrectly
         // if they don't end with newlines
