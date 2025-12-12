@@ -1,8 +1,10 @@
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader};
 use std::process::{Command, ExitStatus, Stdio};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use owo_colors::OwoColorize;
 use rand::seq::SliceRandom;
 
@@ -74,42 +76,163 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
     Ok(())
 }
 
-/// Thread-safe output printer for parallel builds.
+/// Build phase icons (nerd font)
+const ICON_RUST: &str = "\u{e7a8}"; //
+const ICON_WASM: &str = "\u{e6a1}"; //
+const ICON_JS: &str = "\u{e74e}"; //
+#[allow(dead_code)]
+const ICON_PACKAGE: &str = "\u{f487}"; //
+const ICON_CHECK: &str = "\u{f00c}"; //
+const ICON_CROSS: &str = "\u{f00d}"; //
+const ICON_GEAR: &str = "\u{f013}"; //
+
+/// Separator between prefix and log
+const SEP: &str = "│"; // U+2502 box drawings light vertical
+
+/// Build phase for display
+#[derive(Clone, Copy)]
+#[allow(dead_code)]
+enum BuildPhase {
+    Cargo,
+    WasmBindgen,
+    WasmOpt,
+    Package,
+}
+
+impl BuildPhase {
+    fn icon(&self) -> &'static str {
+        match self {
+            BuildPhase::Cargo => ICON_RUST,
+            BuildPhase::WasmBindgen => ICON_WASM,
+            BuildPhase::WasmOpt => ICON_GEAR,
+            BuildPhase::Package => ICON_JS,
+        }
+    }
+
+    fn name(&self) -> &'static str {
+        match self {
+            BuildPhase::Cargo => "cargo",
+            BuildPhase::WasmBindgen => "wasm-bindgen",
+            BuildPhase::WasmOpt => "wasm-opt",
+            BuildPhase::Package => "package",
+        }
+    }
+}
+
+/// Thread-safe output printer for parallel builds with progress tracking.
 #[derive(Clone)]
 struct OutputPrinter {
-    mutex: Arc<Mutex<()>>,
+    multi: MultiProgress,
+    progress: ProgressBar,
+    completed: Arc<AtomicUsize>,
+    #[allow(dead_code)]
+    total: usize,
 }
 
 impl OutputPrinter {
-    fn new() -> Self {
+    fn new(total: usize) -> Self {
+        let multi = MultiProgress::new();
+
+        let style = ProgressStyle::default_bar()
+            .template("{spinner:.cyan} {msg} {wide_bar:.cyan/dim} {pos}/{len} ({percent}%)")
+            .unwrap()
+            .progress_chars("━╸─");
+
+        let progress = multi.add(ProgressBar::new(total as u64));
+        progress.set_style(style);
+        progress.set_message("Building plugins");
+
         Self {
-            mutex: Arc::new(Mutex::new(())),
+            multi,
+            progress,
+            completed: Arc::new(AtomicUsize::new(0)),
+            total,
+        }
+    }
+
+    fn inc_completed(&self) {
+        let completed = self.completed.fetch_add(1, Ordering::SeqCst) + 1;
+        self.progress.set_position(completed as u64);
+    }
+
+    fn finish(&self) {
+        self.progress.finish_with_message("Build complete");
+    }
+
+    fn format_prefix(grammar: &str, phase: Option<BuildPhase>) -> String {
+        match phase {
+            Some(p) => format!("{:>14} {} {}", grammar, p.icon(), SEP),
+            None => format!("{:>14} {} {}", grammar, SEP, SEP),
         }
     }
 
     fn print_line(&self, grammar: &str, line: &str, is_stderr: bool) {
-        let _lock = self.mutex.lock().unwrap();
-        let prefix = format!("[{:^18}]", grammar);
+        self.print_line_with_phase(grammar, line, is_stderr, None);
+    }
+
+    fn print_line_with_phase(
+        &self,
+        grammar: &str,
+        line: &str,
+        is_stderr: bool,
+        phase: Option<BuildPhase>,
+    ) {
+        let prefix = Self::format_prefix(grammar, phase);
         let colored_prefix = if is_stderr {
             prefix.red().to_string()
         } else {
             prefix.blue().to_string()
         };
-        if is_stderr {
-            eprintln!("{} {}", colored_prefix, line);
-            let _ = std::io::stderr().flush();
-        } else {
-            println!("{} {}", colored_prefix, line);
-            let _ = std::io::stdout().flush();
-        }
+        let msg = format!("{} {}", colored_prefix, line);
+        let _ = self.multi.println(&msg);
+    }
+
+    #[allow(dead_code)]
+    fn print_phase_start(&self, grammar: &str, phase: BuildPhase) {
+        let prefix = Self::format_prefix(grammar, Some(phase));
+        let msg = format!("{} {} ...", prefix.cyan(), phase.name().dimmed());
+        let _ = self.multi.println(&msg);
+    }
+
+    fn print_success(&self, grammar: &str) {
+        self.inc_completed();
+        let msg = format!(
+            "{:>14} {} {} {}",
+            grammar.green(),
+            ICON_CHECK.green(),
+            SEP.green(),
+            "done".green().bold()
+        );
+        let _ = self.multi.println(&msg);
+    }
+
+    fn print_error(&self, grammar: &str, error: &str) {
+        let msg = format!(
+            "{:>14} {} {} {} {}",
+            grammar.red(),
+            ICON_CROSS.red(),
+            SEP.red(),
+            "failed:".red().bold(),
+            error.red()
+        );
+        let _ = self.multi.println(&msg);
     }
 }
 
 /// Run a command and stream its output with prefixed lines.
 fn run_streaming(
+    cmd: Command,
+    grammar: &str,
+    printer: &OutputPrinter,
+) -> std::io::Result<ExitStatus> {
+    run_streaming_with_phase(cmd, grammar, printer, None)
+}
+
+fn run_streaming_with_phase(
     mut cmd: Command,
     grammar: &str,
     printer: &OutputPrinter,
+    phase: Option<BuildPhase>,
 ) -> std::io::Result<ExitStatus> {
     cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
 
@@ -127,7 +250,7 @@ fn run_streaming(
         let reader = BufReader::new(stdout);
         for line in reader.lines() {
             let Ok(line) = line else { break };
-            printer_out.print_line(&grammar_out, &line, false);
+            printer_out.print_line_with_phase(&grammar_out, &line, false, phase);
         }
     });
 
@@ -135,7 +258,7 @@ fn run_streaming(
         let reader = BufReader::new(stderr);
         for line in reader.lines() {
             let Ok(line) = line else { break };
-            printer_err.print_line(&grammar_err, &line, true);
+            printer_err.print_line_with_phase(&grammar_err, &line, true, phase);
         }
     });
 
@@ -317,7 +440,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         .into_diagnostic()
         .context("wasm-opt not found")?;
 
-    let printer = OutputPrinter::new();
+    let printer = OutputPrinter::new(grammars.len());
 
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(options.jobs)
@@ -339,23 +462,17 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
 
             match result {
                 Ok(()) => {
-                    println!(
-                        "{} {}",
-                        format!("[{:^18}]", grammar).green(),
-                        "done".green()
-                    );
+                    printer.print_success(grammar);
                 }
                 Err(e) => {
-                    eprintln!(
-                        "{} {}",
-                        format!("[{:^18}]", grammar).red(),
-                        format!("{}", e).red()
-                    );
+                    printer.print_error(grammar, &format!("{}", e));
                     std::process::exit(1);
                 }
             }
         })
     });
+
+    printer.finish();
 
     let manifest = build_manifest(
         repo_root,

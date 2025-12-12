@@ -131,8 +131,14 @@ fn get_published_crate_hash(name: &str, version: &str) -> Result<Option<String>>
 
 /// Compute hash of grammar crate contents for change detection.
 ///
-/// Hashes:
-/// - All source files in grammar/ directory (parser.c, scanner.c, grammar.json, etc.)
+/// Hashes all files that would be published in the crate:
+/// - grammar/ directory (parser.c, scanner.c, grammar.json, etc.)
+/// - src/ directory (lib.rs and other Rust source)
+/// - build.rs
+/// - Cargo.toml
+/// - queries/ directory (if exists)
+/// - arborium.kdl (if exists)
+/// - sample files (if exist)
 /// - tree-sitter CLI version
 ///
 /// Returns hex-encoded blake3 hash.
@@ -147,16 +153,16 @@ pub fn compute_grammar_hash(crate_dir: &Utf8Path) -> Result<String> {
     hasher.update(ts_version.as_bytes());
     hasher.update(b"\n");
 
-    // Hash all files in grammar/ directory in sorted order
-    let grammar_dir = crate_dir.join("grammar");
-    if !grammar_dir.exists() {
-        miette::bail!("grammar/ directory not found in {}", crate_dir);
-    }
-
+    // Collect all files to hash, excluding build artifacts
     let mut files = Vec::new();
-    for entry in walkdir::WalkDir::new(&grammar_dir)
+    for entry in walkdir::WalkDir::new(crate_dir)
         .sort_by_file_name()
         .into_iter()
+        .filter_entry(|e| {
+            // Skip target/ directory and .arborium-hash itself
+            let name = e.file_name().to_string_lossy();
+            name != "target" && name != ".arborium-hash"
+        })
         .filter_map(|e| e.ok())
     {
         if entry.file_type().is_file() {
@@ -164,8 +170,9 @@ pub fn compute_grammar_hash(crate_dir: &Utf8Path) -> Result<String> {
         }
     }
 
+    // Hash all files in sorted order
     for file_path in files {
-        let relative = file_path.strip_prefix(&grammar_dir).unwrap();
+        let relative = file_path.strip_prefix(crate_dir).unwrap();
         let contents = std::fs::read(&file_path)
             .into_diagnostic()
             .with_context(|| format!("Failed to read {}", file_path.display()))?;

@@ -79,6 +79,12 @@ pub enum Operation {
         commit: Option<String>,
         description: String,
     },
+
+    /// Compute grammar hash and write to .arborium-hash file.
+    ComputeGrammarHash {
+        crate_path: Utf8PathBuf,
+        description: String,
+    },
 }
 
 impl Operation {
@@ -92,6 +98,7 @@ impl Operation {
             Operation::RunCommand { description, .. } => description,
             Operation::CopyFile { description, .. } => description,
             Operation::GitClone { description, .. } => description,
+            Operation::ComputeGrammarHash { description, .. } => description,
         }
     }
 
@@ -105,6 +112,7 @@ impl Operation {
             Operation::RunCommand { .. } => None,
             Operation::CopyFile { dest, .. } => Some(dest),
             Operation::GitClone { dest, .. } => Some(dest),
+            Operation::ComputeGrammarHash { .. } => None,
         }
     }
 
@@ -118,6 +126,7 @@ impl Operation {
             Operation::RunCommand { .. } => "run",
             Operation::CopyFile { .. } => "copy",
             Operation::GitClone { .. } => "clone",
+            Operation::ComputeGrammarHash { .. } => "hash",
         }
     }
 
@@ -203,6 +212,20 @@ impl Operation {
                 }
                 Ok(())
             }
+            Operation::ComputeGrammarHash { crate_path, .. } => {
+                // Compute hash from entire crate directory
+                let hash = crate::publish::compute_grammar_hash(crate_path).map_err(|e| {
+                    ExecuteError::Other(format!("Failed to compute grammar hash: {}", e))
+                })?;
+
+                // Write to .arborium-hash file
+                let hash_file = crate_path.join(".arborium-hash");
+                if let Some(parent) = hash_file.parent() {
+                    fs::create_dir_all(parent)?;
+                }
+                fs::write(&hash_file, hash)?;
+                Ok(())
+            }
         }
     }
 }
@@ -231,6 +254,9 @@ impl fmt::Display for Operation {
             Operation::GitClone { url, dest, .. } => {
                 write!(f, "clone  {} -> {}", url, dest)
             }
+            Operation::ComputeGrammarHash { crate_path, .. } => {
+                write!(f, "hash   {}", crate_path.join(".arborium-hash"))
+            }
         }
     }
 }
@@ -244,6 +270,7 @@ pub enum ExecuteError {
         status: std::process::ExitStatus,
     },
     ToolNotFound(crate::tool::ToolNotFound),
+    Other(String),
 }
 
 impl From<std::io::Error> for ExecuteError {
@@ -266,6 +293,7 @@ impl fmt::Display for ExecuteError {
                 write!(f, "Command '{}' failed with {}", command, status)
             }
             ExecuteError::ToolNotFound(e) => write!(f, "{}", e),
+            ExecuteError::Other(msg) => write!(f, "{}", msg),
         }
     }
 }
