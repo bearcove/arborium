@@ -1071,13 +1071,10 @@ function updateStatus(message, success) {
 
 document.getElementById('source').addEventListener('input', doHighlight);
 
-// Global keyboard navigation with arrow keys
+// Global keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-    // Don't handle if we're in a text input (except the picker inputs)
     const activeEl = document.activeElement;
     const isInTextarea = activeEl.tagName === 'TEXTAREA';
-    const isInLangInput = activeEl === langInput;
-    const isInThemeInput = activeEl === themeInput;
     const isInInput = activeEl.tagName === 'INPUT';
 
     // Cmd/Ctrl+K opens language picker from anywhere
@@ -1092,27 +1089,6 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         enterSearchMode();
         return;
-    }
-
-    // If in textarea, don't intercept arrows
-    if (isInTextarea) return;
-
-    // If in picker input, the picker's own handler will handle it
-    if (isInLangInput || isInThemeInput) return;
-
-    // Global arrow key navigation cycles through languages
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (!allLanguages || allLanguages.length === 0) return;
-
-        const currentIndex = allLanguages.indexOf(selectedLang);
-        let newIndex;
-        if (e.key === 'ArrowDown') {
-            newIndex = (currentIndex + 1) % allLanguages.length;
-        } else {
-            newIndex = (currentIndex - 1 + allLanguages.length) % allLanguages.length;
-        }
-        selectLanguage(allLanguages[newIndex]);
     }
 });
 
