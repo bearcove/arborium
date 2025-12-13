@@ -187,16 +187,9 @@ fn get_published_crate_version(name: &str) -> Result<Option<String>> {
             let mut contents = String::new();
             std::io::Read::read_to_string(&mut entry, &mut contents).into_diagnostic()?;
 
-            // Parse version from Cargo.toml
-            for line in contents.lines() {
-                let line = line.trim();
-                if line.starts_with("version") && line.contains('=') {
-                    // Parse: version = "1.2.3"
-                    if let Some(version_str) = line.split('=').nth(1) {
-                        let version = version_str.trim().trim_matches('"').trim();
-                        return Ok(Some(version.to_string()));
-                    }
-                }
+            // Parse version from [package] section using proper TOML parser
+            if let Some(version) = extract_toml_string(&contents, "version") {
+                return Ok(Some(version));
             }
         }
     }
@@ -335,15 +328,15 @@ pub fn publish_crates(
             println!();
 
             // 3. Regenerate POST crates with actual published versions
-            if !dry_run {
-                println!(
-                    "  {} Regenerating POST crates with published versions...",
-                    "●".cyan()
-                );
-                regenerate_umbrella_crate(repo_root, &grammar_versions)?;
-                println!("    {}", "done".green());
-                println!();
-            }
+            // Always regenerate (even in dry-run) so POST crates validate against correct versions
+            println!(
+                "  {} Regenerating POST crates with published versions{}...",
+                "●".cyan(),
+                if dry_run { " [dry-run]" } else { "" }
+            );
+            regenerate_umbrella_crate(repo_root, &grammar_versions)?;
+            println!("    {}", "done".green());
+            println!();
 
             // 4. Post crates
             println!("  {} Publishing {} group...", "●".cyan(), "post".bold());
