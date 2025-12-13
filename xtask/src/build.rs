@@ -259,12 +259,13 @@ impl OutputPrinter {
     fn new(total: usize) -> Self {
         let multi = MultiProgress::new();
 
+        // Progress bar at top with fixed width (40 chars max)
         let style = ProgressStyle::default_bar()
-            .template("{spinner:.cyan} {msg} {wide_bar:.cyan/dim} {pos}/{len} ({percent}%)")
+            .template("{spinner:.cyan} [{bar:40.cyan/dim}] {pos}/{len} {msg}")
             .unwrap()
-            .progress_chars("━╸─");
+            .progress_chars("━━╸");
 
-        let progress = multi.add(ProgressBar::new(total as u64));
+        let progress = multi.insert(0, ProgressBar::new(total as u64));
         progress.set_style(style);
         progress.set_message("Building plugins");
 
