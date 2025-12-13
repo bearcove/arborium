@@ -948,13 +948,22 @@ fn build_single_plugin(
             "--artifact-dir",
             artifact_dir.as_str(),
         ])
-        // Some environments set global CFLAGS (e.g. `-fembed-bitcode=all`) which are
-        // not applicable to wasm32 builds and can cause noisy warnings or failures
-        // in cc-rs-based build scripts. Clear target-specific flags for wasm32.
+        // Some environments set global CFLAGS (e.g. `-fembed-bitcode=all` on macOS)
+        // which are not applicable to wasm32 builds and can cause noisy warnings or
+        // failures in cc-rs-based build scripts. Clear all C/CXX flags for this build.
+        // Also clear Apple SDK-related variables that can inject iOS/macOS-specific flags.
+        .env("CFLAGS", "")
+        .env("CXXFLAGS", "")
         .env("CFLAGS_wasm32_unknown_unknown", "")
         .env("CFLAGS_wasm32-unknown-unknown", "")
         .env("CXXFLAGS_wasm32_unknown_unknown", "")
         .env("CXXFLAGS_wasm32-unknown-unknown", "")
+        // Prevent cc-rs from inheriting Apple SDK flags (like -fembed-bitcode=all for iOS)
+        .env("SDKROOT", "")
+        .env("IPHONEOS_DEPLOYMENT_TARGET", "")
+        .env("TVOS_DEPLOYMENT_TARGET", "")
+        .env("WATCHOS_DEPLOYMENT_TARGET", "")
+        .env("XROS_DEPLOYMENT_TARGET", "")
         .env(
             "RUSTFLAGS",
             "-Zunstable-options -Cpanic=immediate-abort -Copt-level=s -Cembed-bitcode=yes -Clto=fat -Ccodegen-units=1 -Cstrip=symbols",

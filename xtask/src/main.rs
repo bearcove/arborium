@@ -279,9 +279,6 @@ fn main() {
             jobs,
             quiet,
         } => {
-            use std::time::Instant;
-            let total_start = Instant::now();
-
             // Check for required tools before starting
             if !tool::check_tools_or_report(tool::GEN_TOOLS) {
                 std::process::exit(1);
@@ -308,7 +305,10 @@ fn main() {
             let result = generate::plan_generate(&crates_dir, options);
             match result {
                 Ok(plans) => {
-                    if let Err(e) = plans.run_with_options(dry_run, quiet) {
+                    // Quiet by default for normal runs (progress bar + summary is enough)
+                    // Dry run shows full details so users can review what would change
+                    let effective_quiet = !dry_run || quiet;
+                    if let Err(e) = plans.run_with_options(dry_run, effective_quiet) {
                         eprintln!("Error: {}", e);
                         std::process::exit(1);
                     }
@@ -321,27 +321,13 @@ fn main() {
 
             // Run strict lint after generation (now parser.c should exist)
             if !dry_run {
-                println!();
-                println!(
-                    "{}",
-                    "Running post-generation lint (strict)...".cyan().bold()
-                );
                 let options = lint_new::LintOptions { strict: true };
                 if let Err(e) = lint_new::run_lints(&crates_dir, options) {
                     eprintln!("{:?}", e);
                     std::process::exit(1);
                 }
-            }
 
-            let total_elapsed = total_start.elapsed();
-            println!(
-                "\n{} Total time: {:.2}s",
-                "●".green(),
-                total_elapsed.as_secs_f64()
-            );
-
-            // Print next steps hint
-            if !dry_run {
+                // Print next steps hint
                 println!();
                 println!("{}", "Next steps:".bold());
                 println!(

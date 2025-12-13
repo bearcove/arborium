@@ -4,6 +4,7 @@
 //! of truth, with Miette diagnostics for precise error reporting.
 
 use camino::Utf8Path;
+use indicatif::{ProgressBar, ProgressStyle};
 use miette::{Diagnostic, NamedSource, SourceSpan};
 use owo_colors::OwoColorize;
 use thiserror::Error;
@@ -20,119 +21,128 @@ pub struct LintOptions {
 
 /// Run all lints on the registry.
 pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<()> {
-    println!("{}", "Loading crate registry...".cyan().bold());
-    if !options.strict {
-        println!(
-            "{}",
-            "(non-strict mode: missing generated files are warnings)".dimmed()
-        );
-    }
-    println!();
-
     let registry = CrateRegistry::load(crates_dir).map_err(|e| miette::miette!("{e}"))?;
+
+    let total_crates = registry.crates.len();
+    let pb = ProgressBar::new(total_crates as u64);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} Linting {msg}")
+            .unwrap()
+            .progress_chars("━━╸"),
+    );
 
     let mut errors = 0;
     let mut warnings = 0;
+    let mut issues: Vec<(String, Vec<LintDiagnostic>)> = Vec::new();
 
     // First pass: check for crates without arborium.kdl
-    // Only check grammar crates (those with a grammar/ subdirectory)
-    println!("{}", "Checking for missing arborium.kdl files...".cyan());
     for (name, state) in registry.iter() {
-        // Only grammar crates need arborium.kdl - they have a grammar/ directory
+        pb.set_message(name.strip_prefix("arborium-").unwrap_or(name).to_string());
         let has_grammar_dir = state.path.join("grammar").is_dir();
         if state.config.is_none() && has_grammar_dir {
-            println!(
-                "  {} {} - {}",
-                "!".yellow(),
-                name.bold(),
-                "missing arborium.kdl".yellow()
-            );
             warnings += 1;
+            issues.push((
+                name.to_string(),
+                vec![LintDiagnostic::Warning("missing arborium.kdl".to_string())],
+            ));
         }
+        pb.inc(1);
     }
-    println!();
+
+    pb.set_position(0);
 
     // Second pass: lint each configured crate
-    println!("{}", "Linting configured crates...".cyan());
     for (name, state, config) in registry.configured_crates() {
-        let crate_errors = lint_crate(name, state, config, options);
+        pb.set_message(name.strip_prefix("arborium-").unwrap_or(name).to_string());
+        let crate_diagnostics = lint_crate(name, state, config, options);
 
-        if !crate_errors.is_empty() {
-            println!("{} {}", "●".yellow(), name.bold());
-
-            for diagnostic in &crate_errors {
-                match diagnostic {
-                    LintDiagnostic::Error(msg) => {
-                        println!("  {} {}", "error:".red().bold(), msg);
-                        errors += 1;
-                    }
-                    LintDiagnostic::Warning(msg) => {
-                        println!("  {} {}", "warning:".yellow(), msg);
-                        warnings += 1;
-                    }
-                    LintDiagnostic::Spanned {
-                        source_name,
-                        source,
-                        span,
-                        message,
-                        is_error,
-                    } => {
-                        // For spanned diagnostics, print with Miette
-                        let report = SpannedLint {
-                            message: message.clone(),
-                            src: NamedSource::new(source_name, source.clone()),
-                            span: *span,
-                        };
+        if !crate_diagnostics.is_empty() {
+            for diag in &crate_diagnostics {
+                match diag {
+                    LintDiagnostic::Error(_) => errors += 1,
+                    LintDiagnostic::Warning(_) => warnings += 1,
+                    LintDiagnostic::Spanned { is_error, .. } => {
                         if *is_error {
-                            println!("  {} {}", "error:".red().bold(), message);
                             errors += 1;
                         } else {
-                            println!("  {} {}", "warning:".yellow(), message);
                             warnings += 1;
                         }
-                        // Could print full miette report here if desired
-                        let _ = report;
                     }
                 }
             }
-            println!();
+            issues.push((name.to_string(), crate_diagnostics));
         }
+        pb.inc(1);
     }
+
+    pb.set_position(0);
 
     // Third pass: check for legacy files
-    println!("{}", "Checking for legacy files...".cyan());
     for (name, state) in registry.iter() {
+        pb.set_message(name.strip_prefix("arborium-").unwrap_or(name).to_string());
         if !state.files.legacy_files.is_empty() {
-            println!("{} {}", "●".yellow(), name.bold());
+            let mut legacy_diagnostics = Vec::new();
             for legacy in &state.files.legacy_files {
-                println!(
-                    "  {} legacy file should be deleted: {}",
-                    "warning:".yellow(),
+                legacy_diagnostics.push(LintDiagnostic::Warning(format!(
+                    "legacy file should be deleted: {}",
                     legacy.file_name().unwrap_or("?")
-                );
+                )));
                 warnings += 1;
             }
-            println!();
+            issues.push((name.to_string(), legacy_diagnostics));
         }
+        pb.inc(1);
     }
 
-    // Summary
-    println!("{}", "─".repeat(60));
-    println!();
-    println!("Checked {} crate(s)", registry.crates.len());
+    pb.finish_and_clear();
 
+    // Print issues if any
+    if !issues.is_empty() {
+        for (name, diagnostics) in &issues {
+            println!("{} {}", "●".yellow(), name.bold());
+            for diagnostic in diagnostics {
+                match diagnostic {
+                    LintDiagnostic::Error(msg) => {
+                        println!("  {} {}", "error:".red().bold(), msg);
+                    }
+                    LintDiagnostic::Warning(msg) => {
+                        println!("  {} {}", "warning:".yellow(), msg);
+                    }
+                    LintDiagnostic::Spanned {
+                        message, is_error, ..
+                    } => {
+                        if *is_error {
+                            println!("  {} {}", "error:".red().bold(), message);
+                        } else {
+                            println!("  {} {}", "warning:".yellow(), message);
+                        }
+                    }
+                }
+            }
+        }
+        println!();
+    }
+
+    // Summary - single checkmark line
     if errors > 0 {
-        println!("{} {} error(s)", "✗".red(), errors);
-    }
-    if warnings > 0 {
-        println!("{} {} warning(s)", "⚠".yellow(), warnings);
-    }
-    if errors == 0 && warnings == 0 {
-        println!("{} All crates are valid!", "✓".green());
-    }
-
-    if errors > 0 {
+        println!(
+            "{} Linted {} crates ({} errors, {} warnings)",
+            "✗".red(),
+            total_crates,
+            errors,
+            warnings
+        );
         std::process::exit(1);
+    } else if warnings > 0 {
+        println!(
+            "{} Linted {} crates ({} warnings)",
+            "✓".green(),
+            total_crates,
+            warnings
+        );
+    } else {
+        println!("{} Linted {} crates", "✓".green(), total_crates);
     }
 
     Ok(())
@@ -153,6 +163,7 @@ enum LintDiagnostic {
 }
 
 /// A Miette-compatible spanned lint error.
+#[allow(dead_code)]
 #[derive(Debug, Error, Diagnostic)]
 #[error("{message}")]
 struct SpannedLint {

@@ -11,7 +11,7 @@ via `--html-in-header` to highlight everything else.
 
 1. Create `arborium-header.html`:
    ```html
-   <script defer src="https://cdn.jsdelivr.net/npm/@arborium/arborium@1.2.4/dist/arborium.iife.js"></script>
+   <script defer src="https://cdn.jsdelivr.net/npm/@arborium/arborium@1.3.0/dist/arborium.iife.js"></script>
    ```
 
 2. Add to `Cargo.toml`:

@@ -559,15 +559,8 @@ impl PlanSet {
     pub fn run_with_options(&self, dry_run: bool, quiet: bool) -> Result<(), ExecuteError> {
         if !quiet {
             self.display(dry_run);
-        } else if !self.is_empty() {
-            // In quiet mode, just show a summary
-            println!(
-                "{} {} operation(s) across {} crate(s)",
-                if dry_run { "Would apply" } else { "Applying" },
-                self.total_operations(),
-                self.plans.len()
-            );
         }
+        // In quiet mode, skip the summary - caller can print their own
 
         if !dry_run && !self.is_empty() {
             if !quiet {
@@ -590,13 +583,15 @@ impl PlanSet {
             plan.execute()?;
         }
 
-        let elapsed = start.elapsed();
-        println!(
-            "\n{} {} operation(s) completed in {:.2}s",
-            "●".green(),
-            self.total_operations(),
-            elapsed.as_secs_f64()
-        );
+        if !quiet {
+            let elapsed = start.elapsed();
+            println!(
+                "\n{} {} operation(s) completed in {:.2}s",
+                "●".green(),
+                self.total_operations(),
+                elapsed.as_secs_f64()
+            );
+        }
         Ok(())
     }
 }

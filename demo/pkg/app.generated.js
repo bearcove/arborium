@@ -1376,7 +1376,9 @@ let hostModule = null;
 // Cache for loaded grammar plugins
 const grammarCache = {};
 
-// Map from grammar handle to plugin instance (for window.arboriumHost.parse)
+// Map from grammar handle to plugin instance and session (for window.arboriumHost.parse)
+// Each entry: { plugin, language, session }
+// Sessions are kept alive for incremental highlighting
 const handleToPlugin = new Map();
 let nextHandle = 1;
 
@@ -1465,32 +1467,32 @@ function setupArboriumHost() {
             if (!plugin) return 0; // 0 = not found
 
             // Check if already have a handle
-            for (const [handle, p] of handleToPlugin) {
-                if (p.language === language) return handle;
+            for (const [handle, entry] of handleToPlugin) {
+                if (entry.language === language) return handle;
             }
 
-            // Create new handle
+            // Create new handle with a persistent session for incremental highlighting
             const handle = nextHandle++;
-            handleToPlugin.set(handle, { plugin, language });
+            const session = plugin.create_session();
+            handleToPlugin.set(handle, { plugin, language, session });
             return handle;
         },
 
         // Parse text using a grammar handle (sync)
+        // Uses persistent session for incremental highlighting
         parse(handle, text) {
             const entry = handleToPlugin.get(handle);
             if (!entry) return { spans: [], injections: [] };
 
-            const { plugin } = entry;
-            const session = plugin.create_session();
+            const { plugin, session } = entry;
             try {
+                // Reuse the session - just set new text and parse
                 plugin.set_text(session, text);
                 const val = plugin.parse(session);
                 return { spans: val?.spans || [], injections: val?.injections || [] };
             } catch (e) {
                 console.error(`Parse error for handle ${handle}:`, e);
                 return { spans: [], injections: [] };
-            } finally {
-                plugin.free_session(session);
             }
         },
     };

@@ -12,6 +12,7 @@ use crate::types::{CrateRegistry, CrateState};
 use crate::util::find_repo_root;
 use crate::version_store;
 use camino::{Utf8Path, Utf8PathBuf};
+use indicatif::{ProgressBar, ProgressStyle};
 
 /// Options for the generate command.
 pub struct GenerateOptions<'a> {
@@ -190,10 +191,16 @@ pub fn plan_generate(
     let plan_set = generate_all_crates(&prepared, &generation_results, options.mode)?;
 
     let total_elapsed = total_start.elapsed();
-    println!("Total time: {:.2}s", total_elapsed.as_secs_f64());
+
+    // Print summary as checkmark line
+    let regen = generation_results.cache_misses;
+    let reused = generation_results.cache_hits;
     println!(
-        "Cache hits: {}, misses: {}",
-        generation_results.cache_hits, generation_results.cache_misses
+        "{} Generated {}, re-used {} ({:.2}s)",
+        "✓".green(),
+        regen,
+        reused,
+        total_elapsed.as_secs_f64()
     );
 
     Ok(plan_set)
@@ -944,14 +951,28 @@ fn prepare_temp_structures(
 
 // 3. Validate All Grammars using prepared structures
 fn validate_all_grammars(prepared: &PreparedStructures) -> Result<(), Report> {
-    println!("{}", "Validating grammar requires...".cyan().bold());
+    let total = prepared.prepared_temps.len();
+    let pb = ProgressBar::new(total as u64);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} Validating {msg}")
+            .unwrap()
+            .progress_chars("━━╸"),
+    );
 
     for prepared_temp in &prepared.prepared_temps {
+        let short_name = prepared_temp
+            .crate_state
+            .name
+            .strip_prefix("arborium-")
+            .unwrap_or(&prepared_temp.crate_state.name);
+        pb.set_message(short_name.to_string());
         validate_single_grammar(prepared_temp)?;
+        pb.inc(1);
     }
 
-    println!("{} All grammar requires validated", "✓".green());
-    println!();
+    pb.finish_and_clear();
+    println!("{} Validated {} grammars", "✓".green(), total);
     Ok(())
 }
 
@@ -1004,19 +1025,35 @@ fn generate_all_grammars(
     let errors: Mutex<Vec<(String, Report)>> = Mutex::new(Vec::new());
     let first_error_seen = AtomicUsize::new(0); // 0 = no error, 1 = error seen
 
+    // Set up progress bar
+    let total = prepared.prepared_temps.len() as u64;
+    let pb = ProgressBar::new(total);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} {msg}")
+            .unwrap()
+            .progress_chars("━━╸"),
+    );
+    pb.set_message("Generating grammars...");
+
     // Process grammars in parallel using prepared temp directories
     let process_grammar = |prepared_temp: &PreparedTemp| {
         // In fail-fast mode, skip if we already saw an error
         if !no_fail_fast && first_error_seen.load(Ordering::Relaxed) == 1 {
+            pb.inc(1);
             return;
         }
 
         let crate_name = &prepared_temp.crate_state.name;
+        let short_name = crate_name.strip_prefix("arborium-").unwrap_or(crate_name);
+        pb.set_message(format!("{}", short_name));
+
         let result = plan_grammar_generation_with_prepared_temp(
             prepared_temp,
             &prepared.cache,
             &prepared.repo_root,
             mode,
+            false, // quiet mode - don't print per-grammar status
         );
 
         match result {
@@ -1033,6 +1070,7 @@ fn generate_all_grammars(
                 errors.lock().unwrap().push((crate_name.clone(), e));
             }
         }
+        pb.inc(1);
     };
 
     // Always parallel, with configurable thread pool
@@ -1044,6 +1082,8 @@ fn generate_all_grammars(
     pool.install(|| {
         prepared.prepared_temps.par_iter().for_each(process_grammar);
     });
+
+    pb.finish_and_clear();
 
     // Check for errors
     let errors = errors.into_inner().unwrap();
@@ -1071,6 +1111,7 @@ fn plan_grammar_generation_with_prepared_temp(
     cache: &GrammarCache,
     repo_root: &Utf8Path,
     mode: PlanMode,
+    quiet: bool,
 ) -> Result<(Plan, bool), Report> {
     let crate_name = &prepared_temp.crate_state.name;
     let def_path = &prepared_temp.crate_state.def_path;
@@ -1094,26 +1135,10 @@ fn plan_grammar_generation_with_prepared_temp(
     let crates_dir = repo_root.join("crates");
     let cache_key = cache.compute_cache_key(def_path, &crates_dir, &prepared_temp.config)?;
 
-    let short_key = &cache_key[..8.min(cache_key.len())];
-
     if let Some(cached_files) = cache.get(crate_name, &cache_key) {
         // Cache hit - skip tree-sitter generate, but still plan grammar/src updates
         let temp_src = temp_root.join("cached_src");
         cached_files.extract_to(&temp_src)?;
-
-        let cache_path = cache
-            .cache_dir
-            .strip_prefix(repo_root)
-            .unwrap_or(&cache.cache_dir)
-            .join(crate_name)
-            .join(short_key);
-        println!(
-            "● {} ({}: {}, skipping tree-sitter, cache: {})",
-            crate_name.green(),
-            "cache hit".green(),
-            short_key,
-            cache_path
-        );
 
         let mut plan = Plan::for_crate(crate_name);
         plan_updates_from_generated(&mut plan, &temp_src, &dest_src_dir, mode)?;
@@ -1124,12 +1149,7 @@ fn plan_grammar_generation_with_prepared_temp(
     }
 
     // Cache miss - run tree-sitter generate in the prepared temp directory
-    println!(
-        "● {} ({}: {}, regenerating)",
-        crate_name.yellow(),
-        "cache miss".yellow(),
-        short_key
-    );
+    let _ = quiet; // quiet mode is handled by caller now
 
     // Create src/ directory for grammars that generate files there
     fs::create_dir_all(temp_grammar.join("src"))?;
