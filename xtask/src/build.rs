@@ -866,7 +866,7 @@ pub fn build_demo(repo_root: &Utf8Path, crates_dir: &Utf8Path, dev: bool) -> Res
     println!(
         "  {} {} to serve the demo locally",
         "→".blue(),
-        "cargo xtask serve".cyan()
+        "cargo xtask serve --dev".cyan()
     );
 
     Ok(())
