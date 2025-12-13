@@ -68,21 +68,48 @@ fn is_grammar_crate(crate_dir: &Utf8Path) -> bool {
 /// - Ok(false) if hash differs or no published version (should publish)
 /// - Err if couldn't check (e.g., download failed)
 fn should_skip_grammar_publish(crate_dir: &Utf8Path, name: &str, version: &str) -> Result<bool> {
+    use owo_colors::OwoColorize;
+
     // Compute current hash
     let current_hash = compute_grammar_hash(crate_dir)?;
+    let short_hash = &current_hash[..12];
 
     // Try to get hash from published version
     match get_published_crate_hash(name, version) {
         Ok(Some(published_hash)) => {
-            // Compare hashes
-            Ok(current_hash == published_hash)
+            let short_published = &published_hash[..std::cmp::min(12, published_hash.len())];
+            if current_hash == published_hash {
+                eprintln!(
+                    "    {} hash match: {}...",
+                    name.dimmed(),
+                    short_hash.dimmed()
+                );
+                Ok(true)
+            } else {
+                eprintln!(
+                    "    {} hash changed: {} → {}",
+                    name.dimmed(),
+                    short_published.dimmed(),
+                    short_hash.yellow()
+                );
+                Ok(false)
+            }
         }
         Ok(None) => {
-            // No published version or no hash file in it
+            eprintln!(
+                "    {} {}",
+                name.dimmed(),
+                "no published hash (new or first with hash)".dimmed()
+            );
             Ok(false)
         }
-        Err(_) => {
-            // Couldn't download/check, assume we should publish
+        Err(e) => {
+            eprintln!(
+                "    {} {} {}",
+                name.dimmed(),
+                "hash check failed:".dimmed(),
+                format!("{}", e).dimmed()
+            );
             Ok(false)
         }
     }
@@ -90,28 +117,26 @@ fn should_skip_grammar_publish(crate_dir: &Utf8Path, name: &str, version: &str) 
 
 /// Download a published crate and extract its .arborium-hash file if present.
 fn get_published_crate_hash(name: &str, version: &str) -> Result<Option<String>> {
-    // Download the .crate file from crates.io
-    let url = format!(
-        "https://crates.io/api/v1/crates/{}/{}/download",
-        name, version
-    );
-
-    let temp_dir = tempfile::tempdir().into_diagnostic()?;
-    let crate_file = temp_dir.path().join("crate.tar.gz");
-
-    // Download
-    let output = std::process::Command::new("curl")
-        .args(["-sL", "-o", crate_file.to_str().unwrap(), &url])
+    // Use cargo-download which handles crates.io auth properly
+    // It outputs INFO messages to stderr and binary content to stdout
+    let output = std::process::Command::new("cargo")
+        .args(["download", &format!("{}=={}", name, version)])
+        .stderr(std::process::Stdio::null())
         .output()
         .into_diagnostic()?;
 
-    if !output.status.success() {
-        return Ok(None); // Crate doesn't exist yet
+    if !output.status.success() || output.stdout.is_empty() {
+        return Ok(None); // Crate doesn't exist yet or download failed
     }
 
-    // Extract .arborium-hash from tar.gz
-    let tar_gz = std::fs::File::open(&crate_file).into_diagnostic()?;
-    let tar = flate2::read::GzDecoder::new(tar_gz);
+    // Validate gzip magic bytes (0x1f 0x8b) - cargo download returns XML on error
+    if output.stdout.len() < 2 || output.stdout[0] != 0x1f || output.stdout[1] != 0x8b {
+        return Ok(None); // Not a valid gzip file (probably XML error response)
+    }
+
+    // The stdout contains the gzip crate data
+    let cursor = std::io::Cursor::new(&output.stdout);
+    let tar = flate2::read::GzDecoder::new(cursor);
     let mut archive = tar::Archive::new(tar);
 
     for entry in archive.entries().into_diagnostic()? {
