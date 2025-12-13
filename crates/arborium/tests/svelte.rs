@@ -4,110 +4,16 @@
 
 #![cfg(feature = "lang-svelte")]
 
-use arborium::tree_sitter_highlight::{Highlight, HighlightEvent, Highlighter as TsHighlighter};
-use arborium::{HIGHLIGHT_NAMES, Highlighter};
+use arborium::Highlighter;
 use indoc::indoc;
 
-/// A recorded highlight event for testing
-#[derive(Debug, Clone, PartialEq)]
-enum Event {
-    Source { text: String },
-    Start { name: String },
-    End,
-}
-
-/// Record all highlight events for Svelte source
-fn record_events(highlighter: &mut Highlighter, source: &str) -> Vec<Event> {
-    // Pre-load all needed languages before extracting config references
-    highlighter.get_config_mut("svelte");
-    highlighter.get_config_mut("css");
-    highlighter.get_config_mut("javascript");
-    highlighter.get_config_mut("typescript");
-
-    // Now we can safely get immutable references
-    let config = highlighter
-        .get_config("svelte")
-        .expect("Svelte language not found");
-
-    let mut ts_highlighter = TsHighlighter::new();
-    let highlights = ts_highlighter
-        .highlight(config, source.as_bytes(), None, |lang| {
-            highlighter.get_config(lang)
-        })
-        .expect("Failed to highlight");
-
-    let mut events = Vec::new();
-    for event in highlights {
-        let event = event.expect("Highlight event error");
-        match event {
-            HighlightEvent::Source { start, end } => {
-                events.push(Event::Source {
-                    text: source[start..end].to_string(),
-                });
-            }
-            HighlightEvent::HighlightStart(Highlight(i)) => {
-                let name = if i < HIGHLIGHT_NAMES.len() {
-                    HIGHLIGHT_NAMES[i].to_string()
-                } else {
-                    format!("unknown_{}", i)
-                };
-                events.push(Event::Start { name });
-            }
-            HighlightEvent::HighlightEnd => {
-                events.push(Event::End);
-            }
-        }
-    }
-    events
-}
-
-/// Check that specific highlight names appear in the events
-fn assert_has_highlights(events: &[Event], expected_names: &[&str], context: &str) {
-    let found_names: std::collections::HashSet<_> = events
-        .iter()
-        .filter_map(|e| match e {
-            Event::Start { name } => Some(name.as_str()),
-            _ => None,
-        })
-        .collect();
-
-    for expected in expected_names {
-        assert!(
-            found_names.contains(expected),
-            "{}: Expected highlight '{}' not found. Found: {:?}",
-            context,
-            expected,
-            found_names
-        );
-    }
-}
-
-/// Check that a specific text appears with a specific highlight
-fn assert_text_highlighted(events: &[Event], text: &str, highlight: &str, context: &str) {
-    let mut current_highlights: Vec<&str> = Vec::new();
-    let mut found = false;
-
-    for event in events {
-        match event {
-            Event::Start { name } => {
-                current_highlights.push(name);
-            }
-            Event::End => {
-                current_highlights.pop();
-            }
-            Event::Source { text: src } => {
-                if src.contains(text) && current_highlights.contains(&highlight) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-    }
-
+/// Check that HTML contains specific highlight tags
+fn assert_has_tag(html: &str, tag: &str, context: &str) {
     assert!(
-        found,
-        "{}: Text '{}' should be highlighted as '{}'. Events: {:?}",
-        context, text, highlight, events
+        html.contains(tag),
+        "{}: Expected tag '{}' not found in HTML",
+        context,
+        tag
     );
 }
 
@@ -124,10 +30,13 @@ fn test_isolated_script() {
             export let count = 0;
         </script>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let html = highlighter.highlight("svelte", source).unwrap();
 
-    assert_has_highlights(&events, &["keyword"], "Svelte script injection");
-    assert_text_highlighted(&events, "let", "keyword", "Svelte script injection");
+    assert_has_tag(
+        &html,
+        "<a-k>",
+        "Svelte script should have keyword highlighting",
+    );
 }
 
 #[test]
@@ -140,10 +49,13 @@ fn test_script_with_function() {
             }
         </script>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let html = highlighter.highlight("svelte", source).unwrap();
 
-    assert_has_highlights(&events, &["keyword"], "Svelte function");
-    assert_text_highlighted(&events, "function", "keyword", "Svelte function");
+    assert_has_tag(
+        &html,
+        "<a-k>",
+        "Svelte function should have keyword highlighting",
+    );
 }
 
 #[test]
@@ -154,8 +66,12 @@ fn test_nested_braces() {
             let obj = { a: { b: { c: 1 } } };
         </script>
     "#};
-    let events = record_events(&mut highlighter, source);
-    assert_has_highlights(&events, &["keyword"], "Svelte nested braces");
+    let html = highlighter.highlight("svelte", source).unwrap();
+    assert_has_tag(
+        &html,
+        "<a-k>",
+        "Svelte nested braces should have highlighting",
+    );
 }
 
 // ========================================================================

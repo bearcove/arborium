@@ -12,6 +12,9 @@ links = "arborium"
 [features]
 default = []
 
+# Languages needed for the showcase test
+showcase = ["lang-rust", "lang-haskell", "lang-svelte", "lang-scss"]
+
 # All languages
 all-languages = [
     "lang-ada",
@@ -315,6 +318,10 @@ arborium-zsh = { version = "2.0.0", path = "../../langs/group-hazel/zsh/crate", 
 
 [dev-dependencies]
 indoc = "2"
+
+[[example]]
+name = "ansi_showcase"
+required-features = ["showcase"]
 
 # WASM allocator (automatically enabled on wasm targets)
 [target.'cfg(target_family = "wasm")'.dependencies]
