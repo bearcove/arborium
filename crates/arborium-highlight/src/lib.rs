@@ -4,18 +4,49 @@
 //! - **Statically linked Rust grammars**: For CLI tools and servers
 //! - **Dynamically loaded WASM plugins**: For browser contexts
 //!
+//! # Why Async in a Highlighting Library?
+//!
+//! You might wonder why a syntax highlighting library has async code. The answer
+//! is **browser support**.
+//!
+//! - **Parsing is synchronous**: Tree-sitter parsing cannot be async—it's a
+//!   fundamentally synchronous operation that walks the syntax tree.
+//!
+//! - **Getting a grammar can be async**: In browser contexts, grammar plugins
+//!   are loaded from a CDN via JavaScript's dynamic `import()`. This is
+//!   inherently async since it involves network requests and WASM instantiation.
+//!
+//! In native Rust, grammars are statically linked, so the provider returns
+//! immediately. But the trait is async to support both use cases with the same
+//! code.
+//!
 //! # Architecture
 //!
 //! The highlighting system is built around two key traits:
 //!
-//! - [`Grammar`]: What a grammar can do - parse text and return spans
-//! - [`GrammarProvider`]: How grammars are obtained - this is where sync vs async differs
+//! - [`Grammar`]: What a grammar can do — parse text and return spans
+//! - [`GrammarProvider`]: How grammars are obtained — this is where sync vs async differs
 //!
-//! The core highlighting logic is written once as async code in [`HighlighterCore`].
-//! Two wrappers provide the sync and async APIs:
+//! ## The Sync-in-Async-Clothing Pattern
 //!
-//! - [`SyncHighlighter`]: Polls the async future once, panics if it yields
-//! - [`AsyncHighlighter`]: Actually awaits provider calls
+//! The core highlighting logic (including injection handling) is written **once**
+//! as async code in `HighlighterCore`. Two wrappers provide the sync and async APIs:
+//!
+//! - [`SyncHighlighter`]: Polls the async future **once** and panics if it yields.
+//!   This is safe for native Rust where providers return immediately.
+//!
+//! - [`AsyncHighlighter`]: Actually awaits provider calls. Use this for browser/WASM
+//!   contexts where grammar loading involves network requests.
+//!
+//! This design ensures both environments share the exact same injection-handling
+//! logic, avoiding subtle bugs from duplicated code.
+//!
+//! ## When to Use Which
+//!
+//! | Context | Highlighter | Provider Example |
+//! |---------|-------------|------------------|
+//! | Native Rust | [`SyncHighlighter`] | `StaticProvider` (grammars compiled in) |
+//! | Browser WASM | [`AsyncHighlighter`] | `JsGrammarProvider` (loads from CDN) |
 //!
 //! # Quick Start
 //!
@@ -81,7 +112,12 @@ pub use render::{
 pub use types::{HighlightError, Injection, ParseResult, Span};
 
 #[cfg(feature = "tree-sitter")]
-pub use tree_sitter::{TreeSitterGrammar, TreeSitterGrammarConfig, TreeSitterGrammarError};
+pub use tree_sitter::{CompiledGrammar, GrammarConfig, GrammarError, ParseContext};
+
+// Backward compatibility aliases
+#[cfg(feature = "tree-sitter")]
+#[doc(hidden)]
+pub use tree_sitter::{TreeSitterGrammarConfig, TreeSitterGrammarError};
 
 use std::future::Future;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};

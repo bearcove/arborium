@@ -1,39 +1,85 @@
-//! Static grammar provider for the arborium crate.
+//! Thread-safe grammar store for caching compiled grammars.
 //!
-//! This module provides `StaticProvider`, a `GrammarProvider` implementation
-//! that creates `TreeSitterGrammar` instances for enabled language features.
+//! The `GrammarStore` holds compiled grammars that can be shared across threads.
+//! Each grammar is compiled once and cached for reuse.
 
 use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 
-use arborium_highlight::{tree_sitter::TreeSitterGrammar, GrammarProvider};
+use arborium_highlight::tree_sitter::{CompiledGrammar, GrammarConfig};
 
-#[allow(unused_imports)]
-use arborium_highlight::tree_sitter::TreeSitterGrammarConfig;
-
-/// A provider that creates tree-sitter grammars for enabled languages.
+/// Thread-safe cache of compiled grammars.
 ///
-/// Grammars are lazily created on first use and cached.
-pub struct StaticProvider {
-    grammars: HashMap<&'static str, TreeSitterGrammar>,
+/// Grammars are compiled on first access and cached. The store can be shared
+/// across threads via `Arc<GrammarStore>`.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use std::sync::Arc;
+///
+/// // Create store (automatically populated with available grammars)
+/// let store = Arc::new(GrammarStore::new());
+///
+/// // Share across threads
+/// let store2 = store.clone();
+/// std::thread::spawn(move || {
+///     let grammar = store2.get("rust").unwrap();
+///     // Use grammar...
+/// });
+/// ```
+pub struct GrammarStore {
+    grammars: RwLock<HashMap<String, Arc<CompiledGrammar>>>,
 }
 
-impl Default for StaticProvider {
+impl Default for GrammarStore {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl StaticProvider {
-    /// Create a new static provider.
+impl GrammarStore {
+    /// Create a new empty grammar store.
     pub fn new() -> Self {
         Self {
-            grammars: HashMap::new(),
+            grammars: RwLock::new(HashMap::new()),
         }
+    }
+
+    /// Get a grammar by language name, compiling and caching it if needed.
+    ///
+    /// Returns `None` if the language is not supported.
+    pub fn get(&self, language: &str) -> Option<Arc<CompiledGrammar>> {
+        let normalized = Self::normalize_language(language);
+
+        // Fast path: check if already cached
+        {
+            let grammars = self.grammars.read().unwrap();
+            if let Some(grammar) = grammars.get(normalized) {
+                return Some(grammar.clone());
+            }
+        }
+
+        // Slow path: compile and cache
+        let grammar = Self::compile_grammar(normalized)?;
+        let grammar = Arc::new(grammar);
+
+        {
+            let mut grammars = self.grammars.write().unwrap();
+            // Double-check in case another thread compiled it
+            if let Some(existing) = grammars.get(normalized) {
+                return Some(existing.clone());
+            }
+            grammars.insert(normalized.to_string(), grammar.clone());
+        }
+
+        Some(grammar)
     }
 
     /// Normalize a language name to its canonical form.
     fn normalize_language(language: &str) -> &'static str {
         match language {
+            // Common aliases
             "js" | "jsx" | "mjs" | "cjs" => "javascript",
             "ts" | "mts" | "cts" => "typescript",
             "py" | "py3" | "python3" => "python",
@@ -85,46 +131,31 @@ impl StaticProvider {
             "patch" => "diff",
             "dlang" => "d",
             "f#" | "fs" => "fsharp",
-            // Return original if it matches a known language
-            "ada" | "agda" | "asm" | "awk" | "bash" | "batch" | "c" | "c-sharp" | "caddy"
-            | "capnp" | "clojure" | "cmake" | "commonlisp" | "cpp" | "css" | "d" | "dart"
-            | "devicetree" | "diff" | "dot" | "elisp" | "elixir" | "elm"
-            | "erlang" | "fish" | "fsharp" | "gleam" | "glsl" | "go" | "graphql" | "haskell"
-            | "hcl" | "hlsl" | "html" | "idris" | "ini" | "java" | "javascript" | "jinja2"
-            | "jq" | "julia" | "kdl" | "kotlin" | "lean" | "lua" | "matlab" | "meson"
-            | "nginx" | "ninja" | "nix" | "objc" | "ocaml" | "perl" | "php" | "powershell"
-            | "prolog" | "python" | "query" | "r" | "rescript" | "ron" | "ruby" | "rust"
-            | "scala" | "scheme" | "scss" | "sparql" | "sql" | "ssh-config" | "starlark"
-            | "svelte" | "swift" | "textproto" | "thrift" | "tlaplus" | "toml" | "tsx"
-            | "typescript" | "typst" | "uiua" | "vb" | "verilog" | "vhdl" | "vim" | "vue"
-            | "x86asm" | "xml" | "yaml" | "yuri" | "zig" | "zsh" => {
-                // Need to return a &'static str, so leak the string
-                // This is fine because language names are finite and small
-                Box::leak(language.to_string().into_boxed_str())
-            }
-            other => Box::leak(other.to_string().into_boxed_str()),
+            // Canonical names - leak to get &'static str
+            // This is fine since language names are finite
+            _ => Box::leak(language.to_string().into_boxed_str()),
         }
     }
 
-    /// Create a grammar for a language.
+    /// Compile a grammar for a language.
     #[allow(unused_variables)]
-    fn create_grammar(language: &str) -> Option<TreeSitterGrammar> {
+    fn compile_grammar(language: &str) -> Option<CompiledGrammar> {
         macro_rules! try_lang {
             ($feature:literal, $module:ident, $primary:literal) => {
                 #[cfg(feature = $feature)]
                 if language == $primary {
-                    let config = TreeSitterGrammarConfig {
+                    let config = GrammarConfig {
                         language: crate::$module::language().into(),
                         highlights_query: &crate::$module::HIGHLIGHTS_QUERY,
                         injections_query: crate::$module::INJECTIONS_QUERY,
                         locals_query: crate::$module::LOCALS_QUERY,
                     };
-                    return TreeSitterGrammar::new(config).ok();
+                    return CompiledGrammar::new(config).ok();
                 }
             };
         }
 
-        // Core languages for injections
+        // Core languages for injections (checked first for performance)
         try_lang!("lang-javascript", lang_javascript, "javascript");
         try_lang!("lang-css", lang_css, "css");
         try_lang!("lang-typescript", lang_typescript, "typescript");
@@ -164,6 +195,7 @@ impl StaticProvider {
         try_lang!("lang-hcl", lang_hcl, "hcl");
         try_lang!("lang-hlsl", lang_hlsl, "hlsl");
         try_lang!("lang-html", lang_html, "html");
+        try_lang!("lang-idris", lang_idris, "idris");
         try_lang!("lang-ini", lang_ini, "ini");
         try_lang!("lang-java", lang_java, "java");
         try_lang!("lang-jinja2", lang_jinja2, "jinja2");
@@ -211,45 +243,15 @@ impl StaticProvider {
         try_lang!("lang-vb", lang_vb, "vb");
         try_lang!("lang-verilog", lang_verilog, "verilog");
         try_lang!("lang-vhdl", lang_vhdl, "vhdl");
+        try_lang!("lang-vim", lang_vim, "vim");
         try_lang!("lang-vue", lang_vue, "vue");
         try_lang!("lang-x86asm", lang_x86asm, "x86asm");
         try_lang!("lang-xml", lang_xml, "xml");
         try_lang!("lang-yaml", lang_yaml, "yaml");
         try_lang!("lang-yuri", lang_yuri, "yuri");
         try_lang!("lang-zig", lang_zig, "zig");
+        try_lang!("lang-zsh", lang_zsh, "zsh");
 
         None
-    }
-}
-
-impl GrammarProvider for StaticProvider {
-    type Grammar = TreeSitterGrammar;
-
-    #[cfg(not(target_arch = "wasm32"))]
-    async fn get(&mut self, language: &str) -> Option<&mut Self::Grammar> {
-        let normalized = Self::normalize_language(language);
-
-        // Create grammar if not cached
-        if !self.grammars.contains_key(normalized)
-            && let Some(grammar) = Self::create_grammar(normalized)
-        {
-            self.grammars.insert(normalized, grammar);
-        }
-
-        self.grammars.get_mut(normalized)
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    async fn get(&mut self, language: &str) -> Option<&mut Self::Grammar> {
-        let normalized = Self::normalize_language(language);
-
-        // Create grammar if not cached
-        if !self.grammars.contains_key(normalized)
-            && let Some(grammar) = Self::create_grammar(normalized)
-        {
-            self.grammars.insert(normalized, grammar);
-        }
-
-        self.grammars.get_mut(normalized)
     }
 }

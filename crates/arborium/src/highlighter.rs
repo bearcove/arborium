@@ -1,83 +1,68 @@
-//! High-level syntax highlighting API with automatic language injection support.
+//! High-level syntax highlighting API with thread-safe grammar sharing.
 //!
-//! This module provides a simple, batteries-included API for syntax highlighting
-//! that automatically handles language injections (e.g., CSS in HTML `<style>` tags,
-//! JavaScript in `<script>` tags).
+//! This module provides highlighters that can be efficiently used across threads:
+//!
+//! - [`Highlighter`]: HTML output (custom elements or class-based spans)
+//! - [`AnsiHighlighter`]: Terminal output with ANSI colors
+//!
+//! # Thread Safety
+//!
+//! Grammars are compiled once and shared via `Arc<GrammarStore>`. Each highlighter
+//! has its own parse context (cheap to create). Use [`Highlighter::fork`] to create
+//! a new highlighter that shares the grammar store.
 //!
 //! # Example
 //!
 //! ```rust,ignore
-//! use arborium::highlighter::Highlighter;
+//! use arborium::Highlighter;
+//! use rayon::prelude::*;
 //!
-//! let mut highlighter = Highlighter::new();
-//! let html = highlighter.highlight_to_html("svelte", r#"
-//!     <script>
-//!         let name = "world";
-//!     </script>
-//!     <h1>Hello {name}!</h1>
-//!     <style>
-//!         h1 { color: red; }
-//!     </style>
-//! "#)?;
+//! // Create initial highlighter
+//! let hl = Highlighter::new();
+//!
+//! // Parallel highlighting - each thread gets its own forked highlighter
+//! let results: Vec<_> = code_blocks.par_iter().map(|code| {
+//!     let mut hl = hl.fork();
+//!     hl.highlight("rust", code)
+//! }).collect();
 //! ```
 
-use std::io::{self, Write};
+use std::io::Write;
+use std::sync::Arc;
 
-use arborium_highlight::{
-    AnsiOptions, HighlightConfig, HighlightError as CoreError, SyncHighlighter,
-};
+use arborium_highlight::tree_sitter::{CompiledGrammar, ParseContext};
+use arborium_highlight::{AnsiOptions, Span, spans_to_ansi_with_options, spans_to_html};
+use arborium_theme::Theme;
 
-use crate::provider::StaticProvider;
+use crate::Config;
+use crate::error::Error;
+use crate::store::GrammarStore;
 
-/// Error type for highlighting operations
-#[derive(Debug)]
-pub enum HighlightError {
-    /// The requested language is not supported
-    UnsupportedLanguage(String),
-    /// Error compiling the grammar's queries
-    QueryError(String),
-    /// Error during highlighting
-    HighlightError(String),
-    /// IO error during rendering
-    IoError(io::Error),
-}
-
-impl std::fmt::Display for HighlightError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            HighlightError::UnsupportedLanguage(lang) => {
-                write!(f, "Unsupported language: {}", lang)
-            }
-            HighlightError::QueryError(e) => write!(f, "Query error: {}", e),
-            HighlightError::HighlightError(e) => write!(f, "Highlight error: {}", e),
-            HighlightError::IoError(e) => write!(f, "IO error: {}", e),
-        }
-    }
-}
-
-impl std::error::Error for HighlightError {}
-
-impl From<io::Error> for HighlightError {
-    fn from(e: io::Error) -> Self {
-        HighlightError::IoError(e)
-    }
-}
-
-impl From<CoreError> for HighlightError {
-    fn from(e: CoreError) -> Self {
-        match e {
-            CoreError::UnsupportedLanguage(lang) => HighlightError::UnsupportedLanguage(lang),
-            CoreError::ParseError(msg) => HighlightError::HighlightError(msg),
-        }
-    }
-}
-
-/// High-level syntax highlighter with automatic injection support.
+/// High-level syntax highlighter for HTML output.
 ///
-/// This struct wraps `SyncHighlighter<StaticProvider>` and provides a simple
-/// API for highlighting source code with automatic language injection handling.
+/// This is the primary entry point for syntax highlighting. It produces HTML
+/// output using custom elements (`<a-k>`, `<a-f>`, etc.) or traditional
+/// `<span class="...">` elements depending on configuration.
+///
+/// # Thread Safety
+///
+/// The highlighter can be forked to create copies that share the grammar store
+/// but have independent parse contexts. This enables efficient parallel highlighting.
+///
+/// ```rust,ignore
+/// let hl = Highlighter::new();
+///
+/// // Fork for another thread
+/// let hl2 = hl.fork();
+/// std::thread::spawn(move || {
+///     let mut hl = hl2;
+///     hl.highlight("rust", code)
+/// });
+/// ```
 pub struct Highlighter {
-    inner: SyncHighlighter<StaticProvider>,
+    store: Arc<GrammarStore>,
+    ctx: Option<ParseContext>,
+    config: Config,
 }
 
 impl Default for Highlighter {
@@ -86,362 +71,449 @@ impl Default for Highlighter {
     }
 }
 
+impl Clone for Highlighter {
+    /// Clone creates a new highlighter sharing the grammar store.
+    ///
+    /// This is equivalent to [`fork`](Self::fork).
+    fn clone(&self) -> Self {
+        Self {
+            store: self.store.clone(),
+            ctx: None, // New context will be created on first use
+            config: self.config.clone(),
+        }
+    }
+}
+
 impl Highlighter {
     /// Create a new highlighter with default configuration.
+    ///
+    /// Uses custom elements (`<a-k>`, `<a-f>`, etc.) for HTML output.
     pub fn new() -> Self {
         Self {
-            inner: SyncHighlighter::new(StaticProvider::new()),
+            store: Arc::new(GrammarStore::new()),
+            ctx: None,
+            config: Config::default(),
         }
     }
 
     /// Create a new highlighter with custom configuration.
-    pub fn with_config(config: HighlightConfig) -> Self {
+    pub fn with_config(config: Config) -> Self {
         Self {
-            inner: SyncHighlighter::with_config(StaticProvider::new(), config),
+            store: Arc::new(GrammarStore::new()),
+            ctx: None,
+            config,
         }
+    }
+
+    /// Create a new highlighter with a shared grammar store.
+    ///
+    /// Use this when you want multiple highlighters to share compiled grammars.
+    pub fn with_store(store: Arc<GrammarStore>) -> Self {
+        Self {
+            store,
+            ctx: None,
+            config: Config::default(),
+        }
+    }
+
+    /// Create a new highlighter with a shared store and custom configuration.
+    pub fn with_store_and_config(store: Arc<GrammarStore>, config: Config) -> Self {
+        Self {
+            store,
+            ctx: None,
+            config,
+        }
+    }
+
+    /// Fork this highlighter, creating a new one that shares the grammar store.
+    ///
+    /// The forked highlighter has its own parse context, making it safe to use
+    /// from another thread.
+    pub fn fork(&self) -> Self {
+        Self {
+            store: self.store.clone(),
+            ctx: None,
+            config: self.config.clone(),
+        }
+    }
+
+    /// Get the grammar store.
+    ///
+    /// Use this to create additional highlighters that share compiled grammars.
+    pub fn store(&self) -> &Arc<GrammarStore> {
+        &self.store
     }
 
     /// Highlight source code and return HTML string.
     ///
-    /// This is the main entry point for highlighting. It automatically handles
-    /// language injections (e.g., CSS/JS in HTML).
-    pub fn highlight_to_html(
-        &mut self,
-        language: &str,
-        source: &str,
-    ) -> Result<String, HighlightError> {
-        Ok(self.inner.highlight(language, source)?)
+    /// This automatically handles language injections (e.g., CSS/JS in HTML,
+    /// SQL in Python strings, etc.).
+    pub fn highlight(&mut self, language: &str, source: &str) -> Result<String, Error> {
+        let spans = self.highlight_spans(language, source)?;
+        Ok(spans_to_html(source, spans, &self.config.html_format))
     }
 
-    /// Highlight source code and write HTML to a writer.
-    pub fn highlight_to_html_writer<W: Write>(
+    /// Highlight source code and write HTML directly to a writer.
+    ///
+    /// More efficient than [`highlight`](Self::highlight) when writing to a file or socket,
+    /// as it avoids an intermediate string allocation.
+    pub fn highlight_to_writer<W: Write>(
         &mut self,
         writer: &mut W,
         language: &str,
         source: &str,
-    ) -> Result<(), HighlightError> {
-        let html = self.inner.highlight(language, source)?;
+    ) -> Result<(), Error> {
+        let html = self.highlight(language, source)?;
         writer.write_all(html.as_bytes())?;
         Ok(())
     }
 
-    /// Highlight source code and return ANSI-colored text.
-    ///
-    /// This uses the theme system to generate proper 24-bit color ANSI codes.
-    pub fn highlight_to_ansi(
-        &mut self,
-        language: &str,
-        source: &str,
-        theme: &arborium_theme::Theme,
-    ) -> Result<String, HighlightError> {
-        Ok(self.inner.highlight_to_ansi(language, source, theme)?)
+    /// Highlight and return raw spans (for custom rendering).
+    fn highlight_spans(&mut self, language: &str, source: &str) -> Result<Vec<Span>, Error> {
+        // Get the primary grammar
+        let grammar = self
+            .store
+            .get(language)
+            .ok_or_else(|| Error::UnsupportedLanguage {
+                language: language.to_string(),
+            })?;
+
+        // Ensure we have a parse context
+        self.ensure_context(&grammar)?;
+        let ctx = self.ctx.as_mut().unwrap();
+
+        // Set the language for this grammar
+        ctx.set_language(grammar.language())
+            .map_err(|_| Error::ParseError {
+                language: language.to_string(),
+                message: "Failed to set parser language".to_string(),
+            })?;
+
+        // Parse the primary language
+        let result = grammar.parse(ctx, source);
+
+        // Collect all spans (including from injections)
+        let mut all_spans = result.spans;
+
+        // Process injections recursively
+        if self.config.max_injection_depth > 0 {
+            self.process_injections(
+                source,
+                result.injections,
+                0,
+                self.config.max_injection_depth,
+                &mut all_spans,
+            )?;
+        }
+
+        Ok(all_spans)
     }
 
-    /// Highlight source code and return ANSI-colored text with explicit
-    /// rendering options (e.g., base background and width-aware wrapping).
-    pub fn highlight_to_ansi_with_options(
+    /// Ensure we have a parse context, creating one if needed.
+    fn ensure_context(&mut self, grammar: &CompiledGrammar) -> Result<(), Error> {
+        if self.ctx.is_none() {
+            self.ctx = Some(
+                ParseContext::for_grammar(grammar).map_err(|e| Error::ParseError {
+                    language: String::new(),
+                    message: e.to_string(),
+                })?,
+            );
+        }
+        Ok(())
+    }
+
+    /// Process injections recursively.
+    fn process_injections(
         &mut self,
+        source: &str,
+        injections: Vec<arborium_highlight::Injection>,
+        base_offset: u32,
+        remaining_depth: u32,
+        all_spans: &mut Vec<Span>,
+    ) -> Result<(), Error> {
+        if remaining_depth == 0 {
+            return Ok(());
+        }
+
+        for injection in injections {
+            let start = injection.start as usize;
+            let end = injection.end as usize;
+
+            if start >= source.len() || end > source.len() || start >= end {
+                continue;
+            }
+
+            let injected_source = &source[start..end];
+
+            // Try to get grammar for injected language
+            let Some(grammar) = self.store.get(&injection.language) else {
+                continue;
+            };
+
+            // Set language for this grammar
+            let ctx = self.ctx.as_mut().unwrap();
+            if ctx.set_language(grammar.language()).is_err() {
+                continue;
+            }
+
+            // Parse injected content
+            let result = grammar.parse(ctx, injected_source);
+
+            // Offset spans to document coordinates
+            let offset = base_offset + injection.start;
+            for mut span in result.spans {
+                span.start += offset;
+                span.end += offset;
+                all_spans.push(span);
+            }
+
+            // Recurse into nested injections
+            self.process_injections(
+                injected_source,
+                result.injections,
+                offset,
+                remaining_depth - 1,
+                all_spans,
+            )?;
+        }
+
+        Ok(())
+    }
+}
+
+/// High-level syntax highlighter for ANSI terminal output.
+///
+/// This highlighter produces ANSI escape sequences for colored terminal output.
+/// It owns a [`Theme`] which determines the colors used for each syntax element.
+///
+/// # Thread Safety
+///
+/// Like [`Highlighter`], this can be forked to share the grammar store.
+pub struct AnsiHighlighter {
+    inner: Highlighter,
+    theme: Theme,
+    options: AnsiOptions,
+}
+
+impl Clone for AnsiHighlighter {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            theme: self.theme.clone(),
+            options: self.options.clone(),
+        }
+    }
+}
+
+impl AnsiHighlighter {
+    /// Create a new ANSI highlighter with the given theme.
+    pub fn new(theme: Theme) -> Self {
+        Self {
+            inner: Highlighter::new(),
+            theme,
+            options: AnsiOptions::default(),
+        }
+    }
+
+    /// Create a new ANSI highlighter with custom configuration.
+    pub fn with_config(theme: Theme, config: Config) -> Self {
+        Self {
+            inner: Highlighter::with_config(config),
+            theme,
+            options: AnsiOptions::default(),
+        }
+    }
+
+    /// Create a new ANSI highlighter with custom configuration and rendering options.
+    pub fn with_options(theme: Theme, config: Config, options: AnsiOptions) -> Self {
+        Self {
+            inner: Highlighter::with_config(config),
+            theme,
+            options,
+        }
+    }
+
+    /// Create a new ANSI highlighter with a shared grammar store.
+    pub fn with_store(store: Arc<GrammarStore>, theme: Theme) -> Self {
+        Self {
+            inner: Highlighter::with_store(store),
+            theme,
+            options: AnsiOptions::default(),
+        }
+    }
+
+    /// Fork this highlighter, creating a new one that shares the grammar store.
+    pub fn fork(&self) -> Self {
+        Self {
+            inner: self.inner.fork(),
+            theme: self.theme.clone(),
+            options: self.options.clone(),
+        }
+    }
+
+    /// Get the grammar store.
+    pub fn store(&self) -> &Arc<GrammarStore> {
+        self.inner.store()
+    }
+
+    /// Get a reference to the current theme.
+    pub fn theme(&self) -> &Theme {
+        &self.theme
+    }
+
+    /// Set a new theme.
+    pub fn set_theme(&mut self, theme: Theme) {
+        self.theme = theme;
+    }
+
+    /// Get a reference to the current ANSI rendering options.
+    pub fn options(&self) -> &AnsiOptions {
+        &self.options
+    }
+
+    /// Get a mutable reference to the ANSI rendering options.
+    pub fn options_mut(&mut self) -> &mut AnsiOptions {
+        &mut self.options
+    }
+
+    /// Highlight source code and return ANSI-colored string.
+    ///
+    /// This automatically handles language injections.
+    pub fn highlight(&mut self, language: &str, source: &str) -> Result<String, Error> {
+        let spans = self.inner.highlight_spans(language, source)?;
+        Ok(spans_to_ansi_with_options(
+            source,
+            spans,
+            &self.theme,
+            &self.options,
+        ))
+    }
+
+    /// Highlight source code and write ANSI output directly to a writer.
+    pub fn highlight_to_writer<W: Write>(
+        &mut self,
+        writer: &mut W,
         language: &str,
         source: &str,
-        theme: &arborium_theme::Theme,
-        options: &AnsiOptions,
-    ) -> Result<String, HighlightError> {
-        Ok(self
-            .inner
-            .highlight_to_ansi_with_options(language, source, theme, options)?)
+    ) -> Result<(), Error> {
+        let ansi = self.highlight(language, source)?;
+        writer.write_all(ansi.as_bytes())?;
+        Ok(())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    #[allow(unused_imports)]
     use super::*;
+    use arborium_theme::theme::builtin;
+
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_highlighter_fork() {
+        let hl = Highlighter::new();
+
+        // Fork creates independent highlighters sharing the store
+        let mut hl1 = hl.fork();
+        let mut hl2 = hl.fork();
+
+        // Both can highlight independently
+        let html1 = hl1.highlight("rust", "fn main() {}").unwrap();
+        let html2 = hl2.highlight("rust", "let x = 1;").unwrap();
+
+        assert!(html1.contains("<a-"));
+        assert!(html2.contains("<a-"));
+    }
 
     #[test]
     #[cfg(feature = "lang-commonlisp")]
     fn test_commonlisp_highlighting() {
         let mut highlighter = Highlighter::new();
         let html = highlighter
-            .highlight_to_html("commonlisp", "(defun hello () (print \"Hello\"))")
+            .highlight("commonlisp", "(defun hello () (print \"Hello\"))")
             .unwrap();
-        // Should contain some highlighted elements
         assert!(html.contains("<a-"), "Should contain highlight tags");
     }
 
     #[test]
     #[cfg(feature = "lang-rust")]
     fn test_ansi_highlighting() {
-        let mut highlighter = Highlighter::new();
+        let theme = builtin::catppuccin_mocha().clone();
+        let mut highlighter = AnsiHighlighter::new(theme);
+
         let source = r#"
- fn main() {
-     let message = "Hello, world!";
-     println!("{}", message);
-     
-     if let Some(count) = Some(42) {
-         for i in 0..count {
-             println!("Iteration: {}", i);
-         }
-     }
- }
- "#;
+fn main() {
+    let message = "Hello, world!";
+    println!("{}", message);
+}
+"#;
 
-        let theme = arborium_theme::theme::builtin::catppuccin_mocha();
-        let ansi_output = highlighter
-            .highlight_to_ansi("rust", source, theme)
-            .unwrap();
+        let ansi_output = highlighter.highlight("rust", source).unwrap();
 
-        // Should contain ANSI escape sequences
         assert!(
             ansi_output.contains("\x1b["),
             "Should contain ANSI escape sequences"
         );
-
-        // Print colored output (use --nocapture to see)
-        println!("\n=== ANSI colored Rust code ===");
-        println!("{}", ansi_output);
-        println!("=== End of colored output ===\n");
     }
 
     #[test]
     #[cfg(feature = "lang-rust")]
-    fn test_ansi_highlighting_with_background_and_wrapping() {
-        let mut highlighter = Highlighter::new();
-
-        // Short source that fits in width
-        let source_short = r#"fn long_function_name(argument: i32) {
-    println!("value: {}", argument);
-}"#;
-
-        // Long source that will wrap
-        let source_long = r#"fn very_long_function_name_that_will_definitely_wrap(first_argument: i32, second_argument: String) {
-    println!("This is a very long string that should cause wrapping: {}", first_argument);
-}"#;
-
-        // Test with multiple themes
-        let themes = vec![
-            (
-                "Catppuccin Mocha",
-                arborium_theme::theme::builtin::catppuccin_mocha(),
-            ),
-            (
-                "GitHub Light",
-                arborium_theme::theme::builtin::github_light(),
-            ),
-            ("Monokai", arborium_theme::theme::builtin::monokai()),
-        ];
-
-        for (name, theme) in &themes {
-            println!("\n=== {} (Rust, with bg+padding) ===", name);
-
-            // With background and padding (w=2, h=1 since chars aren't square)
-            let mut options = AnsiOptions::default();
-            options.use_theme_base_style = true;
-            options.width = Some(50);
-            options.pad_to_width = true;
-            options.padding_x = 2;
-            options.padding_y = 1;
-
-            let ansi_output = highlighter
-                .highlight_to_ansi_with_options("rust", source_short, theme, &options)
-                .unwrap();
-
-            assert!(ansi_output.contains("\x1b["));
-            assert!(ansi_output.contains(&theme.ansi_base_style()));
-            println!("{}", ansi_output);
-
-            // Without background/padding
-            println!("\n=== {} (Rust, no bg/padding) ===", name);
-            let mut options2 = AnsiOptions::default();
-            options2.width = Some(50);
-            options2.pad_to_width = true;
-
-            let ansi_output2 = highlighter
-                .highlight_to_ansi_with_options("rust", source_short, theme, &options2)
-                .unwrap();
-            println!("{}", ansi_output2);
-        }
-
-        // Test wrapping with long source
-        println!("\n=== WRAPPING TEST (Catppuccin Mocha) ===");
-        let theme = arborium_theme::theme::builtin::catppuccin_mocha();
+    fn test_ansi_with_options() {
+        let theme = builtin::catppuccin_mocha().clone();
+        let config = crate::Config::default();
         let mut options = AnsiOptions::default();
         options.use_theme_base_style = true;
         options.width = Some(60);
         options.pad_to_width = true;
         options.padding_x = 2;
         options.padding_y = 1;
+        options.border = true;
 
-        let ansi_output = highlighter
-            .highlight_to_ansi_with_options("rust", source_long, theme, &options)
-            .unwrap();
-        println!("{}", ansi_output);
+        let mut highlighter = AnsiHighlighter::with_options(theme, config, options);
 
-        // Test with defaults (terminal width, no bg/padding)
-        println!("\n=== DEFAULTS TEST (terminal width auto-detected) ===");
-        let options = AnsiOptions::default();
-        println!("Default options:");
-        println!("  width: {:?}", options.width);
-        println!("  pad_to_width: {}", options.pad_to_width);
-        println!("  use_theme_base_style: {}", options.use_theme_base_style);
-        println!(
-            "  margin_x: {}, margin_y: {}",
-            options.margin_x, options.margin_y
-        );
-        println!(
-            "  padding_x: {}, padding_y: {}",
-            options.padding_x, options.padding_y
-        );
-        println!("  border: {}", options.border);
-        println!("  tab_width: {}", options.tab_width);
-
-        let ansi_output = highlighter
-            .highlight_to_ansi_with_options("rust", source_short, theme, &options)
-            .unwrap();
-        println!("\nOutput with defaults:");
-        println!("{}", ansi_output);
-    }
-
-    #[test]
-    #[cfg(feature = "lang-rust")]
-    fn test_ansi_border_theme_showcase() {
-        use arborium_theme::theme::builtin;
-
-        let mut highlighter = Highlighter::new();
-
-        // Different code samples to keep it interesting
-        let samples: &[(&str, &str)] = &[
-            (
-                "Catppuccin Mocha",
-                r#"fn fibonacci(n: u64) -> u64 {
+        let source = r#"fn fibonacci(n: u64) -> u64 {
     match n {
         0 => 0,
         1 => 1,
         _ => fibonacci(n - 1) + fibonacci(n - 2),
     }
-}"#,
-            ),
-            (
-                "GitHub Light",
-                r#"struct User {
-    name: String,
-    email: String,
-    active: bool,
-}
+}"#;
 
-impl User {
-    fn new(name: &str) -> Self {
-        Self { name: name.into(), email: String::new(), active: true }
+        let ansi_output = highlighter.highlight("rust", source).unwrap();
+        assert!(ansi_output.contains("\x1b["));
     }
-}"#,
-            ),
-            (
-                "Monokai",
-                r#"// A simple HTTP client example
-async fn fetch_data(url: &str) -> Result<String, Error> {
-    let response = reqwest::get(url).await?;
-    let body = response.text().await?;
-    Ok(body)
-}"#,
-            ),
-            (
-                "Dracula",
-                r#"#[derive(Debug, Clone)]
-pub enum Token {
-    Number(f64),
-    String(String),
-    Ident(String),
-    Op(char),
-}"#,
-            ),
-            (
-                "Ayu Light",
-                r#"/// Calculates the factorial of n
-pub fn factorial(n: u32) -> u32 {
-    (1..=n).product()
-}
 
-#[test]
-fn test_factorial() {
-    assert_eq!(factorial(5), 120);
-}"#,
-            ),
-            (
-                "Tokyo Night",
-                r#"use std::collections::HashMap;
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_theme_switching() {
+        let theme1 = builtin::catppuccin_mocha().clone();
+        let mut highlighter = AnsiHighlighter::new(theme1);
 
-fn word_count(text: &str) -> HashMap<&str, usize> {
-    let mut counts = HashMap::new();
-    for word in text.split_whitespace() {
-        *counts.entry(word).or_insert(0) += 1;
+        let source = "let x = 42;";
+        let output1 = highlighter.highlight("rust", source).unwrap();
+
+        // Switch theme
+        highlighter.set_theme(builtin::github_light().clone());
+        let output2 = highlighter.highlight("rust", source).unwrap();
+
+        // Different themes should produce different output
+        assert_ne!(output1, output2);
     }
-    counts
-}"#,
-            ),
-            (
-                "Nord",
-                r#"trait Shape {
-    fn area(&self) -> f64;
-    fn perimeter(&self) -> f64;
-}
 
-struct Circle { radius: f64 }
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_shared_store() {
+        // Create a store
+        let store = Arc::new(GrammarStore::new());
 
-impl Shape for Circle {
-    fn area(&self) -> f64 { std::f64::consts::PI * self.radius.powi(2) }
-    fn perimeter(&self) -> f64 { 2.0 * std::f64::consts::PI * self.radius }
-}"#,
-            ),
-            (
-                "Melange Dark",
-                r#"macro_rules! vec_of_strings {
-    ($($x:expr),*) => {
-        vec![$($x.to_string()),*]
-    };
-}
+        // Multiple highlighters sharing the store
+        let mut hl1 = Highlighter::with_store(store.clone());
+        let mut hl2 = Highlighter::with_store(store.clone());
 
-let names = vec_of_strings!["Alice", "Bob", "Charlie"];"#,
-            ),
-        ];
+        // Both use the same compiled grammar
+        let _html1 = hl1.highlight("rust", "fn a() {}").unwrap();
+        let _html2 = hl2.highlight("rust", "fn b() {}").unwrap();
 
-        // Map theme names to builtin functions
-        let get_theme = |name: &str| -> &'static arborium_theme::Theme {
-            match name {
-                "Catppuccin Mocha" => builtin::catppuccin_mocha(),
-                "GitHub Light" => builtin::github_light(),
-                "Monokai" => builtin::monokai(),
-                "Dracula" => builtin::dracula(),
-                "Ayu Light" => builtin::ayu_light(),
-                "Tokyo Night" => builtin::tokyo_night(),
-                "Nord" => builtin::nord(),
-                "Melange Dark" => builtin::melange_dark(),
-                _ => builtin::catppuccin_mocha(),
-            }
-        };
-
-        println!("\n╔══════════════════════════════════════════════════════════════╗");
-        println!("║           ANSI Border Theme Showcase - 8 Themes              ║");
-        println!("╚══════════════════════════════════════════════════════════════╝\n");
-
-        for (name, source) in samples {
-            let theme = get_theme(name);
-
-            println!("━━━ {} ━━━", name);
-
-            let mut options = AnsiOptions::default();
-            options.use_theme_base_style = true;
-            options.width = Some(65);
-            options.pad_to_width = true;
-            options.padding_x = 2;
-            options.padding_y = 1;
-            options.border = true;
-            options.margin_x = 2;
-
-            let ansi_output = highlighter
-                .highlight_to_ansi_with_options("rust", source, theme, &options)
-                .unwrap();
-
-            println!("{}", ansi_output);
-            println!();
-        }
+        // Store should have the grammar cached
+        assert!(store.get("rust").is_some());
     }
 }
