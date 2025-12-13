@@ -960,18 +960,50 @@ fn validate_all_grammars(prepared: &PreparedStructures) -> Result<(), Report> {
             .progress_chars("━━╸"),
     );
 
-    for prepared_temp in &prepared.prepared_temps {
-        let short_name = prepared_temp
-            .crate_state
-            .name
-            .strip_prefix("arborium-")
-            .unwrap_or(&prepared_temp.crate_state.name);
-        pb.set_message(short_name.to_string());
-        validate_single_grammar(prepared_temp)?;
-        pb.inc(1);
-    }
+    // Collect errors from parallel validation
+    let errors: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
+    prepared
+        .prepared_temps
+        .par_iter()
+        .for_each(|prepared_temp| {
+            let short_name = prepared_temp
+                .crate_state
+                .name
+                .strip_prefix("arborium-")
+                .unwrap_or(&prepared_temp.crate_state.name);
+            pb.set_message(short_name.to_string());
+
+            if let Err(e) = validate_single_grammar(prepared_temp) {
+                errors
+                    .lock()
+                    .unwrap()
+                    .push(format!("{}: {}", short_name, e));
+            }
+
+            pb.inc(1);
+        });
 
     pb.finish_and_clear();
+
+    // Check for errors
+    let errors = errors.into_inner().unwrap();
+    if !errors.is_empty() {
+        eprintln!(
+            "{} Validation failed for {} grammar(s):",
+            "✗".red(),
+            errors.len()
+        );
+        for error in &errors {
+            eprintln!("  {}", error);
+        }
+        return Err(std::io::Error::other(format!(
+            "Validation failed for {} grammar(s)",
+            errors.len()
+        ))
+        .into());
+    }
+
     println!("{} Validated {} grammars", "✓".green(), total);
     Ok(())
 }

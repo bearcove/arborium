@@ -24,7 +24,9 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
     let registry = CrateRegistry::load(crates_dir).map_err(|e| miette::miette!("{e}"))?;
 
     let total_crates = registry.crates.len();
-    let pb = ProgressBar::new(total_crates as u64);
+    // Three passes total
+    let total_steps = total_crates * 3;
+    let pb = ProgressBar::new(total_steps as u64);
     pb.set_style(
         ProgressStyle::default_bar()
             .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} Linting {msg}")
@@ -38,7 +40,10 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
 
     // First pass: check for crates without arborium.kdl
     for (name, state) in registry.iter() {
-        pb.set_message(name.strip_prefix("arborium-").unwrap_or(name).to_string());
+        pb.set_message(format!(
+            "{} (pass 1/3)",
+            name.strip_prefix("arborium-").unwrap_or(name)
+        ));
         let has_grammar_dir = state.path.join("grammar").is_dir();
         if state.config.is_none() && has_grammar_dir {
             warnings += 1;
@@ -50,11 +55,12 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
         pb.inc(1);
     }
 
-    pb.set_position(0);
-
     // Second pass: lint each configured crate
     for (name, state, config) in registry.configured_crates() {
-        pb.set_message(name.strip_prefix("arborium-").unwrap_or(name).to_string());
+        pb.set_message(format!(
+            "{} (pass 2/3)",
+            name.strip_prefix("arborium-").unwrap_or(name)
+        ));
         let crate_diagnostics = lint_crate(name, state, config, options);
 
         if !crate_diagnostics.is_empty() {
@@ -76,11 +82,12 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
         pb.inc(1);
     }
 
-    pb.set_position(0);
-
     // Third pass: check for legacy files
     for (name, state) in registry.iter() {
-        pb.set_message(name.strip_prefix("arborium-").unwrap_or(name).to_string());
+        pb.set_message(format!(
+            "{} (pass 3/3)",
+            name.strip_prefix("arborium-").unwrap_or(name)
+        ));
         if !state.files.legacy_files.is_empty() {
             let mut legacy_diagnostics = Vec::new();
             for legacy in &state.files.legacy_files {
