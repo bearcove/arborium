@@ -8,6 +8,7 @@
 use crate::tool::Tool;
 use camino::{Utf8Path, Utf8PathBuf};
 use fs_err as fs;
+use indicatif::{ProgressBar, ProgressStyle};
 use owo_colors::OwoColorize;
 use std::fmt;
 
@@ -576,11 +577,35 @@ impl PlanSet {
         use std::time::Instant;
         let start = Instant::now();
 
+        let pb = if quiet {
+            let pb = ProgressBar::new(self.plans.len() as u64);
+            pb.set_style(
+                ProgressStyle::default_bar()
+                    .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} Writing {msg}")
+                    .unwrap()
+                    .progress_chars("━━╸"),
+            );
+            Some(pb)
+        } else {
+            None
+        };
+
         for plan in &self.plans {
-            if !quiet && let Some(ref name) = plan.crate_name {
+            if let Some(ref pb) = pb {
+                if let Some(ref name) = plan.crate_name {
+                    pb.set_message(name.strip_prefix("arborium-").unwrap_or(name).to_string());
+                }
+            } else if let Some(ref name) = plan.crate_name {
                 println!("Processing {}...", name);
             }
             plan.execute()?;
+            if let Some(ref pb) = pb {
+                pb.inc(1);
+            }
+        }
+
+        if let Some(pb) = pb {
+            pb.finish_and_clear();
         }
 
         if !quiet {

@@ -26,6 +26,7 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
     let total_crates = registry.crates.len();
     // Three passes total
     let total_steps = total_crates * 3;
+
     let pb = ProgressBar::new(total_steps as u64);
     pb.set_style(
         ProgressStyle::default_bar()
@@ -35,7 +36,6 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
     );
 
     let mut errors = 0;
-    let mut warnings = 0;
     let mut issues: Vec<(String, Vec<LintDiagnostic>)> = Vec::new();
 
     // First pass: check for crates without arborium.kdl
@@ -44,9 +44,10 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
             "{} (pass 1/3)",
             name.strip_prefix("arborium-").unwrap_or(name)
         ));
+        // Force a tick to ensure progress bar updates
+        pb.tick();
         let has_grammar_dir = state.path.join("grammar").is_dir();
         if state.config.is_none() && has_grammar_dir {
-            warnings += 1;
             issues.push((
                 name.to_string(),
                 vec![LintDiagnostic::Warning("missing arborium.kdl".to_string())],
@@ -67,12 +68,10 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
             for diag in &crate_diagnostics {
                 match diag {
                     LintDiagnostic::Error(_) => errors += 1,
-                    LintDiagnostic::Warning(_) => warnings += 1,
+                    LintDiagnostic::Warning(_) => {}
                     LintDiagnostic::Spanned { is_error, .. } => {
                         if *is_error {
                             errors += 1;
-                        } else {
-                            warnings += 1;
                         }
                     }
                 }
@@ -95,7 +94,6 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
                     "legacy file should be deleted: {}",
                     legacy.file_name().unwrap_or("?")
                 )));
-                warnings += 1;
             }
             issues.push((name.to_string(), legacy_diagnostics));
         }
@@ -131,25 +129,9 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
         println!();
     }
 
-    // Summary - single checkmark line
+    // Exit with error if there are any errors
     if errors > 0 {
-        println!(
-            "{} Linted {} crates ({} errors, {} warnings)",
-            "✗".red(),
-            total_crates,
-            errors,
-            warnings
-        );
         std::process::exit(1);
-    } else if warnings > 0 {
-        println!(
-            "{} Linted {} crates ({} warnings)",
-            "✓".green(),
-            total_crates,
-            warnings
-        );
-    } else {
-        println!("{} Linted {} crates", "✓".green(), total_crates);
     }
 
     Ok(())

@@ -321,11 +321,26 @@ fn main() {
 
             // Run strict lint after generation (now parser.c should exist)
             if !dry_run {
+                use std::time::Instant;
+                let lint_start = Instant::now();
+
                 let options = lint_new::LintOptions { strict: true };
                 if let Err(e) = lint_new::run_lints(&crates_dir, options) {
                     eprintln!("{:?}", e);
                     std::process::exit(1);
                 }
+
+                let lint_elapsed = lint_start.elapsed();
+
+                // Count total crates
+                let registry = crate::types::CrateRegistry::load(&crates_dir)
+                    .expect("Failed to load registry");
+                println!(
+                    "  {} Generated {} Rust crates ({:.2}s)",
+                    "✓".green(),
+                    registry.crates.len(),
+                    lint_elapsed.as_secs_f64()
+                );
 
                 // Print next steps hint
                 println!();

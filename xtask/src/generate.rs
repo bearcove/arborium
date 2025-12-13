@@ -166,9 +166,6 @@ pub fn plan_generate(
     crates_dir: &Utf8Path,
     options: GenerateOptions<'_>,
 ) -> Result<PlanSet, Report> {
-    use std::time::Instant;
-    let total_start = Instant::now();
-
     // 1. Load Registry
     let registry = load_registry(crates_dir)?;
 
@@ -189,19 +186,6 @@ pub fn plan_generate(
 
     // 5. Generate all crates using templates
     let plan_set = generate_all_crates(&prepared, &generation_results, options.mode)?;
-
-    let total_elapsed = total_start.elapsed();
-
-    // Print summary as checkmark line
-    let regen = generation_results.cache_misses;
-    let reused = generation_results.cache_hits;
-    println!(
-        "{} Generated {}, re-used {} ({:.2}s)",
-        "✓".green(),
-        regen,
-        reused,
-        total_elapsed.as_secs_f64()
-    );
 
     Ok(plan_set)
 }
@@ -852,8 +836,6 @@ struct PreparedStructures {
 }
 
 struct GenerationResults {
-    cache_hits: usize,
-    cache_misses: usize,
     plans: PlanSet,
 }
 
@@ -951,6 +933,9 @@ fn prepare_temp_structures(
 
 // 3. Validate All Grammars using prepared structures
 fn validate_all_grammars(prepared: &PreparedStructures) -> Result<(), Report> {
+    use std::time::Instant;
+    let start = Instant::now();
+
     let total = prepared.prepared_temps.len();
     let pb = ProgressBar::new(total as u64);
     pb.set_style(
@@ -986,6 +971,8 @@ fn validate_all_grammars(prepared: &PreparedStructures) -> Result<(), Report> {
 
     pb.finish_and_clear();
 
+    let elapsed = start.elapsed();
+
     // Check for errors
     let errors = errors.into_inner().unwrap();
     if !errors.is_empty() {
@@ -1004,7 +991,12 @@ fn validate_all_grammars(prepared: &PreparedStructures) -> Result<(), Report> {
         .into());
     }
 
-    println!("{} Validated {} grammars", "✓".green(), total);
+    println!(
+        "  {} Validated {} grammars ({:.2}s)",
+        "✓".green(),
+        total,
+        elapsed.as_secs_f64()
+    );
     Ok(())
 }
 
@@ -1051,6 +1043,9 @@ fn generate_all_grammars(
     no_fail_fast: bool,
     jobs: usize,
 ) -> Result<GenerationResults, Report> {
+    use std::time::Instant;
+    let start = Instant::now();
+
     let cache_hits = AtomicUsize::new(0);
     let cache_misses = AtomicUsize::new(0);
     let plans = Mutex::new(PlanSet::new());
@@ -1129,9 +1124,20 @@ fn generate_all_grammars(
         .into());
     }
 
+    let elapsed = start.elapsed();
+    let cache_hits_count = cache_hits.load(Ordering::Relaxed);
+    let cache_misses_count = cache_misses.load(Ordering::Relaxed);
+    let total_count = cache_hits_count + cache_misses_count;
+
+    println!(
+        "  {} Generated {} parsers ({} fresh, {:.2}s)",
+        "✓".green(),
+        total_count,
+        cache_misses_count,
+        elapsed.as_secs_f64()
+    );
+
     Ok(GenerationResults {
-        cache_hits: cache_hits.load(Ordering::Relaxed),
-        cache_misses: cache_misses.load(Ordering::Relaxed),
         plans: plans.into_inner().unwrap(),
     })
 }
