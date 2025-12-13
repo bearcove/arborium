@@ -23,9 +23,24 @@ export interface ParseResult {
 /**
  * A parsing session for incremental highlighting.
  *
- * Sessions allow you to parse text incrementally without creating
- * a new session each time. This is useful for editors where text
- * changes frequently.
+ * Sessions allow you to reuse the parser state between parses, which is more
+ * efficient than creating a new session for each parse. This is useful for
+ * editors where text changes frequently.
+ *
+ * Usage pattern:
+ *   - Call `setText(newText)` whenever the text changes.
+ *   - Then call `parse()` to parse the current text and get results.
+ *
+ * Example:
+ * ```ts
+ * const session = grammar.createSession();
+ * session.setText("let x = 1;");
+ * let result = session.parse();
+ * // ... user edits text ...
+ * session.setText("let x = 42;");
+ * result = session.parse();
+ * session.free();
+ * ```
  */
 export interface Session {
   /** Set the text to parse */
@@ -34,7 +49,10 @@ export interface Session {
   parse(): ParseResult;
   /** Cancel any in-progress parsing */
   cancel(): void;
-  /** Free the session resources. Must be called when done. */
+  /**
+   * Free the session resources. Must be called when done to prevent memory leaks.
+   * Failure to call free() will result in WASM memory not being released.
+   */
   free(): void;
 }
 

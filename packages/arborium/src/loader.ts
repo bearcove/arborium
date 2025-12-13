@@ -333,11 +333,16 @@ export async function loadGrammar(
       return {
         setText: (text: string) => module.set_text(handle, text),
         parse: () => {
-          const result = module.parse(handle);
-          return {
-            spans: result.spans || [],
-            injections: result.injections || [],
-          };
+          try {
+            const result = module.parse(handle);
+            return {
+              spans: result.spans || [],
+              injections: result.injections || [],
+            };
+          } catch (e) {
+            console.error(`[arborium] Session parse error:`, e);
+            return { spans: [], injections: [] };
+          }
         },
         cancel: () => module.cancel(handle),
         free: () => module.free_session(handle),
