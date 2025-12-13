@@ -449,6 +449,8 @@ fn main() {
 
         let ansi_output = highlighter.highlight("rust", source).unwrap();
 
+        println!("\n{ansi_output}");
+
         assert!(
             ansi_output.contains("\x1b["),
             "Should contain ANSI escape sequences"
@@ -479,6 +481,9 @@ fn main() {
 }"#;
 
         let ansi_output = highlighter.highlight("rust", source).unwrap();
+
+        println!("\n{ansi_output}");
+
         assert!(ansi_output.contains("\x1b["));
     }
 
