@@ -20,6 +20,24 @@ export interface ParseResult {
   injections: Injection[];
 }
 
+/**
+ * A parsing session for incremental highlighting.
+ *
+ * Sessions allow you to parse text incrementally without creating
+ * a new session each time. This is useful for editors where text
+ * changes frequently.
+ */
+export interface Session {
+  /** Set the text to parse */
+  setText(text: string): void;
+  /** Parse the current text and return spans/injections */
+  parse(): ParseResult;
+  /** Cancel any in-progress parsing */
+  cancel(): void;
+  /** Free the session resources. Must be called when done. */
+  free(): void;
+}
+
 /** A loaded grammar plugin */
 export interface Grammar {
   /** The language identifier */
@@ -28,8 +46,10 @@ export interface Grammar {
   injectionLanguages(): string[];
   /** Highlight source code, returning HTML string */
   highlight(source: string): string | Promise<string>;
-  /** Parse source code, returning raw spans */
+  /** Parse source code, returning raw spans (creates a one-shot session internally) */
   parse(source: string): ParseResult;
+  /** Create a session for incremental parsing */
+  createSession(): Session;
   /** Dispose of resources */
   dispose(): void;
 }

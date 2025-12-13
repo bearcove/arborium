@@ -8,7 +8,7 @@
  * 3. Parse and highlight using the grammar's tree-sitter parser
  */
 
-import type { ParseResult, ArboriumConfig, Grammar, Span, Injection } from "./types.js";
+import type { ParseResult, ArboriumConfig, Grammar, Session, Span, Injection } from "./types.js";
 import { availableLanguages, pluginVersion } from "./plugins-manifest.js";
 
 // Default config
@@ -114,6 +114,7 @@ interface WasmBindgenPlugin {
 interface GrammarPlugin {
   languageId: string;
   injectionLanguages: string[];
+  module: WasmBindgenPlugin;
   parse: (text: string) => ParseResult;
 }
 
@@ -164,6 +165,7 @@ async function loadGrammarPlugin(language: string): Promise<GrammarPlugin | null
     const plugin: GrammarPlugin = {
       languageId: language,
       injectionLanguages,
+      module,
       parse: (text: string) => {
         const session = module.create_session();
         try {
@@ -316,6 +318,8 @@ export async function loadGrammar(
   const plugin = await loadGrammarPlugin(language);
   if (!plugin) return null;
 
+  const { module } = plugin;
+
   return {
     languageId: () => plugin.languageId,
     injectionLanguages: () => plugin.injectionLanguages,
@@ -324,6 +328,21 @@ export async function loadGrammar(
       return spansToHtml(source, result.spans);
     },
     parse: (source: string) => plugin.parse(source),
+    createSession: (): Session => {
+      const handle = module.create_session();
+      return {
+        setText: (text: string) => module.set_text(handle, text),
+        parse: () => {
+          const result = module.parse(handle);
+          return {
+            spans: result.spans || [],
+            injections: result.injections || [],
+          };
+        },
+        cancel: () => module.cancel(handle),
+        free: () => module.free_session(handle),
+      };
+    },
     dispose: () => {
       // No-op for now, plugins are cached
     },

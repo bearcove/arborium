@@ -9,6 +9,7 @@ export { detectLanguage, extractLanguageFromClass, normalizeLanguage } from './d
 export { pluginVersion, availableLanguages } from './plugins-manifest.js';
 export type {
   Grammar,
+  Session,
   Span,
   Injection,
   ParseResult,
