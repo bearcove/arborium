@@ -283,18 +283,26 @@ pub struct AnsiOptions {
     pub border: bool,
 }
 
-/// Box drawing characters for borders.
+/// Unicode block drawing characters used to create visual borders around ANSI output.
+///
+/// These characters create a "half-block" border style that works well in terminals:
+/// - `TOP`/`BOTTOM`: half blocks that create smooth edges
+/// - `LEFT`/`RIGHT`: full blocks for solid vertical borders
 pub struct BoxChars;
 
 impl BoxChars {
-    pub const TOP: char = '▄'; // lower half block
-    pub const BOTTOM: char = '▀'; // upper half block
-    pub const LEFT: char = '█'; // full block
-    pub const RIGHT: char = '█'; // full block
+    /// Unicode lower half block (`▄`) used for the top border.
+    pub const TOP: char = '▄';
+    /// Unicode upper half block (`▀`) used for the bottom border.
+    pub const BOTTOM: char = '▀';
+    /// Unicode full block (`█`) used for the left border.
+    pub const LEFT: char = '█';
+    /// Unicode full block (`█`) used for the right border.
+    pub const RIGHT: char = '█';
 }
 
 fn detect_terminal_width() -> Option<usize> {
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(feature = "terminal-size", not(target_arch = "wasm32")))]
     {
         use terminal_size::{Width, terminal_size};
         if let Some((Width(w), _)) = terminal_size() {
@@ -303,7 +311,7 @@ fn detect_terminal_width() -> Option<usize> {
             None
         }
     }
-    #[cfg(target_arch = "wasm32")]
+    #[cfg(any(not(feature = "terminal-size"), target_arch = "wasm32"))]
     {
         None
     }
@@ -327,7 +335,6 @@ impl Default for AnsiOptions {
 }
 
 #[cfg(feature = "unicode-width")]
-
 fn char_display_width(c: char, col: usize, tab_width: usize) -> usize {
     if c == '\t' {
         let next_tab = ((col / tab_width) + 1) * tab_width;
@@ -386,8 +393,12 @@ fn write_wrapped_text(
     let margin_x = options.margin_x;
     let border = options.border;
     // Inner width excludes border characters
-    let width = if border { inner_width - 2 } else { inner_width };
-    let content_end = width - padding_x; // where content should stop (before right padding)
+    let width = if border {
+        inner_width.saturating_sub(2)
+    } else {
+        inner_width
+    };
+    let content_end = width.saturating_sub(padding_x); // where content should stop (before right padding)
     let pad_to_width = options.pad_to_width;
 
     for ch in text.chars() {
@@ -472,6 +483,21 @@ fn write_wrapped_text(
             if !base_ansi.is_empty() {
                 out.push_str(base_ansi);
             }
+            // New visual line after wrap: emit left margin + border + padding
+            // Left margin
+            for _ in 0..margin_x {
+                out.push(' ');
+            }
+            // Left border (full block)
+            if border && !border_style.is_empty() {
+                out.push_str(border_style);
+                out.push(BoxChars::LEFT);
+                out.push_str(Theme::ANSI_RESET);
+                if !base_ansi.is_empty() {
+                    out.push_str(base_ansi);
+                }
+            }
+            // Re-apply active style after border
             if let Some(idx) = active_style {
                 let style = if use_base_bg {
                     theme.ansi_style_with_base_bg(idx)
@@ -480,8 +506,7 @@ fn write_wrapped_text(
                 };
                 out.push_str(&style);
             }
-
-            // New visual line: emit left padding again.
+            // Left padding
             if padding_x > 0 {
                 for _ in 0..padding_x {
                     out.push(' ');
@@ -674,7 +699,11 @@ pub fn spans_to_ansi_with_options(
                     output_started = true;
                 }
                 // Inner width (minus border chars if present)
-                let inner = if border { width - 2 } else { width };
+                let inner = if border {
+                    width.saturating_sub(2)
+                } else {
+                    width
+                };
                 for _ in 0..inner {
                     out.push(' ');
                 }
@@ -954,7 +983,11 @@ pub fn spans_to_ansi_with_options(
         let padding_y = options.padding_y;
         let pad_to_width = options.pad_to_width;
         // Inner width excludes border characters
-        let inner_width = if border { width - 2 } else { width };
+        let inner_width = if border {
+            width.saturating_sub(2)
+        } else {
+            width
+        };
 
         // Pad the final content line out to the full width.
         if pad_to_width && current_col < inner_width {
@@ -991,7 +1024,11 @@ pub fn spans_to_ansi_with_options(
                 if !base_ansi.is_empty() {
                     out.push_str(&base_ansi);
                 }
-                let inner = if border { width - 2 } else { width };
+                let inner = if border {
+                    width.saturating_sub(2)
+                } else {
+                    width
+                };
                 for _ in 0..inner {
                     out.push(' ');
                 }

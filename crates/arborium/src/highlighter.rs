@@ -299,20 +299,149 @@ mod tests {
             .unwrap();
         println!("\nOutput with defaults:");
         println!("{}", ansi_output);
+    }
 
-        // Test with border
-        println!("\n=== BORDER TEST (Catppuccin Mocha) ===");
-        let mut options = AnsiOptions::default();
-        options.use_theme_base_style = true;
-        options.width = Some(50);
-        options.pad_to_width = true;
-        options.padding_x = 2;
-        options.padding_y = 1;
-        options.border = true;
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_ansi_border_theme_showcase() {
+        use arborium_theme::theme::builtin;
 
-        let ansi_output = highlighter
-            .highlight_to_ansi_with_options("rust", source_short, theme, &options)
-            .unwrap();
-        println!("{}", ansi_output);
+        let mut highlighter = Highlighter::new();
+
+        // Different code samples to keep it interesting
+        let samples: &[(&str, &str)] = &[
+            (
+                "Catppuccin Mocha",
+                r#"fn fibonacci(n: u64) -> u64 {
+    match n {
+        0 => 0,
+        1 => 1,
+        _ => fibonacci(n - 1) + fibonacci(n - 2),
+    }
+}"#,
+            ),
+            (
+                "GitHub Light",
+                r#"struct User {
+    name: String,
+    email: String,
+    active: bool,
+}
+
+impl User {
+    fn new(name: &str) -> Self {
+        Self { name: name.into(), email: String::new(), active: true }
+    }
+}"#,
+            ),
+            (
+                "Monokai",
+                r#"// A simple HTTP client example
+async fn fetch_data(url: &str) -> Result<String, Error> {
+    let response = reqwest::get(url).await?;
+    let body = response.text().await?;
+    Ok(body)
+}"#,
+            ),
+            (
+                "Dracula",
+                r#"#[derive(Debug, Clone)]
+pub enum Token {
+    Number(f64),
+    String(String),
+    Ident(String),
+    Op(char),
+}"#,
+            ),
+            (
+                "Ayu Light",
+                r#"/// Calculates the factorial of n
+pub fn factorial(n: u32) -> u32 {
+    (1..=n).product()
+}
+
+#[test]
+fn test_factorial() {
+    assert_eq!(factorial(5), 120);
+}"#,
+            ),
+            (
+                "Tokyo Night",
+                r#"use std::collections::HashMap;
+
+fn word_count(text: &str) -> HashMap<&str, usize> {
+    let mut counts = HashMap::new();
+    for word in text.split_whitespace() {
+        *counts.entry(word).or_insert(0) += 1;
+    }
+    counts
+}"#,
+            ),
+            (
+                "Nord",
+                r#"trait Shape {
+    fn area(&self) -> f64;
+    fn perimeter(&self) -> f64;
+}
+
+struct Circle { radius: f64 }
+
+impl Shape for Circle {
+    fn area(&self) -> f64 { std::f64::consts::PI * self.radius.powi(2) }
+    fn perimeter(&self) -> f64 { 2.0 * std::f64::consts::PI * self.radius }
+}"#,
+            ),
+            (
+                "Melange Dark",
+                r#"macro_rules! vec_of_strings {
+    ($($x:expr),*) => {
+        vec![$($x.to_string()),*]
+    };
+}
+
+let names = vec_of_strings!["Alice", "Bob", "Charlie"];"#,
+            ),
+        ];
+
+        // Map theme names to builtin functions
+        let get_theme = |name: &str| -> &'static arborium_theme::Theme {
+            match name {
+                "Catppuccin Mocha" => builtin::catppuccin_mocha(),
+                "GitHub Light" => builtin::github_light(),
+                "Monokai" => builtin::monokai(),
+                "Dracula" => builtin::dracula(),
+                "Ayu Light" => builtin::ayu_light(),
+                "Tokyo Night" => builtin::tokyo_night(),
+                "Nord" => builtin::nord(),
+                "Melange Dark" => builtin::melange_dark(),
+                _ => builtin::catppuccin_mocha(),
+            }
+        };
+
+        println!("\n╔══════════════════════════════════════════════════════════════╗");
+        println!("║           ANSI Border Theme Showcase - 8 Themes              ║");
+        println!("╚══════════════════════════════════════════════════════════════╝\n");
+
+        for (name, source) in samples {
+            let theme = get_theme(name);
+
+            println!("━━━ {} ━━━", name);
+
+            let mut options = AnsiOptions::default();
+            options.use_theme_base_style = true;
+            options.width = Some(65);
+            options.pad_to_width = true;
+            options.padding_x = 2;
+            options.padding_y = 1;
+            options.border = true;
+            options.margin_x = 2;
+
+            let ansi_output = highlighter
+                .highlight_to_ansi_with_options("rust", source, theme, &options)
+                .unwrap();
+
+            println!("{}", ansi_output);
+            println!();
+        }
     }
 }
