@@ -621,8 +621,8 @@ fn generate_cargo_toml(
         if l.is_empty() { "MIT" } else { l }
     };
 
-    // Extract major version for dependencies (e.g., "1.1.5" -> "1")
-    let dep_version = workspace_version.split('.').next().unwrap_or("1");
+    // Use full version for dependencies (e.g., "1.1.5" -> "1.1.5")
+    let dep_version = workspace_version;
 
     let template = CargoTomlTemplate {
         crate_name,
@@ -1830,16 +1830,13 @@ all-languages = [
         content.push_str(&format!("lang-{} = [\"dep:{}\"]\n", grammar_id, name));
     }
 
-    // Extract major version (e.g., "1.2.3" -> "1")
-    let major_version = version.split('.').next().unwrap_or("1");
-
-    // Dependencies section
+    // Dependencies section (use full version for all dependencies)
     content.push_str(&format!(
         r#"
 [dependencies]
-arborium-tree-sitter = {{ version = "{major_version}", path = "../arborium-tree-sitter" }}
-arborium-theme = {{ version = "{major_version}", path = "../arborium-theme" }}
-arborium-highlight = {{ version = "{major_version}", path = "../arborium-highlight", features = ["tree-sitter"] }}
+arborium-tree-sitter = {{ version = "{version}", path = "../arborium-tree-sitter" }}
+arborium-theme = {{ version = "{version}", path = "../arborium-theme" }}
+arborium-highlight = {{ version = "{version}", path = "../arborium-highlight", features = ["tree-sitter"] }}
 
 # Optional grammar dependencies
 "#
@@ -1852,7 +1849,7 @@ arborium-highlight = {{ version = "{major_version}", path = "../arborium-highlig
             .unwrap_or(crate_path);
         content.push_str(&format!(
             "{} = {{ version = \"{}\", path = \"../../{}\", optional = true }}\n",
-            name, major_version, rel_path
+            name, version, rel_path
         ));
     }
 
@@ -1950,9 +1947,6 @@ fn update_cargo_toml_version(
         std::io::Error::other(format!("Failed to parse {}: {}", cargo_toml_path, e))
     })?;
 
-    // Extract major version for dependencies (e.g., "1.1.11" -> "1")
-    let major_version = new_version.split('.').next().unwrap_or(new_version);
-
     // Update package version (full version)
     if let Some(package) = doc.get_mut("package")
         && let Some(version) = package.get_mut("version")
@@ -1960,7 +1954,7 @@ fn update_cargo_toml_version(
         *version = Item::Value(Value::from(new_version));
     }
 
-    // Update arborium dependencies in all dependency sections (major version only)
+    // Update arborium dependencies in all dependency sections (full version)
     let dep_sections = ["dependencies", "dev-dependencies", "build-dependencies"];
     for section_name in dep_sections {
         if let Some(deps) = doc.get_mut(section_name)
@@ -1973,7 +1967,7 @@ fn update_cargo_toml_version(
                     && let Some(dep_table) = value.as_table_like_mut()
                     && dep_table.contains_key("version")
                 {
-                    dep_table.insert("version", Item::Value(Value::from(major_version)));
+                    dep_table.insert("version", Item::Value(Value::from(new_version)));
                 }
             }
         }

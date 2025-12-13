@@ -154,6 +154,56 @@ fn get_published_crate_hash(name: &str, version: &str) -> Result<Option<String>>
     Ok(None) // No hash file found
 }
 
+/// Download a published crate and extract its version from Cargo.toml.
+/// Returns None if the crate doesn't exist on crates.io.
+fn get_published_crate_version(name: &str) -> Result<Option<String>> {
+    // Download latest version (without specifying version)
+    let output = std::process::Command::new("cargo")
+        .args(["download", name])
+        .stderr(std::process::Stdio::null())
+        .output()
+        .into_diagnostic()?;
+
+    if !output.status.success() || output.stdout.is_empty() {
+        return Ok(None); // Crate doesn't exist yet or download failed
+    }
+
+    // Validate gzip magic bytes (0x1f 0x8b) - cargo download returns XML on error
+    if output.stdout.len() < 2 || output.stdout[0] != 0x1f || output.stdout[1] != 0x8b {
+        return Ok(None); // Not a valid gzip file (probably XML error response)
+    }
+
+    // The stdout contains the gzip crate data
+    let cursor = std::io::Cursor::new(&output.stdout);
+    let tar = flate2::read::GzDecoder::new(cursor);
+    let mut archive = tar::Archive::new(tar);
+
+    for entry in archive.entries().into_diagnostic()? {
+        let mut entry = entry.into_diagnostic()?;
+        let path = entry.path().into_diagnostic()?;
+
+        // Look for Cargo.toml in the archive: {name}-{version}/Cargo.toml
+        if path.file_name() == Some(std::ffi::OsStr::new("Cargo.toml")) {
+            let mut contents = String::new();
+            std::io::Read::read_to_string(&mut entry, &mut contents).into_diagnostic()?;
+
+            // Parse version from Cargo.toml
+            for line in contents.lines() {
+                let line = line.trim();
+                if line.starts_with("version") && line.contains('=') {
+                    // Parse: version = "1.2.3"
+                    if let Some(version_str) = line.split('=').nth(1) {
+                        let version = version_str.trim().trim_matches('"').trim();
+                        return Ok(Some(version.to_string()));
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(None) // No Cargo.toml or version found
+}
+
 /// Compute hash of grammar crate contents for change detection.
 ///
 /// Hashes all files that would be published in the crate:
@@ -280,20 +330,22 @@ pub fn publish_crates(
             println!();
 
             // 2. All grammar crates in dependency order (leaves first)
-            println!(
-                "  {} Publishing {} (topologically sorted)...",
-                "●".cyan(),
-                "grammar crates".bold()
-            );
-            let sorted_crates = topological_sort_grammar_crates(repo_root, &langs_dir)?;
-            println!(
-                "    {} crates to publish in dependency order",
-                sorted_crates.len()
-            );
-            publish_crate_paths(&sorted_crates, dry_run, verbose)?;
+            // Track published versions for POST crate regeneration
+            let grammar_versions = publish_grammar_crates(repo_root, &langs_dir, dry_run, verbose)?;
             println!();
 
-            // 3. Post crates
+            // 3. Regenerate POST crates with actual published versions
+            if !dry_run {
+                println!(
+                    "  {} Regenerating POST crates with published versions...",
+                    "●".cyan()
+                );
+                regenerate_umbrella_crate(repo_root, &grammar_versions)?;
+                println!("    {}", "done".green());
+                println!();
+            }
+
+            // 4. Post crates
             println!("  {} Publishing {} group...", "●".cyan(), "post".bold());
             let post_paths: Vec<Utf8PathBuf> =
                 POST_CRATES.iter().map(|c| repo_root.join(c)).collect();
@@ -494,9 +546,9 @@ fn publish_crate_paths(crates: &[Utf8PathBuf], dry_run: bool, verbose: bool) -> 
 
     for crate_dir in crates {
         match publish_single_crate(crate_dir, dry_run, verbose)? {
-            CratePublishResult::Published => published += 1,
-            CratePublishResult::AlreadyExists => skipped += 1,
-            CratePublishResult::Failed => failed += 1,
+            (CratePublishResult::Published, _) => published += 1,
+            (CratePublishResult::AlreadyExists, _) => skipped += 1,
+            (CratePublishResult::Failed, _) => failed += 1,
         }
     }
 
@@ -575,11 +627,12 @@ fn crate_version_exists(crate_name: &str, version: &str) -> Result<bool> {
 }
 
 /// Publish a single crate.
+/// Returns the publish result and optionally the (name, version) tuple for tracking.
 fn publish_single_crate(
     crate_dir: &Utf8Path,
     dry_run: bool,
     verbose: bool,
-) -> Result<CratePublishResult> {
+) -> Result<(CratePublishResult, Option<(String, String)>)> {
     // Check if Cargo.toml exists
     if !crate_dir.join("Cargo.toml").exists() {
         println!(
@@ -588,7 +641,7 @@ fn publish_single_crate(
             crate_dir,
             "no Cargo.toml, skipping".yellow()
         );
-        return Ok(CratePublishResult::AlreadyExists);
+        return Ok((CratePublishResult::AlreadyExists, None));
     }
 
     // Check if publish = false
@@ -602,7 +655,7 @@ fn publish_single_crate(
             crate_dir.file_name().unwrap_or("?"),
             "publish = false, skipping".dimmed()
         );
-        return Ok(CratePublishResult::AlreadyExists);
+        return Ok((CratePublishResult::AlreadyExists, None));
     }
 
     let (name, version) = read_crate_info(crate_dir)?;
@@ -625,9 +678,17 @@ fn publish_single_crate(
                         "[dry-run]".yellow(),
                         "unchanged (hash match), would skip".dimmed()
                     );
+                    // In dry-run, don't return version info
+                    return Ok((CratePublishResult::AlreadyExists, None));
                 } else {
                     println!(" {}", "unchanged (hash match), skipping".dimmed());
-                    return Ok(CratePublishResult::AlreadyExists);
+                    // Get the published version from crates.io since we're skipping
+                    let published_version =
+                        get_published_crate_version(&name)?.unwrap_or_else(|| version.clone());
+                    return Ok((
+                        CratePublishResult::AlreadyExists,
+                        Some((name.clone(), published_version)),
+                    ));
                 }
             }
             Ok(false) => {
@@ -645,7 +706,13 @@ fn publish_single_crate(
         match crate_version_exists(&name, &version) {
             Ok(true) => {
                 println!(" {}", "already exists, skipping".yellow());
-                return Ok(CratePublishResult::AlreadyExists);
+                // Get the published version (should be the same as local, but query to be sure)
+                let published_version =
+                    get_published_crate_version(&name)?.unwrap_or_else(|| version.clone());
+                return Ok((
+                    CratePublishResult::AlreadyExists,
+                    Some((name.clone(), published_version)),
+                ));
             }
             Ok(false) => {
                 // Continue to publish
@@ -676,13 +743,14 @@ fn publish_single_crate(
         if status.success() {
             if dry_run {
                 println!("  {}", "dry-run ok".green());
+                return Ok((CratePublishResult::Published, None));
             } else {
                 println!("  {}", "published".green());
+                return Ok((CratePublishResult::Published, Some((name, version))));
             }
-            return Ok(CratePublishResult::Published);
         } else {
             println!("  {}", "FAILED".red());
-            return Ok(CratePublishResult::Failed);
+            return Ok((CratePublishResult::Failed, None));
         }
     }
 
@@ -698,10 +766,11 @@ fn publish_single_crate(
     if output.status.success() {
         if dry_run {
             println!(" {}", "dry-run ok".green());
+            return Ok((CratePublishResult::Published, None));
         } else {
             println!(" {}", "published".green());
+            return Ok((CratePublishResult::Published, Some((name, version))));
         }
-        return Ok(CratePublishResult::Published);
     }
 
     // Check if it's an "already published" error
@@ -711,13 +780,19 @@ fn publish_single_crate(
         || stderr.contains("is already published")
     {
         println!(" {}", "already exists, skipping".yellow());
-        return Ok(CratePublishResult::AlreadyExists);
+        // Get the published version from crates.io
+        let published_version =
+            get_published_crate_version(&name)?.unwrap_or_else(|| version.clone());
+        return Ok((
+            CratePublishResult::AlreadyExists,
+            Some((name, published_version)),
+        ));
     }
 
     // Real error
     println!(" {}", "FAILED".red());
     eprintln!("    stderr: {}", stderr);
-    Ok(CratePublishResult::Failed)
+    Ok((CratePublishResult::Failed, None))
 }
 
 /// Find all language group names in langs/.
@@ -900,6 +975,181 @@ fn topological_sort_grammar_crates(
         .collect();
 
     Ok(result)
+}
+
+/// Publish grammar crates in topological order and track their published versions.
+/// Returns a HashMap of crate_name -> published_version for use in regenerating POST crates.
+fn publish_grammar_crates(
+    repo_root: &Utf8Path,
+    langs_dir: &Utf8Path,
+    dry_run: bool,
+    verbose: bool,
+) -> Result<HashMap<String, String>> {
+    println!(
+        "  {} Publishing {} (topologically sorted)...",
+        "●".cyan(),
+        "grammar crates".bold()
+    );
+
+    let sorted_crates = topological_sort_grammar_crates(repo_root, langs_dir)?;
+    println!(
+        "    {} crates to publish in dependency order",
+        sorted_crates.len()
+    );
+
+    let mut published = 0;
+    let mut skipped = 0;
+    let mut failed = 0;
+    let mut versions = HashMap::new();
+
+    for crate_dir in &sorted_crates {
+        match publish_single_crate(crate_dir, dry_run, verbose)? {
+            (CratePublishResult::Published, Some((name, version))) => {
+                published += 1;
+                versions.insert(name, version);
+            }
+            (CratePublishResult::AlreadyExists, Some((name, version))) => {
+                skipped += 1;
+                versions.insert(name, version);
+            }
+            (CratePublishResult::Failed, _) => {
+                failed += 1;
+            }
+            (_, None) => {
+                // Dry-run or other cases without version tracking
+            }
+        }
+    }
+
+    if failed > 0 {
+        return Err(miette::miette!(
+            "{} grammar crates failed to publish",
+            failed
+        ));
+    }
+
+    println!(
+        "    {} published, {} skipped, {} failed",
+        published.to_string().green(),
+        skipped.to_string().yellow(),
+        failed.to_string().red()
+    );
+
+    Ok(versions)
+}
+
+/// Regenerate the umbrella crate (crates/arborium/Cargo.toml) with actual published versions.
+/// This ensures POST crates reference the correct versions that are actually on crates.io.
+fn regenerate_umbrella_crate(
+    repo_root: &Utf8Path,
+    grammar_versions: &HashMap<String, String>,
+) -> Result<()> {
+    // Read workspace version
+    let workspace_version = crate::version_store::read_version(repo_root)?;
+
+    // Load crate registry to find all grammar crates
+    let crates_dir = repo_root.join("crates");
+    let registry = crate::types::CrateRegistry::load(&crates_dir)
+        .map_err(|e| miette::miette!("Failed to load crate registry: {}", e))?;
+
+    // Collect all grammar crates with their paths and versions
+    let mut grammar_crates: Vec<(String, String, Utf8PathBuf, String)> = Vec::new();
+
+    for (name, state, _) in registry.configured_crates() {
+        // This is a grammar crate
+        let crate_path = state.crate_path.clone();
+        let grammar_id = name.strip_prefix("arborium-").unwrap_or(&name).to_string();
+
+        // Get the actual published version for this crate
+        let version = grammar_versions
+            .get(name.as_str())
+            .cloned()
+            .unwrap_or_else(|| workspace_version.clone());
+
+        grammar_crates.push((name.clone(), grammar_id, crate_path, version));
+    }
+
+    grammar_crates.sort_by(|a, b| a.0.cmp(&b.0));
+
+    // Build Cargo.toml content
+    let mut content = String::new();
+
+    // Package section
+    content.push_str(&format!(
+        r#"[package]
+name = "arborium"
+version = "{workspace_version}"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/bearcove/arborium"
+description = "Tree-sitter syntax highlighting with HTML rendering and WASM support"
+keywords = ["tree-sitter", "syntax-highlighting", "wasm"]
+categories = ["parsing", "text-processing", "wasm"]
+links = "arborium"
+
+[features]
+default = []
+
+# All languages
+all-languages = [
+"#
+    ));
+
+    // Add all lang-* features
+    for (_, grammar_id, _, _) in &grammar_crates {
+        if grammar_id.ends_with("_inline") {
+            continue;
+        }
+        content.push_str(&format!("    \"lang-{}\",\n", grammar_id));
+    }
+    content.push_str("]\n\n");
+
+    // Individual language features
+    content.push_str("# Individual language features\n");
+    for (name, grammar_id, _, _) in &grammar_crates {
+        content.push_str(&format!("lang-{} = [\"dep:{}\"]\n", grammar_id, name));
+    }
+
+    // Dependencies section - use actual published versions
+    content.push_str(&format!(
+        r#"
+
+[dependencies]
+arborium-tree-sitter = {{ version = "{workspace_version}", path = "../arborium-tree-sitter" }}
+arborium-theme = {{ version = "{workspace_version}", path = "../arborium-theme" }}
+arborium-highlight = {{ version = "{workspace_version}", path = "../arborium-highlight", features = ["tree-sitter"] }}
+
+# Optional grammar dependencies
+"#
+    ));
+
+    for (name, _, crate_path, version) in &grammar_crates {
+        let rel_path = crate_path.strip_prefix(repo_root).unwrap_or(crate_path);
+        content.push_str(&format!(
+            "{} = {{ version = \"{}\", path = \"../../{}\", optional = true }}\n",
+            name, version, rel_path
+        ));
+    }
+
+    content.push_str(
+        r#"
+
+[dev-dependencies]
+indoc = "2"
+
+# WASM allocator (automatically enabled on wasm targets)
+[target.'cfg(target_family = "wasm")'.dependencies]
+dlmalloc = "0.2"
+"#,
+    );
+
+    // Write the file
+    let cargo_toml_path = repo_root.join("crates/arborium/Cargo.toml");
+    fs_err::write(&cargo_toml_path, content)
+        .into_diagnostic()
+        .wrap_err_with(|| format!("Failed to write {}", cargo_toml_path))?;
+
+    Ok(())
 }
 
 // =============================================================================
