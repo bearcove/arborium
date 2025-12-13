@@ -86,9 +86,18 @@ pub struct CompiledGrammar {
     injection_language_idx: Option<u32>,
 }
 
-// Safety: Language and Query are Send + Sync (verified in arborium-tree-sitter)
+// Safety: CompiledGrammar only contains Language and Query types from tree-sitter.
+// Both types are documented as thread-safe (immutable after creation).
+// We verify this at compile time with the assertions below.
 unsafe impl Send for CompiledGrammar {}
 unsafe impl Sync for CompiledGrammar {}
+
+// Compile-time verification that the underlying types are Send + Sync
+const _: () = {
+    const fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<Language>();
+    assert_send_sync::<Query>();
+};
 
 impl CompiledGrammar {
     /// Create a new compiled grammar from configuration.

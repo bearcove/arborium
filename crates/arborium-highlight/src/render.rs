@@ -392,11 +392,12 @@ fn write_wrapped_text(
     let padding_x = options.padding_x;
     let margin_x = options.margin_x;
     let border = options.border;
-    // Inner width excludes border characters
+    // Inner width excludes border characters, with a minimum to handle narrow terminals
+    const MIN_CONTENT_WIDTH: usize = 10;
     let width = if border {
-        inner_width.saturating_sub(2)
+        inner_width.saturating_sub(2).max(MIN_CONTENT_WIDTH)
     } else {
-        inner_width
+        inner_width.max(MIN_CONTENT_WIDTH)
     };
     let content_end = width.saturating_sub(padding_x); // where content should stop (before right padding)
     let pad_to_width = options.pad_to_width;
@@ -661,7 +662,10 @@ pub fn spans_to_ansi_with_options(
         String::new()
     };
 
-    if let Some(width) = options.width {
+    // Minimum width to ensure usable output on narrow terminals
+    const MIN_WIDTH: usize = 10;
+
+    if let Some(width) = options.width.map(|w| w.max(MIN_WIDTH)) {
         // Top margin (empty lines)
         for _ in 0..margin_y {
             out.push('\n');

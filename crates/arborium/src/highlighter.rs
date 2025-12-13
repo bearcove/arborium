@@ -516,4 +516,44 @@ fn main() {
         // Store should have the grammar cached
         assert!(store.get("rust").is_some());
     }
+
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_multithreaded_highlighting() {
+        use std::thread;
+
+        // Create a highlighter and share its store across threads
+        let hl = Highlighter::new();
+        let store = hl.store().clone();
+
+        // Spawn multiple threads that highlight concurrently
+        let handles: Vec<_> = (0..4)
+            .map(|i| {
+                let store = store.clone();
+                thread::spawn(move || {
+                    let mut hl = Highlighter::with_store(store);
+                    let code = format!("fn thread{}() {{ let x = {}; }}", i, i * 10);
+                    let html = hl.highlight("rust", &code).unwrap();
+                    assert!(
+                        html.contains("<a-"),
+                        "Thread {} should produce highlighted output",
+                        i
+                    );
+                    html
+                })
+            })
+            .collect();
+
+        // Wait for all threads and collect results
+        let results: Vec<_> = handles.into_iter().map(|h| h.join().unwrap()).collect();
+
+        // All threads should have produced valid output
+        assert_eq!(results.len(), 4);
+        for (i, html) in results.iter().enumerate() {
+            assert!(
+                html.contains(&format!("thread{}", i)),
+                "Output should contain thread-specific content"
+            );
+        }
+    }
 }

@@ -45,7 +45,9 @@ pub use arborium_highlight::tree_sitter::{
 pub use arborium_highlight::{Injection, ParseResult, Span};
 
 // Low-level rendering utilities
-pub use arborium_highlight::{html_escape, spans_to_ansi, spans_to_html, write_spans_as_html};
+pub use arborium_highlight::{
+    html_escape, spans_to_ansi, spans_to_ansi_with_options, spans_to_html, write_spans_as_html,
+};
 
 // ANSI rendering options
 pub use arborium_highlight::AnsiOptions;

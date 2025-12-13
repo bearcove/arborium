@@ -13,7 +13,7 @@ pub enum Error {
     /// The requested language is not supported.
     ///
     /// This occurs when no grammar is available for the given language name.
-    /// Use [`crate::is_language_available`] to check availability before highlighting.
+    /// Language availability depends on which `lang-*` features are enabled.
     UnsupportedLanguage {
         /// The language that was requested.
         language: String,
