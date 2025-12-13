@@ -755,6 +755,7 @@ h1 {
     background: color-mix(in srgb, var(--bg) 60%, transparent);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+    border-radius: 8px 8px 0 0;
     flex-wrap: wrap;
     position: relative;
     z-index: 10;
@@ -1378,17 +1379,41 @@ button:hover {
     position: absolute;
     inset: 0;
     z-index: 100;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
 }
 
 .editor-container.highlighting .loading-overlay {
     display: flex;
+    animation: fade-in 0.2s ease-in forwards;
 }
 
-.editor-container.highlighting > *:not(.loading-overlay) {
-    opacity: 0.2;
+.loading-message {
+    font-size: 0.75rem;
+    color: var(--text);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+}
+
+.loading-dots {
+    display: flex;
+    gap: 0.5rem;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .loading-dot {

@@ -1053,7 +1053,6 @@ fn generate_all_grammars(
             &prepared.cache,
             &prepared.repo_root,
             mode,
-            false, // quiet mode - don't print per-grammar status
         );
 
         match result {
@@ -1111,7 +1110,6 @@ fn plan_grammar_generation_with_prepared_temp(
     cache: &GrammarCache,
     repo_root: &Utf8Path,
     mode: PlanMode,
-    quiet: bool,
 ) -> Result<(Plan, bool), Report> {
     let crate_name = &prepared_temp.crate_state.name;
     let def_path = &prepared_temp.crate_state.def_path;
@@ -1149,8 +1147,6 @@ fn plan_grammar_generation_with_prepared_temp(
     }
 
     // Cache miss - run tree-sitter generate in the prepared temp directory
-    let _ = quiet; // quiet mode is handled by caller now
-
     // Create src/ directory for grammars that generate files there
     fs::create_dir_all(temp_grammar.join("src"))?;
 

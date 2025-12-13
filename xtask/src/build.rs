@@ -949,10 +949,10 @@ fn build_single_plugin(
             "--artifact-dir",
             artifact_dir.as_str(),
         ])
+        // For wasm32 targets, clear environment flags that don't apply:
         // Some environments set global CFLAGS (e.g. `-fembed-bitcode=all` on macOS)
-        // which are not applicable to wasm32 builds and can cause noisy warnings or
-        // failures in cc-rs-based build scripts. Clear all C/CXX flags for this build.
-        // Also clear Apple SDK-related variables that can inject iOS/macOS-specific flags.
+        // which cause warnings or failures in cc-rs-based build scripts when building WASM.
+        // Also clear Apple SDK-related variables that inject iOS/macOS-specific flags.
         .env("CFLAGS", "")
         .env("CXXFLAGS", "")
         .env("CFLAGS_wasm32_unknown_unknown", "")
