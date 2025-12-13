@@ -3,6 +3,7 @@
 
 name = "Dayfox"
 variant = "light"
+source = "https://github.com/EdenEast/nightfox.nvim"
 background = "#f6f2ee"
 foreground = "#3d2b5a"
 

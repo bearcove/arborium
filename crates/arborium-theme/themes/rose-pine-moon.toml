@@ -3,6 +3,7 @@
 
 name = "Rosé Pine Moon"
 variant = "dark"
+source = "https://rosepinetheme.com"
 background = "#232136"
 foreground = "#e0def4"
 

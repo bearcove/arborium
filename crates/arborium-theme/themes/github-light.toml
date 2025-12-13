@@ -3,6 +3,7 @@
 
 name = "GitHub Light"
 variant = "light"
+source = "https://github.com/primer/github-vscode-theme"
 background = "#ffffff"
 foreground = "#24292f"
 

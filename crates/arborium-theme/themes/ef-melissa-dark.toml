@@ -4,6 +4,7 @@
 
 name = "EF Melissa Dark"
 variant = "dark"
+source = "https://protesilaos.com/emacs/ef-themes"
 background = "#352718"
 foreground = "#e8e4b1"
 

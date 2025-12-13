@@ -3,6 +3,7 @@
 
 name = "Catppuccin Latte"
 variant = "light"
+source = "https://github.com/catppuccin/catppuccin"
 background = "#eff1f5"
 foreground = "#4c4f69"
 

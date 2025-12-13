@@ -3,6 +3,7 @@
 
 name = "Kanagawa Dragon"
 variant = "dark"
+source = "https://github.com/rebelot/kanagawa.nvim"
 background = "#181616"
 foreground = "#c5c9c5"
 

@@ -4,6 +4,7 @@
 
 name = "Light Owl"
 variant = "light"
+source = "https://github.com/sdras/night-owl-vscode-theme"
 background = "#fbfbfb"
 foreground = "#403f53"
 

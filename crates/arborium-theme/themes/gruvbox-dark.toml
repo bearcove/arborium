@@ -3,6 +3,7 @@
 
 name = "Gruvbox Dark"
 variant = "dark"
+source = "https://github.com/morhetz/gruvbox"
 background = "#282828"
 foreground = "#ebdbb2"
 

@@ -3,6 +3,7 @@
 
 name = "One Dark"
 variant = "dark"
+source = "https://github.com/atom/one-dark-syntax"
 background = "#282c34"
 foreground = "#abb2bf"
 

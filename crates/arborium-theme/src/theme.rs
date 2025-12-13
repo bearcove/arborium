@@ -131,6 +131,8 @@ pub struct Theme {
     pub name: String,
     /// Whether this is a dark or light theme.
     pub is_dark: bool,
+    /// URL to the original theme source (for attribution).
+    pub source_url: Option<String>,
     /// Background color for the code block.
     pub background: Option<Color>,
     /// Foreground (default text) color.
@@ -144,6 +146,7 @@ impl Default for Theme {
         Self {
             name: String::new(),
             is_dark: true,
+            source_url: None,
             background: None,
             foreground: None,
             styles: std::array::from_fn(|_| Style::new()),
@@ -189,6 +192,9 @@ impl Theme {
         }
         if let Some(variant) = table.get("variant").and_then(|v| v.as_str()) {
             theme.is_dark = variant != "light";
+        }
+        if let Some(source) = table.get("source").and_then(|v| v.as_str()) {
+            theme.source_url = Some(source.to_string());
         }
 
         // Extract palette for color lookups

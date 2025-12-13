@@ -4,6 +4,7 @@
 
 name = "Melange Dark"
 variant = "dark"
+source = "https://github.com/savq/melange-nvim"
 background = "#292522"
 foreground = "#ece1d7"
 

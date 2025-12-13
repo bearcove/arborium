@@ -1,9 +1,10 @@
 # Rustdoc Ayu Theme
-# Based on the actual rustdoc Ayu theme colors
+# https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/ayu.css
 # Extended with additional token types while preserving the palette feel
 
 name = "Rustdoc Ayu"
 variant = "dark"
+source = "https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/ayu.css"
 background = "#191f26"
 foreground = "#c5c5c5"
 

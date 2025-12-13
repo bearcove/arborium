@@ -3,6 +3,7 @@
 
 name = "Desert256"
 variant = "dark"
+source = "https://github.com/vim-scripts/desert256.vim"
 background = "#000000"
 foreground = "#cccccc"
 

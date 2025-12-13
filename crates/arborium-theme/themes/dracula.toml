@@ -3,6 +3,7 @@
 
 name = "Dracula"
 variant = "dark"
+source = "https://draculatheme.com"
 background = "#282a36"
 foreground = "#f8f8f2"
 

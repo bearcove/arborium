@@ -121,9 +121,11 @@ This embeds selected grammars directly in your WASM binary - no CDN required at 
 
 ### Themes
 
-Available themes (dark): `mocha`, `macchiato`, `frappe`, `tokyo-night`, `dracula`, `monokai`, `one-dark`, `nord`, `gruvbox-dark`, `github-dark`
+Arborium includes 32 built-in themes from popular color schemes.
 
-Available themes (light): `latte`, `gruvbox-light`, `github-light`, `alabaster`, `dayfox`
+**Dark themes:** `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `dracula`, `tokyo-night`, `nord`, `one-dark`, `github-dark`, `gruvbox-dark`, `monokai`, `kanagawa-dragon`, `rose-pine-moon`, `ayu-dark`, `solarized-dark`, `ef-melissa-dark`, `melange-dark`, `cobalt2`, `zenburn`, `desert256`, `rustdoc-dark`, `rustdoc-ayu`
+
+**Light themes:** `catppuccin-latte`, `github-light`, `gruvbox-light`, `ayu-light`, `solarized-light`, `melange-light`, `light-owl`, `lucius-light`, `dayfox`, `alabaster`, `rustdoc-light`
 
 Import theme CSS:
 ```html
@@ -131,6 +133,8 @@ Import theme CSS:
 ```
 
 Or let the IIFE bundle auto-inject it via the `data-theme` attribute.
+
+**Theme Attribution:** All themes are adaptations of color schemes from their original projects. See the [arborium-theme crate README](https://github.com/bearcove/arborium/tree/main/crates/arborium-theme#built-in-themes) for full attribution and source links.
 
 ## Feature Flags
 

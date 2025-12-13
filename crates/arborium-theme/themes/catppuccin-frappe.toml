@@ -3,6 +3,7 @@
 
 name = "Catppuccin Frappé"
 variant = "dark"
+source = "https://github.com/catppuccin/catppuccin"
 background = "#303446"
 foreground = "#c6d0f5"
 

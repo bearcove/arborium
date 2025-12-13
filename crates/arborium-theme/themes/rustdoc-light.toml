@@ -1,9 +1,10 @@
 # Rustdoc Light Theme
-# Based on the actual rustdoc light theme colors
+# https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/light.css
 # Extended with additional token types while preserving the palette feel
 
 name = "Rustdoc Light"
 variant = "light"
+source = "https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/light.css"
 background = "#f5f5f5"
 foreground = "#24292e"
 

@@ -3,6 +3,7 @@
 
 name = "Catppuccin Mocha"
 variant = "dark"
+source = "https://github.com/catppuccin/catppuccin"
 background = "#1e1e2e"
 foreground = "#cdd6f4"
 

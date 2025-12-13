@@ -61,6 +61,22 @@ struct IifeDemoHtmlTemplate<'a> {
     script_tag: &'a str,
 }
 
+// Sailfish template for arborium-theme README
+#[derive(TemplateSimple)]
+#[template(path = "arborium_theme_readme.stpl.md")]
+struct ArboriumThemeReadmeTemplate<'a> {
+    theme_count: usize,
+    themes: &'a [ThemeInfo],
+}
+
+/// Theme info for README generation
+struct ThemeInfo {
+    name: String,
+    variant: &'static str,
+    source_url: Option<String>,
+    source_display: String,
+}
+
 // =============================================================================
 // Registry JSON types (for demo consumption)
 // =============================================================================
@@ -466,6 +482,7 @@ fn generate_sample_files(
 
 fn generate_theme_css(demo_dir: &Path) -> Result<(), String> {
     use arborium_theme::theme::builtin;
+    use std::fmt::Write;
 
     let pkg_dir = demo_dir.join("pkg");
     if !pkg_dir.exists() {
@@ -483,6 +500,13 @@ fn generate_theme_css(demo_dir: &Path) -> Result<(), String> {
             .to_lowercase()
             .replace(' ', "-")
             .replace('é', "e"); // Handle Rosé Pine -> rose-pine
+
+        // Add header comment with attribution
+        let variant = if theme.is_dark { "dark" } else { "light" };
+        writeln!(css, "/* {} ({}) */", theme.name, variant).unwrap();
+        if let Some(ref source_url) = theme.source_url {
+            writeln!(css, "/* Source: {} */", source_url).unwrap();
+        }
 
         // Generate CSS with [data-theme="id"] selector
         let theme_css = theme.to_css(&format!("[data-theme=\"{id}\"]"));
@@ -1177,6 +1201,9 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
             theme.name, variant
         )
         .unwrap();
+        if let Some(ref source_url) = theme.source_url {
+            writeln!(css, "/* Source: {} */", source_url).unwrap();
+        }
         writeln!(css, "/* Defines --arb-*-{} variables */\n", variant).unwrap();
 
         writeln!(css, ":root {{").unwrap();
@@ -1357,6 +1384,68 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
         "{} Generated {} theme files + base.css + base-rustdoc.css",
         "✓".green(),
         generated.to_string().cyan()
+    );
+
+    // Also generate the arborium-theme README
+    generate_arborium_theme_readme(crates_dir)?;
+
+    Ok(())
+}
+
+/// Generate the arborium-theme crate README from template.
+pub fn generate_arborium_theme_readme(crates_dir: &Utf8Path) -> Result<(), String> {
+    use arborium_theme::builtin;
+
+    let readme_path = crates_dir.join("arborium-theme/README.md");
+
+    // Collect theme info
+    let themes: Vec<ThemeInfo> = builtin::all()
+        .iter()
+        .map(|theme| {
+            let source_display = theme
+                .source_url
+                .as_ref()
+                .map(|url| {
+                    // Extract a nice display name from the URL
+                    if url.contains("github.com") {
+                        // Extract repo path like "catppuccin/catppuccin"
+                        url.trim_start_matches("https://github.com/")
+                            .trim_end_matches('/')
+                            .to_string()
+                    } else {
+                        // Use domain for non-GitHub URLs
+                        url.trim_start_matches("https://")
+                            .trim_start_matches("http://")
+                            .trim_end_matches('/')
+                            .to_string()
+                    }
+                })
+                .unwrap_or_default();
+
+            ThemeInfo {
+                name: theme.name.clone(),
+                variant: if theme.is_dark { "dark" } else { "light" },
+                source_url: theme.source_url.clone(),
+                source_display,
+            }
+        })
+        .collect();
+
+    let template = ArboriumThemeReadmeTemplate {
+        theme_count: themes.len(),
+        themes: &themes,
+    };
+
+    let content = template
+        .render_once()
+        .map_err(|e| format!("Failed to render arborium-theme README: {}", e))?;
+
+    fs::write(&readme_path, content).map_err(|e| e.to_string())?;
+
+    println!(
+        "{} Generated arborium-theme README with {} themes",
+        "✓".green(),
+        themes.len().to_string().cyan()
     );
 
     Ok(())

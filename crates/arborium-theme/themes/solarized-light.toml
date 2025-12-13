@@ -3,6 +3,7 @@
 
 name = "Solarized Light"
 variant = "light"
+source = "https://ethanschoonover.com/solarized/"
 background = "#fdf6e3"
 foreground = "#657b83"
 

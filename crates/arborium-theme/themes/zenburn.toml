@@ -3,6 +3,7 @@
 
 name = "Zenburn"
 variant = "dark"
+source = "https://github.com/jnurmine/Zenburn"
 background = "#3f3f3f"
 foreground = "#dcdccc"
 

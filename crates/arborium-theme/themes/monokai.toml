@@ -3,6 +3,7 @@
 
 name = "Monokai"
 variant = "dark"
+source = "https://monokai.pro"
 background = "#2d2a2e"
 foreground = "#fcfcfa"
 

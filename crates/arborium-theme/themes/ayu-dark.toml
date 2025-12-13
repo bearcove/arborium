@@ -3,6 +3,7 @@
 
 name = "Ayu Dark"
 variant = "dark"
+source = "https://github.com/ayu-theme/ayu-colors"
 background = "#0d1017"
 foreground = "#bfbdb6"
 

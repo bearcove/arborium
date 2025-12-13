@@ -3,6 +3,7 @@
 
 name = "Ayu Light"
 variant = "light"
+source = "https://github.com/ayu-theme/ayu-colors"
 background = "#fafafa"
 foreground = "#5c6166"
 

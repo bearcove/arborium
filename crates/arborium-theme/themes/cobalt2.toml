@@ -3,6 +3,7 @@
 
 name = "Cobalt2"
 variant = "dark"
+source = "https://github.com/wesbos/cobalt2-vscode"
 background = "#193549"
 foreground = "#ffffff"
 

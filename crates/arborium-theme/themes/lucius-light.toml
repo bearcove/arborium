@@ -4,6 +4,7 @@
 
 name = "Lucius Light"
 variant = "light"
+source = "https://github.com/jonathanfilip/vim-lucius"
 background = "#eeeeee"
 foreground = "#444444"
 

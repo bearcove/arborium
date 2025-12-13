@@ -3,6 +3,7 @@
 
 name = "Nord"
 variant = "dark"
+source = "https://www.nordtheme.com"
 background = "#2e3440"
 foreground = "#eceff4"
 

@@ -3,6 +3,7 @@
 
 name = "Catppuccin Macchiato"
 variant = "dark"
+source = "https://github.com/catppuccin/catppuccin"
 background = "#24273a"
 foreground = "#cad3f5"
 

@@ -3,6 +3,7 @@
 
 name = "Alabaster"
 variant = "light"
+source = "https://github.com/tonsky/vscode-theme-alabaster"
 background = "#f7f7f7"
 foreground = "#000000"
 
