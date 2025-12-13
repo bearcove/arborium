@@ -711,6 +711,29 @@ h1 {
     color: var(--fg);
 }
 
+/* Tag grid for HTML tag reference */
+.tag-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.tag-item {
+    padding: 0.5rem;
+    background: var(--surface);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.tag-item code {
+    font-family: "Iosevka", "SF Mono", "Fira Code", "Consolas", monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 600;
+}
+
 .cards-container code {
     font-family: "Iosevka", "SF Mono", "Fira Code", "Consolas", monospace;
     font-size: 0.85em;

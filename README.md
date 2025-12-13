@@ -226,6 +226,92 @@ Enabling them may have implications for your project's licensing.
 | `lang-jinja2` | Jinja2 | GPL-3.0 | [tree-sitter-jinja2](https://github.com/dbt-labs/tree-sitter-jinja2) |
 | `lang-nginx` | nginx | GPL-3.0 | [tree-sitter-nginx](https://gitlab.com/joncoole/tree-sitter-nginx) |
 
+## HTML Tag Reference
+
+Arborium renders syntax highlighting using custom HTML elements. When highlighting code, it wraps spans of text with tags like `<a-k>`, `<a-f>`, etc. These tags are styled by the theme CSS you choose.
+
+### Tag Mappings
+
+Each tag corresponds to a semantic code element. Here's the complete reference:
+
+| Tag | Element Type | Description |
+|-----|--------------|-------------|
+| `<a-k>` | **Keyword** | Language keywords (if, else, while, class, fn, etc.) |
+| `<a-f>` | **Function** | Function names and method calls |
+| `<a-s>` | **String** | String literals and character literals |
+| `<a-c>` | **Comment** | Comments (line and block) |
+| `<a-t>` | **Type** | Type names and type annotations |
+| `<a-v>` | **Variable** | Variable names and identifiers |
+| `<a-co>` | **Constant** | Constants and boolean literals |
+| `<a-n>` | **Number** | Numeric literals (integers and floats) |
+| `<a-o>` | **Operator** | Operators (+, -, *, /, &&, etc.) |
+| `<a-p>` | **Punctuation** | Delimiters and punctuation (parentheses, brackets, commas) |
+| `<a-pr>` | **Property** | Object properties and struct fields |
+| `<a-at>` | **Attribute** | Attributes and annotations (@, #[derive], etc.) |
+| `<a-tg>` | **Tag** | HTML/XML tags |
+| `<a-m>` | **Macro** | Macro names and invocations |
+| `<a-l>` | **Label** | Labels and goto targets |
+| `<a-ns>` | **Namespace** | Namespaces and modules |
+| `<a-cr>` | **Constructor** | Constructor functions and type constructors |
+
+### Markup Tags (Markdown, etc.)
+
+| Tag | Element Type | Description |
+|-----|--------------|-------------|
+| `<a-tt>` | **Title** | Headings and titles |
+| `<a-st>` | **Strong** | Bold text |
+| `<a-em>` | **Emphasis** | Italic text |
+| `<a-tu>` | **Link** | URLs and hyperlinks |
+| `<a-tl>` | **Literal** | Code blocks and inline code |
+| `<a-tx>` | **Strikethrough** | Strikethrough text |
+
+### Diff Tags
+
+| Tag | Element Type | Description |
+|-----|--------------|-------------|
+| `<a-da>` | **Diff Add** | Added lines in diffs |
+| `<a-dd>` | **Diff Delete** | Deleted lines in diffs |
+
+### Special Tags
+
+| Tag | Element Type | Description |
+|-----|--------------|-------------|
+| `<a-eb>` | **Embedded** | Embedded language content |
+| `<a-er>` | **Error** | Syntax errors |
+
+### How It Works
+
+Arborium uses tree-sitter grammars to parse code and identify semantic elements. Multiple capture names from tree-sitter queries (like `@keyword.function`, `@keyword.import`, `@conditional`) all map to the same theme slot. For example:
+
+- `@keyword`, `@keyword.function`, `@include`, `@conditional` → all become `<a-k>` (keyword)
+- `@function`, `@function.builtin`, `@method` → all become `<a-f>` (function)
+- `@comment`, `@comment.documentation` → all become `<a-c>` (comment)
+
+Adjacent spans with the same tag are automatically merged into a single element for efficiency.
+
+### Styling Example
+
+To create a custom theme, target these elements in your CSS:
+
+```css
+/* Keywords in blue */
+a-k { color: #569cd6; }
+
+/* Functions in yellow */
+a-f { color: #dcdcaa; }
+
+/* Strings in green */
+a-s { color: #ce9178; }
+
+/* Comments in gray */
+a-c { color: #6a9955; font-style: italic; }
+
+/* Types in cyan */
+a-t { color: #4ec9b0; }
+```
+
+See the [included themes](https://github.com/bearcove/arborium/tree/main/packages/arborium/src/themes) for more examples.
+
 ## Sponsors
 
 Thanks to all individual sponsors:
