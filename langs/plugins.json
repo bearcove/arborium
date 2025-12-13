@@ -1,68 +1,104 @@
 {
-  "generated_at": "2025-12-13T13:34:21.755978+00:00",
+  "generated_at": "2025-12-13T14:50:43.047820+00:00",
   "entries": [
     {
-      "language": "diff",
-      "package": "@arborium/diff",
-      "version": "1.4.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/diff@1.4.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/diff@1.4.0/grammar_bg.wasm",
-      "local_js": "/langs/group-willow/diff/npm/grammar.js",
-      "local_wasm": "/langs/group-willow/diff/npm/grammar_bg.wasm"
+      "language": "verilog",
+      "package": "@arborium/verilog",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/verilog@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/verilog@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/verilog/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/verilog/npm/grammar_bg.wasm"
     },
     {
-      "language": "markdown",
-      "package": "@arborium/markdown",
-      "version": "1.4.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/markdown@1.4.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/markdown@1.4.0/grammar_bg.wasm",
-      "local_js": "/langs/group-willow/markdown/npm/grammar.js",
-      "local_wasm": "/langs/group-willow/markdown/npm/grammar_bg.wasm"
+      "language": "prolog",
+      "package": "@arborium/prolog",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/prolog@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/prolog@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/prolog/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/prolog/npm/grammar_bg.wasm"
     },
     {
-      "language": "jinja2",
-      "package": "@arborium/jinja2",
-      "version": "1.4.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/jinja2@1.4.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/jinja2@1.4.0/grammar_bg.wasm",
-      "local_js": "/langs/group-willow/jinja2/npm/grammar.js",
-      "local_wasm": "/langs/group-willow/jinja2/npm/grammar_bg.wasm"
+      "language": "tlaplus",
+      "package": "@arborium/tlaplus",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/tlaplus@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/tlaplus@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/tlaplus/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/tlaplus/npm/grammar_bg.wasm"
     },
     {
-      "language": "typst",
-      "package": "@arborium/typst",
-      "version": "1.4.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/typst@1.4.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/typst@1.4.0/grammar_bg.wasm",
-      "local_js": "/langs/group-willow/typst/npm/grammar.js",
-      "local_wasm": "/langs/group-willow/typst/npm/grammar_bg.wasm"
+      "language": "ada",
+      "package": "@arborium/ada",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/ada@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/ada@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/ada/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/ada/npm/grammar_bg.wasm"
     },
     {
-      "language": "vue",
-      "package": "@arborium/vue",
-      "version": "1.4.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/vue@1.4.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/vue@1.4.0/grammar_bg.wasm",
-      "local_js": "/langs/group-willow/vue/npm/grammar.js",
-      "local_wasm": "/langs/group-willow/vue/npm/grammar_bg.wasm"
+      "language": "sparql",
+      "package": "@arborium/sparql",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/sparql@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/sparql@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/sparql/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/sparql/npm/grammar_bg.wasm"
     },
     {
-      "language": "svelte",
-      "package": "@arborium/svelte",
-      "version": "1.4.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/svelte@1.4.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/svelte@1.4.0/grammar_bg.wasm",
-      "local_js": "/langs/group-willow/svelte/npm/grammar.js",
-      "local_wasm": "/langs/group-willow/svelte/npm/grammar_bg.wasm"
+      "language": "r",
+      "package": "@arborium/r",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/r@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/r@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/r/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/r/npm/grammar_bg.wasm"
     },
     {
-      "language": "asciidoc",
-      "package": "@arborium/asciidoc",
-      "version": "1.4.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/asciidoc@1.4.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/asciidoc@1.4.0/grammar_bg.wasm",
-      "local_js": "/langs/group-willow/asciidoc/npm/grammar.js",
-      "local_wasm": "/langs/group-willow/asciidoc/npm/grammar_bg.wasm"
+      "language": "julia",
+      "package": "@arborium/julia",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/julia@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/julia@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/julia/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/julia/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "vhdl",
+      "package": "@arborium/vhdl",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/vhdl@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/vhdl@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/vhdl/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/vhdl/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "hlsl",
+      "package": "@arborium/hlsl",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/hlsl@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/hlsl@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/hlsl/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/hlsl/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "glsl",
+      "package": "@arborium/glsl",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/glsl@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/glsl@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/glsl/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/glsl/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "matlab",
+      "package": "@arborium/matlab",
+      "version": "2.0.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/matlab@2.0.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/matlab@2.0.0/grammar_bg.wasm",
+      "local_js": "/langs/group-moss/matlab/npm/grammar.js",
+      "local_wasm": "/langs/group-moss/matlab/npm/grammar_bg.wasm"
     }
   ]
 }

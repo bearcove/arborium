@@ -1,6 +1,6 @@
 [package]
 name = "arborium-highlight"
-version = "1.3.0"
+version = "2.0.0"
 edition = "2024"
 rust-version = "1.85"
 description = "Unified syntax highlighting for arborium - works with both static Rust grammars and WASM plugins"
@@ -9,9 +9,11 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/bearcove/arborium"
 homepage = "https://github.com/bearcove/arborium"
-documentation = "https://docs.rs/arborium-highlight"
 keywords = ["syntax-highlighting", "tree-sitter", "wasm"]
 categories = ["text-processing"]
+# This crate is internal to arborium and not published separately.
+# Users should depend on the main `arborium` crate instead.
+publish = false
 
 [features]
 default = ["unicode-width", "terminal-size"]
@@ -23,8 +25,8 @@ unicode-width = ["dep:unicode-width"]
 terminal-size = ["dep:terminal_size"]
 
 [dependencies]
-arborium-theme = { version = "1.3.0", path = "../arborium-theme" }
-arborium-tree-sitter = { version = "1.3.0", path = "../arborium-tree-sitter", optional = true }
+arborium-theme = { version = "2.0.0", path = "../arborium-theme" }
+arborium-tree-sitter = { version = "2.0.0", path = "../arborium-tree-sitter", optional = true }
 streaming-iterator = { version = "0.1", optional = true }
 unicode-width = { version = "0.1", optional = true }
 terminal_size = { version = "0.4", optional = true }
