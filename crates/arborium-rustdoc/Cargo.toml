@@ -38,4 +38,3 @@ color-eyre = "0.6"
 
 # Progress/output
 owo-colors = "4"
-indicatif = "0.17"

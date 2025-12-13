@@ -58,14 +58,15 @@ pub fn transform_html(
                 element_content_handlers: vec![
                     // Handler for <pre class="language-*"> - extract language
                     (
-                        Cow::<Selector>::Owned("pre[class^='language-']".parse().unwrap()),
+                        Cow::<Selector>::Owned("pre[class*='language-']".parse().unwrap()),
                         ElementContentHandlers::default().element(move |el: &mut lol_html::html_content::Element| {
                             let mut state = state_for_pre.borrow_mut();
 
                             let class = el.get_attribute("class").unwrap_or_default();
 
                             // Skip if it has "rust" class (already highlighted by rustdoc)
-                            if class.contains("rust") {
+                            // Use word boundary check to avoid false positives like "language-rustscript"
+                            if class.split_whitespace().any(|c| c == "rust") {
                                 state.result.blocks_skipped += 1;
                                 state.current_lang = None;
                                 return Ok(());
@@ -79,7 +80,7 @@ pub fn transform_html(
                     ),
                     // Handler for <code> inside language pre - collect text and replace
                     (
-                        Cow::<Selector>::Owned("pre[class^='language-'] code".parse().unwrap()),
+                        Cow::<Selector>::Owned("pre[class*='language-'] code".parse().unwrap()),
                         ElementContentHandlers::default()
                             .element({
                                 let state_ref = state_for_code_el.clone();
@@ -205,12 +206,14 @@ fn extract_language_from_class(class: &str) -> Option<String> {
 }
 
 fn decode_html_entities(s: &str) -> String {
+    // Note: &amp; must be decoded LAST to avoid double-decoding
+    // e.g., "&lt;" should become "<", not "&<"
     s.replace("&lt;", "<")
         .replace("&gt;", ">")
-        .replace("&amp;", "&")
         .replace("&quot;", "\"")
         .replace("&#39;", "'")
         .replace("&#x27;", "'")
+        .replace("&amp;", "&")
 }
 
 /// Errors that can occur during HTML transformation.

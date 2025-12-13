@@ -158,7 +158,7 @@ impl Processor {
     }
 }
 
-/// Copy a directory recursively.
+/// Copy a directory recursively, handling symlinks properly.
 fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), ProcessError> {
     if !dst.exists() {
         fs::create_dir_all(dst)?;
@@ -168,8 +168,13 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), ProcessError> {
         let entry = entry?;
         let src_path = entry.path();
         let dst_path = dst.join(entry.file_name());
+        let file_type = entry.file_type()?;
 
-        if src_path.is_dir() {
+        if file_type.is_symlink() {
+            // Preserve symlinks by reading the target and creating a new symlink
+            let target = fs::read_link(&src_path)?;
+            symlink(&target, &dst_path)?;
+        } else if file_type.is_dir() {
             copy_dir_recursive(&src_path, &dst_path)?;
         } else {
             fs::copy(&src_path, &dst_path)?;
@@ -177,6 +182,23 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), ProcessError> {
     }
 
     Ok(())
+}
+
+/// Create a symlink (cross-platform).
+#[cfg(unix)]
+fn symlink(target: &Path, link: &Path) -> std::io::Result<()> {
+    std::os::unix::fs::symlink(target, link)
+}
+
+#[cfg(windows)]
+fn symlink(target: &Path, link: &Path) -> std::io::Result<()> {
+    // On Windows, we need to know if the target is a directory
+    // Since we're copying from an existing structure, check if target exists
+    if target.is_dir() {
+        std::os::windows::fs::symlink_dir(target, link)
+    } else {
+        std::os::windows::fs::symlink_file(target, link)
+    }
 }
 
 /// Errors that can occur during processing.
