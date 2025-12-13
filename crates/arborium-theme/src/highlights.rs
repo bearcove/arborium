@@ -113,6 +113,41 @@ impl ThemeSlot {
             ThemeSlot::None => None,
         }
     }
+
+    /// Get the full name for this slot (for CSS class names).
+    /// Returns None for slots that produce no styling.
+    pub fn name(self) -> Option<&'static str> {
+        match self {
+            ThemeSlot::Keyword => Some("keyword"),
+            ThemeSlot::Function => Some("function"),
+            ThemeSlot::String => Some("string"),
+            ThemeSlot::Comment => Some("comment"),
+            ThemeSlot::Type => Some("type"),
+            ThemeSlot::Variable => Some("variable"),
+            ThemeSlot::Constant => Some("constant"),
+            ThemeSlot::Number => Some("number"),
+            ThemeSlot::Operator => Some("operator"),
+            ThemeSlot::Punctuation => Some("punctuation"),
+            ThemeSlot::Property => Some("property"),
+            ThemeSlot::Attribute => Some("attribute"),
+            ThemeSlot::Tag => Some("tag"),
+            ThemeSlot::Macro => Some("macro"),
+            ThemeSlot::Label => Some("label"),
+            ThemeSlot::Namespace => Some("namespace"),
+            ThemeSlot::Constructor => Some("constructor"),
+            ThemeSlot::Title => Some("title"),
+            ThemeSlot::Strong => Some("strong"),
+            ThemeSlot::Emphasis => Some("emphasis"),
+            ThemeSlot::Link => Some("link"),
+            ThemeSlot::Literal => Some("literal"),
+            ThemeSlot::Strikethrough => Some("strikethrough"),
+            ThemeSlot::DiffAdd => Some("diff-add"),
+            ThemeSlot::DiffDelete => Some("diff-delete"),
+            ThemeSlot::Embedded => Some("embedded"),
+            ThemeSlot::Error => Some("error"),
+            ThemeSlot::None => None,
+        }
+    }
 }
 
 /// Map a theme slot to a canonical highlight index.
@@ -877,6 +912,52 @@ pub fn css_inheritance_rules() -> String {
 /// ```
 pub fn tag_for_capture(capture: &str) -> Option<&'static str> {
     capture_to_slot(capture).tag()
+}
+
+/// Map a short tag to its full name.
+///
+/// This is useful for class-based HTML output where you need
+/// `<span class="keyword">` instead of `<a-k>`.
+///
+/// # Example
+/// ```
+/// use arborium_theme::highlights::tag_to_name;
+///
+/// assert_eq!(tag_to_name("k"), Some("keyword"));
+/// assert_eq!(tag_to_name("f"), Some("function"));
+/// assert_eq!(tag_to_name("s"), Some("string"));
+/// ```
+pub fn tag_to_name(tag: &str) -> Option<&'static str> {
+    match tag {
+        "k" => Some("keyword"),
+        "f" => Some("function"),
+        "s" => Some("string"),
+        "c" => Some("comment"),
+        "t" => Some("type"),
+        "v" => Some("variable"),
+        "co" => Some("constant"),
+        "n" => Some("number"),
+        "o" => Some("operator"),
+        "p" => Some("punctuation"),
+        "pr" => Some("property"),
+        "at" => Some("attribute"),
+        "tg" => Some("tag"),
+        "m" => Some("macro"),
+        "l" => Some("label"),
+        "ns" => Some("namespace"),
+        "cr" => Some("constructor"),
+        "tt" => Some("title"),
+        "st" => Some("strong"),
+        "em" => Some("emphasis"),
+        "tu" => Some("link"),
+        "tl" => Some("literal"),
+        "tx" => Some("strikethrough"),
+        "da" => Some("diff-add"),
+        "dd" => Some("diff-delete"),
+        "eb" => Some("embedded"),
+        "er" => Some("error"),
+        _ => None,
+    }
 }
 
 /// The complete list of capture names that arborium recognizes.

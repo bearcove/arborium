@@ -11,9 +11,9 @@ repository = "https://github.com/bearcove/arborium"
 default = []
 
 [dependencies]
-arborium-tree-sitter = { version = "1", path = "../arborium-tree-sitter" }
+arborium-tree-sitter = { version = "1.3.0", path = "../arborium-tree-sitter" }
 arborium-wire = { path = "../arborium-wire" }
-arborium-sysroot = { version = "1", path = "../arborium-sysroot" }
+arborium-sysroot = { version = "1.3.0", path = "../arborium-sysroot" }
 
 [dev-dependencies]
 arborium-rust = { path = "../arborium-rust" }

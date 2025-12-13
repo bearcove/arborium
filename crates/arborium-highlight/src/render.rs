@@ -12,10 +12,50 @@
 //!
 //! Both map to the "keyword" slot (`k` tag), so they become a single `<a-k>` element.
 
-use crate::Span;
-use arborium_theme::{Theme, capture_to_slot, slot_to_highlight_index, tag_for_capture};
+use crate::{HtmlFormat, Span};
+use arborium_theme::{
+    Theme, capture_to_slot, slot_to_highlight_index, tag_for_capture, tag_to_name,
+};
 use std::collections::HashMap;
 use std::io::{self, Write};
+
+/// Generate opening and closing HTML tags based on the configured format.
+///
+/// Returns (opening_tag, closing_tag) for the given short tag and format.
+fn make_html_tags(short_tag: &str, format: &HtmlFormat) -> (String, String) {
+    match format {
+        HtmlFormat::CustomElements => {
+            let open = format!("<a-{short_tag}>");
+            let close = format!("</a-{short_tag}>");
+            (open, close)
+        }
+        HtmlFormat::CustomElementsWithPrefix(prefix) => {
+            let open = format!("<{prefix}-{short_tag}>");
+            let close = format!("</{prefix}-{short_tag}>");
+            (open, close)
+        }
+        HtmlFormat::ClassNames => {
+            if let Some(name) = tag_to_name(short_tag) {
+                let open = format!("<span class=\"{name}\">");
+                let close = "</span>".to_string();
+                (open, close)
+            } else {
+                // Fallback for unknown tags
+                ("<span>".to_string(), "</span>".to_string())
+            }
+        }
+        HtmlFormat::ClassNamesWithPrefix(prefix) => {
+            if let Some(name) = tag_to_name(short_tag) {
+                let open = format!("<span class=\"{prefix}-{name}\">");
+                let close = "</span>".to_string();
+                (open, close)
+            } else {
+                // Fallback for unknown tags
+                ("<span>".to_string(), "</span>".to_string())
+            }
+        }
+    }
+}
 
 /// A normalized span with theme slot tag.
 #[derive(Debug, Clone)]
@@ -74,7 +114,9 @@ fn normalize_and_coalesce(spans: Vec<Span>) -> Vec<NormalizedSpan> {
 /// 1. Mapping captures to theme slots (many -> few)
 /// 2. Coalescing adjacent spans with the same tag
 /// 3. Handling overlapping spans
-pub fn spans_to_html(source: &str, spans: Vec<Span>) -> String {
+///
+/// The `format` parameter controls the HTML output style.
+pub fn spans_to_html(source: &str, spans: Vec<Span>, format: &HtmlFormat) -> String {
     if spans.is_empty() {
         return html_escape(source);
     }
@@ -141,13 +183,10 @@ pub fn spans_to_html(source: &str, spans: Vec<Span>) -> String {
             let text = &source[last_pos..pos];
             if let Some(&top_idx) = stack.last() {
                 let tag = spans[top_idx].tag;
-                html.push_str("<a-");
-                html.push_str(tag);
-                html.push('>');
+                let (open_tag, close_tag) = make_html_tags(tag, format);
+                html.push_str(&open_tag);
                 html.push_str(&html_escape(text));
-                html.push_str("</a-");
-                html.push_str(tag);
-                html.push('>');
+                html.push_str(&close_tag);
             } else {
                 html.push_str(&html_escape(text));
             }
@@ -170,13 +209,10 @@ pub fn spans_to_html(source: &str, spans: Vec<Span>) -> String {
         let text = &source[last_pos..];
         if let Some(&top_idx) = stack.last() {
             let tag = spans[top_idx].tag;
-            html.push_str("<a-");
-            html.push_str(tag);
-            html.push('>');
+            let (open_tag, close_tag) = make_html_tags(tag, format);
+            html.push_str(&open_tag);
             html.push_str(&html_escape(text));
-            html.push_str("</a-");
-            html.push_str(tag);
-            html.push('>');
+            html.push_str(&close_tag);
         } else {
             html.push_str(&html_escape(text));
         }
@@ -188,8 +224,13 @@ pub fn spans_to_html(source: &str, spans: Vec<Span>) -> String {
 /// Write spans as HTML to a writer.
 ///
 /// This is more efficient than `spans_to_html` for streaming output.
-pub fn write_spans_as_html<W: Write>(w: &mut W, source: &str, spans: Vec<Span>) -> io::Result<()> {
-    let html = spans_to_html(source, spans);
+pub fn write_spans_as_html<W: Write>(
+    w: &mut W,
+    source: &str,
+    spans: Vec<Span>,
+    format: &HtmlFormat,
+) -> io::Result<()> {
+    let html = spans_to_html(source, spans, format);
     w.write_all(html.as_bytes())
 }
 
@@ -407,7 +448,7 @@ mod tests {
                 capture: "function".into(),
             },
         ];
-        let html = spans_to_html(source, spans);
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
         assert_eq!(html, "<a-k>fn</a-k> <a-f>main</a-f>");
     }
 
@@ -432,7 +473,7 @@ mod tests {
                 capture: "keyword.import".into(),
             },
         ];
-        let html = spans_to_html(source, spans);
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
         // All should use "k" tag - but they're not adjacent so still separate
         assert!(html.contains("<a-k>with</a-k>"));
         assert!(html.contains("<a-k>use</a-k>"));
@@ -455,7 +496,7 @@ mod tests {
                 capture: "keyword.function".into(), // Maps to same slot
             },
         ];
-        let html = spans_to_html(source, spans);
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
         // Should be one tag, not two
         assert_eq!(html, "<a-k>keyword</a-k>");
     }
@@ -476,7 +517,7 @@ mod tests {
                 capture: "variable".into(),
             },
         ];
-        let html = spans_to_html(source, spans);
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
         // Should only have one tag, not two
         assert!(!html.contains("apiVersionapiVersion"));
         assert!(html.contains("apiVersion"));
@@ -486,7 +527,7 @@ mod tests {
     fn test_html_escape() {
         let source = "<script>";
         let spans = vec![];
-        let html = spans_to_html(source, spans);
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
         assert_eq!(html, "&lt;script&gt;");
     }
 
@@ -506,7 +547,7 @@ mod tests {
                 capture: "nospell".into(),
             },
         ];
-        let html = spans_to_html(source, spans);
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
         // No tags should be emitted
         assert_eq!(html, "hello world");
     }
@@ -528,8 +569,150 @@ mod tests {
                 capture: "spell".into(),
             },
         ];
-        let html = spans_to_html(source, spans);
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
         // Should have comment styling, not be unstyled
         assert_eq!(html, "<a-c># a comment</a-c>");
+    }
+
+    #[test]
+    fn test_html_format_custom_elements() {
+        let source = "fn main";
+        let spans = vec![
+            Span {
+                start: 0,
+                end: 2,
+                capture: "keyword".into(),
+            },
+            Span {
+                start: 3,
+                end: 7,
+                capture: "function".into(),
+            },
+        ];
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
+        assert_eq!(html, "<a-k>fn</a-k> <a-f>main</a-f>");
+    }
+
+    #[test]
+    fn test_html_format_custom_elements_with_prefix() {
+        let source = "fn main";
+        let spans = vec![
+            Span {
+                start: 0,
+                end: 2,
+                capture: "keyword".into(),
+            },
+            Span {
+                start: 3,
+                end: 7,
+                capture: "function".into(),
+            },
+        ];
+        let html = spans_to_html(
+            source,
+            spans,
+            &HtmlFormat::CustomElementsWithPrefix("code".to_string()),
+        );
+        assert_eq!(html, "<code-k>fn</code-k> <code-f>main</code-f>");
+    }
+
+    #[test]
+    fn test_html_format_class_names() {
+        let source = "fn main";
+        let spans = vec![
+            Span {
+                start: 0,
+                end: 2,
+                capture: "keyword".into(),
+            },
+            Span {
+                start: 3,
+                end: 7,
+                capture: "function".into(),
+            },
+        ];
+        let html = spans_to_html(source, spans, &HtmlFormat::ClassNames);
+        assert_eq!(
+            html,
+            "<span class=\"keyword\">fn</span> <span class=\"function\">main</span>"
+        );
+    }
+
+    #[test]
+    fn test_html_format_class_names_with_prefix() {
+        let source = "fn main";
+        let spans = vec![
+            Span {
+                start: 0,
+                end: 2,
+                capture: "keyword".into(),
+            },
+            Span {
+                start: 3,
+                end: 7,
+                capture: "function".into(),
+            },
+        ];
+        let html = spans_to_html(
+            source,
+            spans,
+            &HtmlFormat::ClassNamesWithPrefix("arb".to_string()),
+        );
+        assert_eq!(
+            html,
+            "<span class=\"arb-keyword\">fn</span> <span class=\"arb-function\">main</span>"
+        );
+    }
+
+    #[test]
+    fn test_html_format_all_tags() {
+        // Test a variety of different tags to ensure mapping works
+        let source = "kfsctvcopprattgmlnscrttstemdadder";
+        let mut offset = 0;
+        let mut spans = vec![];
+        let tags = [
+            ("k", "keyword", "keyword"),
+            ("f", "function", "function"),
+            ("s", "string", "string"),
+            ("c", "comment", "comment"),
+            ("t", "type", "type"),
+            ("v", "variable", "variable"),
+            ("co", "constant", "constant"),
+            ("p", "punctuation", "punctuation"),
+            ("pr", "property", "property"),
+            ("at", "attribute", "attribute"),
+            ("tg", "tag", "tag"),
+            ("m", "macro", "macro"),
+            ("l", "label", "label"),
+            ("ns", "namespace", "namespace"),
+            ("cr", "constructor", "constructor"),
+            ("tt", "text.title", "title"),
+            ("st", "text.strong", "strong"),
+            ("em", "text.emphasis", "emphasis"),
+            ("da", "diff.addition", "diff-add"),
+            ("dd", "diff.deletion", "diff-delete"),
+            ("er", "error", "error"),
+        ];
+
+        for (tag, capture_name, _class_name) in &tags {
+            let len = tag.len() as u32;
+            spans.push(Span {
+                start: offset,
+                end: offset + len,
+                capture: capture_name.to_string(),
+            });
+            offset += len;
+        }
+
+        // Test ClassNames format
+        let html = spans_to_html(source, spans.clone(), &HtmlFormat::ClassNames);
+        for (_tag, _capture, class_name) in &tags {
+            assert!(
+                html.contains(&format!("class=\"{}\"", class_name)),
+                "Missing class=\"{}\" in output: {}",
+                class_name,
+                html
+            );
+        }
     }
 }

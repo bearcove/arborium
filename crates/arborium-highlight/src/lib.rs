@@ -21,6 +21,7 @@
 //!
 //! ```rust,ignore
 //! use arborium_highlight::{SyncHighlighter, Grammar, GrammarProvider, ParseResult, Span};
+//! use arborium_highlight::{HighlightConfig, HtmlFormat};
 //!
 //! // Define your grammar (implements Grammar trait)
 //! struct MyGrammar { /* ... */ }
@@ -41,10 +42,31 @@
 //!     }
 //! }
 //!
-//! // Use with sync wrapper
+//! // Use with default configuration (custom elements: <a-k>, <a-f>, etc.)
 //! let mut highlighter = SyncHighlighter::new(MyProvider { /* ... */ });
 //! let html = highlighter.highlight("rust", "fn main() {}");
+//! // Output: <a-k>fn</a-k> <a-f>main</a-f>() {}
+//!
+//! // Or use class-based output for compatibility with existing CSS
+//! let config = HighlightConfig {
+//!     html_format: HtmlFormat::ClassNames,
+//!     ..Default::default()
+//! };
+//! let mut highlighter = SyncHighlighter::with_config(MyProvider { /* ... */ }, config);
+//! let html = highlighter.highlight("rust", "fn main() {}");
+//! // Output: <span class="keyword">fn</span> <span class="function">main</span>() {}
 //! ```
+//!
+//! # HTML Output Formats
+//!
+//! Arborium supports multiple HTML output formats via [`HtmlFormat`]:
+//!
+//! - **`CustomElements`** (default): Compact custom elements like `<a-k>`, `<a-f>`, etc.
+//! - **`CustomElementsWithPrefix(prefix)`**: Custom elements with your prefix, e.g., `<code-k>`
+//! - **`ClassNames`**: Traditional `<span class="keyword">` for compatibility
+//! - **`ClassNamesWithPrefix(prefix)`**: Namespaced classes like `<span class="arb-keyword">`
+//!
+//! See [`HtmlFormat`] for examples and use cases.
 
 mod render;
 mod types;
@@ -125,6 +147,58 @@ pub trait GrammarProvider {
     fn get(&mut self, language: &str) -> impl Future<Output = Option<&mut Self::Grammar>>;
 }
 
+/// HTML output format for syntax highlighting.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum HtmlFormat {
+    /// Custom elements with default prefix: `<a-k>`, `<a-f>`, etc. (default)
+    ///
+    /// This is the most compact format and leverages custom HTML elements.
+    ///
+    /// # Example
+    /// ```html
+    /// <a-k>fn</a-k> <a-f>main</a-f>()
+    /// ```
+    CustomElements,
+
+    /// Custom elements with custom prefix: `<prefix-k>`, `<prefix-f>`, etc.
+    ///
+    /// Useful for branding or avoiding conflicts with other custom elements.
+    ///
+    /// # Example
+    /// ```html
+    /// <!-- With prefix "code" -->
+    /// <code-k>fn</code-k> <code-f>main</code-f>()
+    /// ```
+    CustomElementsWithPrefix(String),
+
+    /// Traditional class-based spans: `<span class="keyword">`, etc.
+    ///
+    /// Compatible with existing tooling that expects class-based markup.
+    ///
+    /// # Example
+    /// ```html
+    /// <span class="keyword">fn</span> <span class="function">main</span>()
+    /// ```
+    ClassNames,
+
+    /// Class-based spans with custom prefix: `<span class="prefix-keyword">`, etc.
+    ///
+    /// Useful for namespacing CSS classes.
+    ///
+    /// # Example
+    /// ```html
+    /// <!-- With prefix "arb" -->
+    /// <span class="arb-keyword">fn</span> <span class="arb-function">main</span>()
+    /// ```
+    ClassNamesWithPrefix(String),
+}
+
+impl Default for HtmlFormat {
+    fn default() -> Self {
+        Self::CustomElements
+    }
+}
+
 /// Configuration for highlighting.
 #[derive(Debug, Clone)]
 pub struct HighlightConfig {
@@ -134,12 +208,16 @@ pub struct HighlightConfig {
     /// - `3`: Default, handles most cases
     /// - Higher: For deeply nested content
     pub max_injection_depth: u32,
+
+    /// HTML output format (custom elements vs class-based spans).
+    pub html_format: HtmlFormat,
 }
 
 impl Default for HighlightConfig {
     fn default() -> Self {
         Self {
             max_injection_depth: 3,
+            html_format: HtmlFormat::default(),
         }
     }
 }
@@ -204,7 +282,7 @@ impl<P: GrammarProvider> HighlighterCore<P> {
     /// The main highlight function - written once, used by both wrappers.
     async fn highlight(&mut self, language: &str, source: &str) -> Result<String, HighlightError> {
         let spans = self.highlight_spans(language, source).await?;
-        Ok(spans_to_html(source, spans))
+        Ok(spans_to_html(source, spans, &self.config.html_format))
     }
 
     /// Process injections recursively.
@@ -570,7 +648,7 @@ mod tests {
                 capture: "keyword.function".into(),
             },
         ];
-        let html = spans_to_html("keyword", spans);
+        let html = spans_to_html("keyword", spans, &HtmlFormat::default());
         assert_eq!(html, "<a-k>keyword</a-k>");
     }
 }

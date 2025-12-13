@@ -29,8 +29,8 @@ use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
 use arborium_highlight::{
-    AsyncHighlighter, Grammar, GrammarProvider, HighlightConfig as CoreConfig, Injection,
-    ParseResult, Span,
+    AsyncHighlighter, Grammar, GrammarProvider, HighlightConfig as CoreConfig,
+    HtmlFormat as CoreHtmlFormat, Injection, ParseResult, Span,
 };
 
 /// Grammar handle type (matches JS side)
@@ -87,13 +87,22 @@ fn parse_js_result(value: JsValue) -> ParseResult {
             .and_then(|v| v.as_string())
             .unwrap_or_default();
 
-        spans.push(Span { start, end, capture });
+        spans.push(Span {
+            start,
+            end,
+            capture,
+        });
     }
 
     // Get injections array
     let injections_val = match Reflect::get(&obj, &"injections".into()) {
         Ok(v) => v,
-        Err(_) => return ParseResult { spans, injections: vec![] },
+        Err(_) => {
+            return ParseResult {
+                spans,
+                injections: vec![],
+            };
+        }
     };
     let injections_arr = Array::from(&injections_val);
 
@@ -215,6 +224,7 @@ impl GrammarProvider for JsGrammarProvider {
 #[wasm_bindgen]
 pub struct HighlightConfig {
     max_injection_depth: u32,
+    html_format: CoreHtmlFormat,
 }
 
 #[wasm_bindgen]
@@ -223,12 +233,37 @@ impl HighlightConfig {
     pub fn new() -> Self {
         Self {
             max_injection_depth: 3,
+            html_format: CoreHtmlFormat::default(),
         }
     }
 
     #[wasm_bindgen(js_name = setMaxInjectionDepth)]
     pub fn set_max_injection_depth(&mut self, depth: u32) {
         self.max_injection_depth = depth;
+    }
+
+    /// Set HTML format to custom elements (default): `<a-k>`, `<a-f>`, etc.
+    #[wasm_bindgen(js_name = setHtmlFormatCustomElements)]
+    pub fn set_html_format_custom_elements(&mut self) {
+        self.html_format = CoreHtmlFormat::CustomElements;
+    }
+
+    /// Set HTML format to custom elements with custom prefix.
+    #[wasm_bindgen(js_name = setHtmlFormatCustomElementsWithPrefix)]
+    pub fn set_html_format_custom_elements_with_prefix(&mut self, prefix: String) {
+        self.html_format = CoreHtmlFormat::CustomElementsWithPrefix(prefix);
+    }
+
+    /// Set HTML format to class names: `<span class="keyword">`, etc.
+    #[wasm_bindgen(js_name = setHtmlFormatClassNames)]
+    pub fn set_html_format_class_names(&mut self) {
+        self.html_format = CoreHtmlFormat::ClassNames;
+    }
+
+    /// Set HTML format to class names with custom prefix.
+    #[wasm_bindgen(js_name = setHtmlFormatClassNamesWithPrefix)]
+    pub fn set_html_format_class_names_with_prefix(&mut self, prefix: String) {
+        self.html_format = CoreHtmlFormat::ClassNamesWithPrefix(prefix);
     }
 }
 
@@ -256,6 +291,7 @@ pub async fn highlight_with_config(
 ) -> Result<String, JsValue> {
     let core_config = CoreConfig {
         max_injection_depth: config.max_injection_depth,
+        html_format: config.html_format.clone(),
     };
 
     let provider = JsGrammarProvider::new();

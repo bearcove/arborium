@@ -46,6 +46,8 @@ struct CodeBlocks {
     docsrs_script: String,
     docsrs_cargo: String,
     miette_example: String,
+    html_example_traditional: String,
+    html_example_arborium: String,
 }
 
 // Sailfish template for iife-demo.html
@@ -747,6 +749,8 @@ use miette_arborium::ArboriumHighlighter;
 let handler = GraphicalReportHandler::new()
     .with_syntax_highlighting(ArboriumHighlighter::new());"#,
         ),
+        html_example_traditional: highlight_code("html", r#"<span class="keyword">fn</span>"#),
+        html_example_arborium: highlight_code("html", r#"<a-k>fn</a-k>"#),
     }
 }
 
