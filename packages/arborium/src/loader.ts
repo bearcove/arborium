@@ -9,7 +9,7 @@
  */
 
 import type { ParseResult, ArboriumConfig, Grammar, Span, Injection } from "./types.js";
-import { availableLanguages } from "./plugins-manifest.js";
+import { availableLanguages, pluginVersion } from "./plugins-manifest.js";
 
 // Default config
 export const defaultConfig: Required<ArboriumConfig> = {
@@ -17,7 +17,7 @@ export const defaultConfig: Required<ArboriumConfig> = {
   theme: "one-dark",
   selector: "pre code",
   cdn: "jsdelivr",
-  version: "1", // Major version - allows patch/minor upgrades via CDN
+  version: pluginVersion, // Precise version from manifest
   pluginsUrl: "", // Empty means use bundled manifest
   hostUrl: "", // Empty means use CDN based on version
 };
@@ -84,8 +84,9 @@ function getGrammarBaseUrl(language: string): string {
     }
   }
 
-  // Production: derive from language name using @1 (major version)
+  // Production: derive from language name using precise version
   const cdn = config.cdn;
+  const version = config.version;
   let baseUrl: string;
   if (cdn === "jsdelivr") {
     baseUrl = "https://cdn.jsdelivr.net/npm";
@@ -94,7 +95,7 @@ function getGrammarBaseUrl(language: string): string {
   } else {
     baseUrl = cdn;
   }
-  return `${baseUrl}/@arborium/${language}@1`;
+  return `${baseUrl}/@arborium/${language}@${version}`;
 }
 
 /** wasm-bindgen plugin module interface */

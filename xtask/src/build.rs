@@ -686,13 +686,14 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
     );
 
     // Write TypeScript manifest to packages/arborium/src/plugins-manifest.ts (bundled)
-    // This is a simplified manifest - just a list of language names
+    // This is a simplified manifest - just a list of language names plus version
     let mut sorted_grammars = grammars.clone();
     sorted_grammars.sort();
     let ts_manifest_path = repo_root
         .join("packages/arborium/src")
         .join("plugins-manifest.ts");
     let ts_template = PluginsManifestTsTemplate {
+        version: &version,
         languages: &sorted_grammars,
     };
     let ts_content = ts_template
@@ -702,9 +703,10 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         .into_diagnostic()
         .context("failed to write TypeScript manifest")?;
     println!(
-        "{} Wrote TypeScript manifest {}",
+        "{} Wrote TypeScript manifest {} (version {})",
         "✓".green(),
-        ts_manifest_path.cyan()
+        ts_manifest_path.cyan(),
+        version.cyan()
     );
 
     // Print next steps hint
@@ -1108,14 +1110,18 @@ pub fn locate_grammar<'a>(
 #[derive(sailfish::TemplateSimple)]
 #[template(path = "plugins_manifest.stpl.ts")]
 struct PluginsManifestTsTemplate<'a> {
+    version: &'a str,
     languages: &'a [String],
 }
 
 /// Generate the plugins-manifest.ts file for the npm package.
 /// This uses ALL grammars with generate_component enabled, not just locally built ones.
-/// The manifest is simplified: just a list of language names.
-/// CDN URLs are derived at runtime: `https://cdn.jsdelivr.net/npm/@arborium/{lang}@1/grammar.js`
+/// The manifest is simplified: just a list of language names plus the version.
+/// CDN URLs are derived at runtime: `https://cdn.jsdelivr.net/npm/@arborium/{lang}@{version}/grammar.js`
 pub fn generate_plugins_manifest(repo_root: &Utf8Path, crates_dir: &Utf8Path) -> Result<()> {
+    // Read the canonical version from version.json
+    let version = version_store::read_version(repo_root)?;
+
     let registry = CrateRegistry::load(crates_dir)
         .map_err(|e| miette::miette!("failed to load crate registry: {}", e))?;
 
@@ -1134,9 +1140,10 @@ pub fn generate_plugins_manifest(repo_root: &Utf8Path, crates_dir: &Utf8Path) ->
     }
 
     println!(
-        "{} Generating manifest for {} language(s)",
+        "{} Generating manifest for {} language(s) at version {}",
         "●".cyan(),
-        languages.len()
+        languages.len(),
+        version.cyan()
     );
 
     // Write TypeScript manifest
@@ -1144,6 +1151,7 @@ pub fn generate_plugins_manifest(repo_root: &Utf8Path, crates_dir: &Utf8Path) ->
         .join("packages/arborium/src")
         .join("plugins-manifest.ts");
     let ts_template = PluginsManifestTsTemplate {
+        version: &version,
         languages: &languages,
     };
     let ts_content = ts_template
@@ -1154,10 +1162,11 @@ pub fn generate_plugins_manifest(repo_root: &Utf8Path, crates_dir: &Utf8Path) ->
         .context("failed to write TypeScript manifest")?;
 
     println!(
-        "{} Wrote {} with {} languages",
+        "{} Wrote {} with {} languages at version {}",
         "✓".green(),
         ts_manifest_path.cyan(),
-        languages.len()
+        languages.len(),
+        version.cyan()
     );
 
     Ok(())
