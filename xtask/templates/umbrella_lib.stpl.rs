@@ -67,7 +67,7 @@
 // Internal modules
 mod error;
 mod highlighter;
-pub(crate) mod provider;
+pub(crate) mod store;
 
 // Public modules
 pub mod advanced;
@@ -82,6 +82,7 @@ pub mod theme {
 // Primary API exports
 pub use error::Error;
 pub use highlighter::{AnsiHighlighter, Highlighter};
+pub use store::GrammarStore;
 
 // Configuration types (re-exported from arborium-highlight)
 pub use arborium_highlight::HtmlFormat;

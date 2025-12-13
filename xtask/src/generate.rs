@@ -165,13 +165,10 @@ struct UmbrellaLibRsTemplate<'a> {
 }
 
 #[derive(TemplateSimple)]
-#[template(path = "umbrella_provider.stpl.rs")]
-struct UmbrellaProviderTemplate<'a> {
+#[template(path = "umbrella_store.stpl.rs")]
+struct UmbrellaStoreTemplate<'a> {
     /// List of (alias, canonical_id) pairs for language normalization
     aliases: &'a [(String, String)],
-    /// List of canonical grammar IDs (reserved for future use)
-    #[allow(dead_code)]
-    grammar_ids: &'a [String],
     /// List of (feature_name, module_name, grammar_id) for try_lang! macro
     languages: &'a [(String, String, String)],
 }
@@ -2037,12 +2034,11 @@ dlmalloc = "0.2"
     }
 
     // =========================================================================
-    // Generate src/provider.rs from template
+    // Generate src/store.rs from template
     // =========================================================================
 
     // Collect aliases from all grammars in the registry
     let mut aliases: Vec<(String, String)> = Vec::new();
-    let mut grammar_ids: Vec<String> = Vec::new();
     let mut languages: Vec<(String, String, String)> = Vec::new();
 
     for (_state, _config, grammar) in prepared.registry.all_grammars() {
@@ -2052,8 +2048,6 @@ dlmalloc = "0.2"
         if grammar.is_internal() || grammar_id.ends_with("_inline") {
             continue;
         }
-
-        grammar_ids.push(grammar_id.clone());
 
         // Build feature name, module name, and grammar ID for try_lang! macro
         let feature = format!("lang-{}", grammar_id);
@@ -2070,33 +2064,31 @@ dlmalloc = "0.2"
 
     // Sort for deterministic output
     aliases.sort();
-    grammar_ids.sort();
     languages.sort();
 
-    let provider_rs_content = UmbrellaProviderTemplate {
+    let store_rs_content = UmbrellaStoreTemplate {
         aliases: &aliases,
-        grammar_ids: &grammar_ids,
         languages: &languages,
     }
     .render_once()
-    .expect("UmbrellaProviderTemplate render failed");
+    .expect("UmbrellaStoreTemplate render failed");
 
-    let provider_rs_path = src_dir.join("provider.rs");
-    if provider_rs_path.exists() {
-        let old_content = fs::read_to_string(&provider_rs_path)?;
-        if old_content != provider_rs_content {
+    let store_rs_path = src_dir.join("store.rs");
+    if store_rs_path.exists() {
+        let old_content = fs::read_to_string(&store_rs_path)?;
+        if old_content != store_rs_content {
             plan.add(Operation::UpdateFile {
-                path: provider_rs_path,
+                path: store_rs_path,
                 old_content: Some(old_content),
-                new_content: provider_rs_content,
-                description: "Update umbrella src/provider.rs".to_string(),
+                new_content: store_rs_content,
+                description: "Update umbrella src/store.rs".to_string(),
             });
         }
     } else {
         plan.add(Operation::CreateFile {
-            path: provider_rs_path,
-            content: provider_rs_content,
-            description: "Create umbrella src/provider.rs".to_string(),
+            path: store_rs_path,
+            content: store_rs_content,
+            description: "Create umbrella src/store.rs".to_string(),
         });
     }
 
