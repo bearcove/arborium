@@ -1,51 +1,6 @@
 {
-  "generated_at": "2025-12-13T07:15:54.444869+00:00",
+  "generated_at": "2025-12-13T08:19:52.414660+00:00",
   "entries": [
-    {
-      "language": "objc",
-      "package": "@arborium/objc",
-      "version": "1.3.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/objc@1.3.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/objc@1.3.0/grammar_bg.wasm",
-      "local_js": "/langs/group-birch/objc/npm/grammar.js",
-      "local_wasm": "/langs/group-birch/objc/npm/grammar_bg.wasm"
-    },
-    {
-      "language": "cpp",
-      "package": "@arborium/cpp",
-      "version": "1.3.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/cpp@1.3.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/cpp@1.3.0/grammar_bg.wasm",
-      "local_js": "/langs/group-birch/cpp/npm/grammar.js",
-      "local_wasm": "/langs/group-birch/cpp/npm/grammar_bg.wasm"
-    },
-    {
-      "language": "go",
-      "package": "@arborium/go",
-      "version": "1.3.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/go@1.3.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/go@1.3.0/grammar_bg.wasm",
-      "local_js": "/langs/group-birch/go/npm/grammar.js",
-      "local_wasm": "/langs/group-birch/go/npm/grammar_bg.wasm"
-    },
-    {
-      "language": "c",
-      "package": "@arborium/c",
-      "version": "1.3.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/c@1.3.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/c@1.3.0/grammar_bg.wasm",
-      "local_js": "/langs/group-birch/c/npm/grammar.js",
-      "local_wasm": "/langs/group-birch/c/npm/grammar_bg.wasm"
-    },
-    {
-      "language": "asm",
-      "package": "@arborium/asm",
-      "version": "1.3.0",
-      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/asm@1.3.0/grammar.js",
-      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/asm@1.3.0/grammar_bg.wasm",
-      "local_js": "/langs/group-birch/asm/npm/grammar.js",
-      "local_wasm": "/langs/group-birch/asm/npm/grammar_bg.wasm"
-    },
     {
       "language": "rust",
       "package": "@arborium/rust",
@@ -65,6 +20,33 @@
       "local_wasm": "/langs/group-birch/x86asm/npm/grammar_bg.wasm"
     },
     {
+      "language": "asm",
+      "package": "@arborium/asm",
+      "version": "1.3.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/asm@1.3.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/asm@1.3.0/grammar_bg.wasm",
+      "local_js": "/langs/group-birch/asm/npm/grammar.js",
+      "local_wasm": "/langs/group-birch/asm/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "go",
+      "package": "@arborium/go",
+      "version": "1.3.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/go@1.3.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/go@1.3.0/grammar_bg.wasm",
+      "local_js": "/langs/group-birch/go/npm/grammar.js",
+      "local_wasm": "/langs/group-birch/go/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "cpp",
+      "package": "@arborium/cpp",
+      "version": "1.3.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/cpp@1.3.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/cpp@1.3.0/grammar_bg.wasm",
+      "local_js": "/langs/group-birch/cpp/npm/grammar.js",
+      "local_wasm": "/langs/group-birch/cpp/npm/grammar_bg.wasm"
+    },
+    {
       "language": "zig",
       "package": "@arborium/zig",
       "version": "1.3.0",
@@ -72,6 +54,24 @@
       "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/zig@1.3.0/grammar_bg.wasm",
       "local_js": "/langs/group-birch/zig/npm/grammar.js",
       "local_wasm": "/langs/group-birch/zig/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "objc",
+      "package": "@arborium/objc",
+      "version": "1.3.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/objc@1.3.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/objc@1.3.0/grammar_bg.wasm",
+      "local_js": "/langs/group-birch/objc/npm/grammar.js",
+      "local_wasm": "/langs/group-birch/objc/npm/grammar_bg.wasm"
+    },
+    {
+      "language": "c",
+      "package": "@arborium/c",
+      "version": "1.3.0",
+      "cdn_js": "https://cdn.jsdelivr.net/npm/@arborium/c@1.3.0/grammar.js",
+      "cdn_wasm": "https://cdn.jsdelivr.net/npm/@arborium/c@1.3.0/grammar_bg.wasm",
+      "local_js": "/langs/group-birch/c/npm/grammar.js",
+      "local_wasm": "/langs/group-birch/c/npm/grammar_bg.wasm"
     },
     {
       "language": "d",
