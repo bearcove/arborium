@@ -71,8 +71,6 @@ a-fc { color: var(--arb-fc-light); font-weight: var(--arb-fc-light-weight, norma
 a-km { color: var(--arb-km-light); font-weight: var(--arb-km-light-weight, normal); font-style: var(--arb-km-light-style, normal); text-decoration: var(--arb-km-light-decoration, none); }
 a-dr { color: var(--arb-dr-light); font-weight: var(--arb-dr-light-weight, normal); font-style: var(--arb-dr-light-style, normal); text-decoration: var(--arb-dr-light-decoration, none); }
 a-rx { color: var(--arb-rx-light); font-weight: var(--arb-rx-light-weight, normal); font-style: var(--arb-rx-light-style, normal); text-decoration: var(--arb-rx-light-decoration, none); }
-a-n { color: var(--arb-n-light); font-weight: var(--arb-n-light-weight, normal); font-style: var(--arb-n-light-style, normal); text-decoration: var(--arb-n-light-decoration, none); }
-a-cb { color: var(--arb-cb-light); font-weight: var(--arb-cb-light-weight, normal); font-style: var(--arb-cb-light-style, normal); text-decoration: var(--arb-cb-light-decoration, none); }
 
 /* System preference: dark */
 @media (prefers-color-scheme: dark) {
@@ -145,8 +143,6 @@ a-cb { color: var(--arb-cb-light); font-weight: var(--arb-cb-light-weight, norma
   a-km { color: var(--arb-km-dark); font-weight: var(--arb-km-dark-weight, normal); font-style: var(--arb-km-dark-style, normal); text-decoration: var(--arb-km-dark-decoration, none); }
   a-dr { color: var(--arb-dr-dark); font-weight: var(--arb-dr-dark-weight, normal); font-style: var(--arb-dr-dark-style, normal); text-decoration: var(--arb-dr-dark-decoration, none); }
   a-rx { color: var(--arb-rx-dark); font-weight: var(--arb-rx-dark-weight, normal); font-style: var(--arb-rx-dark-style, normal); text-decoration: var(--arb-rx-dark-decoration, none); }
-  a-n { color: var(--arb-n-dark); font-weight: var(--arb-n-dark-weight, normal); font-style: var(--arb-n-dark-style, normal); text-decoration: var(--arb-n-dark-decoration, none); }
-  a-cb { color: var(--arb-cb-dark); font-weight: var(--arb-cb-dark-weight, normal); font-style: var(--arb-cb-dark-style, normal); text-decoration: var(--arb-cb-dark-decoration, none); }
 }
 
 /* Explicit light mode */
@@ -220,8 +216,6 @@ a-cb { color: var(--arb-cb-light); font-weight: var(--arb-cb-light-weight, norma
   a-km { color: var(--arb-km-light); font-weight: var(--arb-km-light-weight, normal); font-style: var(--arb-km-light-style, normal); text-decoration: var(--arb-km-light-decoration, none); }
   a-dr { color: var(--arb-dr-light); font-weight: var(--arb-dr-light-weight, normal); font-style: var(--arb-dr-light-style, normal); text-decoration: var(--arb-dr-light-decoration, none); }
   a-rx { color: var(--arb-rx-light); font-weight: var(--arb-rx-light-weight, normal); font-style: var(--arb-rx-light-style, normal); text-decoration: var(--arb-rx-light-decoration, none); }
-  a-n { color: var(--arb-n-light); font-weight: var(--arb-n-light-weight, normal); font-style: var(--arb-n-light-style, normal); text-decoration: var(--arb-n-light-decoration, none); }
-  a-cb { color: var(--arb-cb-light); font-weight: var(--arb-cb-light-weight, normal); font-style: var(--arb-cb-light-style, normal); text-decoration: var(--arb-cb-light-decoration, none); }
 }
 
 /* Explicit dark mode */
@@ -295,6 +289,4 @@ a-cb { color: var(--arb-cb-light); font-weight: var(--arb-cb-light-weight, norma
   a-km { color: var(--arb-km-dark); font-weight: var(--arb-km-dark-weight, normal); font-style: var(--arb-km-dark-style, normal); text-decoration: var(--arb-km-dark-decoration, none); }
   a-dr { color: var(--arb-dr-dark); font-weight: var(--arb-dr-dark-weight, normal); font-style: var(--arb-dr-dark-style, normal); text-decoration: var(--arb-dr-dark-decoration, none); }
   a-rx { color: var(--arb-rx-dark); font-weight: var(--arb-rx-dark-weight, normal); font-style: var(--arb-rx-dark-style, normal); text-decoration: var(--arb-rx-dark-decoration, none); }
-  a-n { color: var(--arb-n-dark); font-weight: var(--arb-n-dark-weight, normal); font-style: var(--arb-n-dark-style, normal); text-decoration: var(--arb-n-dark-decoration, none); }
-  a-cb { color: var(--arb-cb-dark); font-weight: var(--arb-cb-dark-weight, normal); font-style: var(--arb-cb-dark-style, normal); text-decoration: var(--arb-cb-dark-decoration, none); }
 }

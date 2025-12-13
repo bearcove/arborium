@@ -1295,58 +1295,74 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
 
     // Default: use light variables
     writeln!(base_css, "/* Default: light mode */").unwrap();
-    for def in HIGHLIGHTS.iter() {
-        if def.tag.is_empty() {
-            continue;
+    {
+        let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
+        for def in HIGHLIGHTS.iter() {
+            if def.tag.is_empty() || emitted_tags.contains(def.tag) {
+                continue;
+            }
+            emitted_tags.insert(def.tag);
+            writeln!(
+                base_css,
+                "a-{} {{ color: var(--arb-{}-light); font-weight: var(--arb-{}-light-weight, normal); font-style: var(--arb-{}-light-style, normal); text-decoration: var(--arb-{}-light-decoration, none); }}",
+                def.tag, def.tag, def.tag, def.tag, def.tag
+            ).unwrap();
         }
-        writeln!(
-            base_css,
-            "a-{} {{ color: var(--arb-{}-light); font-weight: var(--arb-{}-light-weight, normal); font-style: var(--arb-{}-light-style, normal); text-decoration: var(--arb-{}-light-decoration, none); }}",
-            def.tag, def.tag, def.tag, def.tag, def.tag
-        ).unwrap();
     }
 
     // Media query for dark preference
     writeln!(base_css, "\n/* System preference: dark */").unwrap();
     writeln!(base_css, "@media (prefers-color-scheme: dark) {{").unwrap();
-    for def in HIGHLIGHTS.iter() {
-        if def.tag.is_empty() {
-            continue;
+    {
+        let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
+        for def in HIGHLIGHTS.iter() {
+            if def.tag.is_empty() || emitted_tags.contains(def.tag) {
+                continue;
+            }
+            emitted_tags.insert(def.tag);
+            writeln!(
+                base_css,
+                "  a-{} {{ color: var(--arb-{}-dark); font-weight: var(--arb-{}-dark-weight, normal); font-style: var(--arb-{}-dark-style, normal); text-decoration: var(--arb-{}-dark-decoration, none); }}",
+                def.tag, def.tag, def.tag, def.tag, def.tag
+            ).unwrap();
         }
-        writeln!(
-            base_css,
-            "  a-{} {{ color: var(--arb-{}-dark); font-weight: var(--arb-{}-dark-weight, normal); font-style: var(--arb-{}-dark-style, normal); text-decoration: var(--arb-{}-dark-decoration, none); }}",
-            def.tag, def.tag, def.tag, def.tag, def.tag
-        ).unwrap();
     }
     writeln!(base_css, "}}").unwrap();
 
     // Explicit data-theme overrides
     writeln!(base_css, "\n/* Explicit light mode */").unwrap();
     writeln!(base_css, ":root[data-theme=\"light\"] {{").unwrap();
-    for def in HIGHLIGHTS.iter() {
-        if def.tag.is_empty() {
-            continue;
+    {
+        let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
+        for def in HIGHLIGHTS.iter() {
+            if def.tag.is_empty() || emitted_tags.contains(def.tag) {
+                continue;
+            }
+            emitted_tags.insert(def.tag);
+            writeln!(
+                base_css,
+                "  a-{} {{ color: var(--arb-{}-light); font-weight: var(--arb-{}-light-weight, normal); font-style: var(--arb-{}-light-style, normal); text-decoration: var(--arb-{}-light-decoration, none); }}",
+                def.tag, def.tag, def.tag, def.tag, def.tag
+            ).unwrap();
         }
-        writeln!(
-            base_css,
-            "  a-{} {{ color: var(--arb-{}-light); font-weight: var(--arb-{}-light-weight, normal); font-style: var(--arb-{}-light-style, normal); text-decoration: var(--arb-{}-light-decoration, none); }}",
-            def.tag, def.tag, def.tag, def.tag, def.tag
-        ).unwrap();
     }
     writeln!(base_css, "}}").unwrap();
 
     writeln!(base_css, "\n/* Explicit dark mode */").unwrap();
     writeln!(base_css, ":root[data-theme=\"dark\"] {{").unwrap();
-    for def in HIGHLIGHTS.iter() {
-        if def.tag.is_empty() {
-            continue;
+    {
+        let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
+        for def in HIGHLIGHTS.iter() {
+            if def.tag.is_empty() || emitted_tags.contains(def.tag) {
+                continue;
+            }
+            emitted_tags.insert(def.tag);
+            writeln!(
+                base_css,
+                "  a-{} {{ color: var(--arb-{}-dark); font-weight: var(--arb-{}-dark-weight, normal); font-style: var(--arb-{}-dark-style, normal); text-decoration: var(--arb-{}-dark-decoration, none); }}",
+                def.tag, def.tag, def.tag, def.tag, def.tag
+            ).unwrap();
         }
-        writeln!(
-            base_css,
-            "  a-{} {{ color: var(--arb-{}-dark); font-weight: var(--arb-{}-dark-weight, normal); font-style: var(--arb-{}-dark-style, normal); text-decoration: var(--arb-{}-dark-decoration, none); }}",
-            def.tag, def.tag, def.tag, def.tag, def.tag
-        ).unwrap();
     }
     writeln!(base_css, "}}").unwrap();
 
@@ -1367,10 +1383,12 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
     )
     .unwrap();
 
+    let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
     for def in HIGHLIGHTS.iter() {
-        if def.tag.is_empty() {
+        if def.tag.is_empty() || emitted_tags.contains(def.tag) {
             continue;
         }
+        emitted_tags.insert(def.tag);
         writeln!(
             rustdoc_css,
             "a-{} {{ color: var(--arb-{}-dark, var(--arb-{}-light)); font-weight: var(--arb-{}-dark-weight, var(--arb-{}-light-weight, normal)); font-style: var(--arb-{}-dark-style, var(--arb-{}-light-style, normal)); text-decoration: var(--arb-{}-dark-decoration, var(--arb-{}-light-decoration, none)); }}",
