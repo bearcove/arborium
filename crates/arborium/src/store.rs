@@ -195,13 +195,13 @@ impl GrammarStore {
 
             "pl" => "perl",
 
-            "pl" => "prolog",
-
             "pm" => "perl",
 
             "postgres" => "sql",
 
             "postgresql" => "sql",
+
+            "pro" => "prolog",
 
             "ps" => "postscript",
 
@@ -219,6 +219,8 @@ impl GrammarStore {
 
             "res" => "rescript",
 
+            "rkt" => "scheme",
+
             "rlang" => "r",
 
             "rq" => "sparql",
@@ -229,13 +231,13 @@ impl GrammarStore {
 
             "scm" => "query",
 
-            "scm" => "scheme",
-
             "sh" => "bash",
 
             "shell" => "bash",
 
             "sqlite" => "sql",
+
+            "ss" => "scheme",
 
             "sv" => "verilog",
 
@@ -252,8 +254,6 @@ impl GrammarStore {
             "tla" => "tlaplus",
 
             "ts" => "typescript",
-
-            "tsx" => "typescript",
 
             "typ" => "typst",
 

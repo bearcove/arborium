@@ -139,6 +139,37 @@ use arborium_theme::highlights;
 /// The indices correspond to HTML element tags (e.g., index 7 = `<a-k>` for keyword).
 pub const HIGHLIGHT_NAMES: [&str; highlights::COUNT] = highlights::names();
 
+/// Detect the language from a file path or name.
+///
+/// Extracts the file extension and maps it to a canonical language identifier.
+/// Returns `None` if the extension is not recognized.
+///
+/// # Example
+///
+/// ```rust
+/// use arborium::detect_language;
+///
+/// assert_eq!(detect_language("main.rs"), Some("rust"));
+/// assert_eq!(detect_language("/path/to/script.py"), Some("python"));
+/// assert_eq!(detect_language("styles.css"), Some("css"));
+/// assert_eq!(detect_language("unknown.xyz"), None);
+/// ```
+pub fn detect_language(path: &str) -> Option<&'static str> {
+    // Extract extension from path
+    let ext = path
+        .rsplit('.')
+        .next()
+        .filter(|e| !e.contains('/') && !e.contains('\\'))?;
+
+    // Map extension to canonical language ID
+    Some(match ext.to_lowercase().as_str() {
+<% for (ext, lang) in extensions { %>
+        "<%= ext %>" => "<%= lang %>",
+<% } %>
+        _ => return None,
+    })
+}
+
 // =============================================================================
 // Language grammar re-exports based on enabled features.
 // Each module provides:

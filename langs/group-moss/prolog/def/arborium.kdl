@@ -8,7 +8,7 @@ grammar {
     tag "code"
     tier 4
     icon "mdi:head-question"
-    aliases "pl"
+    aliases "pro"
 
     inventor "Alain Colmerauer and Philippe Roussel"
     year 1972

@@ -9,7 +9,7 @@ grammar {
     tier 1
     has-scanner #true
     icon "devicon-plain:typescript"
-    aliases "ts" "tsx" "mts" "cts"
+    aliases "ts" "mts" "cts"
 
     dependency "tree-sitter-javascript" crate="arborium-javascript"
 

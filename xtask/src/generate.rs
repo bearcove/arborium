@@ -162,6 +162,8 @@ struct DocsrsDemoReadmeTemplate<'a> {
 struct UmbrellaLibRsTemplate<'a> {
     /// List of (crate_name, grammar_id) for all grammars
     grammars: &'a [(String, String)],
+    /// List of (extension, canonical_id) pairs for detect_language function
+    extensions: &'a [(String, String)],
 }
 
 #[derive(TemplateSimple)]
@@ -1991,7 +1993,7 @@ dlmalloc = "0.2"
     }
 
     // =========================================================================
-    // Generate src/lib.rs from template
+    // Collect grammar data for templates
     // =========================================================================
     let src_dir = umbrella_path.join("src");
     if !src_dir.exists() {
@@ -2008,8 +2010,48 @@ dlmalloc = "0.2"
         .map(|(name, grammar_id, _)| (name.clone(), grammar_id.clone()))
         .collect();
 
+    // Collect aliases and extensions from all grammars in the registry
+    let mut aliases: Vec<(String, String)> = Vec::new();
+    let mut extensions: Vec<(String, String)> = Vec::new();
+    let mut languages: Vec<(String, String, String)> = Vec::new();
+
+    for (_state, _config, grammar) in prepared.registry.all_grammars() {
+        let grammar_id = grammar.id().to_string();
+
+        // Skip internal grammars
+        if grammar.is_internal() || grammar_id.ends_with("_inline") {
+            continue;
+        }
+
+        // Build feature name, module name, and grammar ID for try_lang! macro
+        let feature = format!("lang-{}", grammar_id);
+        let module = format!("lang_{}", grammar_id.replace('-', "_"));
+        languages.push((feature, module, grammar_id.clone()));
+
+        // Add canonical ID as an extension (e.g., "rust" -> "rust")
+        extensions.push((grammar_id.clone(), grammar_id.clone()));
+
+        // Collect aliases (used for both store.rs normalization and lib.rs extensions)
+        if let Some(ref alias_config) = grammar.aliases {
+            for alias in &alias_config.values {
+                aliases.push((alias.clone(), grammar_id.clone()));
+                // Aliases also serve as file extensions
+                extensions.push((alias.clone(), grammar_id.clone()));
+            }
+        }
+    }
+
+    // Sort for deterministic output
+    aliases.sort();
+    extensions.sort();
+    languages.sort();
+
+    // =========================================================================
+    // Generate src/lib.rs from template
+    // =========================================================================
     let lib_rs_content = UmbrellaLibRsTemplate {
         grammars: &grammars_for_lib,
+        extensions: &extensions,
     }
     .render_once()
     .expect("UmbrellaLibRsTemplate render failed");
@@ -2036,35 +2078,6 @@ dlmalloc = "0.2"
     // =========================================================================
     // Generate src/store.rs from template
     // =========================================================================
-
-    // Collect aliases from all grammars in the registry
-    let mut aliases: Vec<(String, String)> = Vec::new();
-    let mut languages: Vec<(String, String, String)> = Vec::new();
-
-    for (_state, _config, grammar) in prepared.registry.all_grammars() {
-        let grammar_id = grammar.id().to_string();
-
-        // Skip internal grammars
-        if grammar.is_internal() || grammar_id.ends_with("_inline") {
-            continue;
-        }
-
-        // Build feature name, module name, and grammar ID for try_lang! macro
-        let feature = format!("lang-{}", grammar_id);
-        let module = format!("lang_{}", grammar_id.replace('-', "_"));
-        languages.push((feature, module, grammar_id.clone()));
-
-        // Collect aliases
-        if let Some(ref alias_config) = grammar.aliases {
-            for alias in &alias_config.values {
-                aliases.push((alias.clone(), grammar_id.clone()));
-            }
-        }
-    }
-
-    // Sort for deterministic output
-    aliases.sort();
-    languages.sort();
 
     let store_rs_content = UmbrellaStoreTemplate {
         aliases: &aliases,

@@ -8,7 +8,7 @@ grammar {
     tag "code"
     tier 2
     icon "mdi:lambda"
-    aliases "scm"
+    aliases "ss" "rkt"
 
     inventor "Guy L. Steele Jr., Gerald Jay Sussman"
     year 1975

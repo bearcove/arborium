@@ -83,120 +83,15 @@ impl MietteHighlighter {
         // Check if arborium has this language available
         // We do this by trying to highlight an empty string
         let mut inner = self.inner.write().unwrap();
-        inner.highlight_to_html(language, "").is_ok()
+        inner.highlight(language, "").is_ok()
     }
 
     /// Detect language from a source name (file path or extension).
+    ///
+    /// This delegates to [`arborium::detect_language`] which is generated from
+    /// the grammar registry, ensuring extensions stay in sync with supported languages.
     pub fn detect_language(source_name: &str) -> Option<&'static str> {
-        // Extract extension from path
-        let ext = source_name
-            .rsplit('.')
-            .next()
-            .filter(|e| !e.contains('/'))?;
-
-        // Map extension to language name
-        Some(match ext.to_lowercase().as_str() {
-            // Rust
-            "rs" => "rust",
-            // JavaScript family
-            "js" | "mjs" | "cjs" => "javascript",
-            "jsx" => "javascript",
-            "ts" | "mts" | "cts" => "typescript",
-            "tsx" => "tsx",
-            // Web
-            "html" | "htm" => "html",
-            "css" => "css",
-            "scss" | "sass" => "scss",
-            "vue" => "vue",
-            "svelte" => "svelte",
-            // Systems languages
-            "c" | "h" => "c",
-            "cpp" | "cxx" | "cc" | "hpp" | "hxx" | "hh" => "cpp",
-            "go" => "go",
-            "zig" => "zig",
-            // Scripting
-            "py" | "pyw" | "pyi" => "python",
-            "rb" => "ruby",
-            "php" => "php",
-            "lua" => "lua",
-            "pl" | "pm" => "perl",
-            // Shell
-            "sh" | "bash" => "bash",
-            "zsh" => "zsh",
-            "fish" => "fish",
-            "ps1" | "psm1" => "powershell",
-            "bat" | "cmd" => "batch",
-            // JVM
-            "java" => "java",
-            "kt" | "kts" => "kotlin",
-            "scala" | "sc" => "scala",
-            // Functional
-            "hs" | "lhs" => "haskell",
-            "ml" | "mli" => "ocaml",
-            "ex" | "exs" => "elixir",
-            "erl" | "hrl" => "erlang",
-            "elm" => "elm",
-            "fs" | "fsi" | "fsx" => "fsharp",
-            "gleam" => "gleam",
-            // Lisps
-            "clj" | "cljs" | "cljc" => "clojure",
-            "el" => "elisp",
-            "scm" | "ss" => "scheme",
-            "lisp" | "cl" => "commonlisp",
-            // Data formats
-            "json" | "jsonc" => "json",
-            "yaml" | "yml" => "yaml",
-            "toml" => "toml",
-            "xml" | "xsl" | "xslt" | "svg" => "xml",
-            "kdl" => "kdl",
-            "ini" | "cfg" | "conf" => "ini",
-            "ron" => "ron",
-            // Query languages
-            "sql" => "sql",
-            "graphql" | "gql" => "graphql",
-            "sparql" | "rq" => "sparql",
-            // Documentation
-            "md" | "markdown" => "markdown",
-            // DevOps / Config
-            "dockerfile" => "dockerfile",
-            "tf" | "hcl" => "hcl",
-            "nix" => "nix",
-            "cmake" => "cmake",
-            "meson" | "meson.build" => "meson",
-            // Mobile
-            "swift" => "swift",
-            "dart" => "dart",
-            "m" => "objc",
-            "mm" => "objc",
-            // .NET
-            "cs" => "c-sharp",
-            "vb" => "vb",
-            // Other languages
-            "r" | "R" => "r",
-            "jl" => "julia",
-            "ada" | "adb" | "ads" => "ada",
-            "nim" => "nim",
-            "v" | "sv" | "svh" => "verilog",
-            "vhd" | "vhdl" => "vhdl",
-            "asm" | "s" | "S" => "asm",
-            "d" => "d",
-            "lean" => "lean",
-            "agda" => "agda",
-            "idris" | "idr" => "idris",
-            "prolog" | "pro" | "P" => "prolog",
-            "vim" => "vim",
-            "diff" | "patch" => "diff",
-            "dot" | "gv" => "dot",
-            "thrift" => "thrift",
-            "capnp" => "capnp",
-            "proto" | "textproto" | "pbtxt" => "textproto",
-            "glsl" | "vert" | "frag" | "geom" | "comp" | "tesc" | "tese" => "glsl",
-            "hlsl" => "hlsl",
-            "jq" => "jq",
-            "awk" => "awk",
-            "typst" | "typ" => "typst",
-            _ => return None,
-        })
+        arborium::detect_language(source_name)
     }
 }
 
@@ -241,7 +136,7 @@ impl miette::highlighters::HighlighterState for MietteHighlighterState<'_> {
 
         // Use arborium to highlight the line
         let mut inner = self.highlighter.inner.write().unwrap();
-        let html = match inner.highlight_to_html(language, line) {
+        let html = match inner.highlight(language, line) {
             Ok(html) => html,
             Err(_) => return vec![Style::new().style(line)],
         };

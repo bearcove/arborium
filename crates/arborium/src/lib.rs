@@ -139,6 +139,422 @@ use arborium_theme::highlights;
 /// The indices correspond to HTML element tags (e.g., index 7 = `<a-k>` for keyword).
 pub const HIGHLIGHT_NAMES: [&str; highlights::COUNT] = highlights::names();
 
+/// Detect the language from a file path or name.
+///
+/// Extracts the file extension and maps it to a canonical language identifier.
+/// Returns `None` if the extension is not recognized.
+///
+/// # Example
+///
+/// ```rust
+/// use arborium::detect_language;
+///
+/// assert_eq!(detect_language("main.rs"), Some("rust"));
+/// assert_eq!(detect_language("/path/to/script.py"), Some("python"));
+/// assert_eq!(detect_language("styles.css"), Some("css"));
+/// assert_eq!(detect_language("unknown.xyz"), None);
+/// ```
+pub fn detect_language(path: &str) -> Option<&'static str> {
+    // Extract extension from path
+    let ext = path
+        .rsplit('.')
+        .next()
+        .filter(|e| !e.contains('/') && !e.contains('\\'))?;
+
+    // Map extension to canonical language ID
+    Some(match ext.to_lowercase().as_str() {
+        "ada" => "ada",
+
+        "adoc" => "asciidoc",
+
+        "agda" => "agda",
+
+        "asciidoc" => "asciidoc",
+
+        "asm" => "asm",
+
+        "assembly" => "asm",
+
+        "awk" => "awk",
+
+        "bash" => "bash",
+
+        "bat" => "batch",
+
+        "batch" => "batch",
+
+        "bazel" => "starlark",
+
+        "bzl" => "starlark",
+
+        "c" => "c",
+
+        "c++" => "cpp",
+
+        "c-sharp" => "c-sharp",
+
+        "caddy" => "caddy",
+
+        "capnp" => "capnp",
+
+        "cfg" => "ini",
+
+        "cjs" => "javascript",
+
+        "cl" => "commonlisp",
+
+        "clj" => "clojure",
+
+        "clojure" => "clojure",
+
+        "cmake" => "cmake",
+
+        "cmd" => "batch",
+
+        "commonlisp" => "commonlisp",
+
+        "conf" => "ini",
+
+        "cpp" => "cpp",
+
+        "cs" => "c-sharp",
+
+        "csharp" => "c-sharp",
+
+        "css" => "css",
+
+        "cts" => "typescript",
+
+        "cxx" => "cpp",
+
+        "d" => "d",
+
+        "dart" => "dart",
+
+        "devicetree" => "devicetree",
+
+        "diff" => "diff",
+
+        "dlang" => "d",
+
+        "docker" => "dockerfile",
+
+        "dockerfile" => "dockerfile",
+
+        "dot" => "dot",
+
+        "el" => "elisp",
+
+        "elisp" => "elisp",
+
+        "elixir" => "elixir",
+
+        "elm" => "elm",
+
+        "emacs-lisp" => "elisp",
+
+        "erl" => "erlang",
+
+        "erlang" => "erlang",
+
+        "ex" => "elixir",
+
+        "exs" => "elixir",
+
+        "f#" => "fsharp",
+
+        "fish" => "fish",
+
+        "frag" => "glsl",
+
+        "fs" => "fsharp",
+
+        "fsharp" => "fsharp",
+
+        "gleam" => "gleam",
+
+        "glsl" => "glsl",
+
+        "go" => "go",
+
+        "golang" => "go",
+
+        "gql" => "graphql",
+
+        "graphql" => "graphql",
+
+        "h" => "c",
+
+        "haskell" => "haskell",
+
+        "hcl" => "hcl",
+
+        "hlsl" => "hlsl",
+
+        "hpp" => "cpp",
+
+        "hs" => "haskell",
+
+        "htm" => "html",
+
+        "html" => "html",
+
+        "idr" => "idris",
+
+        "idris" => "idris",
+
+        "ini" => "ini",
+
+        "j2" => "jinja2",
+
+        "java" => "java",
+
+        "javascript" => "javascript",
+
+        "jinja" => "jinja2",
+
+        "jinja2" => "jinja2",
+
+        "jl" => "julia",
+
+        "jq" => "jq",
+
+        "js" => "javascript",
+
+        "json" => "json",
+
+        "jsonc" => "json",
+
+        "jsx" => "javascript",
+
+        "julia" => "julia",
+
+        "kdl" => "kdl",
+
+        "kotlin" => "kotlin",
+
+        "kt" => "kotlin",
+
+        "kts" => "kotlin",
+
+        "lean" => "lean",
+
+        "lisp" => "commonlisp",
+
+        "lua" => "lua",
+
+        "m" => "matlab",
+
+        "markdown" => "markdown",
+
+        "matlab" => "matlab",
+
+        "md" => "markdown",
+
+        "mdx" => "markdown",
+
+        "meson" => "meson",
+
+        "mjs" => "javascript",
+
+        "ml" => "ocaml",
+
+        "mm" => "objc",
+
+        "mts" => "typescript",
+
+        "mysql" => "sql",
+
+        "nasm" => "x86asm",
+
+        "nginx" => "nginx",
+
+        "ninja" => "ninja",
+
+        "nix" => "nix",
+
+        "objc" => "objc",
+
+        "objective-c" => "objc",
+
+        "ocaml" => "ocaml",
+
+        "patch" => "diff",
+
+        "pbtxt" => "textproto",
+
+        "perl" => "perl",
+
+        "php" => "php",
+
+        "pl" => "perl",
+
+        "pm" => "perl",
+
+        "postgres" => "sql",
+
+        "postgresql" => "sql",
+
+        "postscript" => "postscript",
+
+        "powershell" => "powershell",
+
+        "pro" => "prolog",
+
+        "prolog" => "prolog",
+
+        "ps" => "postscript",
+
+        "ps1" => "powershell",
+
+        "pwsh" => "powershell",
+
+        "py" => "python",
+
+        "py3" => "python",
+
+        "python" => "python",
+
+        "python3" => "python",
+
+        "query" => "query",
+
+        "r" => "r",
+
+        "rb" => "ruby",
+
+        "res" => "rescript",
+
+        "rescript" => "rescript",
+
+        "rkt" => "scheme",
+
+        "rlang" => "r",
+
+        "ron" => "ron",
+
+        "rq" => "sparql",
+
+        "rs" => "rust",
+
+        "ruby" => "ruby",
+
+        "rust" => "rust",
+
+        "sass" => "scss",
+
+        "scala" => "scala",
+
+        "scheme" => "scheme",
+
+        "scm" => "query",
+
+        "scss" => "scss",
+
+        "sh" => "bash",
+
+        "shell" => "bash",
+
+        "sparql" => "sparql",
+
+        "sql" => "sql",
+
+        "sqlite" => "sql",
+
+        "ss" => "scheme",
+
+        "ssh-config" => "ssh-config",
+
+        "starlark" => "starlark",
+
+        "sv" => "verilog",
+
+        "svelte" => "svelte",
+
+        "svg" => "xml",
+
+        "swift" => "swift",
+
+        "systemverilog" => "verilog",
+
+        "terraform" => "hcl",
+
+        "textpb" => "textproto",
+
+        "textproto" => "textproto",
+
+        "tf" => "hcl",
+
+        "thrift" => "thrift",
+
+        "tla" => "tlaplus",
+
+        "tlaplus" => "tlaplus",
+
+        "toml" => "toml",
+
+        "ts" => "typescript",
+
+        "tsx" => "tsx",
+
+        "typ" => "typst",
+
+        "typescript" => "typescript",
+
+        "typst" => "typst",
+
+        "ua" => "uiua",
+
+        "uiua" => "uiua",
+
+        "v" => "verilog",
+
+        "vb" => "vb",
+
+        "vbnet" => "vb",
+
+        "verilog" => "verilog",
+
+        "vert" => "glsl",
+
+        "vhd" => "vhdl",
+
+        "vhdl" => "vhdl",
+
+        "vim" => "vim",
+
+        "viml" => "vim",
+
+        "vimscript" => "vim",
+
+        "visualbasic" => "vb",
+
+        "vue" => "vue",
+
+        "x86" => "x86asm",
+
+        "x86asm" => "x86asm",
+
+        "xml" => "xml",
+
+        "xsl" => "xml",
+
+        "xslt" => "xml",
+
+        "yaml" => "yaml",
+
+        "yml" => "yaml",
+
+        "yuri" => "yuri",
+
+        "zig" => "zig",
+
+        "zsh" => "zsh",
+
+        _ => return None,
+    })
+}
+
 // =============================================================================
 // Language grammar re-exports based on enabled features.
 // Each module provides:
