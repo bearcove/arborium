@@ -56,15 +56,11 @@ jobs:
         run: "set -e\n./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet"
         shell: bash
       - 
-        name: Create grammar sources tarball
-        run: "set -e\ntar -cvf grammar-sources.tar crates/ langs/ version.json xtask/target/release/xtask"
-        shell: bash
-      - 
-        name: Upload grammar sources
+        name: Upload generate output
         uses: actions/upload-artifact@v4
         with: 
-          name: grammar-sources
-          path: grammar-sources.tar
+          name: generate-output
+          path: "crates/\nlangs/\nxtask/target/release/xtask"
           retention-days: "1"
 
 
@@ -80,15 +76,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Rust cache
@@ -128,15 +124,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Install Rust
@@ -182,15 +178,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Run Clippy
@@ -213,15 +209,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build docs
@@ -243,15 +239,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build css, html, javascript, json, scss, tsx, typescript, xml
@@ -278,15 +274,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build asm, c, cpp, d, go, objc, rust, x86asm, zig
@@ -313,15 +309,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build clojure, java, kotlin, scala
@@ -348,15 +344,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme
@@ -383,15 +379,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh
@@ -418,15 +414,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, kdl, meson, nginx, ninja, nix, query, ron, sql, ssh-config, toml, yaml
@@ -453,15 +449,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl
@@ -488,15 +484,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build capnp, dart, devicetree, rescript, starlark, swift, textproto, thrift, uiua, yuri
@@ -523,15 +519,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build c-sharp, elisp, fsharp, postscript, vb, vim
@@ -558,15 +554,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Build asciidoc, diff, jinja2, markdown, svelte, typst, vue
@@ -601,15 +597,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Authenticate with crates.io
@@ -650,15 +646,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Download grammar sources
+        name: Download generate output
         uses: actions/download-artifact@v4
         with: 
-          name: grammar-sources
+          name: generate-output
           path: .
 
       - 
-        name: Extract grammar sources
-        run: "set -e\ntar -xvf grammar-sources.tar"
+        name: Make xtask executable
+        run: "set -e\nchmod +x xtask/target/release/xtask"
         shell: bash
       - 
         name: Download plugins group acorn

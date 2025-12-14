@@ -342,15 +342,18 @@ pub mod common {
             .with_inputs([("tool", "cargo-nextest")])
     }
 
-    /// Download grammar sources from artifact.
-    pub fn download_grammar_sources() -> Step {
-        Step::uses("Download grammar sources", "actions/download-artifact@v4")
-            .with_inputs([("name", "grammar-sources"), ("path", ".")])
+    /// Download generate output from artifact.
+    pub fn download_generate_output() -> Step {
+        Step::uses("Download generate output", "actions/download-artifact@v4")
+            .with_inputs([("name", "generate-output"), ("path", ".")])
     }
 
-    /// Extract grammar sources tarball.
-    pub fn extract_grammar_sources() -> Step {
-        Step::run("Extract grammar sources", "tar -xvf grammar-sources.tar")
+    /// Make xtask executable after download (permissions not preserved in artifacts).
+    pub fn make_xtask_executable() -> Step {
+        Step::run(
+            "Make xtask executable",
+            "chmod +x xtask/target/release/xtask",
+        )
     }
 }
 
@@ -447,19 +450,13 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                     "Generate grammar sources",
                     "./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet",
                 ),
-                // Create tarball for CI jobs (fast tar)
+                // Upload generated files for downstream jobs
                 // Note: no root Cargo.toml/lock - each crate is standalone
-                // Include version.json so all downstream jobs see the same
-                // release version that was used for generation.
-                // Include xtask binary so downstream jobs don't need to rebuild it.
-                Step::run(
-                    "Create grammar sources tarball",
-                    "tar -cvf grammar-sources.tar crates/ langs/ version.json xtask/target/release/xtask",
-                ),
-                Step::uses("Upload grammar sources", "actions/upload-artifact@v4")
+                // Includes xtask binary so downstream jobs don't need to rebuild it.
+                Step::uses("Upload generate output", "actions/upload-artifact@v4")
                     .with_inputs([
-                        ("name", "grammar-sources"),
-                        ("path", "grammar-sources.tar"),
+                        ("name", "generate-output"),
+                        ("path", "crates/\nlangs/\nxtask/target/release/xtask"),
                         ("retention-days", "1"),
                     ]),
             ]),
@@ -479,8 +476,8 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             .needs(["generate"])
             .steps([
                 checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
+                download_generate_output(),
+                make_xtask_executable(),
                 rust_cache(),
                 Step::run("Build", "cargo build --manifest-path crates/arborium/Cargo.toml --verbose"),
                 Step::run("Run tests", "cargo nextest run --manifest-path crates/arborium/Cargo.toml --verbose --no-tests=pass"),
@@ -502,8 +499,8 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             .needs(["generate"])
             .steps([
                 checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
+                download_generate_output(),
+                make_xtask_executable(),
                 install_rust(),
                 rust_cache(),
                 install_nextest(),
@@ -524,8 +521,8 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             .needs(["generate"])
             .steps([
                 checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
+                download_generate_output(),
+                make_xtask_executable(),
                 Step::run("Run Clippy", "cargo clippy --manifest-path crates/arborium/Cargo.toml --all-targets -- -D warnings"),
                 Step::run("Run Clippy on arborium-rustdoc", "cargo clippy --manifest-path crates/arborium-rustdoc/Cargo.toml --all-targets -- -D warnings"),
             ]),
@@ -541,8 +538,8 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             .needs(["generate"])
             .steps([
                 checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
+                download_generate_output(),
+                make_xtask_executable(),
                 Step::run(
                     "Build docs",
                     "cargo doc --manifest-path crates/arborium/Cargo.toml --no-deps",
@@ -575,8 +572,8 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                     .needs(["generate"])
                     .steps([
                         checkout(),
-                        download_grammar_sources(),
-                        extract_grammar_sources(),
+                        download_generate_output(),
+                        make_xtask_executable(),
                         Step::run(
                             format!("Build {}", display_grammars),
                             format!(
@@ -608,8 +605,8 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             .permissions([("id-token", "write"), ("contents", "read")])
             .steps([
                 checkout(),
-                download_grammar_sources(),
-                extract_grammar_sources(),
+                download_generate_output(),
+                make_xtask_executable(),
                 // Exchange OIDC token for crates.io access token
                 Step::uses(
                     "Authenticate with crates.io",
@@ -636,8 +633,8 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
 
         let mut npm_steps = vec![
             checkout(),
-            download_grammar_sources(),
-            extract_grammar_sources(),
+            download_generate_output(),
+            make_xtask_executable(),
         ];
 
         // Download all plugin artifacts
