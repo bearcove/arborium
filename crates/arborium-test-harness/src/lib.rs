@@ -34,7 +34,7 @@ use std::path::{Path, PathBuf};
 
 use arborium_highlight::{CompiledGrammar, GrammarConfig, ParseContext};
 use arborium_tree_sitter::Language;
-use arborium_tree_sitter::{Node, Parser};
+use arborium_tree_sitter::{Node, Parser, Tree};
 use tree_sitter_language::LanguageFn;
 
 // Re-export CAPTURE_NAMES from arborium-theme as HIGHLIGHT_NAMES for convenience
@@ -332,41 +332,17 @@ pub fn run_corpus_file(language: LanguageFn, name: &str, path: &Path) -> Harness
 
 /// Execute a single corpus test case.
 pub fn run_corpus_case(language: LanguageFn, name: &str, case: &CorpusCase) -> HarnessResult<()> {
-    if case.input.trim().is_empty() {
-        return Err(HarnessError::new(format!(
-            "Corpus test {} / {} (file {}) is missing an `--- input` section",
-            name,
-            case.name,
-            case.file.display()
-        )));
-    }
+    run_corpus_case_with_tree(language, name, case).map(|_| ())
+}
 
-    let language = Language::from(language);
-    let mut parser = Parser::new();
-    parser
-        .set_language(&language)
-        .map_err(|e| HarnessError::new(format!("Failed to set language for {}: {:?}", name, e)))?;
-
-    let tree = parser.parse(&case.input, None).ok_or_else(|| {
-        HarnessError::new(format!(
-            "Parser returned no tree for {} / {} (file {})",
-            name,
-            case.name,
-            case.file.display()
-        ))
-    })?;
-
+/// Run a corpus test case and return the parsed tree's s-expression.
+pub fn run_corpus_case_with_tree(
+    language: LanguageFn,
+    name: &str,
+    case: &CorpusCase,
+) -> HarnessResult<String> {
+    let tree = parse_case(language, name, case)?;
     let root = tree.root_node();
-    if root.has_error() {
-        return Err(HarnessError::new(format!(
-            "Parse errors for {} / {} (file {})\n--- input ---\n{}\n--- sexp ---\n{}",
-            name,
-            case.name,
-            case.file.display(),
-            case.input,
-            root.to_sexp()
-        )));
-    }
 
     if let Some(expected) = &case.expected_sexp {
         let actual = root.to_sexp();
@@ -403,7 +379,47 @@ pub fn run_corpus_case(language: LanguageFn, name: &str, case: &CorpusCase) -> H
         }
     }
 
-    Ok(())
+    Ok(root.to_sexp())
+}
+
+fn parse_case(language: LanguageFn, name: &str, case: &CorpusCase) -> HarnessResult<Tree> {
+    if case.input.trim().is_empty() {
+        return Err(HarnessError::new(format!(
+            "Corpus test {} / {} (file {}) is missing an `--- input` section",
+            name,
+            case.name,
+            case.file.display()
+        )));
+    }
+
+    let language = Language::from(language);
+    let mut parser = Parser::new();
+    parser
+        .set_language(&language)
+        .map_err(|e| HarnessError::new(format!("Failed to set language for {}: {:?}", name, e)))?;
+
+    let tree = parser.parse(&case.input, None).ok_or_else(|| {
+        HarnessError::new(format!(
+            "Parser returned no tree for {} / {} (file {})",
+            name,
+            case.name,
+            case.file.display()
+        ))
+    })?;
+
+    let root = tree.root_node();
+    if root.has_error() {
+        return Err(HarnessError::new(format!(
+            "Parse errors for {} / {} (file {})\n--- input ---\n{}\n--- sexp ---\n{}",
+            name,
+            case.name,
+            case.file.display(),
+            case.input,
+            root.to_sexp()
+        )));
+    }
+
+    Ok(tree)
 }
 
 fn collect_kinds(node: Node, out: &mut HashSet<&str>) {

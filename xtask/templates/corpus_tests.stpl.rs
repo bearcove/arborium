@@ -22,13 +22,14 @@ fn main() {
             let name = format!("{}::{}", relative.display(), case.name);
             let display = name.clone();
             Trial::test(name, move || {
-                println!("--- corpus case: {} ---", display);
-                arborium_test_harness::run_corpus_case(
+                let sexp = arborium_test_harness::run_corpus_case_with_tree(
                     grammar::language(),
                     "<%= grammar_id %>",
                     &case,
                 )
-                .map_err(|err| Failed::from(err.to_string()))
+                .map_err(|err| Failed::from(err.to_string()))?;
+                println!("=== corpus::{display} ===\n{sexp}\n");
+                Ok(())
             })
             .with_kind("corpus")
         })
