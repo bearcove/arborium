@@ -99,15 +99,19 @@ module.exports = grammar({
     ),
 
     // version := '/-' unicode-space* 'kdl-version' unicode-space+ ('1' | '2') unicode-space* newline
-    version_marker: $ => prec(1, seq(
-      '/-',
-      repeat($._unicode_space),
-      'kdl-version',
+    version_marker: $ => seq(
+      $._version_marker_prefix,
       repeat1($._unicode_space),
       field('version', choice('1', '2')),
       repeat($._unicode_space),
       $._newline,
-    )),
+    ),
+
+    // Tokenize the distinctive `/- ... kdl-version` prefix as a single token to
+    // avoid conflicts with plain `/-` (slashdash) nodes.
+    _version_marker_prefix: _ => token(
+      new RegExp(`/-${UNICODE_SPACE_RE.source}*kdl-version`),
+    ),
 
     // nodes := (line-space* node)* line-space*
     // Tree-sitter doesn't allow non-start rules that match the empty string,
@@ -244,8 +248,10 @@ module.exports = grammar({
     // multi-line-string-body := (('"' | '""')? string-character)*
     // This structure prevents the body from containing the closing delimiter `"""`.
     // (If the body is empty, the optional(...) wrapper in _quoted_string_multi handles it.)
-    multi_line_string_body: $ =>
-      repeat1(seq(optional(choice('""', '"')), $.string_character)),
+    multi_line_string_body: $ => repeat1(choice(
+      seq(optional(choice('""', '"')), $.string_character),
+      $._newline,
+    )),
 
     // string-character :=
     //   '\\' (["\\bfnrts] | 'u{' hex-unicode '}') |
@@ -257,7 +263,7 @@ module.exports = grammar({
     string_character: $ => choice(
       $.escape,
       $.ws_escape,
-      token.immediate(/[^\\"]/),
+      token.immediate(/[^\\"\r\n\u0085\u000C\u2028\u2029]/),
     ),
 
     single_line_string_text: _ => token.immediate(

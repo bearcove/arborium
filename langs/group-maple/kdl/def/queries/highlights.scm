@@ -46,4 +46,4 @@
   (multi_line_comment)
 ] @comment @spell
 
-"/-" @comment
+(slashdash) @comment
