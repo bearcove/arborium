@@ -36,20 +36,26 @@ struct IndexHtmlTemplate<'a> {
     language_count: usize,
 }
 
-/// Pre-highlighted code blocks for the index page
+/// A code block with its language for client-side highlighting
+struct CodeBlock {
+    lang: &'static str,
+    source: &'static str,
+}
+
+/// Code blocks for the index page (highlighted client-side by IIFE)
 struct CodeBlocks {
-    script_tag: String,
-    code_block_examples: String,
-    data_attributes: String,
-    cargo_toml: String,
-    rust_highlight: String,
-    js_esm: String,
-    docsrs_script: String,
-    docsrs_cargo: String,
-    rustdoc_postprocess: String,
-    miette_example: String,
-    html_example_traditional: String,
-    html_example_arborium: String,
+    script_tag: CodeBlock,
+    code_block_examples: CodeBlock,
+    data_attributes: CodeBlock,
+    cargo_toml: CodeBlock,
+    rust_highlight: CodeBlock,
+    js_esm: CodeBlock,
+    docsrs_script: CodeBlock,
+    docsrs_cargo: CodeBlock,
+    rustdoc_postprocess: CodeBlock,
+    miette_example: CodeBlock,
+    html_example_traditional: CodeBlock,
+    html_example_arborium: CodeBlock,
 }
 
 // Sailfish template for iife-demo.html
@@ -755,76 +761,73 @@ fn generate_theme_swatches() -> String {
     html
 }
 
-/// Highlight a code snippet using arborium
-fn highlight_code(lang: &str, source: &str) -> String {
-    use arborium::Highlighter;
-    let mut highlighter = Highlighter::new();
-    highlighter
-        .highlight_to_html(lang, source)
-        .unwrap_or_else(|_| source.to_string())
-}
-
-/// Generate all pre-highlighted code blocks for the index page
+/// Generate code blocks for the index page (highlighted client-side by IIFE)
 fn generate_code_blocks() -> CodeBlocks {
     CodeBlocks {
-        script_tag: highlight_code(
-            "html",
-            r#"<script src="https://cdn.jsdelivr.net/npm/@arborium/arborium@1/dist/arborium.iife.js"></script>"#,
-        ),
-        code_block_examples: highlight_code(
-            "html",
-            r#"<pre><code class="language-rust">fn main() {}</code></pre>
+        script_tag: CodeBlock {
+            lang: "html",
+            source: r#"<script src="https://cdn.jsdelivr.net/npm/@arborium/arborium@1/dist/arborium.iife.js"></script>"#,
+        },
+        code_block_examples: CodeBlock {
+            lang: "html",
+            source: r#"<pre><code class="language-rust">fn main() {}</code></pre>
 <!-- or -->
 <pre><code data-lang="rust">fn main() {}</code></pre>
 <!-- or just let it auto-detect -->
 <pre><code>fn main() {}</code></pre>"#,
-        ),
-        data_attributes: highlight_code(
-            "html",
-            r#"<script src="..."
+        },
+        data_attributes: CodeBlock {
+            lang: "html",
+            source: r#"<script src="..."
   data-theme="github-light"      <!-- theme name -->
   data-selector="pre code"        <!-- CSS selector -->
   data-manual                     <!-- disable auto-highlight -->
   data-cdn="unpkg"></script>       <!-- jsdelivr | unpkg | custom URL -->"#,
-        ),
-        cargo_toml: highlight_code(
-            "toml",
-            r#"arborium = { version = "2", features = ["lang-rust"] }"#,
-        ),
-        rust_highlight: highlight_code(
-            "rust",
-            r#"let html = arborium::highlight("rust", source)?;"#,
-        ),
-        js_esm: highlight_code(
-            "javascript",
-            r#"import { loadGrammar, highlight } from '@arborium/arborium';
+        },
+        cargo_toml: CodeBlock {
+            lang: "toml",
+            source: r#"arborium = { version = "2", features = ["lang-rust"] }"#,
+        },
+        rust_highlight: CodeBlock {
+            lang: "rust",
+            source: r#"let html = arborium::highlight("rust", source)?;"#,
+        },
+        js_esm: CodeBlock {
+            lang: "javascript",
+            source: r#"import { loadGrammar, highlight } from '@arborium/arborium';
 
 const html = await highlight('rust', sourceCode);"#,
-        ),
-        docsrs_script: highlight_code(
-            "html",
-            r#"<script defer src="https://cdn.jsdelivr.net/npm/@arborium/arborium@1/dist/arborium.iife.js"></script>"#,
-        ),
-        docsrs_cargo: highlight_code(
-            "toml",
-            r#"[package.metadata.docs.rs]
+        },
+        docsrs_script: CodeBlock {
+            lang: "html",
+            source: r#"<script defer src="https://cdn.jsdelivr.net/npm/@arborium/arborium@1/dist/arborium.iife.js"></script>"#,
+        },
+        docsrs_cargo: CodeBlock {
+            lang: "toml",
+            source: r#"[package.metadata.docs.rs]
 rustdoc-args = ["--html-in-header", "arborium-header.html"]"#,
-        ),
-        rustdoc_postprocess: highlight_code(
-            "bash",
-            r#"# Process rustdoc output in-place
+        },
+        rustdoc_postprocess: CodeBlock {
+            lang: "bash",
+            source: r#"# Process rustdoc output in-place
 arborium-rustdoc ./target/doc ./target/doc-highlighted"#,
-        ),
-        miette_example: highlight_code(
-            "rust",
-            r#"use miette::GraphicalReportHandler;
+        },
+        miette_example: CodeBlock {
+            lang: "rust",
+            source: r#"use miette::GraphicalReportHandler;
 use miette_arborium::ArboriumHighlighter;
 
 let handler = GraphicalReportHandler::new()
     .with_syntax_highlighting(ArboriumHighlighter::new());"#,
-        ),
-        html_example_traditional: highlight_code("html", r#"<span class="keyword">fn</span>"#),
-        html_example_arborium: highlight_code("html", r#"<a-k>fn</a-k>"#),
+        },
+        html_example_traditional: CodeBlock {
+            lang: "html",
+            source: r#"<span class="keyword">fn</span>"#,
+        },
+        html_example_arborium: CodeBlock {
+            lang: "html",
+            source: r#"<a-k>fn</a-k>"#,
+        },
     }
 }
 

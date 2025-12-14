@@ -1,24 +1,18 @@
 # Docker image for arborium CI
 # Build: docker build -t ghcr.io/bearcove/arborium-plugin-builder:latest -f .github/docker/Dockerfile.plugin-builder .
 # Push:  docker push ghcr.io/bearcove/arborium-plugin-builder:latest
-#
-# NOTE: Rebuild this image when xtask changes!
 
 FROM rust:1.91.1-trixie
 
-# Install build dependencies, wabt (wasm-objdump), binaryen (wasm-opt), Node.js 24.x,
-# and visual regression test deps (imagemagick for JXL support)
+# Install build dependencies: clang, binaryen (wasm-opt), Node.js 24.x
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends clang wabt binaryen imagemagick jq \
+    && apt-get install -y --no-install-recommends clang binaryen jq \
     && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Playwright and Chromium for visual regression tests
-RUN npx playwright install chromium --with-deps
-
 # Add wasm32 targets and components (clippy, rustfmt)
-RUN rustup target add wasm32-unknown-unknown wasm32-wasip1 \
+RUN rustup target add wasm32-unknown-unknown \
     && rustup component add clippy rustfmt
 
 # Install cargo-binstall for fast binary installs
@@ -29,9 +23,6 @@ RUN cargo binstall -y --locked wild-linker
 
 # Configure Rust to use wild linker
 RUN mkdir -p /root/.cargo && printf '[target.x86_64-unknown-linux-gnu]\nlinker = "clang"\nrustflags = ["-C", "link-arg=--ld-path=/usr/local/cargo/bin/wild"]\n' > /root/.cargo/config.toml
-
-# Install cargo-component (binstall)
-RUN cargo binstall -y --locked cargo-component
 
 # Install tree-sitter-cli (binstall)
 RUN cargo binstall -y --locked tree-sitter-cli
@@ -45,35 +36,13 @@ RUN cargo binstall -y --locked wasm-pack
 # Install wasm-bindgen-cli (binstall)
 RUN cargo binstall -y --locked wasm-bindgen-cli
 
-# Install cargo-workspaces (binstall)
-RUN cargo binstall -y --locked cargo-workspaces
-
-# Install jco globally
-RUN npm install -g @bytecodealliance/jco
-
-# Copy xtask and its local dependencies, then build
-WORKDIR /build
-COPY xtask/ ./xtask/
-COPY crates/arborium-theme/ ./crates/arborium-theme/
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/build/xtask/target \
-    cd xtask && cargo build --release \
-    && cp target/release/xtask /usr/local/bin/arborium-xtask
-
-# Clean up source
-RUN rm -rf /build
-
 # Verify installations
 RUN cargo --version \
     && rustc --version \
     && node --version \
     && npm --version \
     && jq --version \
-    && cargo-component --version \
     && cargo nextest --version \
-    && cargo workspaces --version \
-    && wasm-pack --version \
-    && jco --version \
-    && arborium-xtask version
+    && wasm-pack --version
 
 WORKDIR /workspace

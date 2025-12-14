@@ -209,11 +209,11 @@
                     <div class="compare-boxes">
                         <div class="compare-box old">
                             <span class="compare-label">Traditional</span>
-                            <code><%- code.html_example_traditional %></code>
+                            <code class="language-<%= code.html_example_traditional.lang %>"><%= code.html_example_traditional.source %></code>
                         </div>
                         <div class="compare-box new">
                             <span class="compare-label">arborium</span>
-                            <code><%- code.html_example_arborium %></code>
+                            <code class="language-<%= code.html_example_arborium.lang %>"><%= code.html_example_arborium.source %></code>
                         </div>
                     </div>
                     <p><strong>ANSI</strong> — 24-bit true color for terminal applications.</p>
@@ -262,9 +262,9 @@
                         <div class="get-started-option">
                             <h4><%- icons["devicon-plain:rust"] %> Rust (native or WASM)</h4>
                             <p>Add to your <code>Cargo.toml</code>:</p>
-                            <pre class="code-block"><code><%- code.cargo_toml %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.cargo_toml.lang %>"><%= code.cargo_toml.source %></code></pre>
                             <p>Then highlight code:</p>
-                            <pre class="code-block"><code><%- code.rust_highlight %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.rust_highlight.lang %>"><%= code.rust_highlight.source %></code></pre>
                         </div>
                         <div class="get-started-option">
                             <h4><%- icons["mdi:language-html5"] %> Script tag (zero config)</h4>
@@ -273,13 +273,13 @@
                                 <code>&lt;pre&gt;&lt;code&gt;</code> blocks get highlighted
                                 automatically:
                             </p>
-                            <pre class="code-block"><code><%- code.script_tag %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.script_tag.lang %>"><%= code.script_tag.source %></code></pre>
                             <p>Your code blocks should look like this:</p>
                             <pre
                                 class="code-block"
-                            ><code><%- code.code_block_examples %></code></pre>
+                            ><code class="language-<%= code.code_block_examples.lang %>"><%= code.code_block_examples.source %></code></pre>
                             <p>Configure via data attributes:</p>
-                            <pre class="code-block"><code><%- code.data_attributes %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.data_attributes.lang %>"><%= code.data_attributes.source %></code></pre>
                             <p>
                                 With <code>data-manual</code>, call
                                 <code>window.arborium.highlightAll()</code> when ready.
@@ -289,7 +289,7 @@
                         <div class="get-started-option">
                             <h4><%- icons["mdi:nodejs"] %> npm (ESM)</h4>
                             <p>For bundlers or manual control:</p>
-                            <pre class="code-block"><code><%- code.js_esm %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.js_esm.lang %>"><%= code.js_esm.source %></code></pre>
                             <p>Grammars are loaded on-demand from <a href="https://www.jsdelivr.com/">jsDelivr</a> (configurable).</p>
                         </div>
                     </div>
@@ -304,9 +304,9 @@
                                 Highlight TOML, shell, and other languages in your rustdoc. Create
                                 <code>arborium-header.html</code>:
                             </p>
-                            <pre class="code-block"><code><%- code.docsrs_script %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.docsrs_script.lang %>"><%= code.docsrs_script.source %></code></pre>
                             <p>Then in <code>Cargo.toml</code>:</p>
-                            <pre class="code-block"><code><%- code.docsrs_cargo %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.docsrs_cargo.lang %>"><%= code.docsrs_cargo.source %></code></pre>
                             <p class="integration-links">
                                 <a href="https://docs.rs/arborium-docsrs-demo/">See it in action</a>
                             </p>
@@ -319,7 +319,7 @@
                                 for native rustdoc support, or use <code>arborium-rustdoc</code> as a
                                 post-processing step:
                             </p>
-                            <pre class="code-block"><code><%- code.rustdoc_postprocess %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.rustdoc_postprocess.lang %>"><%= code.rustdoc_postprocess.source %></code></pre>
                             <p>
                                 It streams through HTML, finds <code>&lt;pre class="language-*"&gt;</code>
                                 blocks, and highlights them in-place. Works with rustdoc's theme system.
@@ -338,7 +338,7 @@
                                 diagnostics. Beautiful, accurate highlighting in your CLI error
                                 messages.
                             </p>
-                            <pre class="code-block"><code><%- code.miette_example %></code></pre>
+                            <pre class="code-block"><code class="language-<%= code.miette_example.lang %>"><%= code.miette_example.source %></code></pre>
                             <p class="integration-links">
                                 <a href="https://crates.io/crates/miette-arborium">crates.io</a> ·
                                 <a href="https://docs.rs/miette-arborium">docs.rs</a>

@@ -1,5 +1,9 @@
 target
+xtask/target/
 _site
+
+# Version is derived from git tag in CI, not stored in repo
+version.json
 
 # Grammar generation cache
 .cache/

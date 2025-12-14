@@ -1,6 +1,6 @@
 [package]
 name = "arborium-docsrs-demo"
-version = "2.1.0"
+version = "0.0.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Demo crate showcasing arborium syntax highlighting on docs.rs"

@@ -1,6 +1,6 @@
 [package]
 name = "arborium-rustdoc"
-version = "2.1.0"
+version = "0.0.0"
 edition = "2024"
 rust-version = "1.89"
 description = "Post-process rustdoc HTML output to add syntax highlighting for non-Rust code blocks"
@@ -19,8 +19,8 @@ path = "src/main.rs"
 
 [dependencies]
 # Core arborium dependencies
-arborium = { version = "2.1.0", path = "../arborium", features = ["all-languages"] }
-arborium-theme = { version = "2.1.0", path = "../arborium-theme" }
+arborium = { version = "0.0.0", path = "../arborium", features = ["all-languages"] }
+arborium-theme = { version = "0.0.0", path = "../arborium-theme" }
 
 # HTML transformation
 lol_html = "2"

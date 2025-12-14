@@ -68,13 +68,22 @@ fn update_main_npm_package_version(repo_root: &Utf8Path, version: &str) -> Resul
     Ok(())
 }
 
+/// Default version for local development.
+/// CI should always pass --version from the git tag.
+pub const DEV_VERSION: &str = "0.0.0";
+
 pub fn read_version(repo_root: &Utf8Path) -> Result<String> {
     let path = repo_root.join(VERSION_FILE);
-    let content = fs_err::read_to_string(&path)
-        .into_diagnostic()
-        .context("failed to read version.json; run `cargo xtask gen --version <x.y.z>`")?;
-    let entry: VersionEntry = facet_json::from_str(&content)
-        .into_diagnostic()
-        .context("failed to parse version.json")?;
-    Ok(entry.version)
+    match fs_err::read_to_string(&path) {
+        Ok(content) => {
+            let entry: VersionEntry = facet_json::from_str(&content)
+                .into_diagnostic()
+                .context("failed to parse version.json")?;
+            Ok(entry.version)
+        }
+        Err(_) => {
+            // No version.json - use dev version (CI should pass --version from tag)
+            Ok(DEV_VERSION.to_string())
+        }
+    }
 }

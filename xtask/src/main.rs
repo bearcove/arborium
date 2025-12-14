@@ -478,9 +478,9 @@ fn resolve_workspace_version(provided: Option<String>, repo_root: &camino::Utf8P
     if let Some(version) = provided {
         version
     } else {
+        // Returns DEV_VERSION (0.0.0) if version.json doesn't exist
         version_store::read_version(repo_root).unwrap_or_else(|err| {
-            eprintln!("Failed to read version.json: {err}");
-            eprintln!("Run `cargo xtask gen --version <x.y.z>` once to set the workspace version.");
+            eprintln!("Failed to parse version.json: {err}");
             std::process::exit(1);
         })
     }

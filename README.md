@@ -17,14 +17,14 @@ Batteries-included [tree-sitter](https://tree-sitter.github.io/tree-sitter/) gra
 
 ```toml
 [dependencies]
-arborium = "2.1.0"
+arborium = "0.0.0"
 ```
 
 By default, all permissively-licensed grammars are included. To select specific languages:
 
 ```toml
 [dependencies]
-arborium = { version = "2.1.0", default-features = false, features = ["lang-rust", "lang-javascript"] }
+arborium = { version = "0.0.0", default-features = false, features = ["lang-rust", "lang-javascript"] }
 ```
 
 ## Browser Usage
@@ -109,7 +109,7 @@ For complete control and offline-first apps, compile the Rust crate directly to 
 
 ```toml
 [dependencies]
-arborium = { version = "2.1.0", default-features = false, features = ["lang-rust", "lang-javascript"] }
+arborium = { version = "0.0.0", default-features = false, features = ["lang-rust", "lang-javascript"] }
 ```
 
 ```bash

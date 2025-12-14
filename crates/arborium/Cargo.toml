@@ -1,6 +1,6 @@
 [package]
 name = "arborium"
-version = "2.1.0"
+version = "0.0.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/bearcove/arborium"
@@ -212,107 +212,107 @@ lang-zig = ["dep:arborium-zig"]
 lang-zsh = ["dep:arborium-zsh"]
 
 [dependencies]
-arborium-tree-sitter = { version = "2.1.0", path = "../arborium-tree-sitter" }
-arborium-theme = { version = "2.1.0", path = "../arborium-theme" }
-arborium-highlight = { version = "2.1.0", path = "../arborium-highlight", features = ["tree-sitter"] }
+arborium-tree-sitter = { version = "0.0.0", path = "../arborium-tree-sitter" }
+arborium-theme = { version = "0.0.0", path = "../arborium-theme" }
+arborium-highlight = { version = "0.0.0", path = "../arborium-highlight", features = ["tree-sitter"] }
 
 # Optional grammar dependencies
-arborium-ada = { version = "2.1.0", path = "../../langs/group-moss/ada/crate", optional = true }
-arborium-agda = { version = "2.1.0", path = "../../langs/group-fern/agda/crate", optional = true }
-arborium-asciidoc = { version = "2.1.0", path = "../../langs/group-willow/asciidoc/crate", optional = true }
-arborium-asm = { version = "2.1.0", path = "../../langs/group-birch/asm/crate", optional = true }
-arborium-awk = { version = "2.1.0", path = "../../langs/group-hazel/awk/crate", optional = true }
-arborium-bash = { version = "2.1.0", path = "../../langs/group-hazel/bash/crate", optional = true }
-arborium-batch = { version = "2.1.0", path = "../../langs/group-hazel/batch/crate", optional = true }
-arborium-c = { version = "2.1.0", path = "../../langs/group-birch/c/crate", optional = true }
-arborium-c-sharp = { version = "2.1.0", path = "../../langs/group-sage/c-sharp/crate", optional = true }
-arborium-caddy = { version = "2.1.0", path = "../../langs/group-maple/caddy/crate", optional = true }
-arborium-capnp = { version = "2.1.0", path = "../../langs/group-pine/capnp/crate", optional = true }
-arborium-clojure = { version = "2.1.0", path = "../../langs/group-cedar/clojure/crate", optional = true }
-arborium-cmake = { version = "2.1.0", path = "../../langs/group-maple/cmake/crate", optional = true }
-arborium-commonlisp = { version = "2.1.0", path = "../../langs/group-fern/commonlisp/crate", optional = true }
-arborium-cpp = { version = "2.1.0", path = "../../langs/group-birch/cpp/crate", optional = true }
-arborium-css = { version = "2.1.0", path = "../../langs/group-acorn/css/crate", optional = true }
-arborium-d = { version = "2.1.0", path = "../../langs/group-birch/d/crate", optional = true }
-arborium-dart = { version = "2.1.0", path = "../../langs/group-pine/dart/crate", optional = true }
-arborium-devicetree = { version = "2.1.0", path = "../../langs/group-pine/devicetree/crate", optional = true }
-arborium-diff = { version = "2.1.0", path = "../../langs/group-willow/diff/crate", optional = true }
-arborium-dockerfile = { version = "2.1.0", path = "../../langs/group-maple/dockerfile/crate", optional = true }
-arborium-dot = { version = "2.1.0", path = "../../langs/group-maple/dot/crate", optional = true }
-arborium-elisp = { version = "2.1.0", path = "../../langs/group-sage/elisp/crate", optional = true }
-arborium-elixir = { version = "2.1.0", path = "../../langs/group-fern/elixir/crate", optional = true }
-arborium-elm = { version = "2.1.0", path = "../../langs/group-fern/elm/crate", optional = true }
-arborium-erlang = { version = "2.1.0", path = "../../langs/group-fern/erlang/crate", optional = true }
-arborium-fish = { version = "2.1.0", path = "../../langs/group-hazel/fish/crate", optional = true }
-arborium-fsharp = { version = "2.1.0", path = "../../langs/group-sage/fsharp/crate", optional = true }
-arborium-gleam = { version = "2.1.0", path = "../../langs/group-fern/gleam/crate", optional = true }
-arborium-glsl = { version = "2.1.0", path = "../../langs/group-moss/glsl/crate", optional = true }
-arborium-go = { version = "2.1.0", path = "../../langs/group-birch/go/crate", optional = true }
-arborium-graphql = { version = "2.1.0", path = "../../langs/group-maple/graphql/crate", optional = true }
-arborium-haskell = { version = "2.1.0", path = "../../langs/group-fern/haskell/crate", optional = true }
-arborium-hcl = { version = "2.1.0", path = "../../langs/group-maple/hcl/crate", optional = true }
-arborium-hlsl = { version = "2.1.0", path = "../../langs/group-moss/hlsl/crate", optional = true }
-arborium-html = { version = "2.1.0", path = "../../langs/group-acorn/html/crate", optional = true }
-arborium-idris = { version = "2.1.0", path = "../../langs/group-fern/idris/crate", optional = true }
-arborium-ini = { version = "2.1.0", path = "../../langs/group-maple/ini/crate", optional = true }
-arborium-java = { version = "2.1.0", path = "../../langs/group-cedar/java/crate", optional = true }
-arborium-javascript = { version = "2.1.0", path = "../../langs/group-acorn/javascript/crate", optional = true }
-arborium-jinja2 = { version = "2.1.0", path = "../../langs/group-willow/jinja2/crate", optional = true }
-arborium-jq = { version = "2.1.0", path = "../../langs/group-maple/jq/crate", optional = true }
-arborium-json = { version = "2.1.0", path = "../../langs/group-acorn/json/crate", optional = true }
-arborium-julia = { version = "2.1.0", path = "../../langs/group-moss/julia/crate", optional = true }
-arborium-kdl = { version = "2.1.0", path = "../../langs/group-maple/kdl/crate", optional = true }
-arborium-kotlin = { version = "2.1.0", path = "../../langs/group-cedar/kotlin/crate", optional = true }
-arborium-lean = { version = "2.1.0", path = "../../langs/group-fern/lean/crate", optional = true }
-arborium-lua = { version = "2.1.0", path = "../../langs/group-hazel/lua/crate", optional = true }
-arborium-markdown = { version = "2.1.0", path = "../../langs/group-willow/markdown/crate", optional = true }
-arborium-matlab = { version = "2.1.0", path = "../../langs/group-moss/matlab/crate", optional = true }
-arborium-meson = { version = "2.1.0", path = "../../langs/group-maple/meson/crate", optional = true }
-arborium-nginx = { version = "2.1.0", path = "../../langs/group-maple/nginx/crate", optional = true }
-arborium-ninja = { version = "2.1.0", path = "../../langs/group-maple/ninja/crate", optional = true }
-arborium-nix = { version = "2.1.0", path = "../../langs/group-maple/nix/crate", optional = true }
-arborium-objc = { version = "2.1.0", path = "../../langs/group-birch/objc/crate", optional = true }
-arborium-ocaml = { version = "2.1.0", path = "../../langs/group-fern/ocaml/crate", optional = true }
-arborium-perl = { version = "2.1.0", path = "../../langs/group-hazel/perl/crate", optional = true }
-arborium-php = { version = "2.1.0", path = "../../langs/group-hazel/php/crate", optional = true }
-arborium-postscript = { version = "2.1.0", path = "../../langs/group-sage/postscript/crate", optional = true }
-arborium-powershell = { version = "2.1.0", path = "../../langs/group-hazel/powershell/crate", optional = true }
-arborium-prolog = { version = "2.1.0", path = "../../langs/group-moss/prolog/crate", optional = true }
-arborium-python = { version = "2.1.0", path = "../../langs/group-hazel/python/crate", optional = true }
-arborium-query = { version = "2.1.0", path = "../../langs/group-maple/query/crate", optional = true }
-arborium-r = { version = "2.1.0", path = "../../langs/group-moss/r/crate", optional = true }
-arborium-rescript = { version = "2.1.0", path = "../../langs/group-pine/rescript/crate", optional = true }
-arborium-ron = { version = "2.1.0", path = "../../langs/group-maple/ron/crate", optional = true }
-arborium-ruby = { version = "2.1.0", path = "../../langs/group-hazel/ruby/crate", optional = true }
-arborium-rust = { version = "2.1.0", path = "../../langs/group-birch/rust/crate", optional = true }
-arborium-scala = { version = "2.1.0", path = "../../langs/group-cedar/scala/crate", optional = true }
-arborium-scheme = { version = "2.1.0", path = "../../langs/group-fern/scheme/crate", optional = true }
-arborium-scss = { version = "2.1.0", path = "../../langs/group-acorn/scss/crate", optional = true }
-arborium-sparql = { version = "2.1.0", path = "../../langs/group-moss/sparql/crate", optional = true }
-arborium-sql = { version = "2.1.0", path = "../../langs/group-maple/sql/crate", optional = true }
-arborium-ssh-config = { version = "2.1.0", path = "../../langs/group-maple/ssh-config/crate", optional = true }
-arborium-starlark = { version = "2.1.0", path = "../../langs/group-pine/starlark/crate", optional = true }
-arborium-svelte = { version = "2.1.0", path = "../../langs/group-willow/svelte/crate", optional = true }
-arborium-swift = { version = "2.1.0", path = "../../langs/group-pine/swift/crate", optional = true }
-arborium-textproto = { version = "2.1.0", path = "../../langs/group-pine/textproto/crate", optional = true }
-arborium-thrift = { version = "2.1.0", path = "../../langs/group-pine/thrift/crate", optional = true }
-arborium-tlaplus = { version = "2.1.0", path = "../../langs/group-moss/tlaplus/crate", optional = true }
-arborium-toml = { version = "2.1.0", path = "../../langs/group-maple/toml/crate", optional = true }
-arborium-tsx = { version = "2.1.0", path = "../../langs/group-acorn/tsx/crate", optional = true }
-arborium-typescript = { version = "2.1.0", path = "../../langs/group-acorn/typescript/crate", optional = true }
-arborium-typst = { version = "2.1.0", path = "../../langs/group-willow/typst/crate", optional = true }
-arborium-uiua = { version = "2.1.0", path = "../../langs/group-pine/uiua/crate", optional = true }
-arborium-vb = { version = "2.1.0", path = "../../langs/group-sage/vb/crate", optional = true }
-arborium-verilog = { version = "2.1.0", path = "../../langs/group-moss/verilog/crate", optional = true }
-arborium-vhdl = { version = "2.1.0", path = "../../langs/group-moss/vhdl/crate", optional = true }
-arborium-vim = { version = "2.1.0", path = "../../langs/group-sage/vim/crate", optional = true }
-arborium-vue = { version = "2.1.0", path = "../../langs/group-willow/vue/crate", optional = true }
-arborium-x86asm = { version = "2.1.0", path = "../../langs/group-birch/x86asm/crate", optional = true }
-arborium-xml = { version = "2.1.0", path = "../../langs/group-acorn/xml/crate", optional = true }
-arborium-yaml = { version = "2.1.0", path = "../../langs/group-maple/yaml/crate", optional = true }
-arborium-yuri = { version = "2.1.0", path = "../../langs/group-pine/yuri/crate", optional = true }
-arborium-zig = { version = "2.1.0", path = "../../langs/group-birch/zig/crate", optional = true }
-arborium-zsh = { version = "2.1.0", path = "../../langs/group-hazel/zsh/crate", optional = true }
+arborium-ada = { version = "0.0.0", path = "../../langs/group-moss/ada/crate", optional = true }
+arborium-agda = { version = "0.0.0", path = "../../langs/group-fern/agda/crate", optional = true }
+arborium-asciidoc = { version = "0.0.0", path = "../../langs/group-willow/asciidoc/crate", optional = true }
+arborium-asm = { version = "0.0.0", path = "../../langs/group-birch/asm/crate", optional = true }
+arborium-awk = { version = "0.0.0", path = "../../langs/group-hazel/awk/crate", optional = true }
+arborium-bash = { version = "0.0.0", path = "../../langs/group-hazel/bash/crate", optional = true }
+arborium-batch = { version = "0.0.0", path = "../../langs/group-hazel/batch/crate", optional = true }
+arborium-c = { version = "0.0.0", path = "../../langs/group-birch/c/crate", optional = true }
+arborium-c-sharp = { version = "0.0.0", path = "../../langs/group-sage/c-sharp/crate", optional = true }
+arborium-caddy = { version = "0.0.0", path = "../../langs/group-maple/caddy/crate", optional = true }
+arborium-capnp = { version = "0.0.0", path = "../../langs/group-pine/capnp/crate", optional = true }
+arborium-clojure = { version = "0.0.0", path = "../../langs/group-cedar/clojure/crate", optional = true }
+arborium-cmake = { version = "0.0.0", path = "../../langs/group-maple/cmake/crate", optional = true }
+arborium-commonlisp = { version = "0.0.0", path = "../../langs/group-fern/commonlisp/crate", optional = true }
+arborium-cpp = { version = "0.0.0", path = "../../langs/group-birch/cpp/crate", optional = true }
+arborium-css = { version = "0.0.0", path = "../../langs/group-acorn/css/crate", optional = true }
+arborium-d = { version = "0.0.0", path = "../../langs/group-birch/d/crate", optional = true }
+arborium-dart = { version = "0.0.0", path = "../../langs/group-pine/dart/crate", optional = true }
+arborium-devicetree = { version = "0.0.0", path = "../../langs/group-pine/devicetree/crate", optional = true }
+arborium-diff = { version = "0.0.0", path = "../../langs/group-willow/diff/crate", optional = true }
+arborium-dockerfile = { version = "0.0.0", path = "../../langs/group-maple/dockerfile/crate", optional = true }
+arborium-dot = { version = "0.0.0", path = "../../langs/group-maple/dot/crate", optional = true }
+arborium-elisp = { version = "0.0.0", path = "../../langs/group-sage/elisp/crate", optional = true }
+arborium-elixir = { version = "0.0.0", path = "../../langs/group-fern/elixir/crate", optional = true }
+arborium-elm = { version = "0.0.0", path = "../../langs/group-fern/elm/crate", optional = true }
+arborium-erlang = { version = "0.0.0", path = "../../langs/group-fern/erlang/crate", optional = true }
+arborium-fish = { version = "0.0.0", path = "../../langs/group-hazel/fish/crate", optional = true }
+arborium-fsharp = { version = "0.0.0", path = "../../langs/group-sage/fsharp/crate", optional = true }
+arborium-gleam = { version = "0.0.0", path = "../../langs/group-fern/gleam/crate", optional = true }
+arborium-glsl = { version = "0.0.0", path = "../../langs/group-moss/glsl/crate", optional = true }
+arborium-go = { version = "0.0.0", path = "../../langs/group-birch/go/crate", optional = true }
+arborium-graphql = { version = "0.0.0", path = "../../langs/group-maple/graphql/crate", optional = true }
+arborium-haskell = { version = "0.0.0", path = "../../langs/group-fern/haskell/crate", optional = true }
+arborium-hcl = { version = "0.0.0", path = "../../langs/group-maple/hcl/crate", optional = true }
+arborium-hlsl = { version = "0.0.0", path = "../../langs/group-moss/hlsl/crate", optional = true }
+arborium-html = { version = "0.0.0", path = "../../langs/group-acorn/html/crate", optional = true }
+arborium-idris = { version = "0.0.0", path = "../../langs/group-fern/idris/crate", optional = true }
+arborium-ini = { version = "0.0.0", path = "../../langs/group-maple/ini/crate", optional = true }
+arborium-java = { version = "0.0.0", path = "../../langs/group-cedar/java/crate", optional = true }
+arborium-javascript = { version = "0.0.0", path = "../../langs/group-acorn/javascript/crate", optional = true }
+arborium-jinja2 = { version = "0.0.0", path = "../../langs/group-willow/jinja2/crate", optional = true }
+arborium-jq = { version = "0.0.0", path = "../../langs/group-maple/jq/crate", optional = true }
+arborium-json = { version = "0.0.0", path = "../../langs/group-acorn/json/crate", optional = true }
+arborium-julia = { version = "0.0.0", path = "../../langs/group-moss/julia/crate", optional = true }
+arborium-kdl = { version = "0.0.0", path = "../../langs/group-maple/kdl/crate", optional = true }
+arborium-kotlin = { version = "0.0.0", path = "../../langs/group-cedar/kotlin/crate", optional = true }
+arborium-lean = { version = "0.0.0", path = "../../langs/group-fern/lean/crate", optional = true }
+arborium-lua = { version = "0.0.0", path = "../../langs/group-hazel/lua/crate", optional = true }
+arborium-markdown = { version = "0.0.0", path = "../../langs/group-willow/markdown/crate", optional = true }
+arborium-matlab = { version = "0.0.0", path = "../../langs/group-moss/matlab/crate", optional = true }
+arborium-meson = { version = "0.0.0", path = "../../langs/group-maple/meson/crate", optional = true }
+arborium-nginx = { version = "0.0.0", path = "../../langs/group-maple/nginx/crate", optional = true }
+arborium-ninja = { version = "0.0.0", path = "../../langs/group-maple/ninja/crate", optional = true }
+arborium-nix = { version = "0.0.0", path = "../../langs/group-maple/nix/crate", optional = true }
+arborium-objc = { version = "0.0.0", path = "../../langs/group-birch/objc/crate", optional = true }
+arborium-ocaml = { version = "0.0.0", path = "../../langs/group-fern/ocaml/crate", optional = true }
+arborium-perl = { version = "0.0.0", path = "../../langs/group-hazel/perl/crate", optional = true }
+arborium-php = { version = "0.0.0", path = "../../langs/group-hazel/php/crate", optional = true }
+arborium-postscript = { version = "0.0.0", path = "../../langs/group-sage/postscript/crate", optional = true }
+arborium-powershell = { version = "0.0.0", path = "../../langs/group-hazel/powershell/crate", optional = true }
+arborium-prolog = { version = "0.0.0", path = "../../langs/group-moss/prolog/crate", optional = true }
+arborium-python = { version = "0.0.0", path = "../../langs/group-hazel/python/crate", optional = true }
+arborium-query = { version = "0.0.0", path = "../../langs/group-maple/query/crate", optional = true }
+arborium-r = { version = "0.0.0", path = "../../langs/group-moss/r/crate", optional = true }
+arborium-rescript = { version = "0.0.0", path = "../../langs/group-pine/rescript/crate", optional = true }
+arborium-ron = { version = "0.0.0", path = "../../langs/group-maple/ron/crate", optional = true }
+arborium-ruby = { version = "0.0.0", path = "../../langs/group-hazel/ruby/crate", optional = true }
+arborium-rust = { version = "0.0.0", path = "../../langs/group-birch/rust/crate", optional = true }
+arborium-scala = { version = "0.0.0", path = "../../langs/group-cedar/scala/crate", optional = true }
+arborium-scheme = { version = "0.0.0", path = "../../langs/group-fern/scheme/crate", optional = true }
+arborium-scss = { version = "0.0.0", path = "../../langs/group-acorn/scss/crate", optional = true }
+arborium-sparql = { version = "0.0.0", path = "../../langs/group-moss/sparql/crate", optional = true }
+arborium-sql = { version = "0.0.0", path = "../../langs/group-maple/sql/crate", optional = true }
+arborium-ssh-config = { version = "0.0.0", path = "../../langs/group-maple/ssh-config/crate", optional = true }
+arborium-starlark = { version = "0.0.0", path = "../../langs/group-pine/starlark/crate", optional = true }
+arborium-svelte = { version = "0.0.0", path = "../../langs/group-willow/svelte/crate", optional = true }
+arborium-swift = { version = "0.0.0", path = "../../langs/group-pine/swift/crate", optional = true }
+arborium-textproto = { version = "0.0.0", path = "../../langs/group-pine/textproto/crate", optional = true }
+arborium-thrift = { version = "0.0.0", path = "../../langs/group-pine/thrift/crate", optional = true }
+arborium-tlaplus = { version = "0.0.0", path = "../../langs/group-moss/tlaplus/crate", optional = true }
+arborium-toml = { version = "0.0.0", path = "../../langs/group-maple/toml/crate", optional = true }
+arborium-tsx = { version = "0.0.0", path = "../../langs/group-acorn/tsx/crate", optional = true }
+arborium-typescript = { version = "0.0.0", path = "../../langs/group-acorn/typescript/crate", optional = true }
+arborium-typst = { version = "0.0.0", path = "../../langs/group-willow/typst/crate", optional = true }
+arborium-uiua = { version = "0.0.0", path = "../../langs/group-pine/uiua/crate", optional = true }
+arborium-vb = { version = "0.0.0", path = "../../langs/group-sage/vb/crate", optional = true }
+arborium-verilog = { version = "0.0.0", path = "../../langs/group-moss/verilog/crate", optional = true }
+arborium-vhdl = { version = "0.0.0", path = "../../langs/group-moss/vhdl/crate", optional = true }
+arborium-vim = { version = "0.0.0", path = "../../langs/group-sage/vim/crate", optional = true }
+arborium-vue = { version = "0.0.0", path = "../../langs/group-willow/vue/crate", optional = true }
+arborium-x86asm = { version = "0.0.0", path = "../../langs/group-birch/x86asm/crate", optional = true }
+arborium-xml = { version = "0.0.0", path = "../../langs/group-acorn/xml/crate", optional = true }
+arborium-yaml = { version = "0.0.0", path = "../../langs/group-maple/yaml/crate", optional = true }
+arborium-yuri = { version = "0.0.0", path = "../../langs/group-pine/yuri/crate", optional = true }
+arborium-zig = { version = "0.0.0", path = "../../langs/group-birch/zig/crate", optional = true }
+arborium-zsh = { version = "0.0.0", path = "../../langs/group-hazel/zsh/crate", optional = true }
 
 [dev-dependencies]
 indoc = "2"

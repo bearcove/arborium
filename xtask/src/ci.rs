@@ -406,14 +406,11 @@ pub fn build_workflow(config: &CiConfig) -> Workflow {
                 Step::run(
                     "Parse version",
                     r#"set -e
-# Read default version from version.json
-if [ -f version.json ]; then
-  VERSION=$(jq -r '.version' version.json)
-else
-  VERSION="1.0.0"
-fi
+# Default to dev version (matches xtask default)
+VERSION="0.0.0"
 IS_RELEASE="false"
 
+# On tag push, use the tag as version
 if [[ "$GITHUB_REF" == refs/tags/* ]]; then
   TAG="${GITHUB_REF#refs/tags/}"
   TAG="${TAG#v}"
@@ -440,18 +437,24 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                         ),
                         ("restore-keys", "grammar-cache-v1000-"),
                     ]),
-                // Generate with version (from tag or 0.0.0-dev for non-release)
+                // Build xtask (not pre-baked in container, built fresh from source)
+                Step::run(
+                    "Build xtask",
+                    "cargo build --release --manifest-path xtask/Cargo.toml",
+                ),
+                // Generate with version (from tag or 0.0.0 for non-release)
                 Step::run(
                     "Generate grammar sources",
-                    "arborium-xtask gen --version ${{ steps.version.outputs.version }} --quiet",
+                    "./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet",
                 ),
                 // Create tarball for CI jobs (fast tar)
                 // Note: no root Cargo.toml/lock - each crate is standalone
                 // Include version.json so all downstream jobs see the same
                 // release version that was used for generation.
+                // Include xtask binary so downstream jobs don't need to rebuild it.
                 Step::run(
                     "Create grammar sources tarball",
-                    "tar -cvf grammar-sources.tar crates/ langs/ version.json",
+                    "tar -cvf grammar-sources.tar crates/ langs/ version.json xtask/target/release/xtask",
                 ),
                 Step::uses("Upload grammar sources", "actions/upload-artifact@v4")
                     .with_inputs([
@@ -576,7 +579,10 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                         extract_grammar_sources(),
                         Step::run(
                             format!("Build {}", display_grammars),
-                            format!("arborium-xtask build {} -o dist/plugins", grammars_list),
+                            format!(
+                                "./xtask/target/release/xtask build {} -o dist/plugins",
+                                grammars_list
+                            ),
                         ),
                         Step::uses("Upload plugins artifact", "actions/upload-artifact@v4")
                             .with_inputs([
@@ -610,7 +616,11 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                     "rust-lang/crates-io-auth-action@v1",
                 )
                 .with_id("crates-io-auth"),
-                Step::run("Publish to crates.io", "arborium-xtask publish crates").with_env([(
+                Step::run(
+                    "Publish to crates.io",
+                    "./xtask/target/release/xtask publish crates",
+                )
+                .with_env([(
                     "CARGO_REGISTRY_TOKEN",
                     "${{ steps.crates-io-auth.outputs.token }}",
                 )]),
@@ -656,7 +666,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             // No NODE_AUTH_TOKEN needed - OIDC trusted publishing uses id-token permission
             Step::run(
                 "Publish to npm",
-                "arborium-xtask publish npm -o dist/plugins",
+                "./xtask/target/release/xtask publish npm -o dist/plugins",
             ),
         ]);
 
