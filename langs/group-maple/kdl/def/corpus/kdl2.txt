@@ -53,6 +53,15 @@ raw #"""
 --- contains
 raw_string
 
+=== raw_multiline_hash
+--- input
+hashraw ##"""
+  This has a literal """
+  but stays open thanks to hashes
+"""##;
+--- contains
+raw_string
+
 === slashdash
 --- input
 /- disabled 123;
