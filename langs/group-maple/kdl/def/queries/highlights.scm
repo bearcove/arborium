@@ -6,6 +6,8 @@
   (slashdash)? @comment
   name: (string) @type.definition)
 
+((node_no_terminator (slashdash) . (_)) @comment)
+
 (node_children) @scope
 
 ; Allow top-level identifiers (nodes without string quoting) to appear as types
