@@ -26,6 +26,7 @@ mod version_store;
 use facet::Facet;
 use facet_args as args;
 use owo_colors::OwoColorize;
+use std::process::Command as StdCommand;
 
 /// Arborium development tasks
 #[derive(Debug, Facet)]
@@ -120,6 +121,17 @@ enum Command {
         /// Continue building other plugins even if some fail
         #[facet(args::named, default)]
         no_fail_fast: bool,
+    },
+
+    /// Run grammar tests for a specific language crate
+    GrammarTest {
+        /// Grammar ID (e.g., "kdl")
+        #[facet(args::positional)]
+        grammar: String,
+
+        /// Forward -- --nocapture to cargo test
+        #[facet(args::named, default)]
+        no_capture: bool,
     },
 
     /// Clean plugin build artifacts (standard layout)
@@ -404,6 +416,38 @@ fn main() {
             if let Err(e) = build::build_demo(&repo_root, &crates_dir, dev) {
                 eprintln!("{:?}", e);
                 std::process::exit(1);
+            }
+        }
+        Command::GrammarTest {
+            grammar,
+            no_capture,
+        } => {
+            let registry = crate::types::CrateRegistry::load(&crates_dir)
+                .expect("Failed to load crate registry");
+            let Some((crate_state, _)) = registry.find_grammar(&grammar) else {
+                eprintln!("Unknown grammar `{}`", grammar);
+                std::process::exit(1);
+            };
+
+            let manifest = crate_state.crate_path.join("Cargo.toml");
+            println!(
+                "{} Running grammar tests for {} ({})",
+                "→".blue(),
+                grammar,
+                manifest.as_str()
+            );
+
+            let mut cmd = StdCommand::new("cargo");
+            cmd.arg("test")
+                .arg("--manifest-path")
+                .arg(manifest.as_str());
+            if no_capture {
+                cmd.arg("--").arg("--nocapture");
+            }
+            let status = cmd.status().expect("Failed to run cargo test");
+
+            if !status.success() {
+                std::process::exit(status.code().unwrap_or(1));
             }
         }
         Command::Clean => {

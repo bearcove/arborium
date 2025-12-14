@@ -30,11 +30,12 @@ pub use arborium_tree_sitter as tree_sitter;
 
 use std::collections::HashSet;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use arborium_highlight::{CompiledGrammar, GrammarConfig, ParseContext};
 use arborium_tree_sitter::Language;
 use arborium_tree_sitter::{Node, Parser};
+use tree_sitter_language::LanguageFn;
 
 // Re-export CAPTURE_NAMES from arborium-theme as HIGHLIGHT_NAMES for convenience
 pub use arborium_theme::CAPTURE_NAMES as HIGHLIGHT_NAMES_FULL;
@@ -46,6 +47,38 @@ struct CorpusTest {
     contains: Vec<String>,
     expected_sexp: Option<String>,
 }
+
+#[derive(Debug, Clone)]
+pub struct CorpusCase {
+    pub file: PathBuf,
+    pub name: String,
+    pub input: String,
+    pub contains: Vec<String>,
+    pub expected_sexp: Option<String>,
+}
+
+#[derive(Debug)]
+pub struct HarnessError {
+    message: String,
+}
+
+impl HarnessError {
+    fn new(message: impl Into<String>) -> Self {
+        Self {
+            message: message.into(),
+        }
+    }
+}
+
+impl std::fmt::Display for HarnessError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl std::error::Error for HarnessError {}
+
+type HarnessResult<T = ()> = Result<T, HarnessError>;
 
 /// Tests a grammar by validating its queries and highlighting all samples.
 ///
@@ -168,123 +201,209 @@ pub fn test_grammar(
 /// - `sexp`: expected root s-expression (exact match).
 ///
 /// This does **not** use `tree-sitter test`; it's a lightweight Rust runner.
-pub fn test_corpus(language: impl Into<Language>, name: &str, crate_dir: &str) {
-    let language: Language = language.into();
+pub fn test_corpus(language: LanguageFn, name: &str, crate_dir: &str) {
+    let cases = collect_corpus_cases(crate_dir).unwrap_or_else(|e| {
+        panic!(
+            "Failed to gather corpus cases for {} (crate dir {}): {}",
+            name, crate_dir, e
+        )
+    });
+
+    for case in &cases {
+        if let Err(err) = run_corpus_case(language, name, case) {
+            panic!(
+                "Corpus failure for {} / {} (file {}): {}",
+                name,
+                case.name,
+                case.file.display(),
+                err
+            );
+        }
+    }
+}
+
+/// Return all `.txt` corpus files for a grammar crate.
+pub fn corpus_files(crate_dir: &str) -> Vec<PathBuf> {
     let crate_path = Path::new(crate_dir);
     let corpus_dir = crate_path.join("corpus");
     if !corpus_dir.exists() {
-        return;
+        return Vec::new();
     }
 
-    let mut parser = Parser::new();
-    parser
-        .set_language(&language)
-        .unwrap_or_else(|e| panic!("Failed to set language for {}: {:?}", name, e));
-
-    let mut entries: Vec<_> = fs::read_dir(&corpus_dir)
-        .unwrap_or_else(|e| {
-            panic!(
-                "Failed to read corpus dir for {}: {:?} ({})",
-                name,
-                e,
-                corpus_dir.display()
-            )
-        })
-        .filter_map(|e| e.ok())
-        .map(|e| e.path())
-        .filter(|p| p.is_file() && p.extension().is_some_and(|ext| ext == "txt"))
-        .collect();
+    let mut entries: Vec<_> = match fs::read_dir(&corpus_dir) {
+        Ok(read_dir) => read_dir
+            .filter_map(|e| e.ok())
+            .map(|e| e.path())
+            .filter(|p| p.is_file() && p.extension().is_some_and(|ext| ext == "txt"))
+            .collect(),
+        Err(_) => Vec::new(),
+    };
     entries.sort();
+    entries
+}
 
-    if entries.is_empty() {
-        return;
+/// Parse every corpus file and yield a case per `=== test`.
+pub fn collect_corpus_cases(crate_dir: &str) -> HarnessResult<Vec<CorpusCase>> {
+    let files = corpus_files(crate_dir);
+    if files.is_empty() {
+        return Ok(Vec::new());
     }
 
-    for path in entries {
-        let content = fs::read_to_string(&path).unwrap_or_else(|e| {
-            panic!(
-                "Failed to read corpus file {} for {}: {}",
+    let mut cases = Vec::new();
+    for path in files {
+        let content = fs::read_to_string(&path).map_err(|e| {
+            HarnessError::new(format!(
+                "Failed to read corpus file {}: {}",
                 path.display(),
-                name,
                 e
-            );
-        });
+            ))
+        })?;
 
-        let tests = parse_corpus(&content).unwrap_or_else(|e| {
-            panic!(
-                "Failed to parse corpus file {} for {}: {}",
+        let tests = parse_corpus(&content).map_err(|e| {
+            HarnessError::new(format!(
+                "Failed to parse corpus file {}: {}",
                 path.display(),
-                name,
                 e
-            );
-        });
+            ))
+        })?;
 
         if tests.is_empty() {
-            panic!(
-                "Corpus file {} for {} contains no tests",
-                path.display(),
-                name
-            );
+            return Err(HarnessError::new(format!(
+                "Corpus file {} contains no tests",
+                path.display()
+            )));
         }
 
         for test in tests {
-            let tree = parser.parse(&test.input, None).unwrap_or_else(|| {
-                panic!(
-                    "Parser returned no tree for {} / {} (file {})",
-                    name,
-                    test.name,
-                    path.display()
-                )
+            cases.push(CorpusCase {
+                file: path.clone(),
+                name: test.name,
+                input: test.input,
+                contains: test.contains,
+                expected_sexp: test.expected_sexp,
             });
+        }
+    }
 
-            let root = tree.root_node();
-            if root.has_error() {
-                panic!(
-                    "Parse errors for {} / {} (file {})\n--- input ---\n{}\n--- sexp ---\n{}",
+    Ok(cases)
+}
+
+/// Execute all tests defined in a single corpus file.
+pub fn run_corpus_file(language: LanguageFn, name: &str, path: &Path) -> HarnessResult<()> {
+    let content = fs::read_to_string(path).map_err(|e| {
+        HarnessError::new(format!(
+            "Failed to read corpus file {} for {}: {}",
+            path.display(),
+            name,
+            e
+        ))
+    })?;
+
+    let tests = parse_corpus(&content).map_err(|e| {
+        HarnessError::new(format!(
+            "Failed to parse corpus file {} for {}: {}",
+            path.display(),
+            name,
+            e
+        ))
+    })?;
+
+    if tests.is_empty() {
+        return Err(HarnessError::new(format!(
+            "Corpus file {} for {} contains no tests",
+            path.display(),
+            name
+        )));
+    }
+
+    for test in tests {
+        let case = CorpusCase {
+            file: path.to_path_buf(),
+            name: test.name,
+            input: test.input,
+            contains: test.contains,
+            expected_sexp: test.expected_sexp,
+        };
+        run_corpus_case(language, name, &case)?;
+    }
+
+    Ok(())
+}
+
+/// Execute a single corpus test case.
+pub fn run_corpus_case(language: LanguageFn, name: &str, case: &CorpusCase) -> HarnessResult<()> {
+    if case.input.trim().is_empty() {
+        return Err(HarnessError::new(format!(
+            "Corpus test {} / {} (file {}) is missing an `--- input` section",
+            name,
+            case.name,
+            case.file.display()
+        )));
+    }
+
+    let language = Language::from(language);
+    let mut parser = Parser::new();
+    parser
+        .set_language(&language)
+        .map_err(|e| HarnessError::new(format!("Failed to set language for {}: {:?}", name, e)))?;
+
+    let tree = parser.parse(&case.input, None).ok_or_else(|| {
+        HarnessError::new(format!(
+            "Parser returned no tree for {} / {} (file {})",
+            name,
+            case.name,
+            case.file.display()
+        ))
+    })?;
+
+    let root = tree.root_node();
+    if root.has_error() {
+        return Err(HarnessError::new(format!(
+            "Parse errors for {} / {} (file {})\n--- input ---\n{}\n--- sexp ---\n{}",
+            name,
+            case.name,
+            case.file.display(),
+            case.input,
+            root.to_sexp()
+        )));
+    }
+
+    if let Some(expected) = &case.expected_sexp {
+        let actual = root.to_sexp();
+        if actual.trim() != expected.trim() {
+            return Err(HarnessError::new(format!(
+                "S-expression mismatch for {} / {} (file {})\n--- input ---\n{}\n--- expected ---\n{}\n--- actual ---\n{}",
+                name,
+                case.name,
+                case.file.display(),
+                case.input,
+                expected,
+                actual
+            )));
+        }
+    }
+
+    if !case.contains.is_empty() {
+        let mut seen: HashSet<&str> = HashSet::new();
+        collect_kinds(root, &mut seen);
+
+        for kind in &case.contains {
+            if !seen.contains(kind.as_str()) {
+                return Err(HarnessError::new(format!(
+                    "Expected node kind `{}` not found for {} / {} (file {})\n--- input ---\n{}\n--- seen ---\n{:?}\n--- sexp ---\n{}",
+                    kind,
                     name,
-                    test.name,
-                    path.display(),
-                    test.input,
-                    root.to_sexp(),
-                );
-            }
-
-            if let Some(expected) = &test.expected_sexp {
-                let actual = root.to_sexp();
-                if actual.trim() != expected.trim() {
-                    panic!(
-                        "S-expression mismatch for {} / {} (file {})\n--- input ---\n{}\n--- expected ---\n{}\n--- actual ---\n{}",
-                        name,
-                        test.name,
-                        path.display(),
-                        test.input,
-                        expected,
-                        actual
-                    );
-                }
-            }
-
-            if !test.contains.is_empty() {
-                let mut seen: HashSet<&str> = HashSet::new();
-                collect_kinds(root, &mut seen);
-
-                for kind in &test.contains {
-                    if !seen.contains(kind.as_str()) {
-                        panic!(
-                            "Expected node kind `{}` not found for {} / {} (file {})\n--- input ---\n{}\n--- seen ---\n{:?}\n--- sexp ---\n{}",
-                            kind,
-                            name,
-                            test.name,
-                            path.display(),
-                            test.input,
-                            seen,
-                            root.to_sexp()
-                        );
-                    }
-                }
+                    case.name,
+                    case.file.display(),
+                    case.input,
+                    seen,
+                    root.to_sexp()
+                )));
             }
         }
     }
+
+    Ok(())
 }
 
 fn collect_kinds(node: Node, out: &mut HashSet<&str>) {
@@ -295,7 +414,7 @@ fn collect_kinds(node: Node, out: &mut HashSet<&str>) {
     }
 }
 
-fn parse_corpus(content: &str) -> Result<Vec<CorpusTest>, String> {
+fn parse_corpus(content: &str) -> HarnessResult<Vec<CorpusTest>> {
     let mut tests: Vec<CorpusTest> = Vec::new();
     let mut current: Option<CorpusTest> = None;
     let mut section: Option<String> = None;
@@ -325,11 +444,11 @@ fn parse_corpus(content: &str) -> Result<Vec<CorpusTest>, String> {
             if trimmed.is_empty() || trimmed.starts_with('#') {
                 continue;
             }
-            return Err(format!(
+            return Err(HarnessError::new(format!(
                 "Unexpected content before first test at line {}: {}",
                 idx + 1,
                 trimmed
-            ));
+            )));
         };
 
         match section.as_deref() {
@@ -348,17 +467,21 @@ fn parse_corpus(content: &str) -> Result<Vec<CorpusTest>, String> {
                 }
             }
             Some(other) => {
-                return Err(format!("Unknown section `{}` at line {}", other, idx + 1));
+                return Err(HarnessError::new(format!(
+                    "Unknown section `{}` at line {}",
+                    other,
+                    idx + 1
+                )));
             }
             None => {
                 if trimmed.is_empty() || trimmed.starts_with('#') {
                     continue;
                 }
-                return Err(format!(
+                return Err(HarnessError::new(format!(
                     "Content outside a section at line {}: {}",
                     idx + 1,
                     trimmed
-                ));
+                )));
             }
         }
     }

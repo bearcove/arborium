@@ -170,7 +170,7 @@ static bool scan_raw_string(TSLexer *lexer) {
         advance(lexer);
     }
 
-    if (hashes == 0 || lexer->lookahead != '"') {
+    if (lexer->lookahead != '"') {
         return false;
     }
 
@@ -223,4 +223,3 @@ bool tree_sitter_kdl_external_scanner_scan(void *payload, TSLexer *lexer, const 
 
     return false;
 }
-

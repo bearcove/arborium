@@ -17,7 +17,7 @@
 <% } %>
 ## Usage
 
-```rust
+```rust,ignore
 use <%= crate_name_snake %>::language;
 use tree_sitter_patched_arborium::Parser;
 

@@ -50,6 +50,7 @@ injections = [<%- injection_deps.iter().map(|d| format!("\"{}\"", d.crate_name))
 
 [dev-dependencies]
 arborium-test-harness = { version = "<%= dep_version %>", path = "<%= shared_rel %>/arborium-test-harness" }
+libtest-mimic = "0.8"
 
 # WASM allocator (only needed on WASM targets)
 [target.'cfg(target_family = "wasm")'.dependencies]
@@ -57,3 +58,11 @@ arborium-sysroot = { version = "<%= dep_version %>", path = "<%= shared_rel %>/a
 
 [build-dependencies]
 cc = "1"
+
+<% if enable_corpus_tests { %>
+
+[[test]]
+name = "corpus"
+path = "tests/corpus.rs"
+harness = false
+<% } %>

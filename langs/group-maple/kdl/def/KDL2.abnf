@@ -82,4 +82,3 @@ version :=
     '/-' unicode-space* 'kdl-version' unicode-space+ ('1' | '2')
     unicode-space* newline
 ```
-

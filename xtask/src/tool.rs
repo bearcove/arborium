@@ -78,7 +78,7 @@ impl Tool {
             Tool::Jco => None,
             Tool::WasmOpt => Some("binaryen"),
             Tool::Curl => Some("curl"),
-            Tool::WasmPack => None, // cargo install
+            Tool::WasmPack => None,    // cargo install
             Tool::WasmBindgen => None, // cargo install
         }
     }

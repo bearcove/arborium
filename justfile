@@ -21,3 +21,6 @@ docker-release tag:
 docker-login:
     @echo "Logging in to ghcr.io..."
     @gh auth token | docker login ghcr.io -u $(gh api user --jq .login) --password-stdin
+
+grammar-test lang:
+    cargo xtask grammar-test {{lang}}

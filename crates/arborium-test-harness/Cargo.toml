@@ -17,3 +17,4 @@ categories = ["development-tools::testing"]
 arborium-highlight = { version = "2.1.0", path = "../arborium-highlight", features = ["tree-sitter"] }
 arborium-theme = { version = "2.1.0", path = "../arborium-theme" }
 arborium-tree-sitter = { version = "2.1.0", path = "../arborium-tree-sitter" }
+tree-sitter-language = { version = "0.1", path = "../arborium-tree-sitter/language" }

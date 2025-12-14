@@ -156,23 +156,20 @@ module.exports = grammar({
     )),
 
     // node-children := '{' nodes final-node? '}'
-    node_children: $ => choice(
-      seq(
-        '{',
-        repeat($._line_space),
-        optional($.nodes),
-        repeat($._line_space),
-        repeat($._node_space),
-        '}',
-      ),
-      seq(
-        '{',
-        repeat($._line_space),
-        optional($.nodes),
+    // node-children := '{' nodes final-node? '}'  (KDL v2)
+    // We support either:
+    //   - one or more fully-terminated nodes (from `nodes`), optionally followed by a final node
+    //   - just a final node
+    node_children: $ => seq(
+      '{',
+      repeat($._line_space),
+      optional(choice(
+        seq($.nodes, optional($.final_node)),
         $.final_node,
-        repeat($._node_space),
-        '}',
-      ),
+      )),
+      repeat($._node_space),
+      repeat($._line_space),
+      '}',
     ),
 
     // slashdash := '/-' line-space*
@@ -275,9 +272,9 @@ module.exports = grammar({
       new RegExp(`\\\\(?:${UNICODE_SPACE_RE.source}|${NEWLINE_RE.source})+`),
     ),
 
-    // escape := ["\\bfnrts] | 'u{' hex-digit{1, 6} '}'
+    // escape := ["\\/bfnrts] | 'u{' hex-digit{1, 6} '}'
     escape: _ => token.immediate(
-      /\\\\|\\"|\\b|\\f|\\n|\\r|\\t|\\s|\\\/|\\u\{[0-9a-fA-F]{1,6}\}/,
+      /\\\\|\\"|\\b|\\f|\\n|\\r|\\t|\\\/|\\u\{[0-9a-fA-F]{1,6}\}/,
     ),
 
     // Numbers

@@ -750,6 +750,18 @@ impl CrateRegistry {
         Ok(Self { crates })
     }
 
+    /// Find a grammar by ID, returning its crate state and grammar config.
+    pub fn find_grammar(&self, grammar_id: &str) -> Option<(&CrateState, &GrammarConfig)> {
+        self.crates.values().find_map(|state| {
+            let config = state.config.as_ref()?;
+            config
+                .grammars
+                .iter()
+                .find(|grammar| grammar.id() == grammar_id)
+                .map(|grammar| (state, grammar))
+        })
+    }
+
     /// Scan a single crate directory.
     fn scan_crate_new_structure(
         name: &str,

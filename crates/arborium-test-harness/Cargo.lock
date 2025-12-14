@@ -35,6 +35,7 @@ dependencies = [
  "arborium-highlight",
  "arborium-theme",
  "arborium-tree-sitter",
+ "tree-sitter-language",
 ]
 
 [[package]]

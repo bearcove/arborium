@@ -69,6 +69,7 @@ struct CargoTomlTemplate<'a> {
     highlights_prepend_deps: &'a [HighlightDep],
     /// Optional crates for language injections (e.g., JS/CSS for HTML)
     injection_deps: &'a [HighlightDep],
+    enable_corpus_tests: bool,
 }
 
 #[derive(TemplateSimple)]
@@ -92,6 +93,14 @@ struct LibRsTemplate<'a> {
     /// Crate names to prepend highlights from, in order
     /// e.g. ["arborium_c"] for C++ inheriting from C
     highlights_prepend: Vec<String>,
+}
+
+#[derive(TemplateSimple)]
+#[template(path = "corpus_tests.stpl.rs")]
+struct CorpusTestsTemplate<'a> {
+    generated_disclaimer: &'a str,
+    crate_name_snake: &'a str,
+    grammar_id: &'a str,
 }
 
 #[derive(TemplateSimple)]
@@ -626,6 +635,7 @@ fn generate_cargo_toml(
     shared_rel: &str,
     highlights_prepend_deps: &[HighlightDep],
     injection_deps: &[HighlightDep],
+    enable_corpus_tests: bool,
 ) -> String {
     let grammar = config.grammars.first();
 
@@ -660,6 +670,7 @@ fn generate_cargo_toml(
         shared_rel,
         highlights_prepend_deps,
         injection_deps,
+        enable_corpus_tests,
     };
     template
         .render_once()
@@ -726,6 +737,19 @@ fn generate_lib_rs(
         highlights_prepend,
     };
     template.render_once().expect("LibRsTemplate render failed")
+}
+
+/// Generate tests/corpus.rs content for a grammar crate.
+fn generate_corpus_tests(crate_name: &str, grammar_id: &str) -> String {
+    let crate_name_snake = crate_name.replace('-', "_");
+    let template = CorpusTestsTemplate {
+        generated_disclaimer: &generated_disclaimer("corpus_tests.stpl.rs"),
+        crate_name_snake: &crate_name_snake,
+        grammar_id,
+    };
+    template
+        .render_once()
+        .expect("CorpusTestsTemplate render failed")
 }
 
 /// Generate README.md content for a grammar crate.
@@ -1462,6 +1486,16 @@ fn plan_crate_files_only(
     let mut plan = Plan::for_crate(&crate_state.name);
     let def_path = &crate_state.def_path;
     let crate_path = &crate_state.crate_path;
+    let grammar = config.grammars.first();
+    let grammar_id = grammar.map(|g| g.id.as_ref()).unwrap_or_else(|| {
+        crate_state
+            .name
+            .strip_prefix("arborium-")
+            .unwrap_or(&crate_state.name)
+    });
+    let tests_cursed = grammar.map(|g| g.tests_cursed()).unwrap_or(false);
+    let has_corpus = def_path.join("corpus").exists();
+    let enable_corpus_tests = has_corpus && !tests_cursed;
 
     // crate/ is at langs/group-*/lang/crate/
     // shared crates are at crates/ (repo root)
@@ -1491,6 +1525,7 @@ fn plan_crate_files_only(
         shared_rel,
         &highlight_prepends.cargo_deps,
         &injection_deps,
+        enable_corpus_tests,
     );
 
     if cargo_toml_path.exists() {
@@ -1588,6 +1623,26 @@ fn plan_crate_files_only(
             content: new_lib_rs,
             description: "Create src/lib.rs".to_string(),
         });
+    }
+
+    if enable_corpus_tests {
+        let tests_dir = crate_path.join("tests");
+        if !tests_dir.exists() {
+            plan.add(Operation::CreateDir {
+                path: tests_dir.clone(),
+                description: "Create tests directory".to_string(),
+            });
+        }
+
+        let corpus_tests_path = tests_dir.join("corpus.rs");
+        let corpus_tests_content = generate_corpus_tests(&crate_state.name, grammar_id);
+        plan_file_update(
+            &mut plan,
+            &corpus_tests_path,
+            corpus_tests_content,
+            "tests/corpus.rs",
+            mode,
+        )?;
     }
 
     // Mirror hand-written grammar sources into the crate so that the published

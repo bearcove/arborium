@@ -46,4 +46,5 @@
   (multi_line_comment)
 ] @comment @spell
 
+; Slashdash directives disable nodes and are treated like comments in KDL
 (slashdash) @comment
