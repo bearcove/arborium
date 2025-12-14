@@ -294,7 +294,12 @@ pub fn serve(crates_dir: &Utf8Path, addr: &str, port: Option<u16>, dev: bool) {
         generate_index_html(crates_dir, &demo_dir, &icons, &registry)
     });
 
-    // Step 4b: Generate IIFE demo HTML files
+    // Step 4b: Build IIFE bundle from packages/arborium
+    step("Building IIFE bundle", || {
+        build_iife_bundle(&repo_root, &demo_dir)
+    });
+
+    // Step 4c: Generate IIFE demo HTML files
     step("Generating IIFE demo HTML", || {
         generate_iife_demo_html(&demo_dir)
     });
@@ -860,6 +865,38 @@ fn generate_index_html(
 
     let html = template.render_once().map_err(|e| e.to_string())?;
     fs::write(&output_path, &html).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+fn build_iife_bundle(repo_root: &Path, demo_dir: &Path) -> Result<(), String> {
+    let packages_dir = repo_root.join("packages/arborium");
+
+    // Run npm/pnpm to build the IIFE
+    let status = std::process::Command::new("pnpm")
+        .arg("run")
+        .arg("build:iife")
+        .current_dir(&packages_dir)
+        .status()
+        .map_err(|e| format!("Failed to run pnpm build:iife: {}", e))?;
+
+    if !status.success() {
+        return Err(format!("pnpm build:iife failed with status: {}", status));
+    }
+
+    // Copy the built IIFE to demo/pkg
+    let src = packages_dir.join("dist/arborium.iife.js");
+    let dst = demo_dir.join("pkg/arborium.iife.js");
+
+    std::fs::copy(&src, &dst)
+        .map_err(|e| format!("Failed to copy IIFE from {:?} to {:?}: {}", src, dst, e))?;
+
+    // Also copy the source map if it exists
+    let src_map = packages_dir.join("dist/arborium.iife.js.map");
+    if src_map.exists() {
+        let dst_map = demo_dir.join("pkg/arborium.iife.js.map");
+        std::fs::copy(&src_map, &dst_map).ok(); // Ignore errors for source map
+    }
+
     Ok(())
 }
 
