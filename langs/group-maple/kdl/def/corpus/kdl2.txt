@@ -60,3 +60,43 @@ enabled 1 /- 2 3;
 --- contains
 slashdash
 
+=== node_children_final
+--- input
+tree {
+branch "left";
+twig "tip"
+}
+--- contains
+node_children
+final_node
+
+=== slashdash_nested
+--- input
+/- outer 0 {
+  /- inner 1;
+}
+--- contains
+slashdash
+node_children
+
+=== typed_values
+--- input
+typed (custom) name (string) "value" (time) #null;
+--- contains
+type
+keyword
+
+=== numeric_edge_cases
+--- input
+numbers 1.23e-4 0xFF 0o755 0b1010_0011;
+--- contains
+number
+--- sexp
+(document (node (node_no_terminator name: (string (identifier_string)) entry: (node_prop_or_arg (value (number (decimal) (exponent)))) entry: (node_prop_or_arg (value (number))) entry: (node_prop_or_arg (value (number))) entry: (node_prop_or_arg (value (number)))) (node_terminator)))
+
+=== bom_with_version
+--- input
+﻿/- kdl-version 2
+root;
+--- contains
+version_marker

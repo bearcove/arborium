@@ -78,6 +78,7 @@ module.exports = grammar({
     [$.prop, $.value],
     [$.value],
     [$.node_no_terminator],
+    [$.node, $.final_node],
   ],
 
   externals: $ => [
@@ -124,7 +125,7 @@ module.exports = grammar({
     ),
 
     // node := base-node node-terminator
-    node: $ => prec(1, seq($.node_no_terminator, $.node_terminator)),
+    node: $ => seq($.node_no_terminator, $.node_terminator),
 
     // final-node := base-node node-terminator?
     //
@@ -138,6 +139,7 @@ module.exports = grammar({
     // This is a pragmatic approximation of the v2 grammar that prioritizes
     // unambiguous parsing for highlighting and tooling.
     node_no_terminator: $ => prec.right(seq(
+      repeat($._node_space),
       optional($.slashdash),
       optional($.type),
       repeat($._node_space),
@@ -164,7 +166,7 @@ module.exports = grammar({
       '{',
       repeat($._line_space),
       optional(choice(
-        seq($.nodes, optional($.final_node)),
+        seq($.nodes, repeat($._line_space), optional($.final_node)),
         $.final_node,
       )),
       repeat($._node_space),
