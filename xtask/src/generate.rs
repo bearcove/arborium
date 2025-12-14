@@ -1201,9 +1201,10 @@ fn generate_all_grammars(
     let total_count = cache_hits_count + cache_misses_count;
 
     println!(
-        "  {} Generated {} parsers ({} fresh, {:.2}s)",
+        "  {} Generated {} parsers ({} fresh, {} regenerated, {:.2}s)",
         "✓".green(),
         total_count,
+        cache_hits_count,
         cache_misses_count,
         elapsed.as_secs_f64()
     );

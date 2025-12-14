@@ -1,5 +1,5 @@
 # Docker image for arborium CI
-# Build: docker build -t ghcr.io/bearcove/arborium-plugin-builder:latest -f .github/docker/Dockerfile.plugin-builder .
+# Build: docker build -t ghcr.io/bearcove/arborium-plugin-builder:latest -f Dockerfile.ci .
 # Push:  docker push ghcr.io/bearcove/arborium-plugin-builder:latest
 
 FROM rust:1.91.1-trixie
@@ -44,5 +44,11 @@ RUN cargo --version \
     && jq --version \
     && cargo nextest --version \
     && wasm-pack --version
+
+# Install nightly toolchain with wasm32-unknown-unknown target and rust-src (for plugin builds)
+# Placed at end to maximize cache reuse for earlier layers
+RUN rustup toolchain install nightly \
+    && rustup target add wasm32-unknown-unknown --toolchain nightly \
+    && rustup component add rust-src --toolchain nightly
 
 WORKDIR /workspace

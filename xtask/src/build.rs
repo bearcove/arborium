@@ -44,7 +44,8 @@ fn run_cmd_status(mut cmd: Command) -> std::io::Result<ExitStatus> {
     cmd.status()
 }
 
-/// Ensure nightly toolchain and wasm32-unknown-unknown target are installed
+/// Verify nightly toolchain with wasm32-unknown-unknown target and rust-src are available.
+/// These should be pre-installed in CI (via Dockerfile.ci) or locally by the developer.
 fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
     // Check if nightly toolchain is installed
     let mut cmd = Command::new("rustup");
@@ -57,17 +58,9 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
     let has_nightly = toolchains.lines().any(|line| line.contains("nightly"));
 
     if !has_nightly {
-        println!("{} Installing nightly toolchain...", "●".cyan());
-        let mut cmd = Command::new("rustup");
-        cmd.args(["toolchain", "install", "nightly"]);
-        let status = run_cmd_status(cmd)
-            .into_diagnostic()
-            .context("failed to install nightly toolchain")?;
-
-        if !status.success() {
-            miette::bail!("failed to install nightly toolchain");
-        }
-        println!("{} Nightly toolchain installed", "✓".green());
+        miette::bail!(
+            "nightly toolchain not found. Install with: rustup toolchain install nightly"
+        );
     }
 
     // Check if wasm32-unknown-unknown target is installed for nightly
@@ -83,20 +76,9 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
         .any(|line| line.trim() == "wasm32-unknown-unknown");
 
     if !has_wasm_target {
-        println!(
-            "{} Installing wasm32-unknown-unknown target for nightly...",
-            "●".cyan()
+        miette::bail!(
+            "wasm32-unknown-unknown target not found for nightly. Install with: rustup target add wasm32-unknown-unknown --toolchain nightly"
         );
-        let mut cmd = Command::new("rustup");
-        cmd.args(["+nightly", "target", "add", "wasm32-unknown-unknown"]);
-        let status = run_cmd_status(cmd)
-            .into_diagnostic()
-            .context("failed to add wasm32-unknown-unknown target")?;
-
-        if !status.success() {
-            miette::bail!("failed to add wasm32-unknown-unknown target");
-        }
-        println!("{} wasm32-unknown-unknown target installed", "✓".green());
     }
 
     // Check if rust-src component is installed for nightly (needed for -Zbuild-std)
@@ -110,20 +92,9 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
     let has_rust_src = components.lines().any(|line| line.starts_with("rust-src"));
 
     if !has_rust_src {
-        println!(
-            "{} Installing rust-src component for nightly (needed for -Zbuild-std)...",
-            "●".cyan()
+        miette::bail!(
+            "rust-src component not found for nightly. Install with: rustup component add rust-src --toolchain nightly"
         );
-        let mut cmd = Command::new("rustup");
-        cmd.args(["+nightly", "component", "add", "rust-src"]);
-        let status = run_cmd_status(cmd)
-            .into_diagnostic()
-            .context("failed to add rust-src component")?;
-
-        if !status.success() {
-            miette::bail!("failed to add rust-src component");
-        }
-        println!("{} rust-src component installed", "✓".green());
     }
 
     Ok(())
@@ -585,11 +556,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         options.jobs
     );
 
-    // Ensure nightly toolchain and wasm32-unknown-unknown target are installed
-    println!(
-        "{} Checking nightly toolchain and wasm target...",
-        "●".cyan()
-    );
+    // Verify nightly toolchain and wasm32-unknown-unknown target are available
     ensure_rust_nightly_with_wasm_target()?;
 
     let wasm_bindgen = Tool::WasmBindgen
