@@ -1,3 +1,5 @@
+/- kdl-version 2
+
 document {
     info {
         title "KDL Schema" lang=en
@@ -21,6 +23,18 @@ document {
         children id=node-children {
             node node-names id=node-names-node description="Validations to apply specifically to arbitrary node names" {
                 children ref=#"[id="validations"]"#
+            }
+            node kdl2-preview description="Examples of KDL 2.0 syntax in use" {
+                node directives id=slashed {
+                    /- hash-values #true #-inf #nan #null
+                }
+                node hashed-raw {
+                    value ##"""
+Line one
+""" literal triple quote
+Line two
+"""##
+                }
             }
             node other-nodes-allowed id=other-nodes-allowed-node description="Whether to allow child nodes other than the ones explicitly listed. Defaults to '#false'." {
                 max 1
