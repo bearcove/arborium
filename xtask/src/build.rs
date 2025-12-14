@@ -38,12 +38,6 @@ fn run_cmd_output(mut cmd: Command) -> std::io::Result<std::process::Output> {
     cmd.output()
 }
 
-/// Run a command, print it first, and return status
-fn run_cmd_status(mut cmd: Command) -> std::io::Result<ExitStatus> {
-    print_cmd(&cmd);
-    cmd.status()
-}
-
 /// Verify nightly toolchain with wasm32-unknown-unknown target and rust-src are available.
 /// These should be pre-installed in CI (via Dockerfile.ci) or locally by the developer.
 fn ensure_rust_nightly_with_wasm_target() -> Result<()> {

@@ -229,6 +229,11 @@ enum PublishAction {
         #[facet(args::named, default)]
         verbose: bool,
     },
+
+    /// Show the topological levels for grammar crate publication order
+    ///
+    /// Useful for debugging and understanding the dependency structure.
+    ShowLevels,
 }
 
 fn main() {
@@ -455,6 +460,13 @@ fn main() {
                     let output_dir = repo_root.join("langs");
                     if let Err(e) = publish::publish_all(&repo_root, &output_dir, dry_run, verbose)
                     {
+                        eprintln!("{:?}", e);
+                        std::process::exit(1);
+                    }
+                }
+                PublishAction::ShowLevels => {
+                    let langs_dir = repo_root.join("langs");
+                    if let Err(e) = publish::show_levels(&repo_root, &langs_dir) {
                         eprintln!("{:?}", e);
                         std::process::exit(1);
                     }

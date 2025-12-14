@@ -23,7 +23,6 @@ use std::collections::HashMap;
 use std::process::{Command, Stdio};
 
 use crate::tool::Tool;
-use crate::types::CrateRegistry;
 use crate::version_store;
 
 /// Crates in the "pre" group - must be published before grammar crates.
@@ -622,6 +621,69 @@ fn crate_version_exists(crate_name: &str, version: &str) -> Result<bool> {
     Ok(false)
 }
 
+/// Maximum number of retry attempts for transient publish failures.
+const MAX_PUBLISH_RETRIES: u32 = 3;
+
+/// Initial backoff delay in milliseconds.
+const INITIAL_BACKOFF_MS: u64 = 1000;
+
+/// Publish a single crate with retry logic for transient failures.
+///
+/// Retries up to MAX_PUBLISH_RETRIES times with exponential backoff for
+/// transient errors (network issues, timeouts). Does not retry for permanent
+/// errors (already exists, validation failures).
+fn publish_single_crate_with_retry(
+    crate_dir: &Utf8Path,
+    dry_run: bool,
+    verbose: bool,
+) -> Result<(CratePublishResult, Option<(String, String)>)> {
+    let mut last_error = None;
+
+    for attempt in 0..=MAX_PUBLISH_RETRIES {
+        if attempt > 0 {
+            let backoff_ms = INITIAL_BACKOFF_MS * 2u64.pow(attempt - 1);
+            eprintln!(
+                "      {} Retry {} after {}ms...",
+                "↻".yellow(),
+                attempt,
+                backoff_ms
+            );
+            std::thread::sleep(std::time::Duration::from_millis(backoff_ms));
+        }
+
+        match publish_single_crate(crate_dir, dry_run, verbose) {
+            Ok(result) => return Ok(result),
+            Err(e) => {
+                let error_str = format!("{:?}", e);
+                // Check if this is a transient error worth retrying
+                let is_transient = error_str.contains("network")
+                    || error_str.contains("timeout")
+                    || error_str.contains("connection")
+                    || error_str.contains("503")
+                    || error_str.contains("502")
+                    || error_str.contains("500")
+                    || error_str.contains("temporarily unavailable");
+
+                if is_transient && attempt < MAX_PUBLISH_RETRIES {
+                    eprintln!(
+                        "      {} Transient error: {}",
+                        "⚠".yellow(),
+                        error_str.dimmed()
+                    );
+                    last_error = Some(e);
+                    continue;
+                }
+
+                // Non-transient error or out of retries
+                return Err(e);
+            }
+        }
+    }
+
+    // Should not reach here, but return last error if we do
+    Err(last_error.unwrap_or_else(|| miette::miette!("Unknown error after retries")))
+}
+
 /// Publish a single crate.
 /// Returns the publish result and optionally the (name, version) tuple for tracking.
 fn publish_single_crate(
@@ -853,24 +915,109 @@ fn find_group_crates(langs_dir: &Utf8Path, group_name: &str) -> Result<Vec<Utf8P
     Ok(crates)
 }
 
+/// Show the topological levels for grammar crate publication order.
+///
+/// This is useful for debugging and understanding the dependency structure.
+pub fn show_levels(repo_root: &Utf8Path, langs_dir: &Utf8Path) -> Result<()> {
+    println!("{}", "Grammar crate publication levels:".cyan().bold());
+    println!();
+
+    let levels = topological_sort_grammar_crates(repo_root, langs_dir)?;
+
+    for (level_idx, level_crates) in levels.iter().enumerate() {
+        println!(
+            "  {} Level {} ({} crates):",
+            "●".cyan(),
+            level_idx,
+            level_crates.len()
+        );
+        for crate_path in level_crates {
+            if let Ok((name, _)) = read_crate_info(crate_path) {
+                // Get dependencies for this crate
+                let deps = extract_arborium_deps(crate_path).unwrap_or_default();
+                if deps.is_empty() {
+                    println!("      {} {}", "→".blue(), name);
+                } else {
+                    println!(
+                        "      {} {} (depends on: {})",
+                        "→".blue(),
+                        name,
+                        deps.join(", ").dimmed()
+                    );
+                }
+            }
+        }
+        println!();
+    }
+
+    let total: usize = levels.iter().map(|l| l.len()).sum();
+    println!(
+        "{} Total: {} crates across {} levels",
+        "✓".green().bold(),
+        total,
+        levels.len()
+    );
+
+    Ok(())
+}
+
+/// Extract arborium-* dependencies from a crate's Cargo.toml.
+///
+/// Parses the actual Cargo.toml file (the source of truth) rather than
+/// relying on KDL config metadata. This ensures publication order matches
+/// real dependency relationships.
+fn extract_arborium_deps(crate_dir: &Utf8Path) -> Result<Vec<String>> {
+    let cargo_toml_path = crate_dir.join("Cargo.toml");
+    let content = fs_err::read_to_string(&cargo_toml_path)
+        .into_diagnostic()
+        .wrap_err_with(|| format!("Failed to read {}", cargo_toml_path))?;
+
+    let doc: toml_edit::DocumentMut = content
+        .parse()
+        .into_diagnostic()
+        .wrap_err_with(|| format!("Failed to parse {}", cargo_toml_path))?;
+
+    let mut deps = Vec::new();
+
+    // Check [dependencies] section
+    if let Some(deps_table) = doc.get("dependencies").and_then(|d| d.as_table()) {
+        for (name, _) in deps_table {
+            // Only include arborium-* grammar crates, not infrastructure crates
+            if name.starts_with("arborium-")
+                && name != "arborium-sysroot"
+                && name != "arborium-test-harness"
+                && name != "arborium-tree-sitter"
+                && name != "arborium-highlight"
+                && name != "arborium-theme"
+                && name != "tree-sitter-language"
+            {
+                deps.push(name.to_string());
+            }
+        }
+    }
+
+    Ok(deps)
+}
+
 /// Collect ALL grammar crates and sort them topologically by dependencies.
 ///
+/// Returns crates grouped into "levels" for parallel publishing:
+/// - Level 0: Crates with no dependencies on other grammar crates
+/// - Level 1: Crates that only depend on Level 0 crates
+/// - Level N: Crates that only depend on Level 0..N-1 crates
+///
 /// This ensures crates are published leaves-first: if crate A depends on crate B,
-/// then B will appear before A in the returned list.
+/// then B will be in an earlier level than A. Crates within the same level
+/// can be published in parallel since they don't depend on each other.
 fn topological_sort_grammar_crates(
-    repo_root: &Utf8Path,
+    _repo_root: &Utf8Path,
     langs_dir: &Utf8Path,
-) -> Result<Vec<Utf8PathBuf>> {
-    let crates_dir = repo_root.join("crates");
-
-    // Load the registry to get dependency information
-    let registry = CrateRegistry::load(&crates_dir)
-        .map_err(|e| miette::miette!("failed to load crate registry: {}", e))?;
+) -> Result<Vec<Vec<Utf8PathBuf>>> {
+    use petgraph::graph::DiGraph;
+    use petgraph::graph::NodeIndex;
 
     // Build a map from crate name -> crate path
-    // and a map from crate name -> dependencies (other arborium crate names)
     let mut crate_paths: HashMap<String, Utf8PathBuf> = HashMap::new();
-    let mut dependencies: HashMap<String, Vec<String>> = HashMap::new();
 
     // Collect all grammar crates from all groups
     let groups = find_all_groups(langs_dir)?;
@@ -880,168 +1027,191 @@ fn topological_sort_grammar_crates(
             // Extract crate name from Cargo.toml
             if let Ok((name, _)) = read_crate_info(&crate_path) {
                 crate_paths.insert(name.clone(), crate_path);
-                dependencies.insert(name, Vec::new());
             }
         }
     }
 
-    // Now fill in dependencies from the registry
-    for (_, _state, config) in registry.configured_crates() {
-        for grammar in &config.grammars {
-            let crate_name = format!("arborium-{}", grammar.id());
+    // Build dependency graph from actual Cargo.toml files
+    let mut graph: DiGraph<String, ()> = DiGraph::new();
+    let mut node_indices: HashMap<String, NodeIndex> = HashMap::new();
 
-            // Only process if this crate is in our map
-            if !crate_paths.contains_key(&crate_name) {
-                continue;
-            }
-
-            // Add dependencies from grammar config (compile-time deps)
-            for dep in &grammar.dependencies {
-                // dep.krate is like "arborium-c"
-                if crate_paths.contains_key(&dep.krate) {
-                    dependencies
-                        .get_mut(&crate_name)
-                        .unwrap()
-                        .push(dep.krate.clone());
-                }
-            }
-
-            // Add injection dependencies (e.g., HTML depends on CSS/JS)
-            if let Some(ref injections) = grammar.injections {
-                for lang_id in &injections.values {
-                    let dep_crate = format!("arborium-{}", lang_id);
-                    if crate_paths.contains_key(&dep_crate) {
-                        dependencies.get_mut(&crate_name).unwrap().push(dep_crate);
-                    }
-                }
-            }
-        }
-    }
-
-    // Topological sort using Kahn's algorithm
-    // in_degree[X] = number of crates X depends on
-    let mut in_degree: HashMap<String, usize> = HashMap::new();
-    for (name, deps) in &dependencies {
-        in_degree.insert(name.clone(), deps.len());
-    }
-
-    // Build reverse dependency map: dependents[X] = crates that depend on X
-    let mut dependents: HashMap<String, Vec<String>> = HashMap::new();
+    // Add all crates as nodes
     for name in crate_paths.keys() {
-        dependents.insert(name.clone(), Vec::new());
+        let idx = graph.add_node(name.clone());
+        node_indices.insert(name.clone(), idx);
     }
-    for (name, deps) in &dependencies {
+
+    // Add edges based on actual Cargo.toml dependencies
+    for (name, path) in &crate_paths {
+        let deps = extract_arborium_deps(path)?;
         for dep in deps {
-            if let Some(list) = dependents.get_mut(dep) {
-                list.push(name.clone());
+            // Only add edge if the dependency is also a grammar crate we're publishing
+            if let (Some(&from), Some(&to)) = (node_indices.get(name), node_indices.get(&dep)) {
+                // Edge goes from dependent -> dependency (A depends on B means A -> B)
+                graph.add_edge(from, to, ());
             }
         }
     }
 
-    // Start with crates that have no dependencies (in_degree == 0)
-    let mut queue: Vec<String> = in_degree
-        .iter()
-        .filter(|(_, deg)| **deg == 0)
-        .map(|(name, _)| name.clone())
-        .collect();
-    queue.sort(); // Deterministic order for crates at same level
+    // Topological sort using petgraph
+    let sorted = petgraph::algo::toposort(&graph, None).map_err(|cycle| {
+        let cycle_node = &graph[cycle.node_id()];
+        miette::miette!("Dependency cycle detected involving: {}", cycle_node)
+    })?;
 
-    let mut sorted: Vec<String> = Vec::new();
+    // Group nodes into levels by depth (BFS from leaves)
+    // Depth = longest path from this node to any leaf
+    let mut depths: HashMap<NodeIndex, usize> = HashMap::new();
 
-    while let Some(name) = queue.pop() {
-        sorted.push(name.clone());
+    // Process in reverse topological order (leaves first)
+    for &node_idx in sorted.iter().rev() {
+        // Get max depth of all dependencies, then add 1
+        let max_dep_depth = graph
+            .neighbors(node_idx)
+            .filter_map(|dep| depths.get(&dep))
+            .max()
+            .copied()
+            .unwrap_or(0);
 
-        // For each crate that depends on this one, decrement its in-degree
-        if let Some(deps_on_me) = dependents.get(&name) {
-            for dependent in deps_on_me {
-                if let Some(deg) = in_degree.get_mut(dependent) {
-                    *deg -= 1;
-                    if *deg == 0 {
-                        queue.push(dependent.clone());
-                        queue.sort(); // Keep deterministic
-                    }
-                }
-            }
+        // If no dependencies, depth is 0; otherwise depth is max_dep_depth + 1
+        let has_deps = graph.neighbors(node_idx).next().is_some();
+        let depth = if has_deps { max_dep_depth + 1 } else { 0 };
+        depths.insert(node_idx, depth);
+    }
+
+    // Group by depth
+    let max_depth = depths.values().max().copied().unwrap_or(0);
+    let mut levels: Vec<Vec<Utf8PathBuf>> = vec![Vec::new(); max_depth + 1];
+
+    for (name, &node_idx) in &node_indices {
+        let depth = depths.get(&node_idx).copied().unwrap_or(0);
+        if let Some(path) = crate_paths.get(name) {
+            levels[depth].push(path.clone());
         }
     }
 
-    // Check for cycles
-    if sorted.len() != crate_paths.len() {
-        let remaining: Vec<_> = crate_paths.keys().filter(|k| !sorted.contains(k)).collect();
-        return Err(miette::miette!(
-            "Dependency cycle detected involving: {:?}",
-            remaining
-        ));
+    // Sort each level for deterministic output
+    for level in &mut levels {
+        level.sort();
     }
 
-    // Convert names back to paths
-    let result: Vec<Utf8PathBuf> = sorted
-        .into_iter()
-        .filter_map(|name| crate_paths.remove(&name))
-        .collect();
+    // Remove empty levels (shouldn't happen, but be safe)
+    levels.retain(|level| !level.is_empty());
 
-    Ok(result)
+    Ok(levels)
 }
 
 /// Publish grammar crates in topological order and track their published versions.
+///
+/// Crates are published in "levels" with parallelism within each level:
+/// - Level 0: All crates with no grammar dependencies (published in parallel)
+/// - Level 1: All crates depending only on Level 0 (published in parallel after Level 0 completes)
+/// - etc.
+///
+/// This provides a barrier between levels (crates in Level N wait for Level N-1 to complete)
+/// while maximizing parallelism within each level.
+///
 /// Returns a HashMap of crate_name -> published_version for use in regenerating POST crates.
+/// Maximum number of concurrent crate publishes per level.
+/// crates.io has no rate limits (https://github.com/rust-lang/crates.io/issues/11685)
+/// but we limit concurrency to keep output readable and avoid potential issues.
+const MAX_PUBLISH_CONCURRENCY: usize = 8;
+
 fn publish_grammar_crates(
     repo_root: &Utf8Path,
     langs_dir: &Utf8Path,
     dry_run: bool,
     verbose: bool,
 ) -> Result<HashMap<String, String>> {
+    use rayon::prelude::*;
+    use std::sync::Mutex;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    // Create a thread pool with limited concurrency
+    let pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(MAX_PUBLISH_CONCURRENCY)
+        .build()
+        .into_diagnostic()
+        .wrap_err("Failed to create thread pool")?;
+
     println!(
-        "  {} Publishing {} (topologically sorted)...",
+        "  {} Publishing {} (topologically sorted with parallel levels)...",
         "●".cyan(),
         "grammar crates".bold()
     );
 
-    let sorted_crates = topological_sort_grammar_crates(repo_root, langs_dir)?;
-    println!(
-        "    {} crates to publish in dependency order",
-        sorted_crates.len()
-    );
+    let levels = topological_sort_grammar_crates(repo_root, langs_dir)?;
+    let total_crates: usize = levels.iter().map(|l| l.len()).sum();
 
-    let mut published = 0;
-    let mut skipped = 0;
-    let mut failed = 0;
-    let mut versions = HashMap::new();
+    println!("    {} crates across {} levels", total_crates, levels.len());
 
-    for crate_dir in &sorted_crates {
-        match publish_single_crate(crate_dir, dry_run, verbose)? {
-            (CratePublishResult::Published, Some((name, version))) => {
-                published += 1;
-                versions.insert(name, version);
+    let published = AtomicUsize::new(0);
+    let skipped = AtomicUsize::new(0);
+    let failed = AtomicUsize::new(0);
+    let versions = Mutex::new(HashMap::new());
+
+    for (level_idx, level_crates) in levels.iter().enumerate() {
+        println!(
+            "    {} Level {} ({} crates)...",
+            "→".blue(),
+            level_idx,
+            level_crates.len()
+        );
+
+        // Publish this level in parallel using rayon with limited concurrency
+        // The collect() at the end acts as a barrier - we wait for all crates in this level
+        // to finish before moving to the next level
+        let results: Vec<Result<(CratePublishResult, Option<(String, String)>)>> =
+            pool.install(|| {
+                level_crates
+                    .par_iter()
+                    .map(|crate_dir| publish_single_crate_with_retry(crate_dir, dry_run, verbose))
+                    .collect()
+            });
+
+        // Process results
+        for result in results {
+            match result? {
+                (CratePublishResult::Published, Some((name, version))) => {
+                    published.fetch_add(1, Ordering::Relaxed);
+                    versions.lock().unwrap().insert(name, version);
+                }
+                (CratePublishResult::AlreadyExists, Some((name, version))) => {
+                    skipped.fetch_add(1, Ordering::Relaxed);
+                    versions.lock().unwrap().insert(name, version);
+                }
+                (CratePublishResult::Failed, _) => {
+                    failed.fetch_add(1, Ordering::Relaxed);
+                }
+                (_, None) => {
+                    // Dry-run or other cases without version tracking
+                }
             }
-            (CratePublishResult::AlreadyExists, Some((name, version))) => {
-                skipped += 1;
-                versions.insert(name, version);
-            }
-            (CratePublishResult::Failed, _) => {
-                failed += 1;
-            }
-            (_, None) => {
-                // Dry-run or other cases without version tracking
-            }
+        }
+
+        // Check for failures after each level - don't continue if any failed
+        let failed_count = failed.load(Ordering::Relaxed);
+        if failed_count > 0 {
+            return Err(miette::miette!(
+                "{} grammar crates failed to publish in level {}",
+                failed_count,
+                level_idx
+            ));
         }
     }
 
-    if failed > 0 {
-        return Err(miette::miette!(
-            "{} grammar crates failed to publish",
-            failed
-        ));
-    }
+    let published_count = published.load(Ordering::Relaxed);
+    let skipped_count = skipped.load(Ordering::Relaxed);
+    let failed_count = failed.load(Ordering::Relaxed);
 
     println!(
         "    {} published, {} skipped, {} failed",
-        published.to_string().green(),
-        skipped.to_string().yellow(),
-        failed.to_string().red()
+        published_count.to_string().green(),
+        skipped_count.to_string().yellow(),
+        failed_count.to_string().red()
     );
 
-    Ok(versions)
+    Ok(versions.into_inner().unwrap())
 }
 
 /// Regenerate the umbrella crate (crates/arborium/Cargo.toml) with actual published versions.
