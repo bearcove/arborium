@@ -66,6 +66,12 @@ crates/arborium/src/store.rs
 # Generated theme code
 crates/arborium-theme/src/builtin_generated.rs
 
+# Generated demo/plugin manifests
+demo/index.html
+demo/plugins.json
+langs/plugins.json
+packages/arborium/src/plugins-manifest.ts
+
 # Generated NPM theme CSS files
 packages/arborium/src/themes/*.css
 
