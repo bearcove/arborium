@@ -12,18 +12,27 @@ use thiserror::Error;
 use crate::types::{CrateRegistry, CrateState, MIN_SAMPLE_LINES, SampleFileState};
 
 /// Options for running lints.
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct LintOptions {
     /// When true, missing generated files (parser.c) are errors.
     /// When false, they're warnings (useful before running `cargo xtask gen`).
     pub strict: bool,
+    /// Limit linting to these crate names (with or without `arborium-` prefix).
+    pub only: Option<Vec<String>>,
 }
 
 /// Run all lints on the registry.
 pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<()> {
     let registry = CrateRegistry::load(crates_dir).map_err(|e| miette::miette!("{e}"))?;
 
-    let total_crates = registry.crates.len();
+    let filter = options.only.clone();
+    let include = |name: &str| should_include_crate(name, filter.as_ref());
+    let total_crates = registry.crates.keys().filter(|name| include(name)).count();
+    if total_crates == 0 {
+        println!("No crates matched lint filter.");
+        return Ok(());
+    }
+
     // Three passes total
     let total_steps = total_crates * 3;
 
@@ -40,6 +49,9 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
 
     // First pass: check for crates without arborium.kdl
     for (name, state) in registry.iter() {
+        if !include(name) {
+            continue;
+        }
         pb.set_message(format!(
             "{} (pass 1/3)",
             name.strip_prefix("arborium-").unwrap_or(name)
@@ -58,11 +70,14 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
 
     // Second pass: lint each configured crate
     for (name, state, config) in registry.configured_crates() {
+        if !include(name) {
+            continue;
+        }
         pb.set_message(format!(
             "{} (pass 2/3)",
             name.strip_prefix("arborium-").unwrap_or(name)
         ));
-        let crate_diagnostics = lint_crate(name, state, config, options);
+        let crate_diagnostics = lint_crate(name, state, config, &options);
 
         if !crate_diagnostics.is_empty() {
             for diag in &crate_diagnostics {
@@ -83,6 +98,9 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
 
     // Third pass: check for legacy files
     for (name, state) in registry.iter() {
+        if !include(name) {
+            continue;
+        }
         pb.set_message(format!(
             "{} (pass 3/3)",
             name.strip_prefix("arborium-").unwrap_or(name)
@@ -137,6 +155,19 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<
     Ok(())
 }
 
+fn should_include_crate(name: &str, filter: Option<&Vec<String>>) -> bool {
+    match filter {
+        None => true,
+        Some(targets) => {
+            let short = name.strip_prefix("arborium-").unwrap_or(name);
+            targets.iter().any(|target| {
+                let target_short = target.strip_prefix("arborium-").unwrap_or(target);
+                target_short == short
+            })
+        }
+    }
+}
+
 /// A lint diagnostic.
 enum LintDiagnostic {
     Error(String),
@@ -168,7 +199,7 @@ fn lint_crate(
     _name: &str,
     state: &CrateState,
     config: &crate::types::CrateConfig,
-    options: LintOptions,
+    options: &LintOptions,
 ) -> Vec<LintDiagnostic> {
     let mut diagnostics = Vec::new();
 

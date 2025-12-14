@@ -901,6 +901,7 @@ struct PreparedStructures {
     workspace_version: String,
     /// Full crate registry for path resolution (includes all crates, not just those being generated)
     registry: CrateRegistry,
+    process_all: bool,
 }
 
 struct GenerationResults {
@@ -996,6 +997,7 @@ fn prepare_temp_structures(
         cache,
         workspace_version: version.to_string(),
         registry,
+        process_all: name.is_none(),
     })
 }
 
@@ -1459,17 +1461,19 @@ fn generate_all_crates(
         final_plan.add(plugin_plan);
     }
 
-    // Generate umbrella crate (crates/arborium/Cargo.toml)
-    let umbrella_plan = plan_umbrella_crate(prepared)?;
-    final_plan.add(umbrella_plan);
+    if prepared.process_all {
+        // Generate umbrella crate (crates/arborium/Cargo.toml)
+        let umbrella_plan = plan_umbrella_crate(prepared)?;
+        final_plan.add(umbrella_plan);
 
-    // Update shared crates to use the workspace version
-    let shared_plan = plan_shared_crates(prepared, mode)?;
-    final_plan.add(shared_plan);
+        // Update shared crates to use the workspace version
+        let shared_plan = plan_shared_crates(prepared, mode)?;
+        final_plan.add(shared_plan);
 
-    // Generate docs.rs demo crate
-    let demo_plan = plan_docsrs_demo_crate(prepared, mode)?;
-    final_plan.add(demo_plan);
+        // Generate docs.rs demo crate
+        let demo_plan = plan_docsrs_demo_crate(prepared, mode)?;
+        final_plan.add(demo_plan);
+    }
 
     Ok(final_plan)
 }

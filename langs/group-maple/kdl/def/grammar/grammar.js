@@ -124,7 +124,7 @@ module.exports = grammar({
     ),
 
     // node := base-node node-terminator
-    node: $ => seq($.node_no_terminator, $.node_terminator),
+    node: $ => prec(1, seq($.node_no_terminator, $.node_terminator)),
 
     // final-node := base-node node-terminator?
     //

@@ -65,8 +65,8 @@ enum Command {
         dry_run: bool,
 
         /// Version to use for generated Cargo.toml files
-        #[facet(args::named)]
-        version: String,
+        #[facet(args::named, default)]
+        version: Option<String>,
 
         /// Continue processing all crates even if some fail (default: stop on first failure)
         #[facet(args::named, default)]
@@ -252,10 +252,9 @@ fn main() {
         return;
     }
 
-    let crates_dir = util::find_repo_root()
-        .expect("Could not find repo root")
-        .join("crates");
-    let crates_dir = camino::Utf8PathBuf::from_path_buf(crates_dir).expect("non-UTF8 path");
+    let repo_root_path = util::find_repo_root().expect("Could not find repo root");
+    let repo_root = camino::Utf8PathBuf::from_path_buf(repo_root_path).expect("non-UTF8 path");
+    let crates_dir = repo_root.join("crates");
 
     match args.command {
         Command::Version => unreachable!(),
@@ -269,7 +268,7 @@ fn main() {
             }
         }
         Command::Lint { strict } => {
-            let options = lint_new::LintOptions { strict };
+            let options = lint_new::LintOptions { strict, only: None };
             if let Err(e) = lint_new::run_lints(&crates_dir, options) {
                 eprintln!("{:?}", e);
                 std::process::exit(1);
@@ -288,85 +287,17 @@ fn main() {
                 std::process::exit(1);
             }
 
-            let mode = if dry_run {
-                plan::PlanMode::DryRun
-            } else {
-                plan::PlanMode::Execute
-            };
-
-            // Use provided version
-            let version = version.as_str();
-
-            let options = generate::GenerateOptions {
-                name: name.as_deref(),
-                mode,
-                version,
+            let resolved_version = resolve_workspace_version(version, &repo_root);
+            run_generation_pipeline(
+                &crates_dir,
+                name.as_deref(),
+                dry_run,
+                quiet,
+                resolved_version.as_str(),
                 no_fail_fast,
-                jobs: jobs.unwrap_or(16),
-            };
-
-            // Plan and execute generation
-            let result = generate::plan_generate(&crates_dir, options);
-            match result {
-                Ok(plans) => {
-                    // Quiet by default for normal runs (progress bar + summary is enough)
-                    // Dry run shows full details so users can review what would change
-                    let effective_quiet = !dry_run || quiet;
-                    if let Err(e) = plans.run_with_options(dry_run, effective_quiet) {
-                        eprintln!("Error: {}", e);
-                        std::process::exit(1);
-                    }
-                }
-                Err(e) => {
-                    eprintln!("{}", e);
-                    std::process::exit(1);
-                }
-            }
-
-            // Run strict lint after generation (now parser.c should exist)
-            if !dry_run {
-                use std::time::Instant;
-                let lint_start = Instant::now();
-
-                let options = lint_new::LintOptions { strict: true };
-                if let Err(e) = lint_new::run_lints(&crates_dir, options) {
-                    eprintln!("{:?}", e);
-                    std::process::exit(1);
-                }
-
-                let lint_elapsed = lint_start.elapsed();
-
-                // Count total crates
-                let registry = crate::types::CrateRegistry::load(&crates_dir)
-                    .expect("Failed to load registry");
-                println!(
-                    "  {} Generated {} Rust crates ({:.2}s)",
-                    "✓".green(),
-                    registry.crates.len(),
-                    lint_elapsed.as_secs_f64()
-                );
-
-                // Generate theme Rust code from TOML files
-                if let Err(e) = theme_gen::generate_theme_code(&crates_dir) {
-                    eprintln!("{:?}", e);
-                    std::process::exit(1);
-                }
-
-                // Generate theme CSS and README
-                if let Err(e) = serve::generate_npm_theme_css(&crates_dir) {
-                    eprintln!("{:?}", e);
-                    std::process::exit(1);
-                }
-
-                // Print next steps hint
-                println!();
-                println!("{}", "Next steps:".bold());
-                println!(
-                    "  {} {} to build WASM plugins",
-                    "→".blue(),
-                    "cargo xtask build".cyan()
-                );
-            }
+                jobs.unwrap_or(16),
+                !dry_run,
+            );
         }
         Command::Serve { address, port, dev } => {
             // Check for required tools before starting
@@ -422,6 +353,22 @@ fn main() {
             grammar,
             no_capture,
         } => {
+            if !tool::check_tools_or_report(tool::GEN_TOOLS) {
+                std::process::exit(1);
+            }
+
+            let resolved_version = resolve_workspace_version(None, &repo_root);
+            run_generation_pipeline(
+                &crates_dir,
+                Some(grammar.as_str()),
+                false,
+                true,
+                resolved_version.as_str(),
+                false,
+                16,
+                false,
+            );
+
             let registry = crate::types::CrateRegistry::load(&crates_dir)
                 .expect("Failed to load crate registry");
             let Some((crate_state, _)) = registry.find_grammar(&grammar) else {
@@ -524,5 +471,107 @@ fn main() {
                 std::process::exit(1);
             }
         }
+    }
+}
+
+fn resolve_workspace_version(provided: Option<String>, repo_root: &camino::Utf8Path) -> String {
+    if let Some(version) = provided {
+        version
+    } else {
+        version_store::read_version(repo_root).unwrap_or_else(|err| {
+            eprintln!("Failed to read version.json: {err}");
+            eprintln!("Run `cargo xtask gen --version <x.y.z>` once to set the workspace version.");
+            std::process::exit(1);
+        })
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_generation_pipeline(
+    crates_dir: &camino::Utf8Path,
+    name: Option<&str>,
+    dry_run: bool,
+    quiet: bool,
+    version: &str,
+    no_fail_fast: bool,
+    jobs: usize,
+    show_next_steps: bool,
+) {
+    let options = generate::GenerateOptions {
+        name,
+        mode: if dry_run {
+            plan::PlanMode::DryRun
+        } else {
+            plan::PlanMode::Execute
+        },
+        version,
+        no_fail_fast,
+        jobs,
+    };
+
+    let plans = match generate::plan_generate(crates_dir, options) {
+        Ok(plans) => plans,
+        Err(e) => {
+            eprintln!("{}", e);
+            std::process::exit(1);
+        }
+    };
+
+    let effective_quiet = !dry_run || quiet;
+    if let Err(e) = plans.run_with_options(dry_run, effective_quiet) {
+        eprintln!("Error: {}", e);
+        std::process::exit(1);
+    }
+
+    if dry_run {
+        return;
+    }
+
+    use std::time::Instant;
+    let lint_start = Instant::now();
+    let lint_filter = name.map(|n| vec![n.to_string()]);
+    let lint_options = lint_new::LintOptions {
+        strict: true,
+        only: lint_filter.clone(),
+    };
+    if let Err(e) = lint_new::run_lints(crates_dir, lint_options) {
+        eprintln!("{:?}", e);
+        std::process::exit(1);
+    }
+    let lint_elapsed = lint_start.elapsed();
+
+    let registry = crate::types::CrateRegistry::load(crates_dir).expect("Failed to load registry");
+    let crate_total = lint_filter
+        .as_ref()
+        .map(|targets| targets.len())
+        .unwrap_or_else(|| registry.crates.len());
+    println!(
+        "  {} Generated {} Rust crate{} ({:.2}s)",
+        "✓".green(),
+        crate_total,
+        if crate_total == 1 { "" } else { "s" },
+        lint_elapsed.as_secs_f64()
+    );
+
+    if name.is_none() {
+        if let Err(e) = theme_gen::generate_theme_code(crates_dir) {
+            eprintln!("{:?}", e);
+            std::process::exit(1);
+        }
+
+        if let Err(e) = serve::generate_npm_theme_css(crates_dir) {
+            eprintln!("{:?}", e);
+            std::process::exit(1);
+        }
+    }
+
+    if show_next_steps {
+        println!();
+        println!("{}", "Next steps:".bold());
+        println!(
+            "  {} {} to build WASM plugins",
+            "→".blue(),
+            "cargo xtask build".cyan()
+        );
     }
 }
