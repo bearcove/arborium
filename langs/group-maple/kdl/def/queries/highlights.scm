@@ -62,6 +62,7 @@
   (multi_line_comment)
 ] @comment @spell
 
+; slashdash directives behave like comments in KDL, so capture the node.
 (slashdash) @comment
 
 ; Version marker (/- kdl-version ...)

@@ -435,7 +435,11 @@ fn parse_corpus(content: &str) -> HarnessResult<Vec<CorpusTest>> {
     let mut current: Option<CorpusTest> = None;
     let mut section: Option<String> = None;
 
-    for (idx, line) in content.lines().enumerate() {
+    for (idx, chunk) in content.split_inclusive('\n').enumerate() {
+        let line = chunk
+            .strip_suffix('\n')
+            .map(|l| l.strip_suffix('\r').unwrap_or(l))
+            .unwrap_or(chunk);
         let trimmed = line.trim_end();
 
         if let Some(name) = trimmed.strip_prefix("===") {
@@ -468,14 +472,10 @@ fn parse_corpus(content: &str) -> HarnessResult<Vec<CorpusTest>> {
         };
 
         match section.as_deref() {
-            Some("input") => {
-                test.input.push_str(line);
-                test.input.push('\n');
-            }
+            Some("input") => test.input.push_str(chunk),
             Some("sexp") => {
                 let expected = test.expected_sexp.get_or_insert_with(String::new);
-                expected.push_str(line);
-                expected.push('\n');
+                expected.push_str(chunk);
             }
             Some("contains") => {
                 for tok in trimmed.split_whitespace() {

@@ -165,10 +165,11 @@ module.exports = grammar({
     node_children: $ => seq(
       '{',
       repeat($._line_space),
-      optional(choice(
-        seq($.nodes, repeat($._line_space), optional($.final_node)),
-        $.final_node,
+      optional(seq(
+        $.nodes,
+        repeat($._line_space),
       )),
+      optional($.final_node),
       repeat($._node_space),
       repeat($._line_space),
       '}',
@@ -253,7 +254,7 @@ module.exports = grammar({
     )),
 
     // string-character :=
-    //   '\\' (["\\bfnrts] | 'u{' hex-unicode '}') |
+    //   '\\' (["\\/bfnrts] | 'u{' hex-unicode '}') |
     //   ws-escape |
     //   [^\\"] - disallowed-literal-code-points
     //
