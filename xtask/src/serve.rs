@@ -35,6 +35,7 @@ struct IndexHtmlTemplate<'a> {
     theme_css_link: &'a str,
     code: &'a CodeBlocks,
     language_count: usize,
+    default_theme: &'a str,
 }
 
 /// A code block with its language for client-side highlighting
@@ -854,6 +855,7 @@ fn generate_index_html(
         theme_css_link,
         code: &code_blocks,
         language_count,
+        default_theme: "tokyo-night",
     };
 
     let html = template.render_once().map_err(|e| e.to_string())?;
