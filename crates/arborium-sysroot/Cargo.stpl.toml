@@ -1,6 +1,6 @@
 [package]
 name = "arborium-sysroot"
-version = "0.0.0"
+version = "<%= version %>"
 edition = "2024"
 description = "WASM sysroot for arborium grammar crates"
 license = "MIT"
@@ -8,6 +8,7 @@ repository = "https://github.com/bearcove/arborium"
 keywords = ["tree-sitter", "wasm", "sysroot"]
 categories = ["parsing", "development-tools"]
 links = "arborium_sysroot"
+readme = "README.md"
 
 [lib]
 path = "src/lib.rs"

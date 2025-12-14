@@ -1,6 +1,6 @@
 [package]
 name = "arborium-test-harness"
-version = "0.0.0"
+version = "<%= version %>"
 edition = "2024"
 rust-version = "1.85"
 description = "Test harness for arborium grammar crates"
@@ -14,7 +14,7 @@ keywords = ["syntax-highlighting", "tree-sitter", "testing"]
 categories = ["development-tools::testing"]
 
 [dependencies]
-arborium-highlight = { version = "0.0.0", path = "../arborium-highlight", features = ["tree-sitter"] }
-arborium-theme = { version = "0.0.0", path = "../arborium-theme" }
-arborium-tree-sitter = { version = "0.0.0", path = "../arborium-tree-sitter" }
+arborium-highlight = { version = "<%= version %>", path = "../arborium-highlight", features = ["tree-sitter"] }
+arborium-theme = { version = "<%= version %>", path = "../arborium-theme" }
+arborium-tree-sitter = { version = "<%= version %>", path = "../arborium-tree-sitter" }
 tree-sitter-language = { version = "0.1", path = "../arborium-tree-sitter/language" }

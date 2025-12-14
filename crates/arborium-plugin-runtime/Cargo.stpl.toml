@@ -1,0 +1,17 @@
+[package]
+publish = false
+name = "arborium-plugin-runtime"
+version = "<%= version %>"
+edition = "2024"
+description = "Runtime library for arborium grammar plugins"
+license = "MIT"
+repository = "https://github.com/bearcove/arborium"
+readme = "README.md"
+
+[features]
+default = []
+
+[dependencies]
+arborium-tree-sitter = { version = "<%= version %>", path = "../arborium-tree-sitter" }
+arborium-wire = { version = "<%= version %>", path = "../arborium-wire" }
+arborium-sysroot = { version = "<%= version %>", path = "../arborium-sysroot" }

@@ -1,11 +1,11 @@
 [package]
 name = "arborium-tree-sitter"
-version = "0.0.0"
+version = "<%= version %>"
 description = "Rust bindings to the Tree-sitter parsing library (vendored for arborium WASM support)"
 authors = ["Max Brunsfeld <maxbrunsfeld@gmail.com>", "Amaan Qureshi <amaanq12@gmail.com>"]
 edition = "2021"
 rust-version = "1.76"
-readme = "binding_rust/README.md"
+readme = "README.md"
 license = "MIT"
 repository = "https://github.com/tree-sitter/tree-sitter"
 categories = [
@@ -33,7 +33,7 @@ streaming-iterator = "0.1.9"
 
 # WASM allocator (only needed on WASM targets)
 [target.'cfg(target_family = "wasm")'.dependencies]
-arborium-sysroot = { version = "2.0.0", path = "../arborium-sysroot" }
+arborium-sysroot = { version = "<%= version %>", path = "../arborium-sysroot" }
 
 [build-dependencies]
 cc = "1"

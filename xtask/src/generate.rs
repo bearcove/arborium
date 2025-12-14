@@ -2225,14 +2225,14 @@ dlmalloc = "0.2"
     Ok(plan)
 }
 
-/// Update shared crates (arborium-theme, arborium-highlight, etc.) to use the workspace version.
-/// These crates are not generated from arborium.kdl but need their versions kept in sync.
+/// Generate shared crates (arborium-theme, arborium-highlight, etc.) from templates.
+/// Each crate has a Cargo.toml.in template that gets {version} substituted.
 fn plan_shared_crates(prepared: &PreparedStructures, mode: PlanMode) -> Result<Plan, Report> {
     let mut plan = Plan::for_crate("shared-crates");
     let version = &prepared.workspace_version;
     let repo_root = &prepared.repo_root;
 
-    // Update all shared crates - dependencies are auto-detected
+    // Shared crates with Cargo.toml.in templates
     let shared_crates = [
         "arborium-theme",
         "arborium-highlight",
@@ -2245,18 +2245,85 @@ fn plan_shared_crates(prepared: &PreparedStructures, mode: PlanMode) -> Result<P
         "arborium-query",
         "miette-arborium",
         "arborium-rustdoc",
+        "arborium-mdbook",
     ];
 
     for crate_name in shared_crates {
-        update_cargo_toml_version(
-            &mut plan,
-            &repo_root.join(format!("crates/{}/Cargo.toml", crate_name)),
-            version,
-            mode,
-        )?;
+        let crate_dir = repo_root.join(format!("crates/{}", crate_name));
+        generate_shared_crate(&mut plan, &crate_dir, crate_name, version, mode)?;
     }
 
     Ok(plan)
+}
+
+/// Generate a shared crate's Cargo.toml from its .stpl.toml template and create README.md.
+fn generate_shared_crate(
+    plan: &mut Plan,
+    crate_dir: &Utf8Path,
+    crate_name: &str,
+    version: &str,
+    mode: PlanMode,
+) -> Result<(), Report> {
+    let template_path = crate_dir.join("Cargo.stpl.toml");
+    let output_path = crate_dir.join("Cargo.toml");
+
+    // Read template and substitute version (sailfish-style <%= version %> syntax)
+    if template_path.exists() {
+        let template_content = fs::read_to_string(&template_path)?;
+        let generated_content = template_content.replace("<%= version %>", version);
+
+        plan_file_update(
+            plan,
+            &output_path,
+            generated_content,
+            &format!("Generate {}/Cargo.toml from template", crate_name),
+            mode,
+        )?;
+    } else {
+        // Fallback: update existing Cargo.toml in place (for crates not yet migrated)
+        update_cargo_toml_version(plan, &output_path, version, mode)?;
+    }
+
+    // Generate README.md
+    let readme_path = crate_dir.join("README.md");
+    let readme_content = generate_shared_crate_readme(crate_name);
+    plan_file_update(
+        plan,
+        &readme_path,
+        readme_content,
+        &format!("Generate {}/README.md", crate_name),
+        mode,
+    )?;
+
+    Ok(())
+}
+
+/// Generate a simple README for a shared crate.
+fn generate_shared_crate_readme(crate_name: &str) -> String {
+    format!(
+        r#"# {crate_name}
+
+Part of the [arborium](https://github.com/bearcove/arborium) project.
+
+See the [main documentation](https://arborium.dev) for more information.
+"#
+    )
+}
+
+/// Helper to update arborium dependency versions in a TOML table.
+fn update_arborium_deps_in_table(table: &mut toml_edit::Table, new_version: &str) {
+    use toml_edit::{Item, Value};
+
+    for (name, value) in table.iter_mut() {
+        // Match "arborium" or "arborium-*"
+        let dep_name = name.get();
+        if (dep_name == "arborium" || dep_name.starts_with("arborium-"))
+            && let Some(dep_table) = value.as_table_like_mut()
+            && dep_table.contains_key("version")
+        {
+            dep_table.insert("version", Item::Value(Value::from(new_version)));
+        }
+    }
 }
 
 /// Update a Cargo.toml file's version and all arborium dependency versions.
@@ -2292,14 +2359,22 @@ fn update_cargo_toml_version(
         if let Some(deps) = doc.get_mut(section_name)
             && let Some(table) = deps.as_table_mut()
         {
-            for (name, value) in table.iter_mut() {
-                // Match "arborium" or "arborium-*"
-                let dep_name = name.get();
-                if (dep_name == "arborium" || dep_name.starts_with("arborium-"))
-                    && let Some(dep_table) = value.as_table_like_mut()
-                    && dep_table.contains_key("version")
-                {
-                    dep_table.insert("version", Item::Value(Value::from(new_version)));
+            update_arborium_deps_in_table(table, new_version);
+        }
+    }
+
+    // Also handle target-specific dependencies like [target.'cfg(...)'.dependencies]
+    if let Some(target) = doc.get_mut("target")
+        && let Some(target_table) = target.as_table_mut()
+    {
+        for (_cfg, cfg_value) in target_table.iter_mut() {
+            if let Some(cfg_table) = cfg_value.as_table_mut() {
+                for section_name in dep_sections {
+                    if let Some(deps) = cfg_table.get_mut(section_name)
+                        && let Some(table) = deps.as_table_mut()
+                    {
+                        update_arborium_deps_in_table(table, new_version);
+                    }
                 }
             }
         }
