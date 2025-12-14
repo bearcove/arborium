@@ -1,6 +1,6 @@
 ; Node names
 
-(base_node name: (string) @type)
+(node_no_terminator name: (string) @type)
 
 ; Type annotations
 
@@ -21,13 +21,14 @@
 (raw_string) @string
 
 (escape) @string.escape
+(ws_escape) @string.escape
 
 (number) @number
 (keyword_number) @number.special
 
 (boolean) @boolean
 
-"#null" @constant.builtin
+(keyword) @constant.builtin
 
 ; Operators / punctuation
 
@@ -46,4 +47,3 @@
 ] @comment @spell
 
 "/-" @comment
-

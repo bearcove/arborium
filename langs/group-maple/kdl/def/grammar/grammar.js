@@ -95,8 +95,7 @@ module.exports = grammar({
       optional($._bom),
       optional($.version_marker),
       repeat($._line_space),
-      optional($.nodes),
-      repeat($._line_space),
+      repeat(seq($.node, repeat($._line_space))),
     ),
 
     // version := '/-' unicode-space* 'kdl-version' unicode-space+ ('1' | '2') unicode-space* newline

@@ -1,0 +1,62 @@
+=== version_marker
+--- input
+/- kdl-version 2
+node 1;
+--- contains
+version_marker
+number
+
+=== keywords_v2
+--- input
+flags #true #false #null;
+nums #inf #-inf #nan;
+--- contains
+boolean
+keyword_number
+
+=== identifiers_dotted_signed
+--- input
+.md;
++foo;
+-.bar;
+--- contains
+identifier_string
+
+=== quoted_multiline
+--- input
+doc """
+  hello \
+world
+  """;
+--- contains
+quoted_string
+ws_escape
+
+=== raw_single
+--- input
+raw #"hello\\n"#;
+--- contains
+raw_string
+
+=== raw_empty
+--- input
+raw #""#;
+--- contains
+raw_string
+
+=== raw_multiline
+--- input
+raw #"""
+  Here's a """
+    multiline string
+  """#;
+--- contains
+raw_string
+
+=== slashdash
+--- input
+/- disabled 123;
+enabled 1 /- 2 3;
+--- contains
+slashdash
+

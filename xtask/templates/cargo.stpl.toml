@@ -18,6 +18,7 @@ include = [
     "src/**/*",
     "grammar/**/*",
     "queries/**/*",
+    "corpus/**/*",
     "sample.*",
     "samples/**/*",
     "build.rs",

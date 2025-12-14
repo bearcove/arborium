@@ -1677,6 +1677,13 @@ fn plan_crate_files_only(
             plan_copy_dir_recursive(&mut plan, &def_samples, &crate_samples, mode)?;
         }
 
+        // Copy corpus directory if it exists
+        let def_corpus = def_path.join("corpus");
+        if def_corpus.exists() {
+            let crate_corpus = crate_path.join("corpus");
+            plan_copy_dir_recursive(&mut plan, &def_corpus, &crate_corpus, mode)?;
+        }
+
         // Copy individual sample files (sample.* at def root)
         for entry in fs::read_dir(def_path)? {
             let entry = entry?;

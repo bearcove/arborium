@@ -75,5 +75,10 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"),
         );
     }
+
+    #[test]
+    fn test_corpus() {
+        arborium_test_harness::test_corpus(language(), "<%= grammar_id %>", env!("CARGO_MANIFEST_DIR"));
+    }
 }
 <% } %>
