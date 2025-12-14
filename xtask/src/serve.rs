@@ -269,6 +269,16 @@ pub fn serve(crates_dir: &Utf8Path, addr: &str, port: Option<u16>, dev: bool) {
     }
     println!();
 
+    // Step 0: Generate Cargo.toml files from templates for shared crates
+    step("Generating shared crate manifests", || {
+        generate_shared_crate_manifests(&repo_root)
+    });
+
+    // Step 0b: Generate theme Rust code (builtin_generated.rs)
+    step("Generating theme Rust code", || {
+        theme_gen::generate_theme_code(crates_dir)
+    });
+
     // Step 1: Generate registry.json and get the registry for later use
     let registry = step_with_result("Generating registry.json", || {
         generate_registry_json(crates_dir, &demo_dir)
@@ -294,7 +304,16 @@ pub fn serve(crates_dir: &Utf8Path, addr: &str, port: Option<u16>, dev: bool) {
         generate_index_html(crates_dir, &demo_dir, &icons, &registry)
     });
 
-    // Step 4b: Build IIFE bundle from packages/arborium
+    // Step 4b: Generate plugins-manifest.ts for IIFE bundle
+    step("Generating plugins manifest", || {
+        crate::build::generate_plugins_manifest(
+            Utf8Path::new(repo_root.to_str().unwrap()),
+            crates_dir,
+        )
+        .map_err(|e| e.to_string())
+    });
+
+    // Step 4c: Build IIFE bundle from packages/arborium
     step("Building IIFE bundle", || {
         build_iife_bundle(&repo_root, &demo_dir)
     });
@@ -309,8 +328,8 @@ pub fn serve(crates_dir: &Utf8Path, addr: &str, port: Option<u16>, dev: bool) {
         generate_app_js(crates_dir, &demo_dir, &registry, &icons)
     });
 
-    // Step 5b: Generate rustdoc comparison
-    step("Generating rustdoc comparison", || {
+    // Step 5b: Generate rustdoc comparison (optional - requires all crates to be buildable)
+    optional_step("Generating rustdoc comparison", || {
         generate_rustdoc_comparison(&repo_root, &demo_dir)
     });
 
@@ -513,6 +532,53 @@ where
     }
 }
 
+fn optional_step<F, E>(name: &str, f: F)
+where
+    F: FnOnce() -> Result<(), E>,
+    E: std::fmt::Display,
+{
+    print!("  {} {}... ", "●".cyan(), name);
+    std::io::stdout().flush().ok();
+
+    match f() {
+        Ok(()) => println!("{}", "done".green()),
+        Err(e) => {
+            println!("{}", "skipped".yellow());
+            eprintln!("    {}: {}", "Warning".yellow(), e);
+        }
+    }
+}
+
+fn generate_shared_crate_manifests(repo_root: &Path) -> Result<(), String> {
+    let version = crate::version_store::read_version(Utf8Path::new(repo_root.to_str().unwrap()))
+        .map_err(|e| e.to_string())?;
+    let shared_crates = [
+        "arborium-theme",
+        "arborium-highlight",
+        "arborium-sysroot",
+        "arborium-test-harness",
+        "arborium-tree-sitter",
+        "arborium-host",
+        "arborium-plugin-runtime",
+        "arborium-wire",
+        "arborium-query",
+        "miette-arborium",
+        "arborium-rustdoc",
+        "arborium-mdbook",
+    ];
+    for crate_name in shared_crates {
+        let crate_dir = repo_root.join("crates").join(crate_name);
+        let cargo_toml = crate_dir.join("Cargo.toml");
+        let cargo_template = crate_dir.join("Cargo.stpl.toml");
+        if !cargo_toml.exists() && cargo_template.exists() {
+            let template = fs::read_to_string(&cargo_template).map_err(|e| e.to_string())?;
+            let content = template.replace("<%= version %>", &version);
+            fs::write(&cargo_toml, content).map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
+
 fn generate_sample_files(
     _crates_dir: &Utf8Path,
     registry: &Registry,
@@ -584,29 +650,57 @@ fn copy_plugins_json(crates_dir: &Utf8Path, demo_dir: &Path, dev: bool) -> Resul
     // We need to go up from crates/ to find langs/
     let repo_root = crates_dir.parent().ok_or("crates_dir has no parent")?;
     let plugins_path = repo_root.join("langs").join("plugins.json");
-
-    if !plugins_path.exists() {
-        return Err(format!(
-            "plugins.json not found at {}. Run `cargo xtask build` first.",
-            plugins_path
-        ));
-    }
-
-    // Read and parse the plugins.json
-    let content = fs::read_to_string(&plugins_path).map_err(|e| e.to_string())?;
-
-    // Parse as facet_value::Value so we can modify it
-    let mut json: facet_value::Value = facet_json::from_str(&content).map_err(|e| e.to_string())?;
-
-    // Add dev_mode field
-    if let Some(obj) = json.as_object_mut() {
-        obj.insert("dev_mode", dev);
-    }
-
-    // Write to demo directory
     let output_path = demo_dir.join("plugins.json");
-    let output = facet_json::to_string_pretty(&json);
-    fs::write(&output_path, output).map_err(|e| e.to_string())?;
+
+    if plugins_path.exists() {
+        // Read and parse the plugins.json
+        let content = fs::read_to_string(&plugins_path).map_err(|e| e.to_string())?;
+
+        // Parse as facet_value::Value so we can modify it
+        let mut json: facet_value::Value =
+            facet_json::from_str(&content).map_err(|e| e.to_string())?;
+
+        // Add dev_mode field
+        if let Some(obj) = json.as_object_mut() {
+            obj.insert("dev_mode", dev);
+        }
+
+        // Write to demo directory
+        let output = facet_json::to_string_pretty(&json);
+        fs::write(&output_path, output).map_err(|e| e.to_string())?;
+    } else {
+        // Generate a minimal plugins.json from registry if build hasn't been run
+        // This allows the demo UI to work, even if WASM grammars aren't available
+        let crate_registry = CrateRegistry::load(crates_dir).map_err(|e| e.to_string())?;
+        let version = crate::version_store::read_version(repo_root).map_err(|e| e.to_string())?;
+
+        let entries: Vec<String> = crate_registry
+            .all_grammars()
+            .filter(|(_, _, g)| g.generate_component())
+            .map(|(_, _, g)| {
+                format!(
+                    r#"    {{"language": "{}", "js": "/pkg/{}.js", "wasm": "/pkg/{}_bg.wasm"}}"#,
+                    g.id(),
+                    g.id(),
+                    g.id()
+                )
+            })
+            .collect();
+
+        let output = format!(
+            r#"{{
+  "version": "{}",
+  "entries": [
+{}
+  ],
+  "dev_mode": {}
+}}"#,
+            version,
+            entries.join(",\n"),
+            dev
+        );
+        fs::write(&output_path, output).map_err(|e| e.to_string())?;
+    }
 
     Ok(())
 }

@@ -647,8 +647,14 @@ const allThemes = Object.keys(themeInfo);
 let selectedTheme = null;
 let themeHighlightedIndex = 0;
 
-// Mode toggle (dark/light filter)
-let currentMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+// Mode toggle (auto/dark/light filter)
+const systemColorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+function getSystemMode() {
+    return systemColorSchemeQuery.matches ? 'dark' : 'light';
+}
+let currentMode = getSystemMode(); // The effective mode (always 'dark' or 'light')
+let userModePreference = 'auto'; // What the user chose ('auto', 'dark', or 'light')
+const modeAutoBtn = document.getElementById('mode-auto');
 const modeDarkBtn = document.getElementById('mode-dark');
 const modeLightBtn = document.getElementById('mode-light');
 
@@ -680,14 +686,21 @@ function findThemePair(themeId) {
     return allThemes.find(id => themeInfo[id].variant === targetVariant) || null;
 }
 
-function setMode(mode) {
-    currentMode = mode;
+function setMode(mode, { skipThemeSwitch = false } = {}) {
+    userModePreference = mode;
+    // Calculate effective mode: 'auto' follows system, otherwise use explicit choice
+    const effectiveMode = mode === 'auto' ? getSystemMode() : mode;
+    const modeChanged = currentMode !== effectiveMode;
+    currentMode = effectiveMode;
+
+    // Update button active states
+    modeAutoBtn.classList.toggle('active', mode === 'auto');
     modeDarkBtn.classList.toggle('active', mode === 'dark');
     modeLightBtn.classList.toggle('active', mode === 'light');
     localStorage.setItem('arborium-mode', mode);
 
-    // If current theme doesn't match mode, switch to paired theme or fallback
-    if (selectedTheme && themeInfo[selectedTheme].variant !== mode) {
+    // If current theme doesn't match effective mode, switch to paired theme or fallback
+    if (!skipThemeSwitch && modeChanged && selectedTheme && themeInfo[selectedTheme].variant !== effectiveMode) {
         const pairedTheme = findThemePair(selectedTheme);
         if (pairedTheme) {
             selectTheme(pairedTheme);
@@ -697,12 +710,20 @@ function setMode(mode) {
     // Sync swatch filter in Theme support section
     const swatches = document.querySelector('.theme-swatches');
     if (swatches) {
-        swatches.dataset.showMode = mode;
-        document.getElementById('swatch-mode-dark')?.classList.toggle('active', mode === 'dark');
-        document.getElementById('swatch-mode-light')?.classList.toggle('active', mode === 'light');
+        swatches.dataset.showMode = effectiveMode;
+        document.getElementById('swatch-mode-dark')?.classList.toggle('active', effectiveMode === 'dark');
+        document.getElementById('swatch-mode-light')?.classList.toggle('active', effectiveMode === 'light');
     }
 }
 
+// Listen for system color scheme changes (only affects 'auto' mode)
+systemColorSchemeQuery.addEventListener('change', () => {
+    if (userModePreference === 'auto') {
+        setMode('auto');
+    }
+});
+
+modeAutoBtn.addEventListener('click', () => setMode('auto'));
 modeDarkBtn.addEventListener('click', () => setMode('dark'));
 modeLightBtn.addEventListener('click', () => setMode('light'));
 
@@ -945,11 +966,11 @@ themeDropdown.addEventListener('mouseover', (e) => {
 const savedMode = localStorage.getItem('arborium-mode');
 const savedTheme = localStorage.getItem('arborium-theme');
 
-// Set mode first (from saved, or from system preference)
-if (savedMode) {
+// Set mode first (from saved, or default to 'auto' which follows system preference)
+if (savedMode && ['auto', 'dark', 'light'].includes(savedMode)) {
     setMode(savedMode);
 } else {
-    setMode(currentMode); // Uses system preference detected earlier
+    setMode('auto'); // Default: follow system preference
 }
 
 // Then set theme (if saved theme matches current mode, use it; otherwise use default for mode)

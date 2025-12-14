@@ -1,6 +1,7 @@
 target
 xtask/target/
 _site
+demo/.icon-cache.json
 
 # Library crates don't need Cargo.lock (consumers use their own)
 crates/*/Cargo.lock
