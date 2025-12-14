@@ -42,7 +42,8 @@ flate2 = "1"
 tar = "0.4"
 brotli = "7"
 
-arborium-theme = { path = "../crates/arborium-theme" }  # For theme CSS generation
+# NOTE: xtask does NOT depend on arborium-theme - it parses theme TOML files directly
+# This avoids circular dependency since arborium-theme/Cargo.toml is generated
 toml_edit = "0.23.9"
 serde_json = "1.0.145"
 walrus = "0.20"

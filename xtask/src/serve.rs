@@ -3,6 +3,7 @@
 //! This module generates registry.json from arborium.kdl files and serves
 //! the demo with all grammar metadata and inlined sample content.
 
+use crate::theme_gen::{self, HIGHLIGHTS, Theme};
 use crate::types::{CrateConfig, CrateRegistry, GrammarConfig, SampleConfig};
 use crate::util;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -283,11 +284,13 @@ pub fn serve(crates_dir: &Utf8Path, addr: &str, port: Option<u16>, dev: bool) {
     });
 
     // Step 3: Generate theme CSS from arborium themes
-    step("Generating theme CSS", || generate_theme_css(&demo_dir));
+    step("Generating theme CSS", || {
+        generate_theme_css(crates_dir, &demo_dir)
+    });
 
     // Step 4: Generate index.html from template
     step("Generating index.html", || {
-        generate_index_html(&demo_dir, &icons, &registry)
+        generate_index_html(crates_dir, &demo_dir, &icons, &registry)
     });
 
     // Step 4b: Generate IIFE demo HTML files
@@ -297,7 +300,7 @@ pub fn serve(crates_dir: &Utf8Path, addr: &str, port: Option<u16>, dev: bool) {
 
     // Step 5: Generate app.generated.js
     step("Generating app.generated.js", || {
-        generate_app_js(&demo_dir, &registry, &icons)
+        generate_app_js(crates_dir, &demo_dir, &registry, &icons)
     });
 
     // Step 5b: Generate rustdoc comparison
@@ -373,15 +376,17 @@ pub fn build_static_site(crates_dir: &Utf8Path, dev: bool) -> Result<(), String>
         fetch_icons_from_registry(&registry, &demo_dir)
     });
 
-    step("Generating theme CSS", || generate_theme_css(&demo_dir));
+    step("Generating theme CSS", || {
+        generate_theme_css(crates_dir, &demo_dir)
+    });
     step("Generating index.html", || {
-        generate_index_html(&demo_dir, &icons, &registry)
+        generate_index_html(crates_dir, &demo_dir, &icons, &registry)
     });
     step("Generating IIFE demo HTML", || {
         generate_iife_demo_html(&demo_dir)
     });
     step("Generating app.generated.js", || {
-        generate_app_js(&demo_dir, &registry, &icons)
+        generate_app_js(crates_dir, &demo_dir, &registry, &icons)
     });
     step("Generating rustdoc comparison", || {
         generate_rustdoc_comparison(&repo_root, &demo_dir)
@@ -424,10 +429,12 @@ pub fn generate_registry_and_assets(
         fetch_icons_from_registry(&registry, demo_dir_path)
     });
 
-    step("Generating theme CSS", || generate_theme_css(demo_dir_path));
+    step("Generating theme CSS", || {
+        generate_theme_css(crates_dir, demo_dir_path)
+    });
 
     step("Generating index.html", || {
-        generate_index_html(demo_dir_path, &icons, &registry)
+        generate_index_html(crates_dir, demo_dir_path, &icons, &registry)
     });
 
     step("Generating IIFE demo HTML", || {
@@ -435,7 +442,7 @@ pub fn generate_registry_and_assets(
     });
 
     step("Generating app.generated.js", || {
-        generate_app_js(demo_dir_path, &registry, &icons)
+        generate_app_js(crates_dir, demo_dir_path, &registry, &icons)
     });
 
     step("Generating rustdoc comparison", || {
@@ -531,9 +538,10 @@ fn generate_sample_files(
     Ok(())
 }
 
-fn generate_theme_css(demo_dir: &Path) -> Result<(), String> {
-    use arborium_theme::theme::builtin;
+fn generate_theme_css(crates_dir: &Utf8Path, demo_dir: &Path) -> Result<(), String> {
     use std::fmt::Write;
+
+    let themes = theme_gen::parse_all_themes(crates_dir)?;
 
     let pkg_dir = demo_dir.join("pkg");
     if !pkg_dir.exists() {
@@ -544,13 +552,9 @@ fn generate_theme_css(demo_dir: &Path) -> Result<(), String> {
     let mut css = String::new();
 
     // Generate CSS for each built-in theme
-    for theme in builtin::all() {
+    for theme in &themes {
         // Convert theme name to a valid CSS identifier (lowercase, hyphens)
-        let id = theme
-            .name
-            .to_lowercase()
-            .replace(' ', "-")
-            .replace('é', "e"); // Handle Rosé Pine -> rose-pine
+        let id = theme_name_to_id(&theme.name);
 
         // Add header comment with attribution
         let variant = if theme.is_dark { "dark" } else { "light" };
@@ -724,9 +728,7 @@ fn theme_name_to_id(name: &str) -> String {
 }
 
 /// Generate HTML for theme swatches in the "Theme support" section
-fn generate_theme_swatches() -> String {
-    use arborium_theme::builtin;
-
+fn generate_theme_swatches(themes: &[Theme]) -> String {
     let mut html = String::new();
 
     // Sample code snippet (Rust) for each theme preview
@@ -736,7 +738,7 @@ fn generate_theme_swatches() -> String {
     <a-fb>println!</a-fb><a-p>(</a-p><a-s>"Hello"</a-s><a-p>)</a-p><a-p>;</a-p>
 <a-p>}</a-p>"#;
 
-    for theme in builtin::all() {
+    for theme in themes {
         let id = theme_name_to_id(&theme.name);
         let variant = if theme.is_dark { "dark" } else { "light" };
         let bg = theme
@@ -832,14 +834,16 @@ let handler = GraphicalReportHandler::new()
 }
 
 fn generate_index_html(
+    crates_dir: &Utf8Path,
     demo_dir: &Path,
     icons: &BTreeMap<String, String>,
     registry: &Registry,
 ) -> Result<(), String> {
+    let themes = theme_gen::parse_all_themes(crates_dir)?;
     let output_path = demo_dir.join("index.html");
 
     // Generate theme swatches
-    let swatches_html = generate_theme_swatches();
+    let swatches_html = generate_theme_swatches(&themes);
     let theme_css_link = "\n    <link rel=\"stylesheet\" href=\"/pkg/themes.generated.css\">";
     let code_blocks = generate_code_blocks();
     let language_count = registry.grammars.len();
@@ -953,10 +957,12 @@ fn generate_rustdoc_comparison(repo_root: &Path, demo_dir: &Path) -> Result<(), 
 }
 
 fn generate_app_js(
+    crates_dir: &Utf8Path,
     demo_dir: &Path,
     registry: &Registry,
     icons: &BTreeMap<String, String>,
 ) -> Result<(), String> {
+    let themes = theme_gen::parse_all_themes(crates_dir)?;
     let output_path = demo_dir.join("pkg").join("app.generated.js");
 
     // Ensure pkg directory exists
@@ -974,8 +980,8 @@ fn generate_app_js(
     // Build icons object
     let icons_js = build_icons_js(icons);
 
-    // Build themeInfo object from arborium-theme
-    let theme_info_js = build_theme_info_js();
+    // Build themeInfo object from parsed themes
+    let theme_info_js = build_theme_info_js(&themes);
 
     // Render the template
     let template = AppJsTemplate {
@@ -1116,11 +1122,8 @@ fn escape_for_js(s: &str) -> String {
         .replace('\t', "\\t")
 }
 
-fn build_theme_info_js() -> String {
-    use arborium_theme::builtin;
-
+fn build_theme_info_js(themes: &[Theme]) -> String {
     let mut js = String::from("{\n");
-    let themes = builtin::all();
     for (i, theme) in themes.iter().enumerate() {
         let id = theme_name_to_id(&theme.name);
         let variant = if theme.is_dark { "dark" } else { "light" };
@@ -1305,9 +1308,9 @@ fn guess_content_type(path: &Path) -> &'static str {
 /// 2. base.css - uses media queries and [data-theme] selectors for switching
 /// 3. base-rustdoc.css - uses variable fallback for JS-based switching
 pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
-    use arborium_theme::builtin;
-    use arborium_theme::highlights::HIGHLIGHTS;
     use std::fmt::Write;
+
+    let themes = theme_gen::parse_all_themes(crates_dir)?;
 
     let repo_root = crates_dir.parent().ok_or("crates_dir has no parent")?;
     let themes_dir = repo_root.join("packages/arborium/src/themes");
@@ -1331,7 +1334,7 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
 
     // Generate individual theme files
     let mut generated = 0;
-    for theme in builtin::all() {
+    for theme in &themes {
         let id = theme_name_to_id(&theme.name);
         let variant = if theme.is_dark { "dark" } else { "light" };
         let output_path = themes_dir.join(format!("{}.css", id));
@@ -1353,7 +1356,7 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
         writeln!(css, ":root {{").unwrap();
 
         // Build a map from tag -> style for parent lookups
-        let mut tag_to_style: std::collections::HashMap<&str, &arborium_theme::Style> =
+        let mut tag_to_style: std::collections::HashMap<&str, &theme_gen::Style> =
             std::collections::HashMap::new();
         for (i, def) in HIGHLIGHTS.iter().enumerate() {
             if let Some(style) = theme.style(i)
@@ -1391,18 +1394,18 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
             }
 
             // Handle modifiers as separate variables
-            if style.modifiers.bold {
+            if style.bold {
                 writeln!(css, "  --arb-{}-{}-weight: bold;", def.tag, variant).unwrap();
             }
-            if style.modifiers.italic {
+            if style.italic {
                 writeln!(css, "  --arb-{}-{}-style: italic;", def.tag, variant).unwrap();
             }
-            if style.modifiers.underline || style.modifiers.strikethrough {
+            if style.underline || style.strikethrough {
                 let mut decorations = Vec::new();
-                if style.modifiers.underline {
+                if style.underline {
                     decorations.push("underline");
                 }
-                if style.modifiers.strikethrough {
+                if style.strikethrough {
                     decorations.push("line-through");
                 }
                 writeln!(
@@ -1556,12 +1559,12 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
 
 /// Generate the arborium-theme crate README from template.
 pub fn generate_arborium_theme_readme(crates_dir: &Utf8Path) -> Result<(), String> {
-    use arborium_theme::builtin;
+    let parsed_themes = theme_gen::parse_all_themes(crates_dir)?;
 
     let readme_path = crates_dir.join("arborium-theme/README.md");
 
     // Collect theme info
-    let themes: Vec<ThemeInfo> = builtin::all()
+    let themes: Vec<ThemeInfo> = parsed_themes
         .iter()
         .map(|theme| {
             let source_display = theme

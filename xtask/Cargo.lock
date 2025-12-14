@@ -66,10 +66,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "arborium-theme"
-version = "0.0.0"
-
-[[package]]
 name = "ariadne"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2324,7 +2320,6 @@ dependencies = [
 name = "xtask"
 version = "0.1.0"
 dependencies = [
- "arborium-theme",
  "blake3",
  "brotli",
  "camino",
