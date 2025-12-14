@@ -6,7 +6,8 @@
   (slashdash)? @comment
   name: (string) @type.definition)
 
-((node_no_terminator (slashdash) . (_)) @comment)
+((node_no_terminator (slashdash)) @comment
+ (#set! "priority" 105))
 
 (node_children) @scope
 
