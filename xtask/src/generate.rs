@@ -1260,6 +1260,21 @@ fn plan_grammar_generation_with_prepared_temp(
     // Create src/ directory for grammars that generate files there
     fs::create_dir_all(temp_grammar.join("src"))?;
 
+    // Use vendored tree-sitter.json if present, otherwise generate minimal one for ABI 15 support.
+    // Without this file, tree-sitter CLI 0.25+ falls back to ABI 14 which lacks supertype information.
+    let tree_sitter_json_path = temp_grammar.join("tree-sitter.json");
+    if !tree_sitter_json_path.exists() {
+        let grammar = prepared_temp.config.grammars.first();
+        let grammar_id = grammar
+            .map(|g| g.id.as_ref())
+            .unwrap_or_else(|| crate_name.strip_prefix("arborium-").unwrap_or(crate_name));
+        let tree_sitter_json = format!(
+            r#"{{"grammars":[{{"name":"{}","path":"."}}],"metadata":{{"version":"0.0.0"}}}}"#,
+            grammar_id
+        );
+        fs::write(tree_sitter_json_path, tree_sitter_json)?;
+    }
+
     // Run tree-sitter generate
     let tree_sitter = Tool::TreeSitter.find()?;
 
