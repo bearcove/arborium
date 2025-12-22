@@ -1495,6 +1495,10 @@ fn generate_all_crates(
         let umbrella_plan = plan_umbrella_crate(prepared)?;
         final_plan.add(umbrella_plan);
 
+        // Generate CLI crate (crates/arborium-cli/Cargo.toml)
+        let cli_plan = plan_cli_crate(prepared)?;
+        final_plan.add(cli_plan);
+
         // Update shared crates to use the workspace version
         let shared_plan = plan_shared_crates(prepared, mode)?;
         final_plan.add(shared_plan);
@@ -2552,6 +2556,120 @@ fn plan_docsrs_demo_crate(prepared: &PreparedStructures, mode: PlanMode) -> Resu
         .render_once()
         .expect("DocsrsDemoReadmeTemplate render failed");
     plan_file_update(&mut plan, &readme_path, new_readme, "README.md", mode)?;
+
+    Ok(plan)
+}
+
+/// Generate the CLI crate (crates/arborium-cli/Cargo.toml).
+/// This crate provides a command-line interface for syntax highlighting.
+fn plan_cli_crate(prepared: &PreparedStructures) -> Result<Plan, Report> {
+    let mut plan = Plan::for_crate("arborium-cli");
+    let cli_path = prepared.repo_root.join("crates/arborium-cli");
+    let cargo_toml_path = cli_path.join("Cargo.toml");
+
+    // Collect all grammar crates sorted by name
+    let mut grammar_crates: Vec<_> = prepared
+        .prepared_temps
+        .iter()
+        .map(|pt| {
+            let name = pt.crate_state.name.clone();
+            let grammar_id = name.strip_prefix("arborium-").unwrap_or(&name).to_string();
+            (name, grammar_id)
+        })
+        .collect();
+    grammar_crates.sort_by(|a, b| a.0.cmp(&b.0));
+
+    let version = &prepared.workspace_version;
+
+    // Build Cargo.toml content
+    let mut content = String::new();
+
+    // Package section
+    content.push_str(&format!(
+        r#"[package]
+name = "arborium-cli"
+version = "{version}"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/bearcove/arborium"
+description = "Command-line syntax highlighter powered by arborium"
+keywords = ["tree-sitter", "syntax-highlighting", "cli"]
+categories = ["command-line-utilities", "text-processing"]
+
+[[bin]]
+name = "arborium"
+path = "src/main.rs"
+
+[features]
+default = ["all-languages"]
+
+# All languages
+all-languages = [
+"#
+    ));
+
+    // Add all lang-* features to all-languages
+    for (_name, grammar_id) in &grammar_crates {
+        // Skip internal grammars
+        if grammar_id.ends_with("_inline") {
+            continue;
+        }
+        content.push_str(&format!("    \"lang-{}\",\n", grammar_id));
+    }
+    content.push_str("]\n\n");
+
+    // Individual language features
+    content.push_str("# Individual language features\n");
+    for (_name, grammar_id) in &grammar_crates {
+        content.push_str(&format!(
+            "lang-{} = [\"arborium/lang-{}\"]\n",
+            grammar_id, grammar_id
+        ));
+    }
+
+    // Dependencies section
+    content.push_str(&format!(
+        r#"
+[dependencies]
+arborium = {{ version = "{version}", path = "../arborium" }}
+facet = {{ git = "https://github.com/facet-rs/facet" }}
+facet-args = {{ git = "https://github.com/facet-rs/facet" }}
+"#
+    ));
+
+    // Write or update the Cargo.toml file
+    if cargo_toml_path.exists() {
+        let old_content = fs::read_to_string(&cargo_toml_path)?;
+        if old_content != content {
+            plan.add(Operation::UpdateFile {
+                path: cargo_toml_path,
+                old_content: Some(old_content),
+                new_content: content,
+                description: "Update arborium-cli Cargo.toml".to_string(),
+            });
+        }
+    } else {
+        // Ensure directory exists
+        if !cli_path.exists() {
+            plan.add(Operation::CreateDir {
+                path: cli_path.clone(),
+                description: "Create arborium-cli crate directory".to_string(),
+            });
+        }
+        // Ensure src directory exists
+        let src_dir = cli_path.join("src");
+        if !src_dir.exists() {
+            plan.add(Operation::CreateDir {
+                path: src_dir.clone(),
+                description: "Create arborium-cli src directory".to_string(),
+            });
+        }
+        plan.add(Operation::CreateFile {
+            path: cargo_toml_path,
+            content,
+            description: "Create arborium-cli Cargo.toml".to_string(),
+        });
+    }
 
     Ok(plan)
 }
