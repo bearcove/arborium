@@ -2146,6 +2146,30 @@
       ]
     },
     {
+      "id": "wit",
+      "crate": "arborium-wit",
+      "name": "WIT",
+      "icon": "simple-icons:webassembly",
+      "tier": 3,
+      "tag": "data",
+      "description": "WebAssembly Interface Types - an interface definition language for the WebAssembly Component Model; spec and docs at <a href=\"https://component-model.bytecodealliance.org/\">component-model.bytecodealliance.org</a>.",
+      "inventor": "Bytecode Alliance",
+      "year": 2021,
+      "link": "https://component-model.bytecodealliance.org/design/wit.html",
+      "trivia": "WIT is part of the WebAssembly Component Model initiative, enabling language-neutral component interfaces; the design doc at <a href=\"https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md\">github.com/WebAssembly/component-model</a> details its syntax and semantics.",
+      "aliases": [
+        "wasm-interface"
+      ],
+      "grammar_repo": "https://github.com/bytecodealliance/tree-sitter-wit",
+      "grammar_license": "Apache-2.0 WITH LLVM-exception",
+      "samples": [
+        {
+          "path": "samples/example.wit",
+          "description": "WIT interface showing records, variants, enums, flags, and type aliases from the Component Model design doc."
+        }
+      ]
+    },
+    {
       "id": "x86asm",
       "crate": "arborium-x86asm",
       "name": "x86 Assembly",

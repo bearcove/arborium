@@ -1,0 +1,44 @@
+package local:demo;
+
+interface foo {
+  // "package of named fields"
+  record r {
+    a: u32,
+    b: string,
+  }
+
+  // values of this type will be one of the specified cases
+  variant human {
+    baby,
+    child(u32), // optional type payload
+    adult,
+  }
+
+  // similar to `variant`, but no type payloads
+  enum errno {
+    too-big,
+    too-small,
+    too-fast,
+    too-slow,
+  }
+
+  // a bitflags type
+  flags permissions {
+    read,
+    write,
+    exec,
+  }
+
+  // type aliases are allowed to primitive types and additionally here are some
+  // examples of other types
+  type t1 = u32;
+  type t2 = tuple<u32, u64>;
+  type t3 = string;
+  type t4 = option<u32>;
+  type t5 = result<_, errno>;           // no "ok" type
+  type t6 = result<string>;             // no "err" type
+  type t7 = result<char, errno>;        // both types specified
+  type t8 = result;                     // no "ok" or "err" type
+  type t9 = list<string>;
+  type t10 = t9;
+}

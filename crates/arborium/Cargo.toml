@@ -114,6 +114,7 @@ all-languages = [
     "lang-vhdl",
     "lang-vim",
     "lang-vue",
+    "lang-wit",
     "lang-x86asm",
     "lang-xml",
     "lang-yaml",
@@ -213,6 +214,7 @@ lang-verilog = ["dep:arborium-verilog"]
 lang-vhdl = ["dep:arborium-vhdl"]
 lang-vim = ["dep:arborium-vim"]
 lang-vue = ["dep:arborium-vue"]
+lang-wit = ["dep:arborium-wit"]
 lang-x86asm = ["dep:arborium-x86asm"]
 lang-xml = ["dep:arborium-xml"]
 lang-yaml = ["dep:arborium-yaml"]
@@ -316,6 +318,7 @@ arborium-verilog = { version = "0.0.0", path = "../../langs/group-moss/verilog/c
 arborium-vhdl = { version = "0.0.0", path = "../../langs/group-moss/vhdl/crate", optional = true }
 arborium-vim = { version = "0.0.0", path = "../../langs/group-sage/vim/crate", optional = true }
 arborium-vue = { version = "0.0.0", path = "../../langs/group-willow/vue/crate", optional = true }
+arborium-wit = { version = "0.0.0", path = "../../langs/group-pine/wit/crate", optional = true }
 arborium-x86asm = { version = "0.0.0", path = "../../langs/group-birch/x86asm/crate", optional = true }
 arborium-xml = { version = "0.0.0", path = "../../langs/group-acorn/xml/crate", optional = true }
 arborium-yaml = { version = "0.0.0", path = "../../langs/group-maple/yaml/crate", optional = true }
