@@ -169,7 +169,7 @@ impl Highlighter {
     }
 
     /// Highlight and return raw spans (for custom rendering).
-    fn highlight_spans(&mut self, language: &str, source: &str) -> Result<Vec<Span>, Error> {
+    pub fn highlight_spans(&mut self, language: &str, source: &str) -> Result<Vec<Span>, Error> {
         // Get the primary grammar
         let grammar = self
             .store

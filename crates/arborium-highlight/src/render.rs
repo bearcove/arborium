@@ -19,6 +19,70 @@ use arborium_theme::{
 use std::collections::HashMap;
 use std::io::{self, Write};
 
+/// A span with a theme style index for rendering.
+///
+/// This is the output of processing raw `Span` objects through the theme system.
+/// The `theme_index` can be used with `Theme::style()` to get colors and modifiers.
+#[derive(Debug, Clone)]
+pub struct ThemedSpan {
+    /// Byte offset where the span starts (inclusive).
+    pub start: u32,
+    /// Byte offset where the span ends (exclusive).
+    pub end: u32,
+    /// Index into the theme's style array.
+    pub theme_index: usize,
+}
+
+/// Convert raw spans to themed spans by resolving capture names to theme indices.
+///
+/// This performs deduplication and returns spans with theme style indices that can
+/// be used with `Theme::style()` to get colors and modifiers.
+pub fn spans_to_themed(spans: Vec<Span>) -> Vec<ThemedSpan> {
+    if spans.is_empty() {
+        return Vec::new();
+    }
+
+    // Sort spans by (start, -end) so longer spans come first at same start
+    let mut spans = spans;
+    spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
+
+    // Deduplicate ranges - prefer spans that map to a theme slot
+    let mut deduped: HashMap<(u32, u32), Span> = HashMap::new();
+    for span in spans {
+        let key = (span.start, span.end);
+        let new_has_slot = slot_to_highlight_index(capture_to_slot(&span.capture)).is_some();
+
+        if let Some(existing) = deduped.get(&key) {
+            let existing_has_slot =
+                slot_to_highlight_index(capture_to_slot(&existing.capture)).is_some();
+            if new_has_slot || !existing_has_slot {
+                deduped.insert(key, span);
+            }
+        } else {
+            deduped.insert(key, span);
+        }
+    }
+
+    // Convert to themed spans
+    let mut themed: Vec<ThemedSpan> = deduped
+        .into_values()
+        .filter_map(|span| {
+            let slot = capture_to_slot(&span.capture);
+            let theme_index = slot_to_highlight_index(slot)?;
+            Some(ThemedSpan {
+                start: span.start,
+                end: span.end,
+                theme_index,
+            })
+        })
+        .collect();
+
+    // Sort by start position
+    themed.sort_by_key(|s| s.start);
+
+    themed
+}
+
 #[cfg(feature = "unicode-width")]
 use unicode_width::UnicodeWidthChar;
 

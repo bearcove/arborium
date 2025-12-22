@@ -58,7 +58,8 @@
 
 use std::sync::RwLock;
 
-use arborium::Highlighter;
+use arborium::{Highlighter, ThemedSpan, spans_to_themed};
+use arborium_theme::{Style as ThemeStyle, Theme};
 use miette::highlighters::Highlighter as MietteHighlighterTrait;
 use owo_colors::Style;
 
@@ -68,22 +69,28 @@ use owo_colors::Style;
 /// by setting it on miette's `GraphicalReportHandler`.
 pub struct MietteHighlighter {
     inner: RwLock<Highlighter>,
+    theme: Theme,
 }
 
 impl MietteHighlighter {
-    /// Create a new miette highlighter.
+    /// Create a new miette highlighter with the default theme.
     pub fn new() -> Self {
+        Self::with_theme(arborium_theme::builtin::catppuccin_mocha().clone())
+    }
+
+    /// Create a new miette highlighter with a custom theme.
+    pub fn with_theme(theme: Theme) -> Self {
         Self {
             inner: RwLock::new(Highlighter::new()),
+            theme,
         }
     }
 
     /// Returns whether a language is supported by this highlighter.
     pub fn is_supported(&self, language: &str) -> bool {
         // Check if arborium has this language available
-        // We do this by trying to highlight an empty string
         let mut inner = self.inner.write().unwrap();
-        inner.highlight(language, "").is_ok()
+        inner.highlight_spans(language, "").is_ok()
     }
 
     /// Detect language from a source name (file path or extension).
@@ -92,6 +99,16 @@ impl MietteHighlighter {
     /// the grammar registry, ensuring extensions stay in sync with supported languages.
     pub fn detect_language(source_name: &str) -> Option<&'static str> {
         arborium::detect_language(source_name)
+    }
+
+    /// Get a reference to the current theme.
+    pub fn theme(&self) -> &Theme {
+        &self.theme
+    }
+
+    /// Set a new theme.
+    pub fn set_theme(&mut self, theme: Theme) {
+        self.theme = theme;
     }
 }
 
@@ -115,183 +132,145 @@ impl MietteHighlighterTrait for MietteHighlighter {
             _ => None,
         };
 
+        // Get the full source text
+        let source_text = std::str::from_utf8(source.data()).unwrap_or("").to_string();
+
+        // Highlight the entire source once to get themed spans
+        let themed_spans = if let Some(lang) = language {
+            let mut inner = self.inner.write().unwrap();
+            if let Ok(spans) = inner.highlight_spans(lang, &source_text) {
+                spans_to_themed(spans)
+            } else {
+                Vec::new()
+            }
+        } else {
+            Vec::new()
+        };
+
         Box::new(MietteHighlighterState {
             highlighter: self,
-            language,
+            themed_spans,
+            line_start: 0,
         })
     }
 }
 
 struct MietteHighlighterState<'h> {
     highlighter: &'h MietteHighlighter,
-    language: Option<&'static str>,
+    themed_spans: Vec<ThemedSpan>,
+    line_start: usize,
 }
 
 impl miette::highlighters::HighlighterState for MietteHighlighterState<'_> {
     fn highlight_line<'s>(&mut self, line: &'s str) -> Vec<owo_colors::Styled<&'s str>> {
-        let Some(language) = self.language else {
-            // No language detected, return unhighlighted
+        // Handle empty lines
+        if line.is_empty() {
+            self.line_start += 1;
             return vec![Style::new().style(line)];
-        };
+        }
 
-        // Use arborium to highlight the line
-        let mut inner = self.highlighter.inner.write().unwrap();
-        let html = match inner.highlight(language, line) {
-            Ok(html) => html,
-            Err(_) => return vec![Style::new().style(line)],
-        };
+        // If no themed spans, return unhighlighted
+        if self.themed_spans.is_empty() {
+            self.line_start += line.len() + 1;
+            return vec![Style::new().style(line)];
+        }
 
-        // Parse the HTML output and convert to styled spans
-        parse_html_to_spans(line, &html)
-    }
-}
+        // Find where this line ends in the full source
+        let line_end = self.line_start + line.len();
 
-/// Parse arborium's HTML output into miette styled spans.
-///
-/// Arborium outputs HTML like `<a-k>fn</a-k>` where `a-k` is short for "keyword".
-/// We convert these to styled spans with appropriate ANSI colors.
-fn parse_html_to_spans<'s>(original: &'s str, html: &str) -> Vec<owo_colors::Styled<&'s str>> {
-    let mut spans = Vec::new();
-    let mut current_pos = 0;
-    let mut html_pos = 0;
-    let html_bytes = html.as_bytes();
+        // Collect spans that overlap with this line
+        let mut line_spans: Vec<&ThemedSpan> = self
+            .themed_spans
+            .iter()
+            .filter(|span| {
+                let span_start = span.start as usize;
+                let span_end = span.end as usize;
+                // Span overlaps if it starts before line ends and ends after line starts
+                span_start < line_end && span_end > self.line_start
+            })
+            .collect();
 
-    while html_pos < html_bytes.len() {
-        if html_bytes[html_pos] == b'<' {
-            // Check if it's a closing tag
-            if html_pos + 1 < html_bytes.len() && html_bytes[html_pos + 1] == b'/' {
-                // Find end of closing tag
-                if let Some(end) = html[html_pos..].find('>') {
-                    html_pos += end + 1;
-                    continue;
-                }
+        // Sort by start position
+        line_spans.sort_by_key(|span| span.start);
+
+        // Build styled spans for this line
+        let mut result = Vec::new();
+        let mut current_pos = 0;
+
+        for span in line_spans {
+            let span_start = span.start as usize;
+            let span_end = span.end as usize;
+
+            // Calculate positions relative to this line
+            let rel_start = span_start.saturating_sub(self.line_start);
+            let rel_end = (span_end - self.line_start).min(line.len());
+
+            // Add unhighlighted text before this span
+            if current_pos < rel_start && rel_start <= line.len() {
+                result.push(Style::new().style(&line[current_pos..rel_start]));
             }
 
-            // It's an opening tag - find the tag name
-            if let Some(end) = html[html_pos..].find('>') {
-                let tag = &html[html_pos + 1..html_pos + end];
+            // Add the highlighted span
+            if rel_start < rel_end && rel_end <= line.len() {
+                // Get style from theme
+                let style =
+                    if let Some(theme_style) = self.highlighter.theme.style(span.theme_index) {
+                        convert_theme_style_to_owo(theme_style)
+                    } else {
+                        Style::new()
+                    };
 
-                // Find the matching closing tag
-                let close_tag = format!("</{}>", tag);
-                if let Some(close_pos) = html[html_pos + end + 1..].find(&close_tag) {
-                    let content_start = html_pos + end + 1;
-                    let content_end = content_start + close_pos;
-                    let content = &html[content_start..content_end];
-
-                    // The content length in the original string
-                    let content_len = content.len();
-
-                    if current_pos + content_len <= original.len() {
-                        let style = style_for_tag(tag);
-                        spans.push(style.style(&original[current_pos..current_pos + content_len]));
-                        current_pos += content_len;
-                    }
-
-                    html_pos = content_end + close_tag.len();
-                    continue;
-                }
+                result.push(style.style(&line[rel_start..rel_end]));
+                current_pos = rel_end;
             }
         }
 
-        // Regular character - count how many chars until next tag or end
-        let next_tag = html[html_pos..].find('<').unwrap_or(html.len() - html_pos);
-        let chunk = &html[html_pos..html_pos + next_tag];
-
-        // Handle HTML entities
-        let decoded = decode_html_entities(chunk);
-        let decoded_len = decoded.len();
-
-        if !decoded.is_empty() && current_pos + decoded_len <= original.len() {
-            spans.push(Style::new().style(&original[current_pos..current_pos + decoded_len]));
-            current_pos += decoded_len;
+        // Add any remaining unhighlighted text
+        if current_pos < line.len() {
+            result.push(Style::new().style(&line[current_pos..]));
         }
 
-        html_pos += next_tag;
-    }
+        // Update line_start for next line (account for newline character)
+        self.line_start = line_end + 1;
 
-    // Handle any remaining text
-    if current_pos < original.len() {
-        spans.push(Style::new().style(&original[current_pos..]));
+        // Return unhighlighted if we didn't produce any spans
+        if result.is_empty() {
+            vec![Style::new().style(line)]
+        } else {
+            result
+        }
     }
-
-    // If we didn't produce any spans, return the original line unhighlighted
-    if spans.is_empty() {
-        return vec![Style::new().style(original)];
-    }
-
-    spans
 }
 
-/// Decode common HTML entities back to their characters.
-fn decode_html_entities(s: &str) -> String {
-    s.replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&amp;", "&")
-        .replace("&quot;", "\"")
-        .replace("&#39;", "'")
-}
+/// Convert arborium's `ThemeStyle` to `owo_colors::Style`.
+fn convert_theme_style_to_owo(theme_style: &ThemeStyle) -> Style {
+    let mut style = Style::new();
 
-/// Map an arborium tag name to an owo_colors style.
-///
-/// Arborium uses short tag names like `a-k` (keyword), `a-s` (string), etc.
-fn style_for_tag(tag: &str) -> Style {
-    use owo_colors::AnsiColors;
-
-    match tag {
-        // Keywords - bold magenta
-        "a-k" | "a-kw" => Style::new().bold().color(AnsiColors::Magenta),
-
-        // Strings - green
-        "a-s" | "a-str" => Style::new().color(AnsiColors::Green),
-
-        // Comments - dimmed cyan
-        "a-c" | "a-cm" => Style::new().dimmed().color(AnsiColors::Cyan),
-
-        // Functions - bold blue
-        "a-f" | "a-fn" => Style::new().bold().color(AnsiColors::Blue),
-
-        // Types - yellow
-        "a-t" | "a-ty" => Style::new().color(AnsiColors::Yellow),
-
-        // Variables - default
-        "a-v" | "a-var" => Style::new(),
-
-        // Numbers/constants - cyan
-        "a-n" | "a-num" => Style::new().color(AnsiColors::Cyan),
-
-        // Operators - white/default
-        "a-o" | "a-op" => Style::new(),
-
-        // Punctuation - dimmed
-        "a-p" | "a-punc" => Style::new().dimmed(),
-
-        // Attributes - italic cyan
-        "a-a" | "a-attr" => Style::new().italic().color(AnsiColors::Cyan),
-
-        // Macros - bold cyan
-        "a-m" | "a-macro" => Style::new().bold().color(AnsiColors::Cyan),
-
-        // Labels - bold
-        "a-l" | "a-label" => Style::new().bold(),
-
-        // Namespace/module - yellow
-        "a-ns" => Style::new().color(AnsiColors::Yellow),
-
-        // Property - cyan
-        "a-prop" => Style::new().color(AnsiColors::Cyan),
-
-        // Parameter - italic
-        "a-param" => Style::new().italic(),
-
-        // Built-in - bold yellow
-        "a-builtin" => Style::new().bold().color(AnsiColors::Yellow),
-
-        // Error - bold red
-        "a-err" | "a-error" => Style::new().bold().color(AnsiColors::Red),
-
-        // Default - no styling
-        _ => Style::new(),
+    // Apply foreground color if present
+    if let Some(fg) = theme_style.fg {
+        style = style.truecolor(fg.r, fg.g, fg.b);
     }
+
+    // Apply background color if present
+    if let Some(bg) = theme_style.bg {
+        style = style.on_truecolor(bg.r, bg.g, bg.b);
+    }
+
+    // Apply modifiers
+    if theme_style.modifiers.bold {
+        style = style.bold();
+    }
+    if theme_style.modifiers.italic {
+        style = style.italic();
+    }
+    if theme_style.modifiers.underline {
+        style = style.underline();
+    }
+    if theme_style.modifiers.strikethrough {
+        style = style.strikethrough();
+    }
+
+    style
 }
 
 /// Install the arborium highlighter as miette's global highlighter.
@@ -316,6 +295,27 @@ pub fn install_global() -> Result<(), miette::InstallError> {
     }))
 }
 
+/// Install a custom themed highlighter as miette's global highlighter.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// fn main() {
+///     let theme = arborium_theme::builtin::github_light().clone();
+///     miette_arborium::install_global_with_theme(theme).ok();
+///     // ... rest of your program ...
+/// }
+/// ```
+pub fn install_global_with_theme(theme: Theme) -> Result<(), miette::InstallError> {
+    miette::set_hook(Box::new(move |_| {
+        Box::new(
+            miette::MietteHandlerOpts::new()
+                .with_syntax_highlighting(MietteHighlighter::with_theme(theme.clone()))
+                .build(),
+        )
+    }))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -335,11 +335,14 @@ mod tests {
     }
 
     #[test]
-    fn test_style_for_tag() {
-        // Just verify that all expected tags return styles without panicking
-        let tags = ["a-k", "a-s", "a-c", "a-f", "a-t", "a-n", "a-o", "a-p"];
-        for tag in tags {
-            let _ = style_for_tag(tag);
-        }
+    fn test_theme_style_conversion() {
+        use arborium_theme::Color;
+
+        let theme_style = ThemeStyle::new().fg(Color::new(255, 0, 0)).bold().italic();
+
+        let owo_style = convert_theme_style_to_owo(&theme_style);
+
+        // We can't directly test the style, but we can verify it doesn't panic
+        let _styled = owo_style.style("test");
     }
 }

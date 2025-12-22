@@ -106,8 +106,8 @@ mod types;
 pub mod tree_sitter;
 
 pub use render::{
-    AnsiOptions, html_escape, spans_to_ansi, spans_to_ansi_with_options, spans_to_html,
-    write_spans_as_ansi, write_spans_as_html,
+    AnsiOptions, ThemedSpan, html_escape, spans_to_ansi, spans_to_ansi_with_options, spans_to_html,
+    spans_to_themed, write_spans_as_ansi, write_spans_as_html,
 };
 pub use types::{HighlightError, Injection, ParseResult, Span};
 
