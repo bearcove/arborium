@@ -28,6 +28,10 @@ export default defineConfig({
     dts({
       include: ['src/**/*'],
       outDir: 'dist',
+      beforeWriteFile: (filePath, content) => ({
+        content,
+        filePath: filePath.endsWith('index.d.ts') ? filePath.replace('index.d.ts', 'arborium.d.ts') : filePath,
+      }),
     }),
     copyThemes(),
   ],

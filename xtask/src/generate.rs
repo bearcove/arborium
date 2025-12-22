@@ -181,6 +181,19 @@ struct DocsrsDemoReadmeTemplate<'a> {
 #[template(path = "root_readme.stpl.md")]
 struct RootReadmeTemplate<'a> {
     version: &'a str,
+    /// List of permissively-licensed grammars (MIT, Apache-2.0, etc.)
+    permissive_grammars: &'a [LanguageEntry],
+    /// List of GPL-licensed grammars
+    gpl_grammars: &'a [LanguageEntry],
+}
+
+/// Language entry for README table generation
+#[derive(Debug, Clone)]
+struct LanguageEntry {
+    feature: String,
+    name: String,
+    license: String,
+    repo_url: String,
 }
 
 // Umbrella crate templates (arborium)
@@ -2222,8 +2235,57 @@ dlmalloc = "0.2"
     // =========================================================================
     // Generate root README.md from template
     // =========================================================================
+
+    // Collect all grammars and separate by license type
+    let mut all_grammars = Vec::new();
+    for prepared_temp in &prepared.prepared_temps {
+        let config = &prepared_temp.config;
+        let license = config.license.value.as_str();
+
+        // Skip grammars with empty license (placeholders/not yet implemented)
+        if license.is_empty() {
+            continue;
+        }
+
+        // Get repository URL
+        let repo_url = if config.repo.value.as_str() == "local" {
+            "local".to_string()
+        } else {
+            config.repo.value.to_string()
+        };
+
+        // Process each grammar in this crate
+        for grammar in &config.grammars {
+            let entry = LanguageEntry {
+                feature: format!("lang-{}", grammar.id.value.as_str()),
+                name: grammar.name.value.to_string(),
+                license: license.to_string(),
+                repo_url: repo_url.clone(),
+            };
+            all_grammars.push(entry);
+        }
+    }
+
+    // Sort alphabetically by feature name
+    all_grammars.sort_by(|a, b| a.feature.cmp(&b.feature));
+
+    // Separate into permissive and GPL licenses
+    let permissive_grammars: Vec<LanguageEntry> = all_grammars
+        .iter()
+        .filter(|g| !g.license.starts_with("GPL"))
+        .cloned()
+        .collect();
+
+    let gpl_grammars: Vec<LanguageEntry> = all_grammars
+        .iter()
+        .filter(|g| g.license.starts_with("GPL"))
+        .cloned()
+        .collect();
+
     let root_readme_content = RootReadmeTemplate {
         version: &prepared.workspace_version,
+        permissive_grammars: &permissive_grammars,
+        gpl_grammars: &gpl_grammars,
     }
     .render_once()
     .expect("RootReadmeTemplate render failed");

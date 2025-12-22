@@ -74,7 +74,7 @@
     "url": "https://github.com/bearcove/arborium"
   },
   "scripts": {
-    "build": "vite build && vite build --config vite.config.iife.ts && tsc --emitDeclarationOnly && npm run copy:host",
+    "build": "vite build && vite build --config vite.config.iife.ts && npm run copy:host",
     "build:esm": "vite build",
     "build:iife": "vite build --config vite.config.iife.ts",
     "copy:host": "cp ../../demo/pkg/arborium_host.js ../../demo/pkg/arborium_host*.wasm dist/",
