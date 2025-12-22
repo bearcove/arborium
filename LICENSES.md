@@ -27,14 +27,15 @@ You may choose either license at your option.
 | tree-sitter-scss | MIT | Copyright (c) 2024 Amaan Qureshi |
 | tree-sitter-toml | MIT | Copyright (c) Ika |
 | tree-sitter-zig | MIT | Copyright (c) 2022 maxxnino |
+| tree-sitter-jinja2 | Apache-2.0 | Copyright dbt Labs |
 
 ### GPL Licensed (opt-in only)
 
 | Grammar | License | Copyright |
 |---------|---------|-----------|
-| tree-sitter-jinja2 | GPL-3.0 | Copyright dbt Labs |
+| tree-sitter-nginx | GPL-3.0 | Copyright Jon Coole |
 
-**Warning**: Enabling `gpl-grammars` or `lang-jinja2` features will include GPL-3.0 licensed code, which may have implications for your project's licensing.
+**Warning**: Enabling `gpl-grammars` features will include GPL-3.0 licensed code, which may have implications for your project's licensing.
 
 ---
 
@@ -362,8 +363,8 @@ Affirmer's express Statement of Purpose.
   CC0 or use of the Work.
 ```
 
-### GPL-3.0 (applies only to tree-sitter-jinja2)
+### GPL-3.0 (applies only to tree-sitter-nginx)
 
 The full GPL-3.0 license text can be found at: https://www.gnu.org/licenses/gpl-3.0.txt
 
-This license only applies when the `gpl-grammars` or `lang-jinja2` feature is enabled.
+This license only applies when the `gpl-grammars` or `lang-nginx` feature is enabled.

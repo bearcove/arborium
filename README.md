@@ -181,6 +181,7 @@ These grammars use permissive licenses (MIT, Apache-2.0, CC0, Unlicense) and are
 | `lang-ini` | INI | Apache-2.0 | [tree-sitter-ini](https://github.com/justinmk/tree-sitter-ini) |
 | `lang-java` | Java | MIT | [tree-sitter-java](https://github.com/tree-sitter/tree-sitter-java) |
 | `lang-javascript` | JavaScript | MIT | [tree-sitter-javascript](https://github.com/tree-sitter/tree-sitter-javascript) |
+| `lang-jinja2` | Jinja2 | Apache-2.0 | [tree-sitter-jinja2](https://github.com/dbt-labs/tree-sitter-jinja2) |
 | `lang-jq` | jq | MIT | [tree-sitter-jq](https://github.com/flurie/tree-sitter-jq) |
 | `lang-json` | JSON | MIT | [tree-sitter-json](https://github.com/tree-sitter/tree-sitter-json) |
 | `lang-lean` | Lean | MIT | [tree-sitter-lean](https://github.com/Julian/tree-sitter-lean) |
@@ -220,14 +221,13 @@ These grammars use permissive licenses (MIT, Apache-2.0, CC0, Unlicense) and are
 | `lang-zig` | Zig | MIT | [tree-sitter-zig](https://github.com/tree-sitter-grammars/tree-sitter-zig) |
 | `lang-zsh` | Zsh | MIT | [tree-sitter-zsh](https://github.com/georgeharker/tree-sitter-zsh) |
 
-### GPL-Licensed Grammars (2)
+### GPL-Licensed Grammars (1)
 
 These grammars are **not included by default** due to their copyleft license.
 Enabling them may have implications for your project's licensing.
 
 | Feature | Language | License | Source |
 |---------|----------|---------|--------|
-| `lang-jinja2` | Jinja2 | GPL-3.0 | [tree-sitter-jinja2](https://github.com/dbt-labs/tree-sitter-jinja2) |
 | `lang-nginx` | nginx | GPL-3.0 | [tree-sitter-nginx](https://gitlab.com/joncoole/tree-sitter-nginx) |
 
 ## HTML Tag Reference
