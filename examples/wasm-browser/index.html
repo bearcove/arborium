@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arborium WASM Browser Example</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Public Sans', sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        #status {
+            background: #2a2a2a;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #4CAF50;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        #output {
+            background: #212121;
+            padding: .8rem;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: 'IBM Plex Mono', monospace;
+            border: 1px solid #404040;
+            font-size: 90%;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <h1>arborium in a frontend rust project</h1>
+    <p>Syntax highlighting in the browser using WebAssembly</p>
+    <div id="status">Loading WASM module...</div>
+    <pre id="output"></pre>
+
+    <script type="module">
+        import init, { get_theme_css, highlight_code } from './pkg/arborium_wasm_browser_example.js';
+
+        async function run() {
+            try {
+                // Initialize the WASM module
+                await init();
+
+                const status = document.getElementById('status');
+                status.textContent = 'WASM module loaded successfully!';
+
+                // Inject the CSS
+                const css = get_theme_css();
+                const styleElement = document.createElement('style');
+                styleElement.textContent = css;
+                document.head.appendChild(styleElement);
+
+                // Try to highlight some code
+                const rustCode = `use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct Person {
+    name: String,
+    age: u32,
+    email: Option<String>,
+}
+
+impl Person {
+    fn new(name: &str, age: u32) -> Self {
+        Self {
+            name: name.to_string(),
+            age,
+            email: None,
+        }
+    }
+
+    fn set_email(&mut self, email: String) {
+        self.email = Some(email);
+    }
+
+    fn greet(&self) -> String {
+        match &self.email {
+            Some(email) => format!("Hello, I'm {} ({} years old) - reach me at {}",
+                                 self.name, self.age, email),
+            None => format!("Hello, I'm {} ({} years old)", self.name, self.age),
+        }
+    }
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut people: HashMap<u32, Person> = HashMap::new();
+
+    let mut alice = Person::new("Alice", 30);
+    alice.set_email("alice@example.com".to_string());
+
+    let bob = Person::new("Bob", 25);
+
+    people.insert(1, alice);
+    people.insert(2, bob);
+
+    for (id, person) in &people {
+        println!("ID {}: {}", id, person.greet());
+    }
+
+    // Demonstrate error handling
+    let ages: Vec<u32> = people.values()
+        .map(|p| p.age)
+        .filter(|&age| age > 25)
+        .collect();
+
+    println!("People over 25: {:?}", ages);
+
+    Ok(())
+}`;
+                const highlighted = highlight_code(rustCode, "rust");
+
+                document.getElementById('output').innerHTML = highlighted;
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.className = 'error';
+                status.textContent = `Error: ${error}`;
+                console.error('Full error:', error);
+            }
+        }
+
+        run();
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+use anyhow::Result;
+use std::path::PathBuf;
+use walrus::Module;
+
+fn main() -> Result<()> {
+    let wasm_path = PathBuf::from("target/wasm32-unknown-unknown/release/arborium_wasm_repro.wasm");
+
+    println!(
+        "🔍 Inspecting raw WASM file (before wasm-bindgen): {}",
+        wasm_path.display()
+    );
+    println!();
+
+    let wasm_bytes = std::fs::read(&wasm_path)?;
+    let module = Module::from_buffer(&wasm_bytes)?;
+
+    println!("📦 Module Information:");
+    println!("   Functions: {}", module.funcs.iter().count());
+    println!("   Imports: {}", module.imports.iter().count());
+    println!("   Exports: {}", module.exports.iter().count());
+    println!();
+
+    // Check for env imports (the problematic ones)
+    let mut env_imports = Vec::new();
+    let mut other_imports = Vec::new();
+
+    for import in module.imports.iter() {
+        if import.module == "env" {
+            env_imports.push(import.name.clone());
+        } else {
+            other_imports.push((import.module.clone(), import.name.clone()));
+        }
+    }
+
+    if !env_imports.is_empty() {
+        println!(
+            "❌ Found {} problematic 'env' module imports:",
+            env_imports.len()
+        );
+        for name in &env_imports {
+            println!("   - {}", name);
+        }
+        println!();
+        println!("⚠️  These imports will cause browser compatibility issues!");
+        println!();
+    } else {
+        println!("✅ No 'env' module imports found!");
+        println!("   The raw WASM (before wasm-bindgen) is browser-compatible!");
+        println!();
+    }
+
+    if !other_imports.is_empty() {
+        println!("ℹ️  Other imports ({}):", other_imports.len());
+        for (module, name) in &other_imports {
+            println!("   - {}::{}", module, name);
+        }
+        println!();
+    }
+
+    Ok(())
+}

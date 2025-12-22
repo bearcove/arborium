@@ -8,7 +8,7 @@ typedef struct {} FILE;
 
 extern FILE *stderr;
 
-int fprintf(FILE* stream, const char* format, ...);
+#define fprintf(stream, ...) 0
 #define snprintf(str, size, format, ...) 0
 #define vsnprintf(str, size, format, ap) 0
 #define fputs(s, stream) 0

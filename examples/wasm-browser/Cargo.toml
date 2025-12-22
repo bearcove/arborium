@@ -1,0 +1,23 @@
+[package]
+name = "arborium-wasm-browser-example"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "inspect-wasm"
+path = "src/inspect.rs"
+
+[[bin]]
+name = "inspect-raw"
+path = "src/inspect-raw.rs"
+
+[dependencies]
+arborium = { path = "../../crates/arborium", features = ["lang-rust"] }
+wasm-bindgen = "0.2"
+walrus = "0.22"
+anyhow = "1.0"
+arborium-theme = "2.3.2"
