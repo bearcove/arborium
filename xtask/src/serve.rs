@@ -965,6 +965,20 @@ fn generate_index_html(
 fn build_iife_bundle(repo_root: &Path, demo_dir: &Path) -> Result<(), String> {
     let packages_dir = repo_root.join("packages/arborium");
 
+    // Ensure dependencies are installed
+    let node_modules = packages_dir.join("node_modules");
+    if !node_modules.exists() {
+        let status = std::process::Command::new("pnpm")
+            .arg("install")
+            .current_dir(&packages_dir)
+            .status()
+            .map_err(|e| format!("Failed to run pnpm install: {}", e))?;
+
+        if !status.success() {
+            return Err(format!("pnpm install failed with status: {}", status));
+        }
+    }
+
     // Run npm/pnpm to build the IIFE
     let status = std::process::Command::new("pnpm")
         .arg("run")
