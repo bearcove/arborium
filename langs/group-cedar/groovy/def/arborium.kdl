@@ -10,7 +10,7 @@ grammar {
     has-scanner #false
     generate-component #true
     icon "devicon-plain:groovy"
-    aliases "groovy" "gvy" "gy" "gsh"
+    aliases "gvy" "gy" "gsh"
 
     inventor "James Strachan"
     year 2003
