@@ -33,7 +33,11 @@ struct Args {
 
 fn main() {
     let args: Args = facet_args::from_std_args().unwrap_or_else(|e| {
-        eprintln!("Error: {:?}", e);
+        if let Some(text) = e.help_text() {
+            eprintln!("{text}");
+        } else {
+            eprintln!("{:?}", miette::Report::new(e));
+        }
         std::process::exit(1);
     });
 

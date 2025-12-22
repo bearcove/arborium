@@ -2666,6 +2666,7 @@ all-languages = [
 arborium = {{ version = "{version}", path = "../arborium" }}
 facet = "0.33.0"
 facet-args = "0.33.0"
+miette = {{ version = "7.6.0", features = ["fancy-no-backtrace"] }}
 "#
     ));
 
