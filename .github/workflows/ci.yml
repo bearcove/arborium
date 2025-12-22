@@ -302,7 +302,7 @@ jobs:
 
 
   build-plugins-cedar: 
-    name: "Plugins (cedar): clojure, java, kotlin, scala"
+    name: "Plugins (cedar): clojure, groovy, java, kotlin, scala"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -324,8 +324,8 @@ jobs:
         run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
         shell: bash
       - 
-        name: Build clojure, java, kotlin, scala
-        run: "set -e\n./xtask/target/release/xtask build clojure java kotlin scala -o dist/plugins"
+        name: Build clojure, groovy, java, kotlin, scala
+        run: "set -e\n./xtask/target/release/xtask build clojure groovy java kotlin scala -o dist/plugins"
         shell: bash
       - 
         name: Upload plugins artifact

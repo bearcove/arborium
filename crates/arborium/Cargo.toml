@@ -56,6 +56,7 @@ all-languages = [
     "lang-glsl",
     "lang-go",
     "lang-graphql",
+    "lang-groovy",
     "lang-haskell",
     "lang-hcl",
     "lang-hlsl",
@@ -156,6 +157,7 @@ lang-gleam = ["dep:arborium-gleam"]
 lang-glsl = ["dep:arborium-glsl"]
 lang-go = ["dep:arborium-go"]
 lang-graphql = ["dep:arborium-graphql"]
+lang-groovy = ["dep:arborium-groovy"]
 lang-haskell = ["dep:arborium-haskell"]
 lang-hcl = ["dep:arborium-hcl"]
 lang-hlsl = ["dep:arborium-hlsl"]
@@ -260,6 +262,7 @@ arborium-gleam = { version = "0.0.0", path = "../../langs/group-fern/gleam/crate
 arborium-glsl = { version = "0.0.0", path = "../../langs/group-moss/glsl/crate", optional = true }
 arborium-go = { version = "0.0.0", path = "../../langs/group-birch/go/crate", optional = true }
 arborium-graphql = { version = "0.0.0", path = "../../langs/group-maple/graphql/crate", optional = true }
+arborium-groovy = { version = "0.0.0", path = "../../langs/group-cedar/groovy/crate", optional = true }
 arborium-haskell = { version = "0.0.0", path = "../../langs/group-fern/haskell/crate", optional = true }
 arborium-hcl = { version = "0.0.0", path = "../../langs/group-maple/hcl/crate", optional = true }
 arborium-hlsl = { version = "0.0.0", path = "../../langs/group-moss/hlsl/crate", optional = true }

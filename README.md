@@ -146,7 +146,7 @@ Or let the IIFE bundle auto-inject it via the `data-theme` attribute.
 | `gpl-grammars` | GPL-licensed grammars (copyleft - may affect your project's license) |
 | `all-grammars` | All grammars including GPL |
 
-### Permissive Grammars (75)
+### Permissive Grammars (76)
 
 These grammars use permissive licenses (MIT, Apache-2.0, CC0, Unlicense) and are included by default.
 
@@ -196,6 +196,8 @@ These grammars use permissive licenses (MIT, Apache-2.0, CC0, Unlicense) and are
 | `lang-glsl` | GLSL | MIT | [tree-sitter-glsl](https://github.com/tree-sitter-grammars/tree-sitter-glsl) |
 
 | `lang-go` | Go | MIT | [tree-sitter-go](https://github.com/tree-sitter/tree-sitter-go) |
+
+| `lang-groovy` | Groovy | MIT | [tree-sitter-groovy](https://github.com/murtaza64/tree-sitter-groovy) |
 
 | `lang-haskell` | Haskell | MIT | [tree-sitter-haskell](https://github.com/tree-sitter/tree-sitter-haskell) |
 
