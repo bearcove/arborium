@@ -43,6 +43,9 @@ enum Command {
     /// Print version information
     Version,
 
+    /// Print global cache key for CI (combines all grammar cache keys)
+    CacheKey,
+
     /// Generate plugins-manifest.ts for the npm package (used by prepublishOnly)
     GenManifest,
 
@@ -263,6 +266,15 @@ fn main() {
 
     match args.command {
         Command::Version => unreachable!(),
+        Command::CacheKey => {
+            match cache::compute_global_cache_key(&repo_root) {
+                Ok(key) => println!("{}", key),
+                Err(e) => {
+                    eprintln!("Error computing cache key: {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
         Command::GenManifest => {
             let repo_root = util::find_repo_root().expect("Could not find repo root");
             let repo_root = camino::Utf8PathBuf::from_path_buf(repo_root).expect("non-UTF8 path");

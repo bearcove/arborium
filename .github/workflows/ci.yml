@@ -40,17 +40,29 @@ jobs:
         shell: bash
         id: version
       - 
-        name: Restore grammar generation cache
+        name: Restore xtask cache
         uses: actions/cache@v4
         with: 
-          path: .cache/arborium
-          key: "grammar-cache-v1000-${{ hashFiles('langs/group-*/*/def/grammar/grammar.js', 'langs/group-*/*/def/grammar/package.json') }}"
-          restore-keys: grammar-cache-v1000-
+          path: xtask/target
+          key: "xtask-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}"
 
       - 
         name: Build xtask
         run: "set -e\ncargo build --release --manifest-path xtask/Cargo.toml"
         shell: bash
+      - 
+        name: Compute grammar cache key
+        run: "set -e\necho \"key=$(./xtask/target/release/xtask cache-key)\" >> $GITHUB_OUTPUT"
+        shell: bash
+        id: grammar-cache-key
+      - 
+        name: Restore grammar generation cache
+        uses: actions/cache@v4
+        with: 
+          path: .cache/arborium
+          key: "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-${{ steps.grammar-cache-key.outputs.key }}"
+          restore-keys: "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-"
+
       - 
         name: Generate grammar sources
         run: "set -e\n./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet"

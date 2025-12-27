@@ -430,21 +430,39 @@ echo "is_release=$IS_RELEASE" >> $GITHUB_OUTPUT
 echo "Version: $VERSION (release: $IS_RELEASE)""#,
                 )
                 .with_id("version"),
-                // Grammar generation cache
-                Step::uses("Restore grammar generation cache", "actions/cache@v4")
+                // Layer 1: Cache xtask build (keyed on source code)
+                Step::uses("Restore xtask cache", "actions/cache@v4")
                     .with_inputs([
-                        ("path", ".cache/arborium"),
+                        ("path", "xtask/target"),
                         (
                             "key",
-                            "grammar-cache-v1000-${{ hashFiles('langs/group-*/*/def/grammar/grammar.js', 'langs/group-*/*/def/grammar/package.json') }}",
+                            "xtask-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}",
                         ),
-                        ("restore-keys", "grammar-cache-v1000-"),
                     ]),
                 // Build xtask (not pre-baked in container, built fresh from source)
                 Step::run(
                     "Build xtask",
                     "cargo build --release --manifest-path xtask/Cargo.toml",
                 ),
+                // Layer 2: Cache grammars using canonical key from xtask
+                // This key includes tree-sitter version and all grammar inputs
+                Step::run(
+                    "Compute grammar cache key",
+                    "echo \"key=$(./xtask/target/release/xtask cache-key)\" >> $GITHUB_OUTPUT",
+                )
+                .with_id("grammar-cache-key"),
+                Step::uses("Restore grammar generation cache", "actions/cache@v4")
+                    .with_inputs([
+                        ("path", ".cache/arborium"),
+                        (
+                            "key",
+                            "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-${{ steps.grammar-cache-key.outputs.key }}",
+                        ),
+                        (
+                            "restore-keys",
+                            "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-",
+                        ),
+                    ]),
                 // Generate with version (from tag or 0.0.0 for non-release)
                 Step::run(
                     "Generate grammar sources",

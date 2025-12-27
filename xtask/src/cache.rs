@@ -10,6 +10,30 @@ use camino::{Utf8Path, Utf8PathBuf};
 use fs_err as fs;
 use std::io::Read;
 
+/// Combines all per-grammar cache keys into a single hash for CI.
+pub fn compute_global_cache_key(repo_root: &Utf8Path) -> std::io::Result<String> {
+    let crates_dir = repo_root.join("crates");
+    let registry = crate::types::CrateRegistry::load(&crates_dir)
+        .map_err(|e| std::io::Error::other(format!("Failed to load registry: {}", e)))?;
+
+    let cache = GrammarCache::new(repo_root);
+    let mut hasher = blake3::Hasher::new();
+
+    for (name, state) in &registry.crates {
+        let Some(config) = &state.config else { continue };
+        let Ok(key) = cache.compute_cache_key(&state.def_path, &crates_dir, config) else {
+            continue;
+        };
+
+        hasher.update(name.as_bytes());
+        hasher.update(b":");
+        hasher.update(key.as_bytes());
+        hasher.update(b"\0");
+    }
+
+    Ok(hasher.finalize().to_hex().to_string())
+}
+
 /// The cache directory relative to repo root.
 const CACHE_DIR: &str = ".cache/arborium";
 
