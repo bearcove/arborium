@@ -72,6 +72,17 @@ export interface Grammar {
   dispose(): void;
 }
 
+type MaybePromise<T> = T | Promise<T>;
+
+interface ResolveArgs {
+  /** Language to load the grammar plugin for */
+  language: string;
+  /** Base URL derived from language, CDN and version */
+  baseUrl: string;
+  /** Relative path in the module to load */
+  path: string;
+}
+
 /** Configuration for the arborium runtime */
 export interface ArboriumConfig {
   /** Disable auto-highlighting on page load */
@@ -88,6 +99,10 @@ export interface ArboriumConfig {
   pluginsUrl?: string;
   /** Base URL for the Rust host module (for local testing) */
   hostUrl?: string;
+  /** Custom grammar resolution for JS */
+  resolveJs?(args: ResolveArgs): MaybePromise<unknown>;
+  /** Custom grammar resolution for WASM */
+  resolveWasm?(args: ResolveArgs): MaybePromise<Response | BufferSource | WebAssembly.Module>;
 }
 
 /** Global config set before script loads */

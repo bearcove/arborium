@@ -8,7 +8,7 @@
  * 3. Parse and highlight using the grammar's tree-sitter parser
  */
 
-import type { ParseResult, ArboriumConfig, Grammar, Session, Span, Injection } from "./types.js";
+import type { ParseResult, ArboriumConfig, Grammar, Session, Span } from "./types.js";
 import { availableLanguages, pluginVersion } from "./plugins-manifest.js";
 
 // Default config
@@ -20,6 +20,8 @@ export const defaultConfig: Required<ArboriumConfig> = {
   version: pluginVersion, // Precise version from manifest
   pluginsUrl: "", // Empty means use bundled manifest
   hostUrl: "", // Empty means use CDN based on version
+  resolveJs: ({ baseUrl, path }) => import(/* @vite-ignore */ `${baseUrl}/${path}`),
+  resolveWasm: ({ baseUrl, path }) => fetch(`${baseUrl}/${path}`),
 };
 
 // Rust host module (loaded on demand)
@@ -98,9 +100,18 @@ function getGrammarBaseUrl(language: string): string {
   return `${baseUrl}/@arborium/${language}@${version}`;
 }
 
+type MaybePromise<T> = Promise<T> | T;
+
+// See https://github.com/wasm-bindgen/wasm-bindgen/blob/dda4821ee2fbcaa7adc58bc8c385ed8d3627a272/crates/cli-support/src/js/mod.rs#L860
+/** Source of the WASM module for wasm-bindgen */
+type WbgInitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
+
 /** wasm-bindgen plugin module interface */
 interface WasmBindgenPlugin {
-  default: (wasmUrl: string) => Promise<void>;
+  default: (
+    module_or_path?: { module_or_path: MaybePromise<WbgInitInput> } | undefined
+    // deprecated: | MaybePromise<WbgInitInput>,
+  ) => Promise<void>;
   language_id: () => string;
   injection_languages: () => string[];
   create_session: () => number;
@@ -141,16 +152,13 @@ async function loadGrammarPlugin(language: string): Promise<GrammarPlugin | null
 
   try {
     const baseUrl = getGrammarBaseUrl(language);
-    const jsUrl = `${baseUrl}/grammar.js`;
-    const wasmUrl = `${baseUrl}/grammar_bg.wasm`;
+    console.debug(`[arborium] Loading grammar '${language}' from ${baseUrl}/grammar.js`);
 
-    console.debug(`[arborium] Loading grammar '${language}' from ${jsUrl}`);
-
-    // Dynamically import the wasm-bindgen generated JS module
-    const module = (await import(/* @vite-ignore */ jsUrl)) as WasmBindgenPlugin;
+    const module = (await config.resolveJs({ language, baseUrl, path: "grammar.js" })) as WasmBindgenPlugin;
+    const wasm = await config.resolveWasm({ language, baseUrl, path: "grammar_bg.wasm" });
 
     // Initialize the WASM module
-    await module.default(wasmUrl);
+    await module.default({ module_or_path: wasm });
 
     // Verify it loaded correctly
     const loadedId = module.language_id();
