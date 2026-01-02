@@ -72,6 +72,16 @@ export interface Grammar {
   dispose(): void;
 }
 
+/** A highlighting tag */
+export interface Highlight {
+  /** Long name, used in `Span` */
+  name: string;
+  /** Short name, used in HTML tags and CSS variables */
+  tag: string;
+  /** Parent tag for fallback */
+  parentTag?: string;
+}
+
 type MaybePromise<T> = T | Promise<T>;
 
 interface ResolveArgs {
