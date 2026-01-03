@@ -37,7 +37,7 @@ let hostModule: HostModule | null = null;
 let hostLoadPromise: Promise<HostModule | null> | null = null;
 
 // Merged config
-let config: Required<ArboriumConfig> = { ...defaultConfig };
+let globalConfig: Required<ArboriumConfig> = { ...defaultConfig };
 
 // Grammar plugins cache
 const grammarCache = new Map<string, GrammarPlugin>();
@@ -57,7 +57,7 @@ let localManifest: LocalManifest | null = null;
 let localManifestPromise: Promise<void> | null = null;
 
 /** Load local manifest if pluginsUrl is configured (for dev server) */
-async function ensureLocalManifest(): Promise<void> {
+async function ensureLocalManifest(config: Required<ArboriumConfig>): Promise<void> {
   if (!config.pluginsUrl) {
     return;
   }
@@ -80,7 +80,7 @@ async function ensureLocalManifest(): Promise<void> {
 }
 
 /** Get the CDN base URL for a grammar */
-function getGrammarBaseUrl(language: string): string {
+function getGrammarBaseUrl(language: string, config: Required<ArboriumConfig>): string {
   // If we have a local manifest (dev mode), use the local path
   if (localManifest) {
     const entry = localManifest.entries.find((e) => e.language === language);
@@ -134,7 +134,7 @@ interface GrammarPlugin {
 }
 
 /** Load a grammar plugin */
-async function loadGrammarPlugin(language: string): Promise<GrammarPlugin | null> {
+async function loadGrammarPlugin(language: string, config: Required<ArboriumConfig>): Promise<GrammarPlugin | null> {
   // Check cache
   const cached = grammarCache.get(language);
   if (cached) {
@@ -143,7 +143,7 @@ async function loadGrammarPlugin(language: string): Promise<GrammarPlugin | null
   }
 
   // Load local manifest if in dev mode
-  await ensureLocalManifest();
+  await ensureLocalManifest(config);
 
   // Check if language is known
   if (
@@ -155,7 +155,7 @@ async function loadGrammarPlugin(language: string): Promise<GrammarPlugin | null
   }
 
   try {
-    const baseUrl = getGrammarBaseUrl(language);
+    const baseUrl = getGrammarBaseUrl(language, config);
     const detail = config.resolveJs === defaultConfig.resolveJs ? ` from ${baseUrl}/grammar.js` : "";
     console.debug(`[arborium] Loading grammar '${language}'${detail}`);
 
@@ -212,7 +212,7 @@ const handleToPlugin = new Map<number, GrammarPlugin>();
 let nextHandle = 1;
 
 /** Setup window.arboriumHost for the Rust host to call into */
-function setupHostInterface(): void {
+function setupHostInterface(config: Required<ArboriumConfig>): void {
   (window as any).arboriumHost = {
     /** Check if a language is available (sync) */
     isLanguageAvailable(language: string): boolean {
@@ -221,7 +221,7 @@ function setupHostInterface(): void {
 
     /** Load a grammar and return a handle (async) */
     async loadGrammar(language: string): Promise<number> {
-      const plugin = await loadGrammarPlugin(language);
+      const plugin = await loadGrammarPlugin(language, config);
       if (!plugin) return 0; // 0 = not found
 
       // Check if we already have a handle
@@ -245,7 +245,7 @@ function setupHostInterface(): void {
 }
 
 /** Get the host URL based on config */
-function getHostUrl(): string {
+function getHostUrl(config: Required<ArboriumConfig>): string {
   if (config.hostUrl) {
     return config.hostUrl;
   }
@@ -265,15 +265,15 @@ function getHostUrl(): string {
 }
 
 /** Load the Rust host module */
-async function loadHost(): Promise<HostModule | null> {
+async function loadHost(config: Required<ArboriumConfig>): Promise<HostModule | null> {
   if (hostModule) return hostModule;
   if (hostLoadPromise) return hostLoadPromise;
 
   hostLoadPromise = (async () => {
     // Setup the interface the host imports
-    setupHostInterface();
+    setupHostInterface(config);
 
-    const hostUrl = getHostUrl();
+    const hostUrl = getHostUrl(config);
     const jsUrl = `${hostUrl}/arborium_host.js`;
     const wasmUrl = `${hostUrl}/arborium_host_bg.wasm`;
 
@@ -301,10 +301,11 @@ async function loadHost(): Promise<HostModule | null> {
 export async function highlight(
   language: string,
   source: string,
-  _config?: ArboriumConfig,
+  configOverrides?: ArboriumConfig,
 ): Promise<string> {
+  const config = getConfig(configOverrides);
   // Try to use the Rust host (handles injections properly)
-  const host = await loadHost();
+  const host = await loadHost(config);
   if (host) {
     try {
       return host.highlight(language, source);
@@ -314,7 +315,7 @@ export async function highlight(
   }
 
   // Fallback to JS-only highlighting (no injection support)
-  const plugin = await loadGrammarPlugin(language);
+  const plugin = await loadGrammarPlugin(language, config);
   if (!plugin) {
     return escapeHtml(source);
   }
@@ -326,9 +327,10 @@ export async function highlight(
 /** Load a grammar for direct use */
 export async function loadGrammar(
   language: string,
-  _config?: ArboriumConfig,
+  configOverrides?: ArboriumConfig,
 ): Promise<Grammar | null> {
-  const plugin = await loadGrammarPlugin(language);
+  const config = getConfig(configOverrides);
+  const plugin = await loadGrammarPlugin(language, config);
   if (!plugin) return null;
 
   const { module } = plugin;
@@ -370,19 +372,20 @@ export async function loadGrammar(
 /** Get current config, optionally merging with overrides */
 export function getConfig(overrides?: Partial<ArboriumConfig>): Required<ArboriumConfig> {
   if (overrides) {
-    return { ...config, ...overrides };
+    return { ...globalConfig, ...overrides };
   }
-  return { ...config };
+  return { ...globalConfig };
 }
 
 /** Set/merge config */
 export function setConfig(newConfig: Partial<ArboriumConfig>): void {
-  config = { ...config, ...newConfig };
+  globalConfig = { ...globalConfig, ...newConfig };
 }
 
 /** Check if a language is available */
-export async function isLanguageAvailable(language: string): Promise<boolean> {
-  await ensureLocalManifest();
+export async function isLanguageAvailable(language: string, configOverrides?: ArboriumConfig): Promise<boolean> {
+  const config = getConfig(configOverrides);
+  await ensureLocalManifest(config);
   return (
     knownLanguages.has(language) ||
     (localManifest?.entries.some((e) => e.language === language) ?? false)
@@ -390,8 +393,9 @@ export async function isLanguageAvailable(language: string): Promise<boolean> {
 }
 
 /** Get list of available languages */
-export async function getAvailableLanguages(): Promise<string[]> {
-  await ensureLocalManifest();
+export async function getAvailableLanguages(configOverrides?: ArboriumConfig): Promise<string[]> {
+  const config = getConfig(configOverrides);
+  await ensureLocalManifest(config);
   // In dev mode, use local manifest if available
   if (localManifest) {
     return localManifest.entries.map((e) => e.language);
