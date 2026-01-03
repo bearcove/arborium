@@ -8,8 +8,8 @@ Batteries-included [tree-sitter](https://tree-sitter.github.io/tree-sitter/) gra
 
 ## Features
 
-- **69 language grammars** included out of the box
-- **67 permissively licensed** (MIT/Apache-2.0/CC0/Unlicense) grammars enabled by default
+- **<%= permissive_grammars.len() + gpl_grammars.len() %> language grammars** included out of the box
+- **<%= permissive_grammars.len() %> permissively licensed** (MIT/Apache-2.0/CC0/Unlicense) grammars enabled by default
 - **WASM support** with custom allocator fix
 - **Feature flags** for fine-grained control over included languages
 
