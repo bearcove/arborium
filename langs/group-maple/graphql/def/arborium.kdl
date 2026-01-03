@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/bkegley/tree-sitter-graphql"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "graphql"

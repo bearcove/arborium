@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/uyha/tree-sitter-cmake"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "cmake"

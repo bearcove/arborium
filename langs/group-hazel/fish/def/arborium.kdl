@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/ram02z/tree-sitter-fish"
 commit ""
-license ""
+license "Unlicense"
 
 grammar {
     id "fish"

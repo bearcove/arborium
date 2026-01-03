@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/shnarazk/tree-sitter-uiua"
 commit ""
-license ""
+license "MPL-2.0"
 
 grammar {
     id "uiua"

@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/tree-sitter-grammars/tree-sitter-query"
 commit ""
-license ""
+license "Apache-2.0"
 
 grammar {
     id "query"

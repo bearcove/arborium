@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/uben0/tree-sitter-typst"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "typst"

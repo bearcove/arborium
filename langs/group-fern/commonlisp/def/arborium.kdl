@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/theHamsta/tree-sitter-commonlisp"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "commonlisp"

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { spansToHtml } from "./loader.js";
+import { spansToHtml } from "./utils.js";
 import type { Span } from "./types.js";
 
 describe("spansToHtml", () => {

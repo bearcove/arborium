@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/rydesun/tree-sitter-dot"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "dot"

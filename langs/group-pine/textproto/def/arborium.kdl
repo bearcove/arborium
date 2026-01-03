@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/PorterAtGoogle/tree-sitter-textproto"
 commit ""
-license ""
+license "ISC"
 
 grammar {
     id "textproto"

@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/tree-sitter/tree-sitter-julia"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "julia"

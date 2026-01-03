@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/gdamore/tree-sitter-d"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "d"

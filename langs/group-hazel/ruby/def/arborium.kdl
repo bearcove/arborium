@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/tree-sitter/tree-sitter-ruby"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "ruby"

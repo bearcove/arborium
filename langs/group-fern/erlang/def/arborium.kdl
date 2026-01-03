@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/WhatsApp/tree-sitter-erlang"
 commit ""
-license ""
+license "Apache-2.0"
 
 grammar {
     id "erlang"

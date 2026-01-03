@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/ObserverOfTime/tree-sitter-ssh-config"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "ssh-config"

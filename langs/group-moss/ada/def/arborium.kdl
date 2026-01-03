@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/briot/tree-sitter-ada"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "ada"

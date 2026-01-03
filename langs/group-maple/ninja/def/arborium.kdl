@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/alemuller/tree-sitter-ninja"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "ninja"

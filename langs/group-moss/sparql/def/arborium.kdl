@@ -1,6 +1,6 @@
-repo ""
+repo "https://github.com/GordianDziwis/tree-sitter-sparql"
 commit ""
-license ""
+license "MIT"
 
 grammar {
     id "sparql"
