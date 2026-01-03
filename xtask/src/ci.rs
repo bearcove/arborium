@@ -514,6 +514,9 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                         ),
                         Step::run("Build arborium-rustdoc", "cargo build --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose"),
                         Step::run("Test arborium-rustdoc", "cargo test --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose"),
+                        // TypeScript tests for the npm package
+                        Step::run("Install npm dependencies", "cd packages/arborium && pnpm install --frozen-lockfile"),
+                        Step::run("Run TypeScript tests", "cd packages/arborium && pnpm test"),
                     ])
             ),
     );
@@ -689,7 +692,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             ),
             Step::run(
                 "Install main package dependencies",
-                "cd packages/arborium && npm ci",
+                "cd packages/arborium && pnpm install --frozen-lockfile",
             ),
             // No NODE_AUTH_TOKEN needed - OIDC trusted publishing uses id-token permission
             Step::run(
