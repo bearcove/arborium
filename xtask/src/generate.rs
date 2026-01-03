@@ -210,6 +210,10 @@ struct UmbrellaLibRsTemplate<'a> {
     grammars: &'a [(String, String)],
     /// List of (extension, canonical_id) pairs for detect_language function
     extensions: &'a [(String, String)],
+    /// List of permissively-licensed grammars (MIT, Apache-2.0, etc.)
+    permissive_grammars: &'a [LanguageEntry],
+    /// List of GPL-licensed grammars
+    gpl_grammars: &'a [LanguageEntry],
 }
 
 #[derive(TemplateSimple)]
@@ -2188,11 +2192,61 @@ dlmalloc = "0.2"
     languages.sort();
 
     // =========================================================================
+    // Collect all grammars and separate by license type (for lib.rs and README)
+    // =========================================================================
+    let mut all_grammars = Vec::new();
+    for prepared_temp in &prepared.prepared_temps {
+        let config = &prepared_temp.config;
+        let license = config.license.value.as_str();
+
+        // Skip grammars with empty license (placeholders/not yet implemented)
+        if license.is_empty() {
+            continue;
+        }
+
+        // Get repository URL
+        let repo_url = if config.repo.value.as_str() == "local" {
+            "local".to_string()
+        } else {
+            config.repo.value.to_string()
+        };
+
+        // Process each grammar in this crate
+        for grammar in &config.grammars {
+            let entry = LanguageEntry {
+                feature: format!("lang-{}", grammar.id.value.as_str()),
+                name: grammar.name.value.to_string(),
+                license: license.to_string(),
+                repo_url: repo_url.clone(),
+            };
+            all_grammars.push(entry);
+        }
+    }
+
+    // Sort alphabetically by feature name
+    all_grammars.sort_by(|a, b| a.feature.cmp(&b.feature));
+
+    // Separate into permissive and GPL licenses
+    let permissive_grammars: Vec<LanguageEntry> = all_grammars
+        .iter()
+        .filter(|g| !g.license.starts_with("GPL"))
+        .cloned()
+        .collect();
+
+    let gpl_grammars: Vec<LanguageEntry> = all_grammars
+        .iter()
+        .filter(|g| g.license.starts_with("GPL"))
+        .cloned()
+        .collect();
+
+    // =========================================================================
     // Generate src/lib.rs from template
     // =========================================================================
     let lib_rs_content = UmbrellaLibRsTemplate {
         grammars: &grammars_for_lib,
         extensions: &extensions,
+        permissive_grammars: &permissive_grammars,
+        gpl_grammars: &gpl_grammars,
     }
     .render_once()
     .expect("UmbrellaLibRsTemplate render failed");
@@ -2249,52 +2303,6 @@ dlmalloc = "0.2"
     // =========================================================================
     // Generate crates/arborium/README.md from template
     // =========================================================================
-
-    // Collect all grammars and separate by license type
-    let mut all_grammars = Vec::new();
-    for prepared_temp in &prepared.prepared_temps {
-        let config = &prepared_temp.config;
-        let license = config.license.value.as_str();
-
-        // Skip grammars with empty license (placeholders/not yet implemented)
-        if license.is_empty() {
-            continue;
-        }
-
-        // Get repository URL
-        let repo_url = if config.repo.value.as_str() == "local" {
-            "local".to_string()
-        } else {
-            config.repo.value.to_string()
-        };
-
-        // Process each grammar in this crate
-        for grammar in &config.grammars {
-            let entry = LanguageEntry {
-                feature: format!("lang-{}", grammar.id.value.as_str()),
-                name: grammar.name.value.to_string(),
-                license: license.to_string(),
-                repo_url: repo_url.clone(),
-            };
-            all_grammars.push(entry);
-        }
-    }
-
-    // Sort alphabetically by feature name
-    all_grammars.sort_by(|a, b| a.feature.cmp(&b.feature));
-
-    // Separate into permissive and GPL licenses
-    let permissive_grammars: Vec<LanguageEntry> = all_grammars
-        .iter()
-        .filter(|g| !g.license.starts_with("GPL"))
-        .cloned()
-        .collect();
-
-    let gpl_grammars: Vec<LanguageEntry> = all_grammars
-        .iter()
-        .filter(|g| g.license.starts_with("GPL"))
-        .cloned()
-        .collect();
 
     let crates_arborium_readme_content = CratesArboriumReadmeTemplate {
         version: &prepared.workspace_version,

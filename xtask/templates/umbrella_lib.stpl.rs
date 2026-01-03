@@ -59,6 +59,26 @@
 //! arborium = { version = "0.1", features = ["all-languages"] }
 //! ```
 //!
+//! ## Supported Languages
+//!
+//! ### Permissively Licensed (<%= permissive_grammars.len() %> languages, included by default)
+//!
+//! | Language | Feature Flag | License |
+//! |----------|--------------|---------|
+<% for grammar in permissive_grammars { %>
+//! | <%= grammar.name %> | `<%= grammar.feature %>` | <%= grammar.license %> |
+<% } %>
+//!
+//! ### GPL Licensed (<%= gpl_grammars.len() %> languages, opt-in)
+//!
+//! These require explicit opt-in via feature flags due to their copyleft license.
+//!
+//! | Language | Feature Flag | License |
+//! |----------|--------------|---------|
+<% for grammar in gpl_grammars { %>
+//! | <%= grammar.name %> | `<%= grammar.feature %>` | <%= grammar.license %> |
+<% } %>
+//!
 //! # Advanced Usage
 //!
 //! For building custom grammar providers or working with raw spans, see the
