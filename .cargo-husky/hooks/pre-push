@@ -1,3 +1,0 @@
-cargo install --git https://github.com/facet-rs/facet-dev
-facet-dev pre-push
-
