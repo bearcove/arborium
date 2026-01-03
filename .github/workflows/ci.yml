@@ -129,6 +129,10 @@ jobs:
         run: "set -e\ncargo test --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose"
         shell: bash
       - 
+        name: Enable pnpm via corepack
+        run: "set -e\ncorepack enable pnpm"
+        shell: bash
+      - 
         name: Install npm dependencies
         run: "set -e\ncd packages/arborium && pnpm install --frozen-lockfile"
         shell: bash
@@ -752,6 +756,10 @@ jobs:
       - 
         name: List plugins
         run: "set -e\nfind dist/plugins -name 'package.json' | head -20"
+        shell: bash
+      - 
+        name: Enable pnpm via corepack
+        run: "set -e\ncorepack enable pnpm"
         shell: bash
       - 
         name: Install main package dependencies
