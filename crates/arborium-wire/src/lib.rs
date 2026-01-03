@@ -27,9 +27,13 @@ pub const WIRE_VERSION: u32 = 1;
 /// A span of highlighted text with a capture name.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Span {
-    /// Byte offset where the span starts.
+    /// UTF-16 code unit offset where the span starts.
+    ///
+    /// This is compatible with JavaScript string APIs like `slice()` and `Range`.
     pub start: u32,
-    /// Byte offset where the span ends (exclusive).
+    /// UTF-16 code unit offset where the span ends (exclusive).
+    ///
+    /// This is compatible with JavaScript string APIs like `slice()` and `Range`.
     pub end: u32,
     /// The capture name (e.g., "keyword", "function", "string").
     pub capture: String,
@@ -38,9 +42,9 @@ pub struct Span {
 /// An injection point where another language should be parsed.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Injection {
-    /// Byte offset where the injection starts.
+    /// UTF-16 code unit offset where the injection starts.
     pub start: u32,
-    /// Byte offset where the injection ends (exclusive).
+    /// UTF-16 code unit offset where the injection ends (exclusive).
     pub end: u32,
     /// The language ID to inject (e.g., "javascript", "css").
     pub language: String,

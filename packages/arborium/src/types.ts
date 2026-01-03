@@ -1,14 +1,26 @@
-/** A span of highlighted text */
+/**
+ * A span of highlighted text.
+ *
+ * The `start` and `end` fields are UTF-16 code unit indices, compatible with
+ * JavaScript string APIs like `String.prototype.slice()`, `substring()`, and
+ * DOM `Range`.
+ */
 export interface Span {
+  /** UTF-16 code unit index where the span starts (inclusive) */
   start: number;
+  /** UTF-16 code unit index where the span ends (exclusive) */
   end: number;
   /** The capture name (e.g., "keyword", "string", "comment") */
   capture: string;
 }
 
-/** A language injection (e.g., JS inside HTML) */
+/**
+ * A language injection (e.g., JS inside HTML).
+ */
 export interface Injection {
+  /** UTF-16 code unit index where the injection starts (inclusive) */
   start: number;
+  /** UTF-16 code unit index where the injection ends (exclusive) */
   end: number;
   language: string;
   includeChildren: boolean;
