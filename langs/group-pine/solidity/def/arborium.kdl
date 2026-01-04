@@ -1,0 +1,35 @@
+// Repository information (REQUIRED)
+repo "https://github.com/JoranHonig/tree-sitter-solidity"
+commit "4e938a46c7030dd001bc99e1ac0f0c750ac98254"  // Full commit hash from the grammar repo
+license "MIT"       // License of the grammar repository
+
+grammar {
+    // Basic identification (REQUIRED)
+    id "solidity"                // Unique identifier (lowercase, no spaces)
+    name "Solidity"              // Display name
+    tag "code"                   // Category: "code", "data", "markup", "config"
+    tier 2                       // Quality tier: 1 (best) to 5 (experimental)
+
+    // Technical flags
+    has-scanner #false           // Set to #true if scanner.c exists
+    generate-component #true     // Set to #true to include in WASM builds
+
+    // Visual representation
+    icon "devicon-plain:solidity"  // Icon identifier (from iconify.design)
+    aliases "sol"                  // File extensions (space-separated)
+
+    // Metadata (REQUIRED for documentation)
+    inventor "Gavin Wood"
+    year 2014
+    description "Solidity is a programming language for implementing smart contracts on various blockchain platforms, most notably, Ethereum."
+    link "https://en.wikipedia.org/wiki/Solidity"
+    trivia "Solidity doesn't have native support for floating-point numbers by design. Floating-point arithmetic can produce slightly different results on different machines, which would break blockchain consensus, so everything is done with integers and fixed-point math."
+
+    // Sample files (at least one REQUIRED)
+    sample {
+        path "samples/example.sol"
+        description "Typical contract found in the widely used OpenZeppelin library, making use of multiple language features like inline assembly and inheritance"
+        link "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/Governor.sol"
+        license "MIT"
+    }
+}
