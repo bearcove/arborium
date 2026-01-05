@@ -501,7 +501,7 @@ jobs:
 
 
   build-plugins-pine: 
-    name: "Plugins (pine): capnp, dart, devicetree, rescript, starlark, swift, textproto, thrift, uiua, wit, yuri"
+    name: "Plugins (pine): capnp, dart, devicetree, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -523,8 +523,8 @@ jobs:
         run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
         shell: bash
       - 
-        name: Build capnp, dart, devicetree, rescript, starlark, swift, textproto, thrift, uiua, wit, yuri
-        run: "set -e\n./xtask/target/release/xtask build capnp dart devicetree rescript starlark swift textproto thrift uiua wit yuri -o dist/plugins"
+        name: Build capnp, dart, devicetree, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri
+        run: "set -e\n./xtask/target/release/xtask build capnp dart devicetree rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins"
         shell: bash
       - 
         name: Upload plugins artifact
