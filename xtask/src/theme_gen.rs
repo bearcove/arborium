@@ -133,14 +133,17 @@ impl Theme {
         writeln!(css, "}}").unwrap();
 
         // Generate styles for each highlight tag
+        // Track emitted tags to avoid duplicates (multiple HIGHLIGHTS can share the same tag)
+        let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
         for (i, def) in HIGHLIGHTS.iter().enumerate() {
-            if def.tag.is_empty() {
+            if def.tag.is_empty() || emitted_tags.contains(def.tag) {
                 continue;
             }
             if let Some(style) = self.styles.get(i) {
                 if style.is_empty() {
                     continue;
                 }
+                emitted_tags.insert(def.tag);
                 write!(css, "{selector_prefix} a-{}", def.tag).unwrap();
                 css.push_str(" {\n");
                 if let Some(fg) = &style.fg {

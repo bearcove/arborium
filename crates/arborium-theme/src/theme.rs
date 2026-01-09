@@ -376,9 +376,11 @@ impl Theme {
         }
 
         // Generate rules for each highlight category
+        // Track emitted tags to avoid duplicates (multiple HIGHLIGHTS can share the same tag)
+        let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
         for (i, def) in HIGHLIGHTS.iter().enumerate() {
-            if def.tag.is_empty() {
-                continue; // Skip categories like "none" that have no tag
+            if def.tag.is_empty() || emitted_tags.contains(def.tag) {
+                continue; // Skip categories like "none" that have no tag, or already emitted tags
             }
 
             // Use own style, or fall back to parent style
@@ -397,6 +399,8 @@ impl Theme {
             if style.is_empty() {
                 continue;
             }
+
+            emitted_tags.insert(def.tag);
 
             write!(css, "  a-{} {{", def.tag).unwrap();
 

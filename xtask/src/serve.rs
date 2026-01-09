@@ -1515,8 +1515,10 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
         }
 
         // Generate CSS variables for each highlight category
+        // Track emitted tags to avoid duplicates (multiple HIGHLIGHTS can share the same tag)
+        let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
         for (i, def) in HIGHLIGHTS.iter().enumerate() {
-            if def.tag.is_empty() {
+            if def.tag.is_empty() || emitted_tags.contains(def.tag) {
                 continue;
             }
 
@@ -1535,6 +1537,8 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
             } else {
                 continue;
             };
+
+            emitted_tags.insert(def.tag);
 
             if let Some(fg) = &style.fg {
                 writeln!(css, "  --arb-{}-{}: {};", def.tag, variant, fg.to_hex()).unwrap();
