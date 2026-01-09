@@ -96,3 +96,4 @@ crates/arborium-host/target/
 packages/arborium/dist/
 packages/arborium/node_modules/
 tests/visual/diffs
+.tracey/
