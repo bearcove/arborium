@@ -36,7 +36,7 @@ fn main() {
         if let Some(text) = e.help_text() {
             eprintln!("{text}");
         } else {
-            eprintln!("{:?}", miette::Report::new(e));
+            eprintln!("{:?}", e);
         }
         std::process::exit(1);
     });

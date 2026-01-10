@@ -19,7 +19,6 @@ facet-pretty = { git = "https://github.com/facet-rs/facet" }
 facet-diff = { git = "https://github.com/facet-rs/facet" }
 facet-toml = { git = "https://github.com/facet-rs/facet" }
 indexmap = { version = "2", features = ["std"] }
-miette = { version = "7", features = ["fancy"] }
 thiserror = "2"
 structstruck = "0.4"
 rootcause = "0.10"

@@ -53,7 +53,7 @@ The `v0.3.0` tag triggers the CI workflow in `.github/workflows/ci.yml` which:
 ### 1. Native Rust Crates → crates.io
 
 - ~98 grammar crates organized into ~10 hand-picked animal groups
-- Core crates (`arborium`, `arborium-collection`, `miette-arborium`, `tree-sitter-*`) always published
+- Core crates (`arborium`, `arborium-collection`, `tree-sitter-*`) always published
 - Each group publishes independently from `langs/group-{animal}/` via
   `cargo ws publish --publish-as-is`
 - We use `cargo ws publish` instead of `cargo publish --workspace` because the
@@ -74,7 +74,7 @@ The `v0.3.0` tag triggers the CI workflow in `.github/workflows/ci.yml` which:
 ## Publishing Strategy
 
 - A single tag (`vX.Y.Z`) publishes **all** crates.io + npm artifacts together.
-- Core crates (`arborium`, `tree-sitter-*`, `miette-arborium`, etc.) and all
+- Core crates (`arborium`, `tree-sitter-*`, etc.) and all
   `arborium-{lang}` crates publish once per release.
 
 ### crates.io (all crates)
@@ -177,7 +177,6 @@ These crates don't have `arborium.kdl` and are fully hand-written:
 - `arborium-host`
 - `arborium-wire`
 - `arborium-plugin-runtime`
-- `miette-arborium`
 
 ## What `xtask gen --version X.Y.Z` Does
 
@@ -232,7 +231,6 @@ See **Release Flow** above for the full tag + CI story.
 | crates.io | `arborium-sysroot` | 1 |
 | crates.io | `tree-sitter-patched-arborium` | 1 |
 | crates.io | `tree-sitter-highlight-patched-arborium` | 1 |
-| crates.io | `miette-arborium` | 1 |
 | npmjs.com | `@arborium/arborium` (bundle) | 1 |
 | npmjs.com | `@arborium/{lang}` (per-language WASM plugins) | 98 |
 
@@ -242,7 +240,6 @@ These projects use arborium for syntax highlighting:
 
 | Integration | Description | Status |
 |------------|-------------|--------|
-| **miette-arborium** | Syntax highlighting for [miette](https://crates.io/crates/miette) error diagnostics | Published |
 | **dodeca** | Static site generator ([website](https://dodeca.bearcove.eu/), [GitHub](https://github.com/bearcove/dodeca)) | In use |
 | **docs.rs** | Via `--html-in-header` for TOML/shell highlighting in rustdoc | Documented |
 
@@ -254,7 +251,6 @@ These projects use arborium for syntax highlighting:
 - [x] Theme system with 15+ bundled themes (Catppuccin, Dracula, Tokyo Night, etc.)
 - [x] HTML rendering with compact custom elements (`<a-k>` vs `<span class="keyword">`)
 - [x] ANSI output for terminal applications
-- [x] miette integration for error reporting
 - [x] Browser IIFE drop-in script (auto-highlights code blocks)
 - [x] Browser ESM module for bundlers
 - [x] WASM compilation target (`wasm32-unknown-unknown`)
@@ -292,7 +288,6 @@ These projects use arborium for syntax highlighting:
 | `arborium` | **Stable** | Main entry point, semver guarantees |
 | `arborium-highlight` | **Stable** | Core highlighting traits and types |
 | `arborium-theme` | **Stable** | Theme definitions and builtins |
-| `miette-arborium` | **Stable** | Miette integration |
 | `arborium-{lang}` | **Stable** | Per-language grammar crates |
 | `arborium-wire` | Internal | Plugin protocol, may change |
 | `arborium-plugin-runtime` | Internal | Plugin internals, may change |

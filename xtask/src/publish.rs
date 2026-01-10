@@ -17,13 +17,15 @@
 //! grammar crates are published first).
 
 use camino::{Utf8Path, Utf8PathBuf};
-use miette::{Context, IntoDiagnostic, Result};
 use owo_colors::OwoColorize;
+use rootcause::Report;
 use std::collections::HashMap;
 use std::process::{Command, Stdio};
 
 use crate::tool::Tool;
 use crate::version_store;
+
+type Result<T> = std::result::Result<T, Report>;
 
 /// Crates in the "pre" group - must be published before grammar crates.
 /// These are shared dependencies that grammar crates rely on.
@@ -49,7 +51,6 @@ const POST_CRATES: &[&str] = &[
     // Main arborium crate first
     "crates/arborium",
     // Depends on arborium
-    "crates/miette-arborium",
     "crates/arborium-cli",
 ];
 
@@ -122,8 +123,7 @@ fn get_published_crate_hash(name: &str, version: &str) -> Result<Option<String>>
     let output = std::process::Command::new("cargo")
         .args(["download", &format!("{}=={}", name, version)])
         .stderr(std::process::Stdio::null())
-        .output()
-        .into_diagnostic()?;
+        .output()?;
 
     if !output.status.success() || output.stdout.is_empty() {
         return Ok(None); // Crate doesn't exist yet or download failed
@@ -139,14 +139,14 @@ fn get_published_crate_hash(name: &str, version: &str) -> Result<Option<String>>
     let tar = flate2::read::GzDecoder::new(cursor);
     let mut archive = tar::Archive::new(tar);
 
-    for entry in archive.entries().into_diagnostic()? {
-        let mut entry = entry.into_diagnostic()?;
-        let path = entry.path().into_diagnostic()?;
+    for entry in archive.entries()? {
+        let mut entry = entry?;
+        let path = entry.path()?;
 
         // The file will be in the archive like: {name}-{version}/.arborium-hash
         if path.file_name() == Some(std::ffi::OsStr::new(HASH_FILE)) {
             let mut contents = String::new();
-            std::io::Read::read_to_string(&mut entry, &mut contents).into_diagnostic()?;
+            std::io::Read::read_to_string(&mut entry, &mut contents)?;
             return Ok(Some(contents.trim().to_string()));
         }
     }
@@ -161,8 +161,7 @@ fn get_published_crate_version(name: &str) -> Result<Option<String>> {
     let output = std::process::Command::new("cargo")
         .args(["download", name])
         .stderr(std::process::Stdio::null())
-        .output()
-        .into_diagnostic()?;
+        .output()?;
 
     if !output.status.success() || output.stdout.is_empty() {
         return Ok(None); // Crate doesn't exist yet or download failed
@@ -178,14 +177,14 @@ fn get_published_crate_version(name: &str) -> Result<Option<String>> {
     let tar = flate2::read::GzDecoder::new(cursor);
     let mut archive = tar::Archive::new(tar);
 
-    for entry in archive.entries().into_diagnostic()? {
-        let mut entry = entry.into_diagnostic()?;
-        let path = entry.path().into_diagnostic()?;
+    for entry in archive.entries()? {
+        let mut entry = entry?;
+        let path = entry.path()?;
 
         // Look for Cargo.toml in the archive: {name}-{version}/Cargo.toml
         if path.file_name() == Some(std::ffi::OsStr::new("Cargo.toml")) {
             let mut contents = String::new();
-            std::io::Read::read_to_string(&mut entry, &mut contents).into_diagnostic()?;
+            std::io::Read::read_to_string(&mut entry, &mut contents)?;
 
             // Parse version from [package] section using proper TOML parser
             if let Some(version) = extract_toml_string(&contents, "version") {
@@ -241,9 +240,7 @@ pub fn compute_grammar_hash(crate_dir: &Utf8Path) -> Result<String> {
     // Hash all files in sorted order
     for file_path in files {
         let relative = file_path.strip_prefix(crate_dir).unwrap();
-        let contents = std::fs::read(&file_path)
-            .into_diagnostic()
-            .with_context(|| format!("Failed to read {}", file_path.display()))?;
+        let contents = std::fs::read(&file_path)?;
 
         // Hash file path and contents
         hasher.update(b"file:");
@@ -497,10 +494,11 @@ fn ensure_release_version(version: &str) -> Result<()> {
         || version.ends_with("-dev")
         || version.ends_with("-test")
     {
-        return Err(miette::miette!(
+        return Err(std::io::Error::other(format!(
             "Refusing to publish development version {} - run `cargo xtask gen --version <x.y.z>` first",
             version
-        ));
+        ))
+        .into());
     }
 
     Ok(())
@@ -553,7 +551,9 @@ fn publish_crate_paths(crates: &[Utf8PathBuf], dry_run: bool, verbose: bool) -> 
     }
 
     if failed > 0 {
-        return Err(miette::miette!("{} crates failed to publish", failed));
+        return Err(
+            std::io::Error::other(format!("{} crates failed to publish", failed)).into(),
+        );
     }
 
     println!(
@@ -569,13 +569,12 @@ fn publish_crate_paths(crates: &[Utf8PathBuf], dry_run: bool, verbose: bool) -> 
 /// Read crate name and version from Cargo.toml.
 fn read_crate_info(crate_dir: &Utf8Path) -> Result<(String, String)> {
     let cargo_toml_path = crate_dir.join("Cargo.toml");
-    let content = fs_err::read_to_string(&cargo_toml_path)
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to read {}", cargo_toml_path))?;
+    let content = fs_err::read_to_string(&cargo_toml_path)?;
 
     // Simple TOML parsing - extract name and version
-    let name = extract_toml_string(&content, "name")
-        .ok_or_else(|| miette::miette!("No 'name' field in {}", cargo_toml_path))?;
+    let name = extract_toml_string(&content, "name").ok_or_else(|| {
+        std::io::Error::other(format!("No 'name' field in {}", cargo_toml_path))
+    })?;
 
     // Version might be "X.Y.Z" or { workspace = true }
     let version = if content.contains("version.workspace = true")
@@ -584,8 +583,9 @@ fn read_crate_info(crate_dir: &Utf8Path) -> Result<(String, String)> {
         // Read from workspace - for now just use a placeholder that we'll check against crates.io
         "workspace".to_string()
     } else {
-        extract_toml_string(&content, "version")
-            .ok_or_else(|| miette::miette!("No 'version' field in {}", cargo_toml_path))?
+        extract_toml_string(&content, "version").ok_or_else(|| {
+            std::io::Error::other(format!("No 'version' field in {}", cargo_toml_path))
+        })?
     };
 
     Ok((name, version))
@@ -611,9 +611,7 @@ fn crate_version_exists(crate_name: &str, version: &str) -> Result<bool> {
         .args(["search", crate_name, "--limit", "1"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
-        .into_diagnostic()
-        .wrap_err("Failed to run cargo search")?;
+        .output()?;
 
     if output.status.success() {
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -686,7 +684,8 @@ fn publish_single_crate_with_retry(
     }
 
     // Should not reach here, but return last error if we do
-    Err(last_error.unwrap_or_else(|| miette::miette!("Unknown error after retries")))
+    Err(last_error
+        .unwrap_or_else(|| std::io::Error::other("Unknown error after retries").into()))
 }
 
 /// Publish a single crate.
@@ -708,9 +707,7 @@ fn publish_single_crate(
     }
 
     // Check if publish = false
-    let cargo_toml = fs_err::read_to_string(crate_dir.join("Cargo.toml"))
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to read Cargo.toml in {}", crate_dir))?;
+    let cargo_toml = fs_err::read_to_string(crate_dir.join("Cargo.toml"))?;
     if cargo_toml.contains("publish = false") {
         println!(
             "  {} {} - {}",
@@ -799,9 +796,7 @@ fn publish_single_crate(
         let status = Command::new("cargo")
             .args(&args)
             .current_dir(crate_dir)
-            .status()
-            .into_diagnostic()
-            .wrap_err("Failed to run cargo publish")?;
+            .status()?;
 
         if status.success() {
             if dry_run {
@@ -822,9 +817,7 @@ fn publish_single_crate(
         .current_dir(crate_dir)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
-        .into_diagnostic()
-        .wrap_err("Failed to run cargo publish")?;
+        .output()?;
 
     if output.status.success() {
         if dry_run {
@@ -866,12 +859,8 @@ fn find_all_groups(langs_dir: &Utf8Path) -> Result<Vec<String>> {
         return Ok(groups);
     }
 
-    for entry in langs_dir
-        .read_dir_utf8()
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to read directory: {}", langs_dir))?
-    {
-        let entry = entry.into_diagnostic()?;
+    for entry in langs_dir.read_dir_utf8()? {
+        let entry = entry?;
         let path = entry.path();
 
         if !path.is_dir() {
@@ -897,12 +886,8 @@ fn find_group_crates(langs_dir: &Utf8Path, group_name: &str) -> Result<Vec<Utf8P
         return Ok(crates);
     }
 
-    for lang_entry in group_dir
-        .read_dir_utf8()
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to read directory: {}", group_dir))?
-    {
-        let lang_entry = lang_entry.into_diagnostic()?;
+    for lang_entry in group_dir.read_dir_utf8()? {
+        let lang_entry = lang_entry?;
         let lang_path = lang_entry.path();
 
         if !lang_path.is_dir() {
@@ -973,14 +958,9 @@ pub fn show_levels(repo_root: &Utf8Path, langs_dir: &Utf8Path) -> Result<()> {
 /// real dependency relationships.
 fn extract_arborium_deps(crate_dir: &Utf8Path) -> Result<Vec<String>> {
     let cargo_toml_path = crate_dir.join("Cargo.toml");
-    let content = fs_err::read_to_string(&cargo_toml_path)
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to read {}", cargo_toml_path))?;
+    let content = fs_err::read_to_string(&cargo_toml_path)?;
 
-    let doc: toml_edit::DocumentMut = content
-        .parse()
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to parse {}", cargo_toml_path))?;
+    let doc: toml_edit::DocumentMut = content.parse()?;
 
     let mut deps = Vec::new();
 
@@ -1061,7 +1041,10 @@ fn topological_sort_grammar_crates(
     // Topological sort using petgraph
     let sorted = petgraph::algo::toposort(&graph, None).map_err(|cycle| {
         let cycle_node = &graph[cycle.node_id()];
-        miette::miette!("Dependency cycle detected involving: {}", cycle_node)
+        std::io::Error::other(format!(
+            "Dependency cycle detected involving: {}",
+            cycle_node
+        ))
     })?;
 
     // Group nodes into levels by depth (BFS from leaves)
@@ -1135,9 +1118,7 @@ fn publish_grammar_crates(
     // Create a thread pool with limited concurrency
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(MAX_PUBLISH_CONCURRENCY)
-        .build()
-        .into_diagnostic()
-        .wrap_err("Failed to create thread pool")?;
+        .build()?;
 
     println!(
         "  {} Publishing {} (topologically sorted with parallel levels)...",
@@ -1197,11 +1178,11 @@ fn publish_grammar_crates(
         // Check for failures after each level - don't continue if any failed
         let failed_count = failed.load(Ordering::Relaxed);
         if failed_count > 0 {
-            return Err(miette::miette!(
+            return Err(std::io::Error::other(format!(
                 "{} grammar crates failed to publish in level {}",
-                failed_count,
-                level_idx
-            ));
+                failed_count, level_idx
+            ))
+            .into());
         }
     }
 
@@ -1231,7 +1212,7 @@ fn regenerate_umbrella_crate(
     // Load crate registry to find all grammar crates
     let crates_dir = repo_root.join("crates");
     let registry = crate::types::CrateRegistry::load(&crates_dir)
-        .map_err(|e| miette::miette!("Failed to load crate registry: {}", e))?;
+        .map_err(|e| std::io::Error::other(format!("Failed to load crate registry: {}", e)))?;
 
     // Collect all grammar crates with their paths and versions
     let mut grammar_crates: Vec<(String, String, Utf8PathBuf, String)> = Vec::new();
@@ -1336,9 +1317,7 @@ dlmalloc = "0.2"
 
     // Write the file
     let cargo_toml_path = repo_root.join("crates/arborium/Cargo.toml");
-    fs_err::write(&cargo_toml_path, content)
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to write {}", cargo_toml_path))?;
+    fs_err::write(&cargo_toml_path, content)?;
 
     Ok(())
 }
@@ -1366,12 +1345,8 @@ fn find_npm_packages(packages_dir: &Utf8Path) -> Result<Vec<Utf8PathBuf>> {
         return Ok(packages);
     }
 
-    for entry in packages_dir
-        .read_dir_utf8()
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to read directory: {}", packages_dir))?
-    {
-        let entry = entry.into_diagnostic()?;
+    for entry in packages_dir.read_dir_utf8()? {
+        let entry = entry?;
         let path = entry.path();
 
         if !path.is_dir() {
@@ -1382,12 +1357,8 @@ fn find_npm_packages(packages_dir: &Utf8Path) -> Result<Vec<Utf8PathBuf>> {
 
         if name.starts_with("group-") {
             // Nested group structure: group-*/lang/npm/package.json
-            for lang_entry in path
-                .read_dir_utf8()
-                .into_diagnostic()
-                .wrap_err_with(|| format!("Failed to read directory: {}", path))?
-            {
-                let lang_entry = lang_entry.into_diagnostic()?;
+            for lang_entry in path.read_dir_utf8()? {
+                let lang_entry = lang_entry?;
                 let lang_path = lang_entry.path();
 
                 if !lang_path.is_dir() {
@@ -1421,12 +1392,8 @@ fn find_group_npm_packages(langs_dir: &Utf8Path, group_name: &str) -> Result<Vec
         return Ok(packages);
     }
 
-    for lang_entry in group_dir
-        .read_dir_utf8()
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to read directory: {}", group_dir))?
-    {
-        let lang_entry = lang_entry.into_diagnostic()?;
+    for lang_entry in group_dir.read_dir_utf8()? {
+        let lang_entry = lang_entry?;
         let lang_path = lang_entry.path();
 
         if !lang_path.is_dir() {
@@ -1447,15 +1414,15 @@ fn find_group_npm_packages(langs_dir: &Utf8Path, group_name: &str) -> Result<Vec
 /// Read package name and version from package.json.
 fn read_package_info(package_dir: &Utf8Path) -> Result<(String, String)> {
     let package_json_path = package_dir.join("package.json");
-    let content = fs_err::read_to_string(&package_json_path)
-        .into_diagnostic()
-        .wrap_err_with(|| format!("Failed to read {}", package_json_path))?;
+    let content = fs_err::read_to_string(&package_json_path)?;
 
     // Simple JSON parsing - extract name and version
-    let name = extract_json_string(&content, "name")
-        .ok_or_else(|| miette::miette!("No 'name' field in {}", package_json_path))?;
-    let version = extract_json_string(&content, "version")
-        .ok_or_else(|| miette::miette!("No 'version' field in {}", package_json_path))?;
+    let name = extract_json_string(&content, "name").ok_or_else(|| {
+        std::io::Error::other(format!("No 'name' field in {}", package_json_path))
+    })?;
+    let version = extract_json_string(&content, "version").ok_or_else(|| {
+        std::io::Error::other(format!("No 'version' field in {}", package_json_path))
+    })?;
 
     Ok((name, version))
 }
@@ -1472,9 +1439,7 @@ fn npm_version_exists(package_name: &str, version: &str) -> Result<bool> {
         .args(["view", &format!("{}@{}", package_name, version), "version"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
-        .into_diagnostic()
-        .wrap_err("Failed to run npm view")?;
+        .output()?;
 
     // If the command succeeds and outputs the version, it exists
     if output.status.success() {
@@ -1495,12 +1460,13 @@ fn publish_single_npm_package(
     let (name, version) = read_package_info(package_dir)?;
 
     if version != expected_version {
-        return Err(miette::miette!(
+        return Err(std::io::Error::other(format!(
             "{} has version {} but version.json expects {}",
             package_dir.join("package.json"),
             version,
             expected_version
-        ));
+        ))
+        .into());
     }
 
     print!("  {} {}@{}...", "→".blue(), name, version);
@@ -1536,9 +1502,7 @@ fn publish_single_npm_package(
         .current_dir(package_dir)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
-        .into_diagnostic()
-        .wrap_err("Failed to run npm publish")?;
+        .output()?;
 
     if output.status.success() {
         if dry_run {
@@ -1558,11 +1522,11 @@ fn publish_single_npm_package(
 
     // Real error - fail immediately
     println!(" {}", "FAILED".red());
-    Err(miette::miette!(
+    Err(std::io::Error::other(format!(
         "npm publish failed for {}:\n{}",
-        name,
-        stderr
+        name, stderr
     ))
+    .into())
 }
 
 fn should_use_npm_provenance() -> bool {
@@ -1584,11 +1548,11 @@ fn ensure_main_npm_package_host_artifacts(repo_root: &Utf8Path) -> Result<()> {
     crate::build::build_host(repo_root)?;
 
     if !host_js.exists() || !host_wasm.exists() {
-        return Err(miette::miette!(
+        return Err(std::io::Error::other(format!(
             "Expected arborium-host artifacts missing after build: {}, {}",
-            host_js,
-            host_wasm
-        ));
+            host_js, host_wasm
+        ))
+        .into());
     }
 
     Ok(())

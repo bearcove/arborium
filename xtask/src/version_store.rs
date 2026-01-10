@@ -1,5 +1,7 @@
 use camino::Utf8Path;
-use miette::{Context, IntoDiagnostic, Result};
+use rootcause::Report;
+
+type Result<T> = std::result::Result<T, Report>;
 
 const VERSION_FILE: &str = "version.json";
 
@@ -14,10 +16,8 @@ pub fn write_version(repo_root: &Utf8Path, version: &str) -> Result<()> {
     let entry = VersionEntry {
         version: version.to_string(),
     };
-    let content = facet_json::to_string_pretty(&entry);
-    fs_err::write(&path, content)
-        .into_diagnostic()
-        .context("failed to write version.json")?;
+    let content = facet_json::to_string_pretty(&entry).expect("version entry serialization failed");
+    fs_err::write(&path, content)?;
 
     // Also update packages/arborium/package.json
     sync_main_npm_package_version(repo_root, version)?;
@@ -40,14 +40,10 @@ fn update_main_npm_package_version(repo_root: &Utf8Path, version: &str) -> Resul
         return Ok(());
     }
 
-    let content = fs_err::read_to_string(&package_json_path)
-        .into_diagnostic()
-        .context("failed to read packages/arborium/package.json")?;
+    let content = fs_err::read_to_string(&package_json_path)?;
 
     // Parse as serde_json::Value to preserve structure
-    let mut json: serde_json::Value = serde_json::from_str(&content)
-        .into_diagnostic()
-        .context("failed to parse packages/arborium/package.json")?;
+    let mut json: serde_json::Value = serde_json::from_str(&content)?;
 
     // Update version field
     if let Some(obj) = json.as_object_mut() {
@@ -58,13 +54,9 @@ fn update_main_npm_package_version(repo_root: &Utf8Path, version: &str) -> Resul
     }
 
     // Write back with pretty formatting
-    let updated = serde_json::to_string_pretty(&json)
-        .into_diagnostic()
-        .context("failed to serialize packages/arborium/package.json")?;
+    let updated = serde_json::to_string_pretty(&json)?;
 
-    fs_err::write(&package_json_path, updated + "\n")
-        .into_diagnostic()
-        .context("failed to write packages/arborium/package.json")?;
+    fs_err::write(&package_json_path, updated + "\n")?;
 
     Ok(())
 }
@@ -77,9 +69,7 @@ pub fn read_version(repo_root: &Utf8Path) -> Result<String> {
     let path = repo_root.join(VERSION_FILE);
     match fs_err::read_to_string(&path) {
         Ok(content) => {
-            let entry: VersionEntry = facet_json::from_str(&content)
-                .into_diagnostic()
-                .context("failed to parse version.json")?;
+            let entry: VersionEntry = facet_json::from_str(&content)?;
             Ok(entry.version)
         }
         Err(_) => {

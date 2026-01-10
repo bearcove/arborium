@@ -55,7 +55,6 @@ struct CodeBlocks {
     docsrs_script: CodeBlock,
     docsrs_cargo: CodeBlock,
     rustdoc_postprocess: CodeBlock,
-    miette_example: CodeBlock,
     html_example_traditional: CodeBlock,
     html_example_arborium: CodeBlock,
 }
@@ -181,7 +180,7 @@ impl Registry {
 
     /// Serialize to pretty JSON using facet-json.
     pub fn to_json_pretty(&self) -> String {
-        facet_json::to_string_pretty(self)
+        facet_json::to_string_pretty(self).expect("registry serialization failed")
     }
 }
 
@@ -562,7 +561,6 @@ fn generate_shared_crate_manifests(repo_root: &Path) -> Result<(), String> {
         "arborium-plugin-runtime",
         "arborium-wire",
         "arborium-query",
-        "miette-arborium",
         "arborium-rustdoc",
         "arborium-mdbook",
     ];
@@ -666,7 +664,7 @@ fn copy_plugins_json(crates_dir: &Utf8Path, demo_dir: &Path, dev: bool) -> Resul
         }
 
         // Write to demo directory
-        let output = facet_json::to_string_pretty(&json);
+        let output = facet_json::to_string_pretty(&json).map_err(|e| e.to_string())?;
         fs::write(&output_path, output).map_err(|e| e.to_string())?;
     } else {
         // Generate a minimal plugins.json from registry if build hasn't been run
@@ -819,7 +817,7 @@ fn parse_icon_cache(content: &str) -> BTreeMap<String, String> {
 }
 
 fn serialize_icon_cache(icons: &BTreeMap<String, String>) -> String {
-    facet_json::to_string_pretty(icons)
+    facet_json::to_string_pretty(icons).expect("icon cache serialization failed")
 }
 
 /// Convert a theme name to a CSS-friendly ID (kebab-case, lowercase)
@@ -913,14 +911,6 @@ rustdoc-args = ["--html-in-header", "arborium-header.html"]"#,
             lang: "bash",
             source: r#"# Process rustdoc output in-place
 arborium-rustdoc ./target/doc ./target/doc-highlighted"#,
-        },
-        miette_example: CodeBlock {
-            lang: "rust",
-            source: r#"use miette::GraphicalReportHandler;
-use miette_arborium::ArboriumHighlighter;
-
-let handler = GraphicalReportHandler::new()
-    .with_syntax_highlighting(ArboriumHighlighter::new());"#,
         },
         html_example_traditional: CodeBlock {
             lang: "html",

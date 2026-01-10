@@ -1412,7 +1412,7 @@ fn extract_highlights_prepend(
     };
 
     for prepend in &highlights.prepend {
-        let crate_name = &prepend.crate_name.value;
+        let crate_name = &prepend.crate_name;
 
         // Resolve relative path for Cargo.toml
         if let Some(rel_path) = resolve_crate_relative_path(from_crate_path, crate_name, registry) {
@@ -2352,7 +2352,6 @@ fn plan_shared_crates(prepared: &PreparedStructures, mode: PlanMode) -> Result<P
         "arborium-plugin-runtime",
         "arborium-wire",
         "arborium-query",
-        "miette-arborium",
         "arborium-rustdoc",
         "arborium-mdbook",
     ];
@@ -2634,55 +2633,6 @@ This grammar highlights the query DSL itself, including:
 use arborium_query::{language, HIGHLIGHTS_QUERY};
 
 // Use with arborium's highlighting engine
-```
-"#
-        }
-        "miette-arborium" => {
-            r#"# miette-arborium
-
-Syntax highlighting for [miette](https://crates.io/crates/miette) diagnostics using arborium.
-
-## Features
-
-- Automatic language detection from file extensions
-- Tree-sitter based highlighting (same engine as the main arborium crate)
-- All arborium themes available
-- Zero configuration needed
-
-## Quick Start
-
-```rust
-fn main() {
-    // Install the highlighter globally (call once at startup)
-    miette_arborium::install_global().ok();
-
-    // Now all miette errors will have syntax highlighting!
-}
-```
-
-## With Custom Theme
-
-```rust
-fn main() {
-    let theme = arborium_theme::builtin::github_light().clone();
-    miette_arborium::install_global_with_theme(theme).ok();
-}
-```
-
-## Example Output
-
-Error diagnostics will show syntax-highlighted code snippets:
-
-```
-  × cannot find derive macro `Facet` in this scope
-   ╭─[src/lib.rs:3:10]
- 1 │ use facet::Facet;
- 2 │
- 3 │ #[derive(Facet)]
-   ·          ──┬──
-   ·            ╰── cannot find derive macro `Facet` in this scope
- 4 │ struct FooBar {
-   ╰────
 ```
 "#
         }
@@ -3025,7 +2975,6 @@ all-languages = [
 arborium = {{ version = "{version}", path = "../arborium" }}
 facet = "0.33.0"
 facet-args = "0.33.0"
-miette = {{ version = "7.6.0", features = ["fancy-no-backtrace"] }}
 "#
     ));
 

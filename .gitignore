@@ -42,8 +42,6 @@ crates/arborium-wire/Cargo.toml
 crates/arborium-wire/README.md
 crates/arborium-query/Cargo.toml
 crates/arborium-query/README.md
-crates/miette-arborium/Cargo.toml
-crates/miette-arborium/README.md
 crates/arborium-rustdoc/Cargo.toml
 crates/arborium-rustdoc/README.md
 crates/arborium-mdbook/Cargo.toml

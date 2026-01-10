@@ -6,13 +6,15 @@
 
 use camino::{Utf8Path, Utf8PathBuf};
 use chrono::Utc;
-use miette::{Context, IntoDiagnostic, Result};
 use owo_colors::OwoColorize;
+use rootcause::Report;
 use std::process::Command;
 
 use crate::build::{PluginManifest, PluginManifestEntry};
 use crate::serve::build_static_site;
 use crate::types::CrateRegistry;
+
+type Result<T> = std::result::Result<T, Report>;
 
 /// Deploy the website to GitHub Pages
 pub fn deploy_website(repo_root: &Utf8Path, version: &str, dry_run: bool) -> Result<()> {
@@ -25,19 +27,17 @@ pub fn deploy_website(repo_root: &Utf8Path, version: &str, dry_run: bool) -> Res
     // Load the registry to get all grammar info
     let crates_dir = repo_root.join("crates");
     let registry = CrateRegistry::load(&crates_dir)
-        .map_err(|e| miette::miette!("failed to load crate registry: {}", e))?;
+        .map_err(|e| std::io::Error::other(format!("failed to load crate registry: {}", e)))?;
 
     // Build the demo site first (generates index.html, app.generated.js, etc.)
     println!("  {} Building demo site...", "•".dimmed());
     build_static_site(&crates_dir, false)
-        .map_err(|e| miette::miette!("failed to build static site: {}", e))?;
+        .map_err(|e| std::io::Error::other(format!("failed to build static site: {}", e)))?;
 
     // Create a temporary directory for the site
-    let temp_dir = tempfile::tempdir()
-        .into_diagnostic()
-        .context("failed to create temp directory")?;
+    let temp_dir = tempfile::tempdir()?;
     let site_dir = Utf8PathBuf::from_path_buf(temp_dir.path().to_path_buf())
-        .map_err(|p| miette::miette!("non-UTF8 temp path: {}", p.display()))?;
+        .map_err(|p| std::io::Error::other(format!("non-UTF8 temp path: {}", p.display())))?;
 
     println!("  {} Building site in {}", "•".dimmed(), site_dir);
 
@@ -52,9 +52,7 @@ pub fn deploy_website(repo_root: &Utf8Path, version: &str, dry_run: bool) -> Res
     copy_registry_json(&demo_dir, &site_dir)?;
 
     // Write CNAME file for custom domain
-    fs_err::write(site_dir.join("CNAME"), "arborium.bearcove.eu\n")
-        .into_diagnostic()
-        .context("failed to write CNAME")?;
+    fs_err::write(site_dir.join("CNAME"), "arborium.bearcove.eu\n")?;
 
     if dry_run {
         println!();
@@ -91,58 +89,44 @@ fn copy_static_files(demo_dir: &Utf8Path, site_dir: &Utf8Path, version: &str) ->
     let index_src = demo_dir.join("index.html");
     let index_dst = site_dir.join("index.html");
     if index_src.exists() {
-        let content = fs_err::read_to_string(&index_src)
-            .into_diagnostic()
-            .context("failed to read index.html")?;
+        let content = fs_err::read_to_string(&index_src)?;
         let content = content.replace("{{VERSION}}", version);
-        fs_err::write(&index_dst, content)
-            .into_diagnostic()
-            .context("failed to write index.html")?;
+        fs_err::write(&index_dst, content)?;
     }
 
     // Copy iife-demo.html with version replacement
     let iife_demo_src = demo_dir.join("iife-demo.html");
     let iife_demo_dst = site_dir.join("iife-demo.html");
     if iife_demo_src.exists() {
-        let content = fs_err::read_to_string(&iife_demo_src)
-            .into_diagnostic()
-            .context("failed to read iife-demo.html")?;
+        let content = fs_err::read_to_string(&iife_demo_src)?;
         let content = content.replace("{{VERSION}}", version);
-        fs_err::write(&iife_demo_dst, content)
-            .into_diagnostic()
-            .context("failed to write iife-demo.html")?;
+        fs_err::write(&iife_demo_dst, content)?;
     }
 
     // Copy rustdoc-comparison.html
     let rustdoc_comparison_src = demo_dir.join("rustdoc-comparison.html");
     let rustdoc_comparison_dst = site_dir.join("rustdoc-comparison.html");
     if rustdoc_comparison_src.exists() {
-        fs_err::copy(&rustdoc_comparison_src, &rustdoc_comparison_dst)
-            .into_diagnostic()
-            .context("failed to copy rustdoc-comparison.html")?;
+        fs_err::copy(&rustdoc_comparison_src, &rustdoc_comparison_dst)?;
     }
 
     // Copy styles.css directly
     let styles_src = demo_dir.join("styles.css");
     let styles_dst = site_dir.join("styles.css");
     if styles_src.exists() {
-        fs_err::copy(&styles_src, &styles_dst)
-            .into_diagnostic()
-            .context("failed to copy styles.css")?;
+        fs_err::copy(&styles_src, &styles_dst)?;
     }
 
     // Copy dodeca-logo.svg directly
     let logo_src = demo_dir.join("dodeca-logo.svg");
     let logo_dst = site_dir.join("dodeca-logo.svg");
     if logo_src.exists() {
-        fs_err::copy(&logo_src, &logo_dst)
-            .into_diagnostic()
-            .context("failed to copy dodeca-logo.svg")?;
+        fs_err::copy(&logo_src, &logo_dst)?;
     }
 
     // Copy font files (*.woff2) and SVG files (*.svg)
-    for entry in fs_err::read_dir(demo_dir).into_diagnostic()? {
-        let entry = entry.into_diagnostic()?;
+    for entry in fs_err::read_dir(demo_dir)? {
+        let entry = entry?;
         let path = entry.path();
         let should_copy = path
             .extension()
@@ -151,9 +135,7 @@ fn copy_static_files(demo_dir: &Utf8Path, site_dir: &Utf8Path, version: &str) ->
         if should_copy {
             let filename = path.file_name().unwrap();
             let dst = site_dir.join(filename.to_string_lossy().as_ref());
-            fs_err::copy(&path, &dst)
-                .into_diagnostic()
-                .context(format!("failed to copy {}", path.display()))?;
+            fs_err::copy(&path, &dst)?;
         }
     }
 
@@ -171,12 +153,10 @@ fn copy_static_files(demo_dir: &Utf8Path, site_dir: &Utf8Path, version: &str) ->
 }
 
 fn copy_dir_recursive(src: &Utf8Path, dst: &Utf8Path) -> Result<()> {
-    fs_err::create_dir_all(dst)
-        .into_diagnostic()
-        .context(format!("failed to create directory {}", dst))?;
+    fs_err::create_dir_all(dst)?;
 
-    for entry in fs_err::read_dir(src).into_diagnostic()? {
-        let entry = entry.into_diagnostic()?;
+    for entry in fs_err::read_dir(src)? {
+        let entry = entry?;
         let path = entry.path();
         let file_name = path.file_name().unwrap().to_string_lossy();
 
@@ -189,12 +169,10 @@ fn copy_dir_recursive(src: &Utf8Path, dst: &Utf8Path) -> Result<()> {
 
         if path.is_dir() {
             let src_utf8 = Utf8PathBuf::from_path_buf(path.clone())
-                .map_err(|p| miette::miette!("non-UTF8 path: {}", p.display()))?;
+                .map_err(|p| std::io::Error::other(format!("non-UTF8 path: {}", p.display())))?;
             copy_dir_recursive(&src_utf8, &dst_path)?;
         } else {
-            fs_err::copy(&path, &dst_path)
-                .into_diagnostic()
-                .context(format!("failed to copy {}", path.display()))?;
+            fs_err::copy(&path, &dst_path)?;
         }
     }
 
@@ -276,14 +254,12 @@ fn generate_plugins_json(
     };
 
     // Write with dev_mode: false for production
-    let json = facet_json::to_string_pretty(&manifest);
+    let json = facet_json::to_string_pretty(&manifest).expect("manifest serialization failed");
     // Insert dev_mode field at the start
     let json_with_dev_mode = json.replacen("{", "{\n  \"dev_mode\": false,", 1);
 
     let output_path = site_dir.join("plugins.json");
-    fs_err::write(&output_path, json_with_dev_mode)
-        .into_diagnostic()
-        .context("failed to write plugins.json")?;
+    fs_err::write(&output_path, json_with_dev_mode)?;
 
     Ok(())
 }
@@ -295,11 +271,12 @@ fn copy_registry_json(demo_dir: &Utf8Path, site_dir: &Utf8Path) -> Result<()> {
     let dst = site_dir.join("registry.json");
 
     if src.exists() {
-        fs_err::copy(&src, &dst)
-            .into_diagnostic()
-            .context("failed to copy registry.json")?;
+        fs_err::copy(&src, &dst)?;
     } else {
-        miette::bail!("registry.json not found in demo/. Run `cargo xtask build` first.");
+        return Err(
+            std::io::Error::other("registry.json not found in demo/. Run `cargo xtask build` first.")
+                .into(),
+        );
     }
 
     Ok(())
@@ -307,11 +284,11 @@ fn copy_registry_json(demo_dir: &Utf8Path, site_dir: &Utf8Path) -> Result<()> {
 
 fn list_site_contents(site_dir: &Utf8Path) -> Result<()> {
     println!("  Site contents:");
-    for entry in fs_err::read_dir(site_dir).into_diagnostic()? {
-        let entry = entry.into_diagnostic()?;
+    for entry in fs_err::read_dir(site_dir)? {
+        let entry = entry?;
         let path = entry.path();
         let name = path.file_name().unwrap().to_string_lossy();
-        let meta = entry.metadata().into_diagnostic()?;
+        let meta = entry.metadata()?;
         if meta.is_dir() {
             println!("    {}/", name.blue());
         } else {
@@ -360,13 +337,13 @@ fn run_git(cwd: &Utf8Path, args: &[&str]) -> Result<()> {
     let output = Command::new("git")
         .args(args)
         .current_dir(cwd)
-        .output()
-        .into_diagnostic()
-        .context(format!("failed to run git {}", args.join(" ")))?;
+        .output()?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        miette::bail!("git {} failed: {}", args.join(" "), stderr);
+        return Err(
+            std::io::Error::other(format!("git {} failed: {}", args.join(" "), stderr)).into(),
+        );
     }
 
     Ok(())
@@ -376,12 +353,10 @@ fn get_remote_url(repo_root: &Utf8Path) -> Result<String> {
     let output = Command::new("git")
         .args(["remote", "get-url", "origin"])
         .current_dir(repo_root)
-        .output()
-        .into_diagnostic()
-        .context("failed to get git remote URL")?;
+        .output()?;
 
     if !output.status.success() {
-        miette::bail!("failed to get remote URL");
+        return Err(std::io::Error::other("failed to get remote URL").into());
     }
 
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())

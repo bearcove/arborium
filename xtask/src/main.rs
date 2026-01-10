@@ -240,17 +240,15 @@ enum PublishAction {
 }
 
 fn main() {
-    // Install Miette's graphical error handler for nice CLI diagnostics
-    miette::set_hook(Box::new(|_| {
-        Box::new(miette::MietteHandlerOpts::new().build())
-    }))
-    .ok();
-
     // Initialize tracing subscriber for structured logging
     tracing_subscriber::fmt::init();
 
     let args: Args = facet_args::from_std_args().unwrap_or_else(|e| {
-        eprintln!("{:?}", miette::Report::new(e));
+        if let Some(text) = e.help_text() {
+            eprintln!("{text}");
+        } else {
+            eprintln!("{:?}", e);
+        }
         std::process::exit(1);
     });
 

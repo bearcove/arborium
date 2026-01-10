@@ -106,9 +106,7 @@ use std::collections::BTreeMap;
 use camino::{Utf8Path, Utf8PathBuf};
 use facet::Facet;
 use facet_kdl as kdl;
-use facet_kdl::Spanned;
 use fs_err as fs;
-use miette::NamedSource;
 pub use rootcause::Report;
 
 // =============================================================================
@@ -128,21 +126,21 @@ structstruck::strike! {
         #[facet(kdl::child)]
         pub repo: pub struct Repo {
             #[facet(kdl::argument)]
-            pub value: Spanned<String>,
+            pub value: String,
         },
 
         /// Git commit hash of the vendored version.
         #[facet(kdl::child)]
         pub commit: pub struct Commit {
             #[facet(kdl::argument)]
-            pub value: Spanned<String>,
+            pub value: String,
         },
 
         /// SPDX license identifier for the grammar (e.g., "MIT", "Apache-2.0").
         #[facet(kdl::child)]
         pub license: pub struct License {
             #[facet(kdl::argument)]
-            pub value: Spanned<String>,
+            pub value: String,
         },
 
         // TODO: Add authors field back once facet-kdl supports Option<T> + kdl::child + default
@@ -171,7 +169,7 @@ macro_rules! kdl_child_string {
         #[derive(Debug, Clone, Facet)]
         pub struct $name {
             #[facet(kdl::argument)]
-            pub value: Spanned<String>,
+            pub value: String,
         }
 
         impl std::ops::Deref for $name {
@@ -464,11 +462,11 @@ pub struct HighlightsConfig {
 pub struct PrependConfig {
     /// The crate to prepend from (e.g., "arborium-javascript").
     #[facet(kdl::property, rename = "crate")]
-    pub crate_name: Spanned<String>,
+    pub crate_name: String,
 
     /// The grammar within that crate (optional if crate has only one grammar).
     #[facet(kdl::property, default)]
-    pub grammar: Option<Spanned<String>>,
+    pub grammar: Option<String>,
 }
 
 /// Metadata for a sample source file.
@@ -522,7 +520,7 @@ pub struct CrateState {
     /// Parsed configuration from arborium.kdl (if present).
     pub config: Option<CrateConfig>,
 
-    /// Raw KDL source for Miette diagnostics.
+    /// Raw KDL source for error diagnostics.
     pub kdl_source: Option<String>,
 
     /// State of files on disk.
@@ -779,12 +777,7 @@ impl CrateRegistry {
                 Err(e) => {
                     // Print detailed error info
                     eprintln!("Error parsing {}:", kdl_path);
-                    eprintln!("  Kind: {:?}", e.kind());
-
-                    // Use miette to display the error with source context
-                    let report = miette::Report::new(e)
-                        .with_source_code(NamedSource::new(kdl_path.as_str(), content.clone()));
-                    eprintln!("{:?}", report);
+                    eprintln!("  Details: {:?}", e);
                     return Err(
                         std::io::Error::other(format!("Failed to parse {}", kdl_path)).into(),
                     );
@@ -867,12 +860,7 @@ impl CrateRegistry {
                 Err(e) => {
                     // Print detailed error info
                     eprintln!("Error parsing {}:", kdl_path);
-                    eprintln!("  Kind: {:?}", e.kind());
-
-                    // Use miette to display the error with source context
-                    let report = miette::Report::new(e)
-                        .with_source_code(NamedSource::new(kdl_path.as_str(), content.clone()));
-                    eprintln!("{:?}", report);
+                    eprintln!("  Details: {:?}", e);
                     return Err(
                         std::io::Error::other(format!("Failed to parse {}", kdl_path)).into(),
                     );

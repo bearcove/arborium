@@ -1,15 +1,16 @@
 //! New linting system based on CrateRegistry.
 //!
 //! This module provides linting that uses the arborium.kdl files as the source
-//! of truth, with Miette diagnostics for precise error reporting.
+//! of truth, with diagnostics for precise error reporting.
 
 use camino::Utf8Path;
 use indicatif::{ProgressBar, ProgressStyle};
-use miette::{Diagnostic, NamedSource, SourceSpan};
 use owo_colors::OwoColorize;
-use thiserror::Error;
+use rootcause::Report;
 
 use crate::types::{CrateRegistry, CrateState, MIN_SAMPLE_LINES, SampleFileState};
+
+type Result<T> = std::result::Result<T, Report>;
 
 /// Options for running lints.
 #[derive(Debug, Clone, Default)]
@@ -22,8 +23,9 @@ pub struct LintOptions {
 }
 
 /// Run all lints on the registry.
-pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> miette::Result<()> {
-    let registry = CrateRegistry::load(crates_dir).map_err(|e| miette::miette!("{e}"))?;
+pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> Result<()> {
+    let registry = CrateRegistry::load(crates_dir)
+        .map_err(|e| std::io::Error::other(format!("{e}")))?;
 
     let filter = options.only.clone();
     let include = |name: &str| should_include_crate(name, filter.as_ref());
@@ -176,22 +178,10 @@ enum LintDiagnostic {
     Spanned {
         source_name: String,
         source: String,
-        span: SourceSpan,
+        span: (usize, usize), // (offset, length)
         message: String,
         is_error: bool,
     },
-}
-
-/// A Miette-compatible spanned lint error.
-#[allow(dead_code)]
-#[derive(Debug, Error, Diagnostic)]
-#[error("{message}")]
-struct SpannedLint {
-    message: String,
-    #[source_code]
-    src: NamedSource<String>,
-    #[label("here")]
-    span: SourceSpan,
 }
 
 /// Lint a single crate and return diagnostics.

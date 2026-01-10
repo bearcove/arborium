@@ -34,15 +34,6 @@ arborium file.rs  # Syntax highlight in your terminal
 <!-- Auto-highlights all code blocks! -->
 ```
 
-### With Miette error diagnostics
-
-```rust
-fn main() {
-    miette_arborium::install_global().ok();
-    // Now all miette errors have syntax-highlighted source code!
-}
-```
-
 ## Features
 
 - **~70 language grammars** included out of the box
@@ -51,7 +42,6 @@ fn main() {
 - **HTML rendering** with 32 built-in themes
 - **Browser usage** via drop-in script tag or ESM module
 - **CLI tool** (`arborium-cli`) - syntax highlighting for terminal and HTML
-- **Miette integration** (`miette-arborium`) - beautiful error diagnostics with syntax highlighting
 - **Feature flags** for fine-grained control over included languages
 
 ## Documentation
@@ -70,7 +60,6 @@ See the **[arborium crate on crates.io](https://crates.io/crates/arborium)** or 
 
 - **[`crates/arborium/`](crates/arborium/)** - Main umbrella crate (start here!)
 - **[`crates/arborium-cli/`](crates/arborium-cli/)** - Terminal syntax highlighter CLI
-- **[`crates/miette-arborium/`](crates/miette-arborium/)** - Miette diagnostic integration
 - **[`crates/arborium-*/`](crates/)** - Individual language grammar crates (~100 crates)
 - **[`packages/arborium/`](packages/arborium/)** - NPM package for browser use
 - **[`xtask/`](xtask/)** - Build automation and code generation
