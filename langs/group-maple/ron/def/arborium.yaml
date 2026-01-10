@@ -1,0 +1,23 @@
+repo: https://github.com/tree-sitter-grammars/tree-sitter-ron
+commit: 78938553b93075e638035f624973083451b29055
+license: MIT OR Apache-2.0
+
+grammars:
+  - id: ron
+    name: RON
+    tag: data
+    tier: 4
+    has_scanner: true
+    icon: devicon-plain:rust
+
+    inventor: kvark and torkleyy
+    year: 2015
+    description: "Rusty Object Notation, a Rust-friendly data format; reference at <a href=\"https://docs.rs/ron/latest/ron/\">docs.rs/ron</a>."
+    link: https://github.com/ron-rs/ron
+    trivia: "Designed for a (canceled) game project and revived by the Rust community; features trailing commas, comments, and Rust-like enums—see the <a href=\"https://docs.rs/ron\">crate docs</a>."
+
+    samples:
+      - path: samples/kits.ron
+        description: Veloren game server kit definitions with nested item tuples, comments, and RON extensions.
+        link: https://github.com/veloren/veloren/blob/master/assets/server/manifests/kits.ron
+        license: GPL-3.0

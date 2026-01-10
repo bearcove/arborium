@@ -1,0 +1,36 @@
+repo: https://github.com/tree-sitter/tree-sitter-typescript
+commit: 75b3874edb2dc714fb1fd77a32013d0f8699989f
+license: MIT
+
+grammars:
+  - id: typescript
+    name: TypeScript
+    tag: code
+    tier: 1
+    has_scanner: true
+    icon: devicon-plain:typescript
+    aliases:
+      - ts
+      - mts
+      - cts
+
+    dependencies:
+      - npm: tree-sitter-javascript
+        crate: arborium-javascript
+
+    queries:
+      highlights:
+        prepend:
+          - crate: arborium-javascript
+
+    inventor: Anders Hejlsberg
+    year: 2012
+    description: "Statically typed superset of JavaScript; official handbook at <a href=\"https://www.typescriptlang.org/docs/\">typescriptlang.org</a>."
+    link: https://en.wikipedia.org/wiki/TypeScript
+    trivia: Announced by Microsoft in Oct 2012 to add optional types to JS; design is documented in the TypeScript spec and Handbook.
+
+    samples:
+      - path: samples/dot-print.ts
+        description: DOT printer for function graphs with generics, async IO, and string templating.
+        link: https://github.com/tmr232/function-graph-overview/blob/main/src/dot-cfg/dot-print.ts
+        license: MIT

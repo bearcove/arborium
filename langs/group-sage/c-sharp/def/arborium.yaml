@@ -1,0 +1,31 @@
+repo: https://github.com/tree-sitter/tree-sitter-c-sharp
+commit: 485f0bae0274ac9114797fc10db6f7034e4086e3
+license: MIT
+
+grammars:
+  - id: c-sharp
+    name: "C#"
+    tag: code
+    tier: 1
+    has_scanner: true
+    icon: devicon-plain:csharp
+    aliases:
+      - cs
+      - csharp
+
+    inventor: Anders Hejlsberg
+    year: 2000
+    description: "Modern object-oriented language for .NET; official spec is published as <a href=\"https://www.ecma-international.org/publications-and-standards/standards/ecma-334/\">ECMA-334</a>."
+    link: https://en.wikipedia.org/wiki/C_Sharp_(programming_language)
+    trivia: "Originally code-named 'Cool' (C-like Object Oriented Language) inside Microsoft before being renamed C#; see the <a href=\"https://www.ecma-international.org/publications-and-standards/standards/ecma-334/\">ECMA-334 specification</a> and early .NET announcements."
+
+    samples:
+      - path: samples/ref_readonly_program.cs
+        description: Demonstrates ref readonly structs, in parameters, default arguments, and static refs.
+        link: https://github.com/dotnet/samples/blob/main/csharp/safe-efficient-code/ref-readonly-struct/Program.cs
+        license: MIT
+
+      - path: samples/ref_readonly_point3d.cs
+        description: Supporting struct definitions with ref readonly properties and readonly struct.
+        link: https://github.com/dotnet/samples/blob/main/csharp/safe-efficient-code/ref-readonly-struct/Point3D.cs
+        license: MIT

@@ -1,0 +1,23 @@
+repo: https://github.com/gleam-lang/tree-sitter-gleam
+commit: f4d55f3c5b690d4afe8853da892bc290d96deb34
+license: Apache-2.0
+
+grammars:
+  - id: gleam
+    name: Gleam
+    tag: code
+    tier: 1
+    has_scanner: true
+    icon: devicon-plain:gleam
+
+    inventor: Louis Pilfold
+    year: 2016
+    description: "Statically typed functional language for the BEAM; <a href=\"https://gleam.run/\">official docs</a>."
+    link: https://en.wikipedia.org/wiki/Gleam_(programming_language)
+    trivia: "Pilfold announced Gleam in 2016 to bring ML-style typing to Erlang; version 1.0 shipped in March 2024 per the <a href=\"https://gleam.run/news/gleam-v1.0/\">v1.0 announcement</a>."
+
+    samples:
+      - path: samples/router.gleam
+        description: Gleam list operations with types, pattern matching, and tail recursion.
+        link: https://github.com/gleam-lang/stdlib/blob/main/src/gleam/list.gleam
+        license: Apache-2.0

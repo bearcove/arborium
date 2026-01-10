@@ -1,0 +1,26 @@
+repo: https://github.com/JoranHonig/tree-sitter-solidity
+commit: 4e938a46c7030dd001bc99e1ac0f0c750ac98254
+license: MIT
+
+grammars:
+  - id: solidity
+    name: Solidity
+    tag: code
+    tier: 2
+    has_scanner: false
+    generate_component: true
+    icon: devicon-plain:solidity
+    aliases:
+      - sol
+
+    inventor: Gavin Wood
+    year: 2014
+    description: Solidity is a programming language for implementing smart contracts on various blockchain platforms, most notably, Ethereum.
+    link: https://en.wikipedia.org/wiki/Solidity
+    trivia: "Solidity doesn't have native support for floating-point numbers by design. Floating-point arithmetic can produce slightly different results on different machines, which would break blockchain consensus, so everything is done with integers and fixed-point math."
+
+    samples:
+      - path: samples/example.sol
+        description: Typical contract found in the widely used OpenZeppelin library, making use of multiple language features like inline assembly and inheritance
+        link: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/Governor.sol
+        license: MIT

@@ -1,0 +1,25 @@
+repo: https://github.com/smoeding/tree-sitter-postscript
+commit: 33718235e7ce32e355a8dc591b435637a329bc5b
+license: MIT
+
+grammars:
+  - id: postscript
+    name: PostScript
+    tag: code
+    tier: 5
+    has_scanner: true
+    icon: mdi:printer
+    aliases:
+      - ps
+
+    inventor: John Warnock and Charles Geschke
+    year: 1984
+    description: "Page description and programming language from Adobe; reference in the <a href=\"https://www.adobe.com/content/dam/acom/en/devnet/actionscript/articles/PLRM.pdf\">PostScript Language Reference Manual</a>."
+    link: https://en.wikipedia.org/wiki/PostScript
+    trivia: "Adobe released PostScript in 1984; the LaserWriter (1985) used it to ignite desktop publishing. The 'Red Book' PLRM is the definitive spec."
+
+    samples:
+      - path: samples/tiger.ps
+        description: Ghostscript tiger example showcasing PostScript drawing, paths, fills, and strokes.
+        link: https://github.com/ghostscript/ghostpdl/blob/master/examples/tiger.ps
+        license: AGPL-3.0-only

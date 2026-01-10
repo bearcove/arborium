@@ -1,0 +1,29 @@
+repo: https://github.com/tree-sitter/tree-sitter-go
+commit: 2346a3ab1bb3857b48b29d779a1ef9799a248cd7
+license: MIT
+
+grammars:
+  - id: go
+    name: Go
+    tag: code
+    tier: 1
+    icon: devicon-plain:go
+    aliases:
+      - golang
+
+    inventor: Robert Griesemer, Rob Pike, Ken Thompson
+    year: 2009
+    description: "Statically typed compiled language from Google; the canonical <a href=\"https://go.dev/ref/spec\">language specification</a>."
+    link: https://en.wikipedia.org/wiki/Go_(programming_language)
+    trivia: "Announced publicly in Nov 2009; its mascot the Gopher was created by Renée French and documented on the <a href=\"https://go.dev/blog/gopher\">Go blog</a>."
+
+    samples:
+      - path: samples/explore_repo.go
+        description: Gitea explore page with imports, constants, structs, and HTTP handler functions.
+        link: https://github.com/go-gitea/gitea/blob/main/routers/web/explore/repo.go
+        license: MIT
+
+      - path: samples/repo.go
+        description: Gitea explore/repo handler showing routing, templating, pagination, and service calls.
+        link: https://github.com/go-gitea/gitea/blob/main/routers/web/explore/repo.go
+        license: MIT

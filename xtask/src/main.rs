@@ -4,7 +4,7 @@
 //!
 //! Commands:
 //! - `lint` - Validate all grammars
-//! - `gen \[name\]` - Regenerate crate files from arborium.kdl and build the static demo
+//! - `gen \[name\]` - Regenerate crate files from arborium.yaml and build the static demo
 //! - `serve` - Build and serve the WASM demo locally
 
 mod cache;
@@ -57,7 +57,7 @@ enum Command {
         strict: bool,
     },
 
-    /// Regenerate crate files (Cargo.toml, build.rs, lib.rs, grammar/src/) from arborium.kdl
+    /// Regenerate crate files (Cargo.toml, build.rs, lib.rs, grammar/src/) from arborium.yaml
     Gen {
         /// Optional grammar name to regenerate (regenerates all if omitted)
         #[facet(args::positional, default)]

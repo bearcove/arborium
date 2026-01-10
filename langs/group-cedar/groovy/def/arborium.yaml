@@ -1,0 +1,31 @@
+repo: https://github.com/murtaza64/tree-sitter-groovy
+commit: 86911590a8e46d71301c66468e5620d9faa5b6af
+license: MIT
+
+grammars:
+  - id: groovy
+    name: Groovy
+    tag: code
+    tier: 2
+    has_scanner: false
+    generate_component: true
+    icon: devicon-plain:groovy
+    aliases:
+      - gvy
+      - gy
+      - gsh
+
+    inventor: James Strachan
+    year: 2003
+    description: Apache Groovy is a dynamic language for the JVM with syntax inspired by Java, featuring optional typing, closures, and powerful DSL capabilities that make it ideal for scripting and build tools like Gradle.
+    link: https://en.wikipedia.org/wiki/Apache_Groovy
+    trivia: Groovy was created by James Strachan in 2003 and became an Apache project in 2015. It powers the popular Gradle build system and is widely used for creating domain-specific languages due to its flexible syntax and metaprogramming features.
+
+    samples:
+      - path: samples/example.groovy
+        description: Comprehensive Groovy syntax featuring classes, closures, string interpolation, operators, and functional programming constructs
+        license: MIT
+
+      - path: samples/builder.groovy
+        description: Advanced Groovy DSL patterns including builder pattern, XML generation, configuration DSL, and method_missing metaprogramming
+        license: MIT

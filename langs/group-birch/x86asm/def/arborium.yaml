@@ -1,0 +1,26 @@
+repo: local
+commit: n/a
+license: MIT
+
+grammars:
+  - id: x86asm
+    name: x86 Assembly
+    tag: code
+    tier: 3
+    has_scanner: true
+    icon: mdi:memory
+    aliases:
+      - nasm
+      - x86
+
+    inventor: Intel (Stephen P. Morse et al.)
+    year: 1978
+    description: "Assembly language family for Intel x86; reference manuals at <a href=\"https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html\">Intel SDM</a>."
+    link: https://en.wikipedia.org/wiki/X86_assembly_language
+    trivia: "Built on the 8086 ISA released June 1978; Intel's Software Developer Manuals document backward compatibility that lets 1978-era code run on modern CPUs."
+
+    samples:
+      - path: samples/elftest.asm
+        description: NASM ELF test exercising labels, externs, sections, and symbol definitions.
+        link: https://github.com/netwide-assembler/nasm/blob/master/test/elftest.asm
+        license: BSD-2-Clause

@@ -1,0 +1,22 @@
+repo: https://gitlab.com/joncoole/tree-sitter-nginx
+commit: f6d13cf6281b25f2ce342a49a41a10a0381e00f0
+license: GPL-3.0
+
+grammars:
+  - id: nginx
+    name: nginx
+    tag: config
+    tier: 5
+    icon: simple-icons:nginx
+
+    inventor: Igor Sysoev
+    year: 2004
+    description: "Configuration language for the nginx web server; official reference at <a href=\"https://nginx.org/en/docs/dirindex.html\">nginx.org</a>."
+    link: https://en.wikipedia.org/wiki/Nginx
+    trivia: "Sysoev began nginx in 2002; first public release in 2004. The configuration syntax is documented in the <a href=\"https://nginx.org/en/docs/\">official documentation</a>."
+
+    samples:
+      - path: samples/nginx.conf
+        description: H5BP nginx.conf with includes, gzip, SSL, maps, and logging directives.
+        link: https://github.com/h5bp/server-configs-nginx/blob/master/nginx.conf
+        license: MIT

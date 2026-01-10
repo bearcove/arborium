@@ -204,7 +204,7 @@ fn get_published_crate_version(name: &str) -> Result<Option<String>> {
 /// - build.rs
 /// - Cargo.toml
 /// - queries/ directory (if exists)
-/// - arborium.kdl (if exists)
+/// - arborium.yaml (if exists)
 /// - sample files (if exist)
 /// - tree-sitter CLI version
 ///

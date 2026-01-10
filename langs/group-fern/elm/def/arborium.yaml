@@ -1,0 +1,23 @@
+repo: https://github.com/elm-tooling/tree-sitter-elm
+commit: d0bec479c0422ed5eb01467790bd3912142fe987
+license: MIT
+
+grammars:
+  - id: elm
+    name: Elm
+    tag: code
+    tier: 2
+    has_scanner: true
+    icon: devicon-plain:elm
+
+    inventor: Evan Czaplicki
+    year: 2012
+    description: "Purely functional language for reliable web apps; see the official <a href=\"https://guide.elm-lang.org/\">guide</a>."
+    link: https://en.wikipedia.org/wiki/Elm_(programming_language)
+    trivia: "Introduced by Czaplicki in 2012 with 'The Elm Architecture' that later inspired Redux; documented in the <a href=\"https://guide.elm-lang.org/architecture/\">architecture section</a> of the guide."
+
+    samples:
+      - path: samples/Article.elm
+        description: Elm SPA article page with Model-View-Update, commands, and HTML rendering.
+        link: https://github.com/rtfeldman/elm-spa-example/blob/master/src/Page/Article.elm
+        license: MIT

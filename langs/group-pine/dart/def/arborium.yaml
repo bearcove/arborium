@@ -1,0 +1,23 @@
+repo: https://github.com/UserNobody14/tree-sitter-dart
+commit: d4d8f3e337d8be23be27ffc35a0aef972343cd54
+license: MIT
+
+grammars:
+  - id: dart
+    name: Dart
+    tag: code
+    tier: 2
+    has_scanner: true
+    icon: devicon-plain:dart
+
+    inventor: Lars Bak and Kasper Lund
+    year: 2011
+    description: "Object-oriented language optimized for UI development; official site: <a href=\"https://dart.dev/\">dart.dev</a>."
+    link: https://en.wikipedia.org/wiki/Dart_(programming_language)
+    trivia: "Unveiled at GOTO Aarhus 2011 by Bak and Lund; the <a href=\"https://dart.dev/guides/language/language-tour\">language tour</a> documents its core goals, and Dart became the language behind Flutter when Google released Flutter in May 2017."
+
+    samples:
+      - path: samples/fluid_api.dart
+        description: Extension methods demo with fluent API, getters, operators, and generics.
+        link: https://github.com/dart-lang/samples/blob/main/extension_methods/example/fluid_api.dart
+        license: BSD-3-Clause

@@ -1,0 +1,24 @@
+repo: https://codeberg.org/foxy/tree-sitter-prolog
+commit: d8d415f6a1cf80ca138524bcc395810b176d40fa
+license: MIT
+
+grammars:
+  - id: prolog
+    name: Prolog
+    tag: code
+    tier: 4
+    icon: mdi:head-question
+    aliases:
+      - pro
+
+    inventor: Alain Colmerauer and Philippe Roussel
+    year: 1972
+    description: "Logic programming language for AI and computational linguistics; early definition in Colmerauer's 1972 Marseille reports."
+    link: https://en.wikipedia.org/wiki/Prolog
+    trivia: "Prolog (PROgrammation en LOGique) emerged in 1972; used in Japan's Fifth Generation Project (1982). The ISO standard is <a href=\"https://www.iso.org/standard/21413.html\">ISO/IEC 13211-1:1995</a>."
+
+    samples:
+      - path: samples/http_server.pl
+        description: SWI-Prolog HTTP server example with predicates, handlers, and threading.
+        link: https://github.com/SWI-Prolog/packages-http/blob/master/http_server.pl
+        license: BSD-2-Clause

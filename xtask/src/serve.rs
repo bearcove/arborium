@@ -1,6 +1,6 @@
 //! Serve command - builds and serves the WASM demo.
 //!
-//! This module generates registry.json from arborium.kdl files and serves
+//! This module generates registry.json from arborium.yaml files and serves
 //! the demo with all grammar metadata and inlined sample content.
 
 use crate::theme_gen::{self, HIGHLIGHTS, Theme};
@@ -1155,7 +1155,7 @@ fn build_language_info_js(registry: &Registry) -> String {
             js.push_str(&format!("        \"tier\": {},\n", tier));
         }
         if let Some(ref desc) = grammar.description {
-            // description is already HTML in arborium.kdl
+            // description is already HTML in arborium.yaml
             js.push_str(&format!(
                 "        \"description\": \"{}\",\n",
                 escape_for_js(desc)
@@ -1174,7 +1174,7 @@ fn build_language_info_js(registry: &Registry) -> String {
             js.push_str(&format!("        \"url\": \"{}\",\n", escape_for_js(link)));
         }
         if let Some(ref trivia) = grammar.trivia {
-            // trivia is already HTML in arborium.kdl
+            // trivia is already HTML in arborium.yaml
             js.push_str(&format!(
                 "        \"trivia\": \"{}\",\n",
                 escape_for_js(trivia)

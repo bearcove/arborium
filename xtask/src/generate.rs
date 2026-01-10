@@ -1,6 +1,6 @@
-/// Generate command - regenerates crate files from arborium.kdl.
+/// Generate command - regenerates crate files from arborium.yaml.
 ///
-/// This command reads arborium.kdl files and generates:
+/// This command reads arborium.yaml files and generates:
 /// - Cargo.toml
 /// - build.rs
 /// - src/lib.rs
@@ -967,7 +967,7 @@ fn prepare_temp_structures(
                 continue;
             }
         }
-        // Skip crates without arborium.kdl
+        // Skip crates without arborium.yaml
         let Some(config) = crate_state.config.clone() else {
             continue;
         };
@@ -1769,16 +1769,16 @@ fn plan_crate_files_only(
         }
     }
 
-    // Copy arborium.kdl and samples for tests
-    let def_kdl = def_path.join("arborium.kdl");
-    if def_kdl.exists() {
-        let kdl_content = fs::read_to_string(&def_kdl)?;
-        let crate_kdl = crate_path.join("arborium.kdl");
+    // Copy arborium.yaml and samples for tests
+    let def_yaml = def_path.join("arborium.yaml");
+    if def_yaml.exists() {
+        let yaml_content = fs::read_to_string(&def_yaml)?;
+        let crate_yaml = crate_path.join("arborium.yaml");
         plan_file_update(
             &mut plan,
-            &crate_kdl,
-            kdl_content,
-            "arborium.kdl for tests",
+            &crate_yaml,
+            yaml_content,
+            "arborium.yaml for tests",
             mode,
         )?;
 

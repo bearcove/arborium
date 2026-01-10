@@ -1,0 +1,25 @@
+repo: https://github.com/rescript-lang/tree-sitter-rescript
+commit: d2df8a285fff95de56a91d2f8152aeceb66f40ef
+license: MIT
+
+grammars:
+  - id: rescript
+    name: ReScript
+    tag: code
+    tier: 4
+    has_scanner: true
+    icon: simple-icons:rescript
+    aliases:
+      - res
+
+    inventor: Hongbo Zhang and the ReScript team
+    year: 2020
+    description: "Functional language that compiles to JavaScript, evolved from BuckleScript/Reason; docs at <a href=\"https://rescript-lang.org/docs/latest\">rescript-lang.org</a>."
+    link: https://rescript-lang.org/
+    trivia: "Rebranded from BuckleScript/Reason in 2020 to focus on a JS-centric pipeline; see the <a href=\"https://rescript-lang.org/blog/announcement\">announcement</a> and docs for the syntax and compiler."
+
+    samples:
+      - path: samples/Core__Array.res
+        description: ReScript Core array module with external bindings, recursive functions, and comparisons.
+        link: https://github.com/rescript-association/rescript-core/blob/main/src/Core__Array.res
+        license: MIT

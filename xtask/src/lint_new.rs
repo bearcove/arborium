@@ -1,6 +1,6 @@
 //! New linting system based on CrateRegistry.
 //!
-//! This module provides linting that uses the arborium.kdl files as the source
+//! This module provides linting that uses the arborium.yaml files as the source
 //! of truth, with diagnostics for precise error reporting.
 
 use camino::Utf8Path;
@@ -49,7 +49,7 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> Result<()> {
     let mut errors = 0;
     let mut issues: Vec<(String, Vec<LintDiagnostic>)> = Vec::new();
 
-    // First pass: check for crates without arborium.kdl
+    // First pass: check for crates without arborium.yaml
     for (name, state) in registry.iter() {
         if !include(name) {
             continue;
@@ -64,7 +64,7 @@ pub fn run_lints(crates_dir: &Utf8Path, options: LintOptions) -> Result<()> {
         if state.config.is_none() && has_grammar_dir {
             issues.push((
                 name.to_string(),
-                vec![LintDiagnostic::Warning("missing arborium.kdl".to_string())],
+                vec![LintDiagnostic::Warning("missing arborium.yaml".to_string())],
             ));
         }
         pb.inc(1);
@@ -196,7 +196,7 @@ fn lint_crate(
     // Check that we have at least one grammar
     if config.grammars.is_empty() {
         diagnostics.push(LintDiagnostic::Error(
-            "no grammars defined in arborium.kdl".to_string(),
+            "no grammars defined in arborium.yaml".to_string(),
         ));
         return diagnostics;
     }

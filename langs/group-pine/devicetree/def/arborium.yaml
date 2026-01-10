@@ -1,0 +1,22 @@
+repo: https://github.com/joelspadin/tree-sitter-devicetree
+commit: e685f1f6ac1702b046415efb476444167d63e41
+license: MIT
+
+grammars:
+  - id: devicetree
+    name: Device Tree
+    tag: config
+    tier: 5
+    icon: mdi:file-tree
+
+    inventor: Sun Microsystems (Open Firmware)
+    year: 1988
+    description: "Data structure for describing hardware; documented in the <a href=\"https://www.devicetree.org/specifications/\">Device Tree specifications</a>."
+    link: https://en.wikipedia.org/wiki/Devicetree
+    trivia: "Originated with Open Firmware (IEEE 1275-1994); the Flattened Device Tree format for Linux was introduced in 2005—see the <a href=\"https://www.devicetree.org/specifications/\">specifications</a>."
+
+    samples:
+      - path: samples/decawave_dwm1001_dev.dts
+        description: Zephyr board DTS describing SPI, UART, regulators, GPIOs, and sensors.
+        link: https://github.com/zephyrproject-rtos/zephyr/blob/main/boards/qorvo/decawave_dwm1001_dev/decawave_dwm1001_dev.dts
+        license: Apache-2.0

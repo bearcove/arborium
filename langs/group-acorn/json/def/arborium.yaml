@@ -1,0 +1,24 @@
+repo: https://github.com/tree-sitter/tree-sitter-json
+commit: 001c28d7a29832b06b0e831ec77845553c89b56d
+license: MIT
+
+grammars:
+  - id: json
+    name: JSON
+    tag: data
+    tier: 2
+    icon: mdi:code-json
+    aliases:
+      - jsonc
+
+    inventor: Douglas Crockford
+    year: 2001
+    description: "Lightweight data interchange format; see the <a href=\"https://www.ecma-international.org/publications-and-standards/standards/ecma-404/\">ECMA-404 standard</a>."
+    link: https://en.wikipedia.org/wiki/JSON
+    trivia: "Crockford documented JSON in 2001 while at State Software; it was standardized as <a href=\"https://www.rfc-editor.org/rfc/rfc8259\">RFC 8259</a> and <a href=\"https://www.ecma-international.org/publications-and-standards/standards/ecma-404/\">ECMA-404</a>."
+
+    samples:
+      - path: samples/package.json
+        description: Vite monorepo package.json with scripts, dependencies, and workspace configuration.
+        link: https://github.com/vitejs/vite/blob/main/package.json
+        license: MIT

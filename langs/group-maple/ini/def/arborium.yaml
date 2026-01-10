@@ -1,0 +1,25 @@
+repo: https://github.com/justinmk/tree-sitter-ini
+commit: bea223734aa9cea2c8793bf9098bd7fdef912f57
+license: Apache-2.0
+
+grammars:
+  - id: ini
+    name: INI
+    tag: config
+    tier: 3
+    icon: mdi:cog-outline
+    aliases:
+      - conf
+      - cfg
+
+    inventor: Unknown (popularized by Microsoft Windows)
+    year: 1985
+    description: "Simple key-value configuration format; Microsoft documented the <code>.ini</code> structure in early Windows SDKs (e.g., <a href=\"https://win16.org/\">Win16 documentation</a>)."
+    link: https://en.wikipedia.org/wiki/INI_file
+    trivia: "Windows 1.0 (1985) popularized <code>.ini</code> for application settings; the legacy WinAPI functions <code>GetPrivateProfileString</code> etc. are still documented in <a href=\"https://learn.microsoft.com/windows/win32/api/winbase/\">Windows API documentation</a>."
+
+    samples:
+      - path: samples/pytest.ini
+        description: Combined Python linting config with pycodestyle, flake8, pylint sections and pytest markers.
+        link: https://github.com/Bitmessage/PyBitmessage/blob/master/setup.cfg
+        license: MIT
