@@ -1,0 +1,25 @@
+repo: https://github.com/uben0/tree-sitter-typst
+commit: ""
+license: MIT
+
+grammars:
+  - id: typst
+    name: Typst
+    tag: markup
+    tier: 3
+    has_scanner: true
+    icon: simple-icons:typst
+    aliases:
+      - typ
+
+    inventor: Laurenz Mädje and Martin Haug
+    year: 2023
+    description: "A modern markup-based typesetting system designed as a faster, friendlier alternative to LaTeX."
+    link: https://typst.app
+    trivia: "Typst compiles documents incrementally—changes preview instantly, unlike LaTeX which must recompile the entire document."
+
+    samples:
+      - path: samples/simple.typ
+        description: Polylux presentation theme with slide layouts; showcases Typst's page styling, state management, and function definitions.
+        link: https://github.com/typst/packages/blob/main/packages/preview/polylux/0.3.1/themes/simple.typ
+        license: MIT
