@@ -1084,7 +1084,7 @@ pub fn locate_grammar<'a>(
     registry.configured_crates().find_map(|(_, state, cfg)| {
         cfg.grammars
             .iter()
-            .find(|g| <String as AsRef<str>>::as_ref(&g.id.value) == grammar)
+            .find(|g| g.id.as_str() == grammar)
             .map(|g| (state, g))
     })
 }

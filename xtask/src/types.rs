@@ -1,11 +1,11 @@
 //! Core types for the arborium xtask system.
 //!
 //! This module defines the data structures used throughout xtask, primarily
-//! for representing grammar/language metadata stored in `arborium.kdl` files.
+//! for representing grammar/language metadata stored in `arborium.yaml` files.
 //!
 //! # File Format
 //!
-//! Each language definition in `langs/group-*/*/def/` contains an `arborium.kdl` file that
+//! Each language definition in `langs/group-*/*/def/` contains an `arborium.yaml` file that
 //! describes one or more language grammars. This is the single source of truth for:
 //!
 //! - Upstream repository and commit information (crate-level)
@@ -20,7 +20,7 @@
 //! ├── group-birch/              # Systems languages
 //! │   ├── rust/
 //! │   │   ├── def/              # Source of truth (committed)
-//! │   │   │   ├── arborium.kdl
+//! │   │   │   ├── arborium.yaml
 //! │   │   │   ├── grammar/
 //! │   │   │   ├── queries/
 //! │   │   │   └── samples/
@@ -35,68 +35,62 @@
 //! └── ...
 //! ```
 //!
-//! # Example `arborium.kdl` (single grammar, most common)
+//! # Example `arborium.yaml` (single grammar, most common)
 //!
-//! ```kdl
-//! repo "https://github.com/tree-sitter/tree-sitter-rust"
-//! commit "261b20226c04ef601adbdf185a800512a5f66291"
-//! license "MIT"
-//! authors "Maxim Sokolov"
+//! ```yaml
+//! repo: https://github.com/tree-sitter/tree-sitter-rust
+//! commit: 261b20226c04ef601adbdf185a800512a5f66291
+//! license: MIT
+//! authors: Maxim Sokolov
 //!
-//! grammar {
-//!     id "rust"
-//!     name "Rust"
-//!     tag "code"
-//!     tier 1
-//!     icon "devicon-plain:rust"
-//!     aliases "rs"
-//!     has-scanner true
-//!     c-symbol "rust_orchard"
+//! grammars:
+//!   - id: rust
+//!     name: Rust
+//!     tag: code
+//!     tier: 1
+//!     icon: devicon-plain:rust
+//!     aliases:
+//!       - rs
+//!     has_scanner: true
+//!     c_symbol: rust_orchard
 //!
-//!     inventor "Graydon Hoare"
-//!     year 2010
-//!     description "Systems language focused on safety and performance without GC"
-//!     link "https://en.wikipedia.org/wiki/Rust_(programming_language)"
-//!     trivia "Hoare began Rust as a side project at Mozilla in 2006"
+//!     inventor: Graydon Hoare
+//!     year: 2010
+//!     description: Systems language focused on safety and performance without GC
+//!     link: https://en.wikipedia.org/wiki/Rust_(programming_language)
+//!     trivia: Hoare began Rust as a side project at Mozilla in 2006
 //!
-//!     sample {
-//!         path "samples/example.rs"
-//!         description "Clippy lint implementation"
-//!         link "https://github.com/rust-lang/rust/blob/main/..."
-//!         license "MIT OR Apache-2.0"
-//!     }
-//! }
+//!     samples:
+//!       - path: samples/example.rs
+//!         description: Clippy lint implementation
+//!         link: https://github.com/rust-lang/rust/blob/main/...
+//!         license: MIT OR Apache-2.0
 //! ```
 //!
-//! # Example `arborium.kdl` (multi-grammar crate)
+//! # Example `arborium.yaml` (multi-grammar crate)
 //!
-//! ```kdl
-//! repo "https://github.com/tree-sitter-grammars/tree-sitter-xml"
-//! commit "863dbc381f44f6c136a399e684383b977bb2beaa"
-//! license "MIT"
-//! authors "ObserverOfTime"
+//! ```yaml
+//! repo: https://github.com/tree-sitter-grammars/tree-sitter-xml
+//! commit: 863dbc381f44f6c136a399e684383b977bb2beaa
+//! license: MIT
+//! authors: ObserverOfTime
 //!
-//! grammar {
-//!     id "xml"
-//!     name "XML"
-//!     tag "markup"
-//!     tier 3
-//!     has-scanner true
-//!     grammar-path "xml"
+//! grammars:
+//!   - id: xml
+//!     name: XML
+//!     tag: markup
+//!     tier: 3
+//!     has_scanner: true
+//!     grammar_path: xml
+//!     # ...metadata, samples...
 //!
-//!     // ...metadata, samples...
-//! }
-//!
-//! grammar {
-//!     id "dtd"
-//!     name "DTD"
-//!     tag "markup"
-//!     tier 3
-//!     has-scanner true
-//!     grammar-path "dtd"
-//!
-//!     // ...metadata, samples...
-//! }
+//!   - id: dtd
+//!     name: DTD
+//!     tag: markup
+//!     tier: 3
+//!     has_scanner: true
+//!     grammar_path: dtd
+//!     # ...metadata, samples...
 //! ```
 
 #![allow(dead_code)]
@@ -105,198 +99,36 @@ use std::collections::BTreeMap;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use facet::Facet;
-use facet_kdl as kdl;
 use fs_err as fs;
 pub use rootcause::Report;
 
 // =============================================================================
-// Crate-level configuration (parsed from arborium.kdl)
+// Crate-level configuration (parsed from arborium.yaml)
 // =============================================================================
 
-structstruck::strike! {
-    /// Configuration for an entire arborium-* crate.
+/// Configuration for an entire arborium-* crate.
+///
+/// This represents the contents of an `arborium.yaml` file. A crate can
+/// contain one or more grammars that share the same upstream source.
+#[derive(Debug, Clone, Facet)]
+pub struct CrateConfig {
+    /// Git repository URL for the upstream tree-sitter grammar.
     ///
-    /// This represents the contents of an `arborium.kdl` file. A crate can
-    /// contain one or more grammars that share the same upstream source.
-    #[strikethrough[derive(Debug, Clone, Facet)]]
-    pub struct CrateConfig {
-        /// Git repository URL for the upstream tree-sitter grammar.
-        ///
-        /// Use "local" for grammars that are maintained in this repository.
-        #[facet(kdl::child)]
-        pub repo: pub struct Repo {
-            #[facet(kdl::argument)]
-            pub value: String,
-        },
+    /// Use "local" for grammars that are maintained in this repository.
+    pub repo: String,
 
-        /// Git commit hash of the vendored version.
-        #[facet(kdl::child)]
-        pub commit: pub struct Commit {
-            #[facet(kdl::argument)]
-            pub value: String,
-        },
+    /// Git commit hash of the vendored version.
+    pub commit: String,
 
-        /// SPDX license identifier for the grammar (e.g., "MIT", "Apache-2.0").
-        #[facet(kdl::child)]
-        pub license: pub struct License {
-            #[facet(kdl::argument)]
-            pub value: String,
-        },
+    /// SPDX license identifier for the grammar (e.g., "MIT", "Apache-2.0").
+    pub license: String,
 
-        // TODO: Add authors field back once facet-kdl supports Option<T> + kdl::child + default
+    /// Authors of the tree-sitter grammar.
+    #[facet(default)]
+    pub authors: Option<String>,
 
-        /// One or more grammars exported by this crate.
-        #[facet(kdl::children)]
-        pub grammars: Vec<GrammarConfig>,
-    }
-}
-
-/// Authors of the tree-sitter grammar.
-#[derive(Debug, Clone, Facet)]
-pub struct Authors {
-    #[facet(kdl::argument)]
-    pub value: String,
-}
-
-// =============================================================================
-// KDL child node wrapper types
-// =============================================================================
-// In KDL, `name "value"` is a child node with an argument, not a property.
-// These wrapper types allow facet-kdl to deserialize them correctly.
-
-macro_rules! kdl_child_string {
-    ($name:ident) => {
-        #[derive(Debug, Clone, Facet)]
-        pub struct $name {
-            #[facet(kdl::argument)]
-            pub value: String,
-        }
-
-        impl std::ops::Deref for $name {
-            type Target = str;
-            fn deref(&self) -> &Self::Target {
-                &self.value
-            }
-        }
-    };
-}
-
-macro_rules! kdl_child_string_optional {
-    ($name:ident) => {
-        #[derive(Debug, Clone, Facet)]
-        pub struct $name {
-            #[facet(kdl::argument)]
-            pub value: String,
-        }
-
-        impl std::ops::Deref for $name {
-            type Target = str;
-            fn deref(&self) -> &Self::Target {
-                &self.value
-            }
-        }
-    };
-}
-
-// Required string children
-kdl_child_string!(Id);
-kdl_child_string!(Name);
-kdl_child_string!(Tag);
-kdl_child_string!(GrammarPath);
-kdl_child_string!(CSymbol);
-kdl_child_string!(Path);
-
-// Optional string children (no span tracking needed)
-kdl_child_string_optional!(Icon);
-kdl_child_string_optional!(Inventor);
-kdl_child_string_optional!(Description);
-kdl_child_string_optional!(Link);
-kdl_child_string_optional!(Trivia);
-kdl_child_string_optional!(SampleDescription);
-kdl_child_string_optional!(SampleLink);
-kdl_child_string_optional!(SampleLicense);
-
-/// Tier child node (u8 value).
-/// Tier child node (single u8 argument).
-#[derive(Debug, Clone, Facet)]
-pub struct Tier {
-    #[facet(kdl::argument)]
-    pub value: u8,
-}
-
-impl std::ops::Deref for Tier {
-    type Target = u8;
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
-}
-
-/// Year child node (single u16 argument).
-#[derive(Debug, Clone, Facet)]
-pub struct Year {
-    #[facet(kdl::argument)]
-    pub value: u16,
-}
-
-impl std::ops::Deref for Year {
-    type Target = u16;
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
-}
-
-/// Has-scanner child node (single bool argument).
-#[derive(Debug, Clone, Facet)]
-pub struct HasScanner {
-    #[facet(kdl::argument)]
-    pub value: bool,
-}
-
-/// Internal child node (single bool argument).
-#[derive(Debug, Clone, Facet)]
-pub struct Internal {
-    #[facet(kdl::argument)]
-    pub value: bool,
-}
-
-/// Tests-cursed child node (single bool argument).
-#[derive(Debug, Clone, Facet)]
-pub struct TestsCursed {
-    #[facet(kdl::argument)]
-    pub value: bool,
-}
-
-/// Generate-component child node (single bool argument).
-#[derive(Debug, Clone, Facet)]
-pub struct GenerateComponent {
-    #[facet(kdl::argument)]
-    pub value: bool,
-}
-
-/// Cross-grammar dependency for tree-sitter generation.
-#[derive(Debug, Clone, Facet)]
-pub struct Dependency {
-    /// NPM package name (argument).
-    #[facet(kdl::argument)]
-    pub npm: String,
-
-    /// Arborium crate name (property).
-    #[facet(kdl::property, rename = "crate")]
-    pub krate: String,
-}
-
-/// Aliases child node (multiple string arguments).
-#[derive(Debug, Clone, Facet)]
-pub struct Aliases {
-    #[facet(kdl::arguments)]
-    pub values: Vec<String>,
-}
-
-/// Injections child node (multiple language IDs that can be injected).
-#[derive(Debug, Clone, Facet)]
-pub struct Injections {
-    #[facet(kdl::arguments)]
-    pub values: Vec<String>,
+    /// One or more grammars exported by this crate.
+    pub grammars: Vec<GrammarConfig>,
 }
 
 // =============================================================================
@@ -307,104 +139,100 @@ pub struct Injections {
 ///
 /// This contains all the metadata and build configuration for one language.
 #[derive(Debug, Clone, Facet)]
-#[facet(kdl::child, rename = "grammar")]
 pub struct GrammarConfig {
     // =========================================================================
     // Identity
     // =========================================================================
     /// Unique identifier for this grammar, used in feature flags and exports.
-    #[facet(kdl::child)]
-    pub id: Id,
+    pub id: String,
 
     /// Human-readable display name for the language.
-    #[facet(kdl::child)]
-    pub name: Name,
+    pub name: String,
 
     /// Category tag for grouping languages in the UI.
-    #[facet(kdl::child)]
-    pub tag: Tag,
+    pub tag: String,
 
     /// Quality/completeness tier (1 = best, 5 = experimental).
-    #[facet(kdl::child, default)]
-    pub tier: Option<Tier>,
+    #[facet(default)]
+    pub tier: Option<u8>,
 
     /// Iconify icon identifier.
-    #[facet(kdl::child, default)]
-    pub icon: Option<Icon>,
+    #[facet(default)]
+    pub icon: Option<String>,
 
     /// Alternative names or file extensions for this language.
-    #[facet(kdl::child, default)]
-    pub aliases: Option<Aliases>,
+    #[facet(default)]
+    pub aliases: Option<Vec<String>>,
 
     // =========================================================================
     // Build Configuration
     // =========================================================================
     /// Internal grammar (used by other grammars via injection, not user-facing).
-    #[facet(kdl::child, default)]
-    pub internal: Option<Internal>,
+    #[facet(default)]
+    pub internal: Option<bool>,
 
     /// Tests are cursed (skip test generation due to platform issues).
-    #[facet(kdl::child, default, rename = "tests-cursed")]
-    pub tests_cursed: Option<TestsCursed>,
+    #[facet(default)]
+    pub tests_cursed: Option<bool>,
 
     /// Generate a WASM component plugin for this grammar.
-    #[facet(kdl::child, default, rename = "generate-component")]
-    pub generate_component: Option<GenerateComponent>,
+    #[facet(default)]
+    pub generate_component: Option<bool>,
 
     /// Whether this grammar has a scanner.c file.
-    #[facet(kdl::child, default, rename = "has-scanner")]
-    pub has_scanner: Option<HasScanner>,
+    #[facet(default)]
+    pub has_scanner: Option<bool>,
 
     /// Path to the grammar within the repo (for multi-grammar repos).
-    #[facet(kdl::child, default, rename = "grammar-path")]
-    pub grammar_path: Option<GrammarPath>,
+    #[facet(default)]
+    pub grammar_path: Option<String>,
 
     /// Override the C symbol name.
-    #[facet(kdl::child, default, rename = "c-symbol")]
-    pub c_symbol: Option<CSymbol>,
+    #[facet(default)]
+    pub c_symbol: Option<String>,
 
     /// Query configuration (highlights inheritance).
-    #[facet(kdl::child, default)]
+    #[facet(default)]
     pub queries: Option<QueriesConfig>,
 
     /// Cross-grammar dependencies for tree-sitter generation.
-    #[facet(kdl::children, default)]
-    pub dependencies: Vec<Dependency>,
+    #[facet(default)]
+    pub dependencies: Option<Vec<Dependency>>,
 
     /// Languages that can be injected into this grammar (e.g., JS/CSS in HTML).
     /// These become optional dependencies with an "injections" feature.
-    #[facet(kdl::child, default)]
-    pub injections: Option<Injections>,
+    #[facet(default)]
+    pub injections: Option<Vec<String>>,
 
     // =========================================================================
     // Language Metadata (for demos and documentation)
     // =========================================================================
     /// Creator(s) of the programming language.
-    #[facet(kdl::child, default)]
-    pub inventor: Option<Inventor>,
+    #[facet(default)]
+    pub inventor: Option<String>,
 
     /// Year the language was first released.
-    #[facet(kdl::child, default)]
-    pub year: Option<Year>,
+    #[facet(default)]
+    pub year: Option<u16>,
 
     /// Brief description of the language.
-    #[facet(kdl::child, default)]
-    pub description: Option<Description>,
+    #[facet(default)]
+    pub description: Option<String>,
 
     /// URL to more information.
-    #[facet(kdl::child, default)]
-    pub link: Option<Link>,
+    #[facet(default)]
+    pub link: Option<String>,
 
     /// Fun facts or interesting history.
-    #[facet(kdl::child, default)]
-    pub trivia: Option<Trivia>,
+    #[facet(default)]
+    pub trivia: Option<String>,
 
     // =========================================================================
     // Samples
     // =========================================================================
     /// Sample files for testing highlighting and displaying in demos.
-    #[facet(kdl::children, default)]
-    pub samples: Vec<SampleConfig>,
+    #[facet(default)]
+    pub samples: Option<Vec<SampleConfig>>,
 }
 
 impl GrammarConfig {
@@ -415,79 +243,82 @@ impl GrammarConfig {
 
     /// Whether this is an internal grammar (used via injection, not user-facing).
     pub fn is_internal(&self) -> bool {
-        self.internal.as_ref().map(|i| i.value).unwrap_or(false)
+        self.internal.unwrap_or(false)
     }
 
     /// Whether this grammar has a scanner.
     pub fn has_scanner(&self) -> bool {
-        self.has_scanner.as_ref().map(|h| h.value).unwrap_or(false)
+        self.has_scanner.unwrap_or(false)
     }
 
     /// Whether tests are cursed (skip test generation).
     pub fn tests_cursed(&self) -> bool {
-        self.tests_cursed.as_ref().map(|t| t.value).unwrap_or(false)
+        self.tests_cursed.unwrap_or(false)
     }
 
     /// Whether to generate a WASM component plugin for this grammar.
     /// Defaults to true.
     pub fn generate_component(&self) -> bool {
-        self.generate_component
-            .as_ref()
-            .map(|g| g.value)
-            .unwrap_or(true)
+        self.generate_component.unwrap_or(true)
     }
+}
+
+/// Cross-grammar dependency for tree-sitter generation.
+#[derive(Debug, Clone, Facet)]
+pub struct Dependency {
+    /// NPM package name.
+    pub npm: String,
+
+    /// Arborium crate name.
+    #[facet(rename = "crate")]
+    pub krate: String,
 }
 
 /// Query configuration for a grammar.
 #[derive(Debug, Clone, Facet)]
-#[facet(kdl::child, rename = "queries")]
 pub struct QueriesConfig {
     /// Highlights query configuration.
-    #[facet(kdl::child, default)]
+    #[facet(default)]
     pub highlights: Option<HighlightsConfig>,
 }
 
 /// Highlights query configuration.
 #[derive(Debug, Clone, Facet)]
-#[facet(kdl::child, rename = "highlights")]
 pub struct HighlightsConfig {
     /// Queries to prepend from other grammars.
-    #[facet(kdl::children, default)]
-    pub prepend: Vec<PrependConfig>,
+    #[facet(default)]
+    pub prepend: Option<Vec<PrependConfig>>,
 }
 
 /// A reference to another grammar's queries to prepend.
 #[derive(Debug, Clone, Facet)]
-#[facet(kdl::child, rename = "prepend")]
 pub struct PrependConfig {
     /// The crate to prepend from (e.g., "arborium-javascript").
-    #[facet(kdl::property, rename = "crate")]
+    #[facet(rename = "crate")]
     pub crate_name: String,
 
     /// The grammar within that crate (optional if crate has only one grammar).
-    #[facet(kdl::property, default)]
+    #[facet(default)]
     pub grammar: Option<String>,
 }
 
 /// Metadata for a sample source file.
 #[derive(Debug, Clone, Facet)]
-#[facet(kdl::child, rename = "sample")]
 pub struct SampleConfig {
     /// Path to the sample file, relative to the crate root.
-    #[facet(kdl::child)]
-    pub path: Path,
+    pub path: String,
 
     /// Brief description of what the sample demonstrates.
-    #[facet(kdl::child, default)]
-    pub description: Option<SampleDescription>,
+    #[facet(default)]
+    pub description: Option<String>,
 
     /// URL to the original source of this sample (for attribution).
-    #[facet(kdl::child, default)]
-    pub link: Option<SampleLink>,
+    #[facet(default)]
+    pub link: Option<String>,
 
     /// License of the sample file (may differ from the grammar license).
-    #[facet(kdl::child, default)]
-    pub license: Option<SampleLicense>,
+    #[facet(default)]
+    pub license: Option<String>,
 }
 
 impl SampleConfig {
@@ -511,17 +342,17 @@ pub struct CrateState {
     /// In new structure, this points to def/. Use def_path and crate_path instead.
     pub path: Utf8PathBuf,
 
-    /// Path to the def/ directory containing source files (arborium.kdl, grammar/, etc.).
+    /// Path to the def/ directory containing source files (arborium.yaml, grammar/, etc.).
     pub def_path: Utf8PathBuf,
 
     /// Path to the crate/ directory for generated files (Cargo.toml, build.rs, src/).
     pub crate_path: Utf8PathBuf,
 
-    /// Parsed configuration from arborium.kdl (if present).
+    /// Parsed configuration from arborium.yaml (if present).
     pub config: Option<CrateConfig>,
 
-    /// Raw KDL source for error diagnostics.
-    pub kdl_source: Option<String>,
+    /// Raw YAML source for error diagnostics.
+    pub yaml_source: Option<String>,
 
     /// State of files on disk.
     pub files: CrateFiles,
@@ -554,8 +385,8 @@ structstruck::strike! {
     /// State of files within a crate directory.
     #[strikethrough[derive(Debug, Default, Clone)]]
     pub struct CrateFiles {
-        /// arborium.kdl - the source of truth
-        pub kdl: FileState,
+        /// arborium.yaml - the source of truth
+        pub yaml: FileState,
 
         /// Cargo.toml - generated
         pub cargo_toml: FileState,
@@ -590,7 +421,7 @@ structstruck::strike! {
             pub locals: FileState,
         },
 
-        /// Sample files declared in kdl
+        /// Sample files declared in yaml
         pub samples: Vec<SampleState>,
 
         /// Legacy/unexpected files that should be deleted
@@ -601,7 +432,7 @@ structstruck::strike! {
 /// State of a sample file.
 #[derive(Debug, Clone)]
 pub struct SampleState {
-    /// Path relative to crate root (from kdl).
+    /// Path relative to crate root (from yaml).
     pub path: String,
 
     /// What we found on disk.
@@ -645,7 +476,7 @@ pub struct CrateRegistry {
 const SKIP_CRATES: &[&str] = &["sysroot", "test-harness"];
 
 /// Legacy files that should be deleted.
-const LEGACY_FILES: &[&str] = &["info.toml", "grammar-crate-config.toml"];
+const LEGACY_FILES: &[&str] = &["info.toml", "grammar-crate-config.toml", "arborium.kdl"];
 
 /// Minimum recommended lines for a sample file.
 pub const MIN_SAMPLE_LINES: usize = 25;
@@ -768,22 +599,22 @@ impl CrateRegistry {
     ) -> Result<CrateState, Report> {
         let mut files = CrateFiles::default();
 
-        // Check for arborium.kdl in def/
-        let kdl_path = def_path.join("arborium.kdl");
-        let (config, kdl_source) = if kdl_path.exists() {
-            let content = fs::read_to_string(&kdl_path)?;
-            let config: CrateConfig = match facet_kdl::from_str(&content) {
+        // Check for arborium.yaml in def/
+        let yaml_path = def_path.join("arborium.yaml");
+        let (config, yaml_source) = if yaml_path.exists() {
+            let content = fs::read_to_string(&yaml_path)?;
+            let config: CrateConfig = match facet_yaml::from_str(&content) {
                 Ok(c) => c,
                 Err(e) => {
                     // Print detailed error info
-                    eprintln!("Error parsing {}:", kdl_path);
+                    eprintln!("Error parsing {}:", yaml_path);
                     eprintln!("  Details: {:?}", e);
                     return Err(
-                        std::io::Error::other(format!("Failed to parse {}", kdl_path)).into(),
+                        std::io::Error::other(format!("Failed to parse {}", yaml_path)).into(),
                     );
                 }
             };
-            files.kdl = FileState::Present {
+            files.yaml = FileState::Present {
                 content: content.clone(),
             };
             (Some(config), Some(content))
@@ -818,13 +649,15 @@ impl CrateRegistry {
         // Check for samples declared in config (in def/)
         if let Some(ref cfg) = config {
             for grammar in &cfg.grammars {
-                for sample in &grammar.samples {
-                    let sample_path = def_path.join(&*sample.path);
-                    let state = Self::check_sample_file(&sample_path);
-                    files.samples.push(SampleState {
-                        path: sample.path.to_string(),
-                        state,
-                    });
+                if let Some(samples) = &grammar.samples {
+                    for sample in samples {
+                        let sample_path = def_path.join(&sample.path);
+                        let state = Self::check_sample_file(&sample_path);
+                        files.samples.push(SampleState {
+                            path: sample.path.clone(),
+                            state,
+                        });
+                    }
                 }
             }
         }
@@ -843,7 +676,7 @@ impl CrateRegistry {
             def_path: def_path.to_owned(),
             crate_path: crate_path.to_owned(),
             config,
-            kdl_source,
+            yaml_source,
             files,
         })
     }
@@ -851,22 +684,22 @@ impl CrateRegistry {
     fn scan_crate_legacy(name: &str, path: &Utf8Path) -> Result<CrateState, Report> {
         let mut files = CrateFiles::default();
 
-        // Check for arborium.kdl
-        let kdl_path = path.join("arborium.kdl");
-        let (config, kdl_source) = if kdl_path.exists() {
-            let content = fs::read_to_string(&kdl_path)?;
-            let config: CrateConfig = match facet_kdl::from_str(&content) {
+        // Check for arborium.yaml
+        let yaml_path = path.join("arborium.yaml");
+        let (config, yaml_source) = if yaml_path.exists() {
+            let content = fs::read_to_string(&yaml_path)?;
+            let config: CrateConfig = match facet_yaml::from_str(&content) {
                 Ok(c) => c,
                 Err(e) => {
                     // Print detailed error info
-                    eprintln!("Error parsing {}:", kdl_path);
+                    eprintln!("Error parsing {}:", yaml_path);
                     eprintln!("  Details: {:?}", e);
                     return Err(
-                        std::io::Error::other(format!("Failed to parse {}", kdl_path)).into(),
+                        std::io::Error::other(format!("Failed to parse {}", yaml_path)).into(),
                     );
                 }
             };
-            files.kdl = FileState::Present {
+            files.yaml = FileState::Present {
                 content: content.clone(),
             };
             (Some(config), Some(content))
@@ -901,13 +734,15 @@ impl CrateRegistry {
         // Check for samples declared in config
         if let Some(ref cfg) = config {
             for grammar in &cfg.grammars {
-                for sample in &grammar.samples {
-                    let sample_path = path.join(&*sample.path);
-                    let state = Self::check_sample_file(&sample_path);
-                    files.samples.push(SampleState {
-                        path: sample.path.to_string(),
-                        state,
-                    });
+                if let Some(samples) = &grammar.samples {
+                    for sample in samples {
+                        let sample_path = path.join(&sample.path);
+                        let state = Self::check_sample_file(&sample_path);
+                        files.samples.push(SampleState {
+                            path: sample.path.clone(),
+                            state,
+                        });
+                    }
                 }
             }
         }
@@ -926,7 +761,7 @@ impl CrateRegistry {
             def_path: path.to_owned(), // In legacy structure, def and crate are the same
             crate_path: path.to_owned(),
             config,
-            kdl_source,
+            yaml_source,
             files,
         })
     }
@@ -988,44 +823,41 @@ impl CrateRegistry {
 }
 
 // =============================================================================
-// Compression Configuration (compression.kdl)
+// Compression Configuration (compression.yaml)
 // =============================================================================
 
 structstruck::strike! {
     /// Compression settings for WASM plugin builds.
     #[strikethrough[derive(Debug, Clone, Default, facet::Facet)]]
     pub struct CompressionConfig {
-        #[facet(kdl::child, default)]
+        #[facet(default)]
         pub brotli: Option<pub struct BrotliConfig {
             /// Quality level: 0-11 (11 = best compression, slowest)
-            #[facet(kdl::child)]
-            pub quality: pub struct BrotliQuality(#[facet(kdl::argument)] pub u32),
+            pub quality: u32,
 
             /// Window size: 10-24 (larger = better compression, more memory)
-            #[facet(kdl::child)]
-            pub window: pub struct BrotliWindow(#[facet(kdl::argument)] pub u32),
+            pub window: u32,
         }>,
 
-        #[facet(kdl::child, default)]
+        #[facet(default)]
         pub gzip: Option<pub struct GzipConfig {
             /// Backend: "flate2" (fast) or "zopfli" (best compression, slow)
-            #[facet(kdl::child, default)]
-            pub backend: Option<pub struct GzipBackend(#[facet(kdl::argument)] pub String)>,
+            #[facet(default)]
+            pub backend: Option<String>,
 
             /// Compression level for flate2: 0-9 (9 = best compression, slowest)
-            #[facet(kdl::child, default)]
-            pub level: Option<pub struct GzipLevel(#[facet(kdl::argument)] pub u32)>,
+            #[facet(default)]
+            pub level: Option<u32>,
 
             /// Number of iterations for zopfli (15 = default, higher = better but slower)
-            #[facet(kdl::child, default)]
-            pub iterations: Option<pub struct GzipIterations(#[facet(kdl::argument)] pub u8)>,
+            #[facet(default)]
+            pub iterations: Option<u8>,
         }>,
 
-        #[facet(kdl::child, default)]
+        #[facet(default)]
         pub zstd: Option<pub struct ZstdConfig {
             /// Compression level: 1-22 (19 is a good balance, 22 = max)
-            #[facet(kdl::child)]
-            pub level: pub struct ZstdLevel(#[facet(kdl::argument)] pub i32),
+            pub level: i32,
         }>,
     }
 }
@@ -1033,23 +865,23 @@ structstruck::strike! {
 impl CompressionConfig {
     /// Load compression config from the repo root.
     pub fn load(repo_root: &camino::Utf8Path) -> Result<Self, rootcause::Report> {
-        let config_path = repo_root.join("compression.kdl");
+        let config_path = repo_root.join("compression.yaml");
         if !config_path.exists() {
             return Ok(Self::default());
         }
         let content = std::fs::read_to_string(&config_path)?;
-        let config: CompressionConfig = facet_kdl::from_str(&content)?;
+        let config: CompressionConfig = facet_yaml::from_str(&content)?;
         Ok(config)
     }
 
     /// Get brotli quality (default: 11)
     pub fn brotli_quality(&self) -> u32 {
-        self.brotli.as_ref().map(|b| b.quality.0).unwrap_or(11)
+        self.brotli.as_ref().map(|b| b.quality).unwrap_or(11)
     }
 
     /// Get brotli window size (default: 22)
     pub fn brotli_window(&self) -> u32 {
-        self.brotli.as_ref().map(|b| b.window.0).unwrap_or(22)
+        self.brotli.as_ref().map(|b| b.window).unwrap_or(22)
     }
 
     /// Check if using zopfli backend for gzip (default: false/flate2)
@@ -1057,7 +889,7 @@ impl CompressionConfig {
         self.gzip
             .as_ref()
             .and_then(|g| g.backend.as_ref())
-            .map(|b| b.0 == "zopfli")
+            .map(|b| b == "zopfli")
             .unwrap_or(false)
     }
 
@@ -1065,8 +897,7 @@ impl CompressionConfig {
     pub fn gzip_level(&self) -> u32 {
         self.gzip
             .as_ref()
-            .and_then(|g| g.level.as_ref())
-            .map(|l| l.0)
+            .and_then(|g| g.level)
             .unwrap_or(9)
     }
 
@@ -1074,13 +905,12 @@ impl CompressionConfig {
     pub fn gzip_iterations(&self) -> u8 {
         self.gzip
             .as_ref()
-            .and_then(|g| g.iterations.as_ref())
-            .map(|i| i.0)
+            .and_then(|g| g.iterations)
             .unwrap_or(15)
     }
 
     /// Get zstd level (default: 19)
     pub fn zstd_level(&self) -> i32 {
-        self.zstd.as_ref().map(|z| z.level.0).unwrap_or(19)
+        self.zstd.as_ref().map(|z| z.level).unwrap_or(19)
     }
 }

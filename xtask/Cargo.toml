@@ -12,7 +12,6 @@ which = "7"
 facet = { git = "https://github.com/facet-rs/facet", features = ["indexmap"] }
 facet-value = { git = "https://github.com/facet-rs/facet" }
 facet-args = { git = "https://github.com/facet-rs/facet" }
-facet-kdl = { git = "https://github.com/facet-rs/facet" }
 facet-json = { git = "https://github.com/facet-rs/facet" }
 facet-yaml = { git = "https://github.com/facet-rs/facet" }
 facet-pretty = { git = "https://github.com/facet-rs/facet" }

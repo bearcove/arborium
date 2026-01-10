@@ -251,8 +251,10 @@ fn get_grammar_dependencies(config: &crate::types::CrateConfig) -> Vec<(String, 
     let mut deps = Vec::new();
 
     for grammar in &config.grammars {
-        for dep in &grammar.dependencies {
-            deps.push((dep.npm.clone(), dep.krate.clone()));
+        if let Some(dependencies) = &grammar.dependencies {
+            for dep in dependencies {
+                deps.push((dep.npm.clone(), dep.krate.clone()));
+            }
         }
     }
 
@@ -263,7 +265,6 @@ fn get_grammar_dependencies(config: &crate::types::CrateConfig) -> Vec<(String, 
 mod tests {
     use super::*;
     use crate::tool::Tool;
-    use facet_kdl::{Span, Spanned};
 
     #[test]
     fn test_tree_sitter_version_detection() {
@@ -312,24 +313,10 @@ mod tests {
 
         // Create a minimal config
         let config = crate::types::CrateConfig {
-            repo: crate::types::Repo {
-                value: Spanned {
-                    value: "https://example.com/repo".to_string(),
-                    span: Span::default(),
-                },
-            },
-            commit: crate::types::Commit {
-                value: Spanned {
-                    value: "abc123".to_string(),
-                    span: Span::default(),
-                },
-            },
-            license: crate::types::License {
-                value: Spanned {
-                    value: "MIT".to_string(),
-                    span: Span::default(),
-                },
-            },
+            repo: "https://example.com/repo".to_string(),
+            commit: "abc123".to_string(),
+            license: "MIT".to_string(),
+            authors: None,
             grammars: vec![],
         };
 

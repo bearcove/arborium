@@ -247,15 +247,14 @@ fn lint_crate(
         }
 
         // Check samples
-        if grammar.samples.is_empty() {
+        if grammar.samples.as_ref().map_or(true, |s| s.is_empty()) {
             diagnostics.push(LintDiagnostic::Warning(format!(
                 "grammar '{gid}': no samples defined",
             )));
         }
 
         // Validate tier
-        if let Some(ref tier) = grammar.tier {
-            let tier_val = tier.value;
+        if let Some(tier_val) = grammar.tier {
             if !(1..=5).contains(&tier_val) {
                 diagnostics.push(LintDiagnostic::Error(format!(
                     "grammar '{gid}': tier must be between 1 and 5, got {tier_val}",

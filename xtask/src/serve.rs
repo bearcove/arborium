@@ -194,13 +194,16 @@ impl RegistryGrammar {
     ) -> Self {
         let samples: Vec<RegistrySample> = grammar
             .samples
-            .iter()
+            .as_ref()
+            .map(|s| s.iter())
+            .into_iter()
+            .flatten()
             .filter_map(|sample| RegistrySample::from_sample_config(sample, def_path))
             .collect();
 
         // Extract repo URL (skip "local" which means maintained in this repo)
         let grammar_repo = {
-            let repo = config.repo.value.as_str();
+            let repo = config.repo.as_str();
             if repo == "local" {
                 None
             } else {
@@ -209,24 +212,23 @@ impl RegistryGrammar {
         };
 
         Self {
-            id: grammar.id.value.to_string(),
+            id: grammar.id.to_string(),
             crate_name: crate_name.to_string(),
-            name: grammar.name.value.to_string(),
-            icon: grammar.icon.as_ref().map(|i| i.value.clone()),
-            tier: grammar.tier.as_ref().map(|t| t.value),
-            tag: grammar.tag.value.to_string(),
-            description: grammar.description.as_ref().map(|d| d.value.clone()),
-            inventor: grammar.inventor.as_ref().map(|i| i.value.clone()),
-            year: grammar.year.as_ref().map(|y| y.value),
-            link: grammar.link.as_ref().map(|l| l.value.clone()),
-            trivia: grammar.trivia.as_ref().map(|t| t.value.clone()),
+            name: grammar.name.to_string(),
+            icon: grammar.icon.clone(),
+            tier: grammar.tier,
+            tag: grammar.tag.to_string(),
+            description: grammar.description.clone(),
+            inventor: grammar.inventor.clone(),
+            year: grammar.year,
+            link: grammar.link.clone(),
+            trivia: grammar.trivia.clone(),
             aliases: grammar
                 .aliases
-                .as_ref()
-                .map(|a| a.values.clone())
+                .clone()
                 .unwrap_or_default(),
             grammar_repo,
-            grammar_license: Some(config.license.value.to_string()),
+            grammar_license: Some(config.license.to_string()),
             samples,
             def_path: def_path.to_string(),
         }
@@ -237,14 +239,14 @@ impl RegistrySample {
     /// Build from a SampleConfig (content is served separately).
     fn from_sample_config(sample: &SampleConfig, crate_path: &Utf8Path) -> Option<Self> {
         // Check the file exists
-        let sample_path = crate_path.join(&*sample.path);
+        let sample_path = crate_path.join(&sample.path);
         if !sample_path.exists() {
             return None;
         }
 
         Some(Self {
-            path: sample.path.value.to_string(),
-            description: sample.description.as_ref().map(|d| d.value.clone()),
+            path: sample.path.to_string(),
+            description: sample.description.clone(),
         })
     }
 }
