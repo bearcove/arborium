@@ -1,42 +1,64 @@
 import type { Span } from "./types.js";
 
+// Shared TextEncoder instance
+const encoder = new TextEncoder();
+
 /**
- * Convert UTF-8 byte offsets to UTF-16 code unit indices.
- *
- * The grammar plugins return UTF-8 byte offsets (native to tree-sitter),
- * but JavaScript's String.slice() uses UTF-16 code unit indices.
- * This function builds a mapping for efficient conversion.
+ * Get the UTF-8 byte length of a string.
  */
-function buildUtf8ToUtf16Map(source: string): Uint32Array {
-  // Encode to UTF-8 to get byte length
-  const encoder = new TextEncoder();
+export function utf8ByteLength(str: string): number {
+  return encoder.encode(str).length;
+}
+
+/**
+ * Convert a UTF-8 byte offset to a UTF-16 code unit index.
+ *
+ * This is needed because tree-sitter returns UTF-8 byte offsets,
+ * but JavaScript's String methods use UTF-16 code unit indices.
+ */
+export function utf8OffsetToUtf16(source: string, utf8Offset: number): number {
   const utf8Bytes = encoder.encode(source);
 
-  // Map from UTF-8 byte offset to UTF-16 code unit index
-  // Size is utf8Bytes.length + 1 to handle end-of-string offset
+  if (utf8Offset <= 0) return 0;
+  if (utf8Offset >= utf8Bytes.length) return source.length;
+
+  // Decode just the bytes up to the offset to get the UTF-16 length
+  const decoder = new TextDecoder();
+  const prefix = decoder.decode(utf8Bytes.slice(0, utf8Offset));
+  return prefix.length;
+}
+
+/**
+ * Build a mapping from UTF-8 byte offsets to UTF-16 code unit indices.
+ *
+ * More efficient than calling utf8OffsetToUtf16 repeatedly when you
+ * have many offsets to convert for the same string.
+ */
+function buildUtf8ToUtf16Map(source: string): Uint32Array {
+  const utf8Bytes = encoder.encode(source);
   const map = new Uint32Array(utf8Bytes.length + 1);
 
   let utf8Offset = 0;
   let utf16Index = 0;
 
-  for (const codePoint of source) {
-    // Record mapping at current position
+  for (const char of source) {
+    // Record mapping at current UTF-8 position
     map[utf8Offset] = utf16Index;
 
-    // Advance by UTF-8 byte length of this code point
-    const utf8Len = encoder.encode(codePoint).length;
+    // Get UTF-8 byte length of this character
+    const charUtf8Len = encoder.encode(char).length;
 
-    // Fill intermediate bytes (for multi-byte chars, only first byte is valid boundary)
-    for (let i = 1; i < utf8Len; i++) {
-      map[utf8Offset + i] = utf16Index; // Map to same UTF-16 index
+    // Fill intermediate bytes (they map to the same UTF-16 index)
+    for (let i = 1; i < charUtf8Len; i++) {
+      map[utf8Offset + i] = utf16Index;
     }
 
-    utf8Offset += utf8Len;
-    // Surrogate pairs (code points >= 0x10000) take 2 UTF-16 code units
-    utf16Index += codePoint.codePointAt(0)! >= 0x10000 ? 2 : 1;
+    utf8Offset += charUtf8Len;
+    // Characters >= U+10000 are surrogate pairs (2 UTF-16 code units)
+    utf16Index += char.codePointAt(0)! >= 0x10000 ? 2 : 1;
   }
 
-  // Handle end-of-string offset
+  // Map the end-of-string position
   map[utf8Offset] = utf16Index;
 
   return map;

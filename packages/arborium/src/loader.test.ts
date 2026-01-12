@@ -1,58 +1,126 @@
 import { describe, it, expect } from "vitest";
-import { spansToHtml } from "./utils.js";
+import { spansToHtml, utf8ByteLength, utf8OffsetToUtf16 } from "./utils.js";
 import type { Span } from "./types.js";
+
+// Helper to get UTF-8 byte offsets for a substring
+function getUtf8Offsets(source: string, substring: string): { start: number; end: number } {
+  const encoder = new TextEncoder();
+  const idx = source.indexOf(substring);
+  if (idx === -1) throw new Error(`Substring "${substring}" not found in "${source}"`);
+
+  const beforeBytes = encoder.encode(source.slice(0, idx));
+  const substringBytes = encoder.encode(substring);
+  return { start: beforeBytes.length, end: beforeBytes.length + substringBytes.length };
+}
+
+describe("utf8ByteLength", () => {
+  it("returns correct length for ASCII", () => {
+    expect(utf8ByteLength("hello")).toBe(5);
+  });
+
+  it("returns correct length for 2-byte chars (Latin extended)", () => {
+    expect(utf8ByteLength("é")).toBe(2);
+    expect(utf8ByteLength("café")).toBe(5); // c=1, a=1, f=1, é=2
+  });
+
+  it("returns correct length for 3-byte chars (CJK)", () => {
+    expect(utf8ByteLength("中")).toBe(3);
+    expect(utf8ByteLength("中文")).toBe(6);
+  });
+
+  it("returns correct length for 4-byte chars (emoji)", () => {
+    expect(utf8ByteLength("🌍")).toBe(4);
+    expect(utf8ByteLength("🦀")).toBe(4);
+    expect(utf8ByteLength("a🌍b")).toBe(6); // 1 + 4 + 1
+  });
+});
+
+describe("utf8OffsetToUtf16", () => {
+  it("returns same offset for ASCII", () => {
+    const source = "hello";
+    expect(utf8OffsetToUtf16(source, 0)).toBe(0);
+    expect(utf8OffsetToUtf16(source, 3)).toBe(3);
+    expect(utf8OffsetToUtf16(source, 5)).toBe(5);
+  });
+
+  it("converts correctly with 4-byte emoji", () => {
+    const source = "hello🌍world";
+    // UTF-8: hello(5) + 🌍(4) + world(5) = 14 bytes
+    // UTF-16: hello(5) + 🌍(2) + world(5) = 12 code units
+
+    expect(utf8OffsetToUtf16(source, 0)).toBe(0);   // start of "hello"
+    expect(utf8OffsetToUtf16(source, 5)).toBe(5);   // end of "hello" / start of emoji
+    expect(utf8OffsetToUtf16(source, 9)).toBe(7);   // end of emoji / start of "world"
+    expect(utf8OffsetToUtf16(source, 14)).toBe(12); // end of string
+  });
+
+  it("converts correctly with 3-byte CJK chars", () => {
+    const source = "let 变量 = 1";
+    // UTF-8: let(3) + space(1) + 变(3) + 量(3) + " = "(3) + 1(1) = 14 bytes
+    // UTF-16: let(3) + space(1) + 变(1) + 量(1) + " = "(3) + 1(1) = 10 code units
+
+    expect(utf8OffsetToUtf16(source, 0)).toBe(0);   // start of "let"
+    expect(utf8OffsetToUtf16(source, 4)).toBe(4);   // start of "变"
+    expect(utf8OffsetToUtf16(source, 10)).toBe(6);  // end of "量"
+  });
+
+  it("handles multiple emoji", () => {
+    const source = "a🎉🎊b";
+    // UTF-8: a(1) + 🎉(4) + 🎊(4) + b(1) = 10 bytes
+    // UTF-16: a(1) + 🎉(2) + 🎊(2) + b(1) = 6 code units
+
+    expect(utf8OffsetToUtf16(source, 0)).toBe(0);   // start of "a"
+    expect(utf8OffsetToUtf16(source, 1)).toBe(1);   // end of "a" / start of first emoji
+    expect(utf8OffsetToUtf16(source, 5)).toBe(3);   // end of first emoji / start of second
+    expect(utf8OffsetToUtf16(source, 9)).toBe(5);   // end of second emoji / start of "b"
+    expect(utf8OffsetToUtf16(source, 10)).toBe(6);  // end of string
+  });
+});
 
 describe("spansToHtml", () => {
   it("handles ASCII text correctly", () => {
     const source = "let x = 42;";
     const spans: Span[] = [
-      { start: 0, end: 3, capture: "keyword" },
-      { start: 8, end: 10, capture: "number" },
+      { ...getUtf8Offsets(source, "let"), capture: "keyword" },
+      { ...getUtf8Offsets(source, "42"), capture: "number" },
     ];
 
     const html = spansToHtml(source, spans);
-
     expect(html).toBe("<a-k>let</a-k> x = <a-n>42</a-n>;");
   });
 
-  it("handles emoji with UTF-8 offsets", () => {
-    // "hello🌍world" - emoji is 4 bytes in UTF-8 (bytes 5-9)
+  it("handles emoji correctly", () => {
     const source = "hello🌍world";
     const spans: Span[] = [
-      { start: 0, end: 5, capture: "string" }, // "hello" (bytes 0-5)
-      { start: 9, end: 14, capture: "keyword" }, // "world" (bytes 9-14)
+      { ...getUtf8Offsets(source, "hello"), capture: "string" },
+      { ...getUtf8Offsets(source, "world"), capture: "keyword" },
     ];
 
     const html = spansToHtml(source, spans);
-
     expect(html).toBe("<a-s>hello</a-s>🌍<a-k>world</a-k>");
   });
 
-  it("handles Chinese characters with UTF-8 offsets", () => {
-    // Chinese chars are 3 bytes each in UTF-8
+  it("handles Chinese characters correctly", () => {
     const source = "let 变量 = 1";
-    // "let"=0-3, " "=3, "变"=4-7 (3 bytes), "量"=7-10 (3 bytes), " = "=10-13, "1"=13
     const spans: Span[] = [
-      { start: 0, end: 3, capture: "keyword" }, // "let"
-      { start: 4, end: 10, capture: "variable" }, // "变量" (6 bytes total)
-      { start: 13, end: 14, capture: "number" }, // "1"
+      { ...getUtf8Offsets(source, "let"), capture: "keyword" },
+      { ...getUtf8Offsets(source, "变量"), capture: "variable" },
+      { ...getUtf8Offsets(source, "1"), capture: "number" },
     ];
 
     const html = spansToHtml(source, spans);
-
     expect(html).toBe("<a-k>let</a-k> <a-v>变量</a-v> = <a-n>1</a-n>");
   });
 
-  it("handles mixed emoji and text", () => {
-    // "fn 🦀() {}" - 🦀 is at UTF-16 indices 3-5
-    const source = "fn 🦀() {}";
+  it("handles multiple emoji in sequence", () => {
+    const source = "a🎉🎊b";
     const spans: Span[] = [
-      { start: 0, end: 2, capture: "keyword" }, // "fn"
+      { ...getUtf8Offsets(source, "a"), capture: "variable" },
+      { ...getUtf8Offsets(source, "b"), capture: "variable" },
     ];
 
     const html = spansToHtml(source, spans);
-
-    expect(html).toBe("<a-k>fn</a-k> 🦀() {}");
+    expect(html).toBe("<a-v>a</a-v>🎉🎊<a-v>b</a-v>");
   });
 
   it("handles overlapping spans by skipping later ones", () => {
@@ -63,58 +131,43 @@ describe("spansToHtml", () => {
     ];
 
     const html = spansToHtml(source, spans);
-
     expect(html).toBe("<a-s>hello</a-s>");
   });
 
   it("handles empty spans array", () => {
     const source = "hello world";
-    const spans: Span[] = [];
-
-    const html = spansToHtml(source, spans);
-
+    const html = spansToHtml(source, []);
     expect(html).toBe("hello world");
   });
 
   it("escapes HTML special characters", () => {
     const source = "<div>&</div>";
     const spans: Span[] = [
-      { start: 0, end: 5, capture: "tag" }, // "<div>"
+      { ...getUtf8Offsets(source, "<div>"), capture: "tag" },
     ];
 
     const html = spansToHtml(source, spans);
-
     expect(html).toBe("<a-tg>&lt;div&gt;</a-tg>&amp;&lt;/div&gt;");
   });
 
-  it("handles multiple emoji in sequence", () => {
-    // Each emoji is 4 UTF-8 bytes
-    const source = "a🎉🎊b";
-    // a=0-1, 🎉=1-5 (4 bytes), 🎊=5-9 (4 bytes), b=9-10
+  it("handles 2-byte UTF-8 characters (Latin extended)", () => {
+    const source = "café";
     const spans: Span[] = [
-      { start: 0, end: 1, capture: "variable" }, // "a"
-      { start: 9, end: 10, capture: "variable" }, // "b"
+      { ...getUtf8Offsets(source, "café"), capture: "string" },
     ];
 
     const html = spansToHtml(source, spans);
-
-    expect(html).toBe("<a-v>a</a-v>🎉🎊<a-v>b</a-v>");
+    expect(html).toBe("<a-s>café</a-s>");
   });
 
-  it("converts UTF-8 offsets to UTF-16 for String.slice()", () => {
-    // Grammar outputs UTF-8 byte offsets, but JS needs UTF-16 code unit indices
-    const source = "hello🌍world";
+  it("handles mixed content with µ and á (the cpp sample case)", () => {
+    // This is the actual case that was failing - cpp sample has these chars
+    const source = 'fmt::format("{}", std::chrono::microseconds(42)), "42µs"';
+    const spans: Span[] = [
+      { ...getUtf8Offsets(source, '"42µs"'), capture: "string" },
+    ];
 
-    // These are UTF-8 byte offsets (what tree-sitter outputs)
-    const helloSpan: Span = { start: 0, end: 5, capture: "string" }; // bytes 0-5
-    const worldSpan: Span = { start: 9, end: 14, capture: "keyword" }; // bytes 9-14 (after 4-byte emoji)
-
-    // UTF-8 offsets don't work directly with String.slice()
-    expect(source.slice(helloSpan.start, helloSpan.end)).toBe("hello"); // happens to work (ASCII)
-    expect(source.slice(worldSpan.start, worldSpan.end)).not.toBe("world"); // would fail!
-
-    // But spansToHtml converts them correctly
-    const html = spansToHtml(source, [helloSpan, worldSpan]);
-    expect(html).toBe("<a-s>hello</a-s>🌍<a-k>world</a-k>");
+    const html = spansToHtml(source, spans);
+    expect(html).toContain("<a-s>&quot;42µs&quot;</a-s>");
   });
 });
