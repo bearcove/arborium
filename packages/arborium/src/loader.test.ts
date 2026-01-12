@@ -15,12 +15,12 @@ describe("spansToHtml", () => {
     expect(html).toBe("<a-k>let</a-k> x = <a-n>42</a-n>;");
   });
 
-  it("handles emoji with UTF-16 offsets", () => {
-    // "hello🌍world" - emoji is at UTF-16 indices 5-7 (2 code units)
+  it("handles emoji with UTF-8 offsets", () => {
+    // "hello🌍world" - emoji is 4 bytes in UTF-8 (bytes 5-9)
     const source = "hello🌍world";
     const spans: Span[] = [
-      { start: 0, end: 5, capture: "string" }, // "hello"
-      { start: 7, end: 12, capture: "keyword" }, // "world"
+      { start: 0, end: 5, capture: "string" }, // "hello" (bytes 0-5)
+      { start: 9, end: 14, capture: "keyword" }, // "world" (bytes 9-14)
     ];
 
     const html = spansToHtml(source, spans);
@@ -28,13 +28,14 @@ describe("spansToHtml", () => {
     expect(html).toBe("<a-s>hello</a-s>🌍<a-k>world</a-k>");
   });
 
-  it("handles Chinese characters with UTF-16 offsets", () => {
-    // Chinese chars are 1 UTF-16 code unit each (BMP)
+  it("handles Chinese characters with UTF-8 offsets", () => {
+    // Chinese chars are 3 bytes each in UTF-8
     const source = "let 变量 = 1";
+    // "let"=0-3, " "=3, "变"=4-7 (3 bytes), "量"=7-10 (3 bytes), " = "=10-13, "1"=13
     const spans: Span[] = [
       { start: 0, end: 3, capture: "keyword" }, // "let"
-      { start: 4, end: 6, capture: "variable" }, // "变量"
-      { start: 9, end: 10, capture: "number" }, // "1"
+      { start: 4, end: 10, capture: "variable" }, // "变量" (6 bytes total)
+      { start: 13, end: 14, capture: "number" }, // "1"
     ];
 
     const html = spansToHtml(source, spans);
@@ -87,12 +88,12 @@ describe("spansToHtml", () => {
   });
 
   it("handles multiple emoji in sequence", () => {
-    // Each emoji is 2 UTF-16 code units
+    // Each emoji is 4 UTF-8 bytes
     const source = "a🎉🎊b";
-    // a=0, 🎉=1-2, 🎊=3-4, b=5
+    // a=0-1, 🎉=1-5 (4 bytes), 🎊=5-9 (4 bytes), b=9-10
     const spans: Span[] = [
       { start: 0, end: 1, capture: "variable" }, // "a"
-      { start: 5, end: 6, capture: "variable" }, // "b"
+      { start: 9, end: 10, capture: "variable" }, // "b"
     ];
 
     const html = spansToHtml(source, spans);
@@ -100,19 +101,19 @@ describe("spansToHtml", () => {
     expect(html).toBe("<a-v>a</a-v>🎉🎊<a-v>b</a-v>");
   });
 
-  it("verifies spans work with String.slice()", () => {
-    // This is the core issue from #94 - spans should work with JS string APIs
+  it("converts UTF-8 offsets to UTF-16 for String.slice()", () => {
+    // Grammar outputs UTF-8 byte offsets, but JS needs UTF-16 code unit indices
     const source = "hello🌍world";
 
-    // These are UTF-16 offsets that should work with slice()
-    const helloSpan: Span = { start: 0, end: 5, capture: "string" };
-    const worldSpan: Span = { start: 7, end: 12, capture: "keyword" };
+    // These are UTF-8 byte offsets (what tree-sitter outputs)
+    const helloSpan: Span = { start: 0, end: 5, capture: "string" }; // bytes 0-5
+    const worldSpan: Span = { start: 9, end: 14, capture: "keyword" }; // bytes 9-14 (after 4-byte emoji)
 
-    // Verify the offsets work correctly with String.slice()
-    expect(source.slice(helloSpan.start, helloSpan.end)).toBe("hello");
-    expect(source.slice(worldSpan.start, worldSpan.end)).toBe("world");
+    // UTF-8 offsets don't work directly with String.slice()
+    expect(source.slice(helloSpan.start, helloSpan.end)).toBe("hello"); // happens to work (ASCII)
+    expect(source.slice(worldSpan.start, worldSpan.end)).not.toBe("world"); // would fail!
 
-    // And verify spansToHtml produces correct output
+    // But spansToHtml converts them correctly
     const html = spansToHtml(source, [helloSpan, worldSpan]);
     expect(html).toBe("<a-s>hello</a-s>🌍<a-k>world</a-k>");
   });
