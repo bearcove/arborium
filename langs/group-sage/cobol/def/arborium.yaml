@@ -1,0 +1,26 @@
+repo: https://github.com/zharinov/tree-sitter-cobol
+commit: befb226951b65585617f42ecbe526d00c124100c
+license: MIT
+
+grammars:
+  - id: cobol
+    name: COBOL
+    tag: code
+    tier: 4
+    has_scanner: true
+    icon: file-icons:cobol
+    aliases:
+      - cbl
+      - cob
+      - cpy
+
+    inventor: Grace Hopper and CODASYL
+    year: 1959
+    description: "COBOL (Common Business-Oriented Language) is a compiled English-like programming language designed for business use; still runs critical systems in finance, government, and insurance."
+    link: https://en.wikipedia.org/wiki/COBOL
+    trivia: "COBOL was designed to be readable by managers; an estimated 95% of ATM transactions and 80% of in-person transactions still use COBOL code."
+
+    samples:
+      - path: samples/hello.cbl
+        description: Classic COBOL program structure with divisions and sections.
+        license: MIT

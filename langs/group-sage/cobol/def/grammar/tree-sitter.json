@@ -1,0 +1,35 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "cobol",
+      "camelcase": "Cobol",
+      "scope": "source.cobol",
+      "path": ".",
+      "file-types": ["cbl", "cob", "cpy", "CBL", "COB", "CPY"],
+      "injection-regex": "^cobol$"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Tree-sitter grammar for COBOL",
+    "authors": [
+      {
+        "name": "Yutaro Sakamoto",
+        "url": "https://github.com/yutaro-sakamoto/tree-sitter-cobol"
+      },
+      {
+        "name": "Bloop AI",
+        "url": "https://github.com/BloopAI/tree-sitter-cobol"
+      },
+      {
+        "name": "Sergei Zharinov",
+        "url": "https://github.com/zharinov/tree-sitter-cobol"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/zharinov/tree-sitter-cobol"
+    }
+  }
+}
