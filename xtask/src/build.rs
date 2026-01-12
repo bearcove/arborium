@@ -22,7 +22,7 @@ use rayon::prelude::*;
 use sailfish::TemplateSimple;
 use walrus::Module;
 
-use crate::highlight_gen::{self, HighlightDef};
+use crate::highlight_gen::{self, NamedHighlight};
 use crate::tool::Tool;
 use crate::types::CrateRegistry;
 use crate::version_store;
@@ -1097,7 +1097,7 @@ pub fn locate_grammar<'a>(
 struct PluginsManifestTsTemplate<'a> {
     version: &'a str,
     languages: &'a [String],
-    highlights: &'a [HighlightDef],
+    highlights: &'a [NamedHighlight],
 }
 
 /// Generate the plugins-manifest.ts file for the npm package.

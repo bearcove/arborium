@@ -8,7 +8,7 @@
 //! This eliminates the runtime TOML dependency from arborium-theme and
 //! avoids xtask depending on arborium-theme (which would be circular).
 
-use crate::highlight_gen::{self, HighlightDef, Highlights};
+use crate::highlight_gen::{self, Highlights, NamedHighlight};
 use camino::Utf8Path;
 use fs_err as fs;
 use owo_colors::OwoColorize;
@@ -84,16 +84,16 @@ impl Theme {
     }
 
     /// Resolve style for a highlight, following parent chain if needed.
-    pub fn resolve_style(&self, def: &HighlightDef, highlights: &Highlights) -> Option<Style> {
+    pub fn resolve_style(&self, hl: &NamedHighlight, highlights: &Highlights) -> Option<Style> {
         // First try the exact name
-        if let Some(style) = self.styles.get(&def.name) {
+        if let Some(style) = self.styles.get(&hl.name) {
             if !style.is_empty() {
                 return Some(style.clone());
             }
         }
 
         // Follow parent chain
-        let mut current_parent = def.parent.as_deref();
+        let mut current_parent = hl.def.parent.as_deref();
         while let Some(parent_name) = current_parent {
             if let Some(style) = self.styles.get(parent_name) {
                 if !style.is_empty() {
@@ -103,7 +103,7 @@ impl Theme {
             // Get parent's parent
             current_parent = highlights
                 .get(parent_name)
-                .and_then(|p| p.parent.as_deref());
+                .and_then(|p| p.def.parent.as_deref());
         }
 
         None
@@ -154,7 +154,7 @@ impl Theme {
         let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
 
         for def in &highlights.defs {
-            if def.tag.is_empty() || emitted_tags.contains(def.tag.as_str()) {
+            if def.def.tag.is_empty() || emitted_tags.contains(def.def.tag.as_str()) {
                 continue;
             }
 
@@ -164,8 +164,8 @@ impl Theme {
                     continue;
                 }
 
-                emitted_tags.insert(&def.tag);
-                write!(css, "{selector_prefix} a-{}", def.tag).unwrap();
+                emitted_tags.insert(&def.def.tag);
+                write!(css, "{selector_prefix} a-{}", def.def.tag).unwrap();
                 css.push_str(" {\n");
 
                 if let Some(fg) = &style.fg {
@@ -434,10 +434,10 @@ struct ThemeDef {
 /// Parse highlights and get the parent chain for fallback.
 fn get_parent_chain(highlights: &Highlights, name: &str) -> Vec<String> {
     let mut chain = Vec::new();
-    let mut current = highlights.get(name).and_then(|d| d.parent.as_deref());
+    let mut current = highlights.get(name).and_then(|d| d.def.parent.as_deref());
     while let Some(parent) = current {
         chain.push(parent.to_string());
-        current = highlights.get(parent).and_then(|d| d.parent.as_deref());
+        current = highlights.get(parent).and_then(|d| d.def.parent.as_deref());
     }
     chain
 }

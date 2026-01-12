@@ -1469,8 +1469,8 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
     // Collect all unique tags
     let mut all_tags: Vec<&str> = Vec::new();
     for def in &highlights.defs {
-        if !def.tag.is_empty() && !all_tags.contains(&def.tag.as_str()) {
-            all_tags.push(&def.tag);
+        if !def.def.tag.is_empty() && !all_tags.contains(&def.def.tag.as_str()) {
+            all_tags.push(&def.def.tag);
         }
     }
 
@@ -1509,15 +1509,15 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
             }
 
             if let Some(fg) = &style.fg {
-                writeln!(css, "  --arb-{}-{}: {};", def.tag, variant, fg.to_hex()).unwrap();
+                writeln!(css, "  --arb-{}-{}: {};", def.def.tag, variant, fg.to_hex()).unwrap();
             }
 
             // Handle modifiers as separate variables
             if style.bold {
-                writeln!(css, "  --arb-{}-{}-weight: bold;", def.tag, variant).unwrap();
+                writeln!(css, "  --arb-{}-{}-weight: bold;", def.def.tag, variant).unwrap();
             }
             if style.italic {
-                writeln!(css, "  --arb-{}-{}-style: italic;", def.tag, variant).unwrap();
+                writeln!(css, "  --arb-{}-{}-style: italic;", def.def.tag, variant).unwrap();
             }
             if style.underline || style.strikethrough {
                 let mut decorations = Vec::new();
@@ -1530,7 +1530,7 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
                 writeln!(
                     css,
                     "  --arb-{}-{}-decoration: {};",
-                    def.tag,
+                    def.def.tag,
                     variant,
                     decorations.join(" ")
                 )
@@ -1548,14 +1548,14 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
     let emit_tag_rules = |css: &mut String, variant: &str, indent: &str| {
         let mut emitted: std::collections::HashSet<&str> = std::collections::HashSet::new();
         for def in &highlights.defs {
-            if def.tag.is_empty() || emitted.contains(def.tag.as_str()) {
+            if def.def.tag.is_empty() || emitted.contains(def.def.tag.as_str()) {
                 continue;
             }
-            emitted.insert(&def.tag);
+            emitted.insert(&def.def.tag);
             writeln!(
                 css,
                 "{}a-{} {{ color: var(--arb-{}-{}); font-weight: var(--arb-{}-{}-weight, normal); font-style: var(--arb-{}-{}-style, normal); text-decoration: var(--arb-{}-{}-decoration, none); }}",
-                indent, def.tag, def.tag, variant, def.tag, variant, def.tag, variant, def.tag, variant
+                indent, def.def.tag, def.def.tag, variant, def.def.tag, variant, def.def.tag, variant, def.def.tag, variant
             ).unwrap();
         }
     };
@@ -1617,7 +1617,7 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
         writeln!(
             rustdoc_css,
             "a-{} {{ color: var(--arb-{}-dark, var(--arb-{}-light)); font-weight: var(--arb-{}-dark-weight, var(--arb-{}-light-weight, normal)); font-style: var(--arb-{}-dark-style, var(--arb-{}-light-style, normal)); text-decoration: var(--arb-{}-dark-decoration, var(--arb-{}-light-decoration, none)); }}",
-            def.tag, def.tag, def.tag, def.tag, def.tag, def.tag, def.tag, def.tag, def.tag
+            def.def.tag, def.def.tag, def.def.tag, def.def.tag, def.def.tag, def.def.tag, def.def.tag, def.def.tag, def.def.tag
         ).unwrap();
     }
 
