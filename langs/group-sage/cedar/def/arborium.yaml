@@ -1,0 +1,22 @@
+repo: https://github.com/DuskSystems/tree-sitter-cedar
+commit: f4be518f20f71ee62eaff4f3f1de07254c240704
+license: MIT OR Apache-2.0
+
+grammars:
+  - id: cedar
+    name: Cedar
+    tag: config
+    tier: 5
+    has_scanner: false
+    icon: mdi:pine-tree
+
+    inventor: Amazon Web Services
+    year: 2023
+    description: "Cedar is a language for defining permissions as policies."
+    link: https://www.cedarpolicy.com/
+    trivia: "Cedar powered Amazon Verified Permissions internally before AWS open-sourced it in May 2023."
+
+    samples:
+      - path: samples/example.cedar
+        description: GitApp example with permit policies, action groups, and attribute-based conditions.
+        license: Apache-2.0

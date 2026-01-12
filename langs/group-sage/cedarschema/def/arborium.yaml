@@ -1,0 +1,22 @@
+repo: https://github.com/DuskSystems/tree-sitter-cedar
+commit: f4be518f20f71ee62eaff4f3f1de07254c240704
+license: MIT OR Apache-2.0
+
+grammars:
+  - id: cedarschema
+    name: Cedar Schema
+    tag: config
+    tier: 5
+    has_scanner: false
+    icon: mdi:pine-tree
+
+    inventor: Amazon Web Services
+    year: 2023
+    description: "Cedar Schema defines the entity types and actions that Cedar policies can reference."
+    link: https://www.cedarpolicy.com/
+    trivia: "Cedar Schema syntax was added in Cedar v3.1; before that, schemas were JSON only."
+
+    samples:
+      - path: samples/example.cedarschema
+        description: GitApp example with entity types, attributes, and action declarations.
+        license: Apache-2.0

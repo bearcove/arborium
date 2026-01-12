@@ -6,21 +6,17 @@ name: CI
   push: 
     branches: 
       - main
-
     tags: 
       - v*
       - "[0-9]*.[0-9]*.[0-9]*"
-
   pull_request: 
     branches: 
       - main
-
-  merge_group: 
+  merge_group: {}
 env: 
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
   CARGO_PROFILE_TEST_DEBUG: "0"
-
 jobs: 
   generate: 
     name: Generate
@@ -29,582 +25,537 @@ jobs:
     outputs: 
       version: ${{ steps.version.outputs.version }}
       is_release: ${{ steps.version.outputs.is_release }}
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Parse version
-        run: "set -e\n# Default to dev version (matches xtask default)\nVERSION=\"0.0.0\"\nIS_RELEASE=\"false\"\n\n# On tag push, use the tag as version\nif [[ \"$GITHUB_REF\" == refs/tags/* ]]; then\n  TAG=\"${GITHUB_REF#refs/tags/}\"\n  TAG=\"${TAG#v}\"\n\n  # Only publish on semver-ish tags (optionally with prerelease/build suffix).\n  if [[ \"$TAG\" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+([-.].*)?$ ]]; then\n    VERSION=\"$TAG\"\n    IS_RELEASE=\"true\"\n  fi\nfi\n\necho \"version=$VERSION\" >> $GITHUB_OUTPUT\necho \"is_release=$IS_RELEASE\" >> $GITHUB_OUTPUT\necho \"Version: $VERSION (release: $IS_RELEASE)\""
+      - name: Parse version
+        run: |-
+          set -e
+          # Default to dev version (matches xtask default)
+          VERSION="0.0.0"
+          IS_RELEASE="false"
+          
+          # On tag push, use the tag as version
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            TAG="${TAG#v}"
+          
+            # Only publish on semver-ish tags (optionally with prerelease/build suffix).
+            if [[ "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.].*)?$ ]]; then
+              VERSION="$TAG"
+              IS_RELEASE="true"
+            fi
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "is_release=$IS_RELEASE" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION (release: $IS_RELEASE)"
         shell: bash
         id: version
-      - 
-        name: Restore xtask cache
+      - name: Restore xtask cache
         uses: actions/cache@v4
         with: 
           path: xtask/target
           key: "xtask-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}"
-
-      - 
-        name: Build xtask
-        run: "set -e\ncargo build --release --manifest-path xtask/Cargo.toml"
+      - name: Build xtask
+        run: |-
+          set -e
+          cargo build --release --manifest-path xtask/Cargo.toml
         shell: bash
-      - 
-        name: Compute grammar cache key
-        run: "set -e\necho \"key=$(./xtask/target/release/xtask cache-key)\" >> $GITHUB_OUTPUT"
+      - name: Compute grammar cache key
+        run: |-
+          set -e
+          echo "key=$(./xtask/target/release/xtask cache-key)" >> $GITHUB_OUTPUT
         shell: bash
         id: grammar-cache-key
-      - 
-        name: Restore grammar generation cache
+      - name: Restore grammar generation cache
         uses: actions/cache@v4
         with: 
           path: .cache/arborium
           key: "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-${{ steps.grammar-cache-key.outputs.key }}"
           restore-keys: "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-"
-
-      - 
-        name: Generate grammar sources
-        run: "set -e\n./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet"
+      - name: Generate grammar sources
+        run: |-
+          set -e
+          ./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet
         shell: bash
-      - 
-        name: Create generate output tarball
-        run: "set -e\ntar --exclude='node_modules' --exclude='dist' -cf generate-output.tar crates/ langs/ packages/ xtask/target/release/xtask version.json"
+      - name: Create generate output tarball
+        run: |-
+          set -e
+          tar --exclude='node_modules' --exclude='dist' -cf generate-output.tar crates/ langs/ packages/ xtask/target/release/xtask version.json
         shell: bash
-      - 
-        name: Upload generate output
+      - name: Upload generate output
         uses: actions/upload-artifact@v4
         with: 
           name: generate-output
           path: generate-output.tar
           retention-days: "1"
-
-
   test-linux: 
     name: Test (Linux)
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Rust cache
+      - name: Rust cache
         uses: Swatinem/rust-cache@v2
         with: 
           workspaces: crates/arborium
-
-      - 
-        name: Build
-        run: "set -e\ncargo build --manifest-path crates/arborium/Cargo.toml --verbose"
+      - name: Build
+        run: |-
+          set -e
+          cargo build --manifest-path crates/arborium/Cargo.toml --verbose
         shell: bash
-      - 
-        name: Run tests
-        run: "set -e\ncargo nextest run --manifest-path crates/arborium/Cargo.toml --verbose --no-tests=pass"
+      - name: Run tests
+        run: |-
+          set -e
+          cargo nextest run --manifest-path crates/arborium/Cargo.toml --verbose --no-tests=pass
         shell: bash
-      - 
-        name: Build with all features
-        run: "set -e\ncargo build --manifest-path crates/arborium/Cargo.toml --all-features --verbose"
+      - name: Build with all features
+        run: |-
+          set -e
+          cargo build --manifest-path crates/arborium/Cargo.toml --all-features --verbose
         shell: bash
-      - 
-        name: Build arborium-rustdoc
-        run: "set -e\ncargo build --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose"
+      - name: Build arborium-rustdoc
+        run: |-
+          set -e
+          cargo build --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose
         shell: bash
-      - 
-        name: Test arborium-rustdoc
-        run: "set -e\ncargo test --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose"
+      - name: Test arborium-rustdoc
+        run: |-
+          set -e
+          cargo test --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose
         shell: bash
-      - 
-        name: Enable pnpm via corepack
-        run: "set -e\ncorepack enable pnpm"
+      - name: Enable pnpm via corepack
+        run: |-
+          set -e
+          corepack enable pnpm
         shell: bash
-      - 
-        name: Install npm dependencies
-        run: "set -e\ncd packages/arborium && pnpm install --frozen-lockfile"
+      - name: Install npm dependencies
+        run: |-
+          set -e
+          cd packages/arborium && pnpm install --frozen-lockfile
         shell: bash
-      - 
-        name: Run TypeScript tests
-        run: "set -e\ncd packages/arborium && pnpm test"
+      - name: Run TypeScript tests
+        run: |-
+          set -e
+          cd packages/arborium && pnpm test
         shell: bash
-
   test-macos: 
     name: Test (macOS)
     runs-on: depot-macos-latest
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Install Rust
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-      - 
-        name: Rust cache
+      - name: Rust cache
         uses: Swatinem/rust-cache@v2
         with: 
           workspaces: crates/arborium
-
-      - 
-        name: Install nextest
+      - name: Install nextest
         uses: taiki-e/install-action@v2
         with: 
           tool: cargo-nextest
-
-      - 
-        name: Build
-        run: "set -e\ncargo build --manifest-path crates/arborium/Cargo.toml --verbose"
+      - name: Build
+        run: |-
+          set -e
+          cargo build --manifest-path crates/arborium/Cargo.toml --verbose
         shell: bash
-      - 
-        name: Run tests
-        run: "set -e\ncargo nextest run --manifest-path crates/arborium/Cargo.toml --verbose --no-tests=pass"
+      - name: Run tests
+        run: |-
+          set -e
+          cargo nextest run --manifest-path crates/arborium/Cargo.toml --verbose --no-tests=pass
         shell: bash
-      - 
-        name: Build arborium-rustdoc
-        run: "set -e\ncargo build --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose"
+      - name: Build arborium-rustdoc
+        run: |-
+          set -e
+          cargo build --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose
         shell: bash
-      - 
-        name: Test arborium-rustdoc
-        run: "set -e\ncargo test --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose"
+      - name: Test arborium-rustdoc
+        run: |-
+          set -e
+          cargo test --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose
         shell: bash
-
   clippy: 
     name: Clippy
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Run Clippy
-        run: "set -e\ncargo clippy --manifest-path crates/arborium/Cargo.toml --all-targets -- -D warnings"
+      - name: Run Clippy
+        run: |-
+          set -e
+          cargo clippy --manifest-path crates/arborium/Cargo.toml --all-targets -- -D warnings
         shell: bash
-      - 
-        name: Run Clippy on arborium-rustdoc
-        run: "set -e\ncargo clippy --manifest-path crates/arborium-rustdoc/Cargo.toml --all-targets -- -D warnings"
+      - name: Run Clippy on arborium-rustdoc
+        run: |-
+          set -e
+          cargo clippy --manifest-path crates/arborium-rustdoc/Cargo.toml --all-targets -- -D warnings
         shell: bash
-
   docs: 
     name: Documentation
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build docs
-        run: "set -e\ncargo doc --manifest-path crates/arborium/Cargo.toml --no-deps"
+      - name: Build docs
+        run: |-
+          set -e
+          cargo doc --manifest-path crates/arborium/Cargo.toml --no-deps
         shell: bash
         env: 
           RUSTDOCFLAGS: "-D warnings"
-
-
   build-plugins-acorn: 
     name: "Plugins (acorn): css, html, javascript, json, scss, tsx, typescript, xml"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build css, html, javascript, json, scss, tsx, typescript, xml
-        run: "set -e\n./xtask/target/release/xtask build css html javascript json scss tsx typescript xml -o dist/plugins"
+      - name: Build css, html, javascript, json, scss, tsx, typescript, xml
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build css html javascript json scss tsx typescript xml -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-acorn
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-birch: 
     name: "Plugins (birch): asm, c, cpp, d, go, objc, rust, x86asm, zig"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build asm, c, cpp, d, go, objc, rust, x86asm, zig
-        run: "set -e\n./xtask/target/release/xtask build asm c cpp d go objc rust x86asm zig -o dist/plugins"
+      - name: Build asm, c, cpp, d, go, objc, rust, x86asm, zig
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build asm c cpp d go objc rust x86asm zig -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-birch
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-cedar: 
     name: "Plugins (cedar): clojure, groovy, java, kotlin, scala"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build clojure, groovy, java, kotlin, scala
-        run: "set -e\n./xtask/target/release/xtask build clojure groovy java kotlin scala -o dist/plugins"
+      - name: Build clojure, groovy, java, kotlin, scala
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build clojure groovy java kotlin scala -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-cedar
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-fern: 
     name: "Plugins (fern): agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme
-        run: "set -e\n./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml scheme -o dist/plugins"
+      - name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml scheme -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-fern
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-hazel: 
     name: "Plugins (hazel): awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh
-        run: "set -e\n./xtask/target/release/xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins"
+      - name: Build awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-hazel
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-maple: 
     name: "Plugins (maple): caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, ron, sql, ssh-config, toml, yaml"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, ron, sql, ssh-config, toml, yaml
-        run: "set -e\n./xtask/target/release/xtask build caddy cmake dockerfile dot graphql hcl ini jq meson nginx ninja nix query ron sql ssh-config toml yaml -o dist/plugins"
+      - name: Build caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, ron, sql, ssh-config, toml, yaml
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build caddy cmake dockerfile dot graphql hcl ini jq meson nginx ninja nix query ron sql ssh-config toml yaml -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-maple
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-moss: 
     name: "Plugins (moss): ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl
-        run: "set -e\n./xtask/target/release/xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins"
+      - name: Build ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-moss
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-pine: 
     name: "Plugins (pine): capnp, dart, devicetree, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build capnp, dart, devicetree, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri
-        run: "set -e\n./xtask/target/release/xtask build capnp dart devicetree rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins"
+      - name: Build capnp, dart, devicetree, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build capnp dart devicetree rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-pine
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-sage: 
-    name: "Plugins (sage): c-sharp, elisp, fsharp, postscript, vb, vim"
+    name: "Plugins (sage): c-sharp, cedar, cedarschema, cobol, elisp, fsharp, postscript, vb, vim"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build c-sharp, elisp, fsharp, postscript, vb, vim
-        run: "set -e\n./xtask/target/release/xtask build c-sharp elisp fsharp postscript vb vim -o dist/plugins"
+      - name: Build c-sharp, cedar, cedarschema, cobol, elisp, fsharp, postscript, vb, vim
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build c-sharp cedar cedarschema cobol elisp fsharp postscript vb vim -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-sage
           path: dist/plugins
           retention-days: "7"
-
-
   build-plugins-willow: 
     name: "Plugins (willow): asciidoc, diff, jinja2, markdown, svelte, typst, vue"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Build asciidoc, diff, jinja2, markdown, svelte, typst, vue
-        run: "set -e\n./xtask/target/release/xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins"
+      - name: Build asciidoc, diff, jinja2, markdown, svelte, typst, vue
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins
         shell: bash
-      - 
-        name: Upload plugins artifact
+      - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
         with: 
           name: plugins-group-willow
           path: dist/plugins
           retention-days: "7"
-
-
   publish-crates: 
     name: Publish crates.io
     runs-on: depot-ubuntu-24.04-32
@@ -613,39 +564,33 @@ jobs:
       - generate
       - test-linux
       - clippy
-
     if: "needs.generate.outputs.is_release == 'true'"
     permissions: 
       id-token: write
       contents: read
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Authenticate with crates.io
+      - name: Authenticate with crates.io
         uses: rust-lang/crates-io-auth-action@v1
         id: crates-io-auth
-      - 
-        name: Publish to crates.io
-        run: "set -e\n./xtask/target/release/xtask publish crates"
+      - name: Publish to crates.io
+        run: |-
+          set -e
+          ./xtask/target/release/xtask publish crates
         shell: bash
         env: 
           CARGO_REGISTRY_TOKEN: ${{ steps.crates-io-auth.outputs.token }}
-
-
   publish-npm: 
     name: Publish npm
     runs-on: ubuntu-latest
@@ -662,112 +607,91 @@ jobs:
       - build-plugins-pine
       - build-plugins-sage
       - build-plugins-willow
-
     if: "needs.generate.outputs.is_release == 'true'"
     permissions: 
       id-token: write
       contents: read
-
     steps: 
-      - 
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - 
-        name: Download generate output
+      - name: Download generate output
         uses: actions/download-artifact@v4
         with: 
           name: generate-output
           path: .
-
-      - 
-        name: Extract generate output
-        run: "set -e\ntar -xf generate-output.tar && rm generate-output.tar"
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - 
-        name: Download plugins group acorn
+      - name: Download plugins group acorn
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-acorn
           path: dist/plugins
-
-      - 
-        name: Download plugins group birch
+      - name: Download plugins group birch
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-birch
           path: dist/plugins
-
-      - 
-        name: Download plugins group cedar
+      - name: Download plugins group cedar
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-cedar
           path: dist/plugins
-
-      - 
-        name: Download plugins group fern
+      - name: Download plugins group fern
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-fern
           path: dist/plugins
-
-      - 
-        name: Download plugins group hazel
+      - name: Download plugins group hazel
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-hazel
           path: dist/plugins
-
-      - 
-        name: Download plugins group maple
+      - name: Download plugins group maple
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-maple
           path: dist/plugins
-
-      - 
-        name: Download plugins group moss
+      - name: Download plugins group moss
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-moss
           path: dist/plugins
-
-      - 
-        name: Download plugins group pine
+      - name: Download plugins group pine
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-pine
           path: dist/plugins
-
-      - 
-        name: Download plugins group sage
+      - name: Download plugins group sage
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-sage
           path: dist/plugins
-
-      - 
-        name: Download plugins group willow
+      - name: Download plugins group willow
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-willow
           path: dist/plugins
-
-      - 
-        name: List plugins
-        run: "set -e\nfind dist/plugins -name 'package.json' | head -20"
+      - name: List plugins
+        run: |-
+          set -e
+          find dist/plugins -name 'package.json' | head -20
         shell: bash
-      - 
-        name: Enable pnpm via corepack
-        run: "set -e\ncorepack enable pnpm"
+      - name: Enable pnpm via corepack
+        run: |-
+          set -e
+          corepack enable pnpm
         shell: bash
-      - 
-        name: Install main package dependencies
-        run: "set -e\ncd packages/arborium && pnpm install --frozen-lockfile"
+      - name: Install main package dependencies
+        run: |-
+          set -e
+          cd packages/arborium && pnpm install --frozen-lockfile
         shell: bash
-      - 
-        name: Publish to npm
-        run: "set -e\n./xtask/target/release/xtask publish npm -o dist/plugins"
+      - name: Publish to npm
+        run: |-
+          set -e
+          ./xtask/target/release/xtask publish npm -o dist/plugins
         shell: bash
-
 
