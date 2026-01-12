@@ -22,7 +22,7 @@ use rayon::prelude::*;
 use sailfish::TemplateSimple;
 use walrus::Module;
 
-use crate::theme_gen::{HIGHLIGHTS, HighlightDef};
+use crate::highlight_gen::{self, HighlightDef};
 use crate::tool::Tool;
 use crate::types::CrateRegistry;
 use crate::version_store;
@@ -651,10 +651,12 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
     let ts_manifest_path = repo_root
         .join("packages/arborium/src")
         .join("plugins-manifest.ts");
+    let highlights = highlight_gen::parse_highlights(&crates_dir)
+        .map_err(|e| report(format!("failed to parse highlights: {}", e)))?;
     let ts_template = PluginsManifestTsTemplate {
         version: &version,
         languages: &sorted_grammars,
-        highlights: HIGHLIGHTS,
+        highlights: &highlights.defs,
     };
     let ts_content = ts_template
         .render_once()
@@ -1134,10 +1136,12 @@ pub fn generate_plugins_manifest(repo_root: &Utf8Path, crates_dir: &Utf8Path) ->
     let ts_manifest_path = repo_root
         .join("packages/arborium/src")
         .join("plugins-manifest.ts");
+    let highlights = highlight_gen::parse_highlights(crates_dir)
+        .map_err(|e| report(format!("failed to parse highlights: {}", e)))?;
     let ts_template = PluginsManifestTsTemplate {
         version: &version,
         languages: &languages,
-        highlights: HIGHLIGHTS,
+        highlights: &highlights.defs,
     };
     let ts_content = ts_template
         .render_once()

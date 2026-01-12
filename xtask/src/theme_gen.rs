@@ -8,6 +8,7 @@
 //! This eliminates the runtime TOML dependency from arborium-theme and
 //! avoids xtask depending on arborium-theme (which would be circular).
 
+use crate::highlight_gen::{self, HighlightDef, Highlights};
 use camino::Utf8Path;
 use fs_err as fs;
 use owo_colors::OwoColorize;
@@ -72,17 +73,44 @@ pub struct Theme {
     pub source_url: Option<String>,
     pub background: Option<Color>,
     pub foreground: Option<Color>,
-    pub styles: Vec<Style>,
+    /// Styles keyed by highlight name (e.g., "keyword", "punctuation.special")
+    pub styles: HashMap<String, Style>,
 }
 
 impl Theme {
-    /// Get style at index.
-    pub fn style(&self, index: usize) -> Option<&Style> {
-        self.styles.get(index)
+    /// Get style for a highlight name.
+    pub fn style(&self, name: &str) -> Option<&Style> {
+        self.styles.get(name)
+    }
+
+    /// Resolve style for a highlight, following parent chain if needed.
+    pub fn resolve_style(&self, def: &HighlightDef, highlights: &Highlights) -> Option<Style> {
+        // First try the exact name
+        if let Some(style) = self.styles.get(&def.name) {
+            if !style.is_empty() {
+                return Some(style.clone());
+            }
+        }
+
+        // Follow parent chain
+        let mut current_parent = def.parent.as_deref();
+        while let Some(parent_name) = current_parent {
+            if let Some(style) = self.styles.get(parent_name) {
+                if !style.is_empty() {
+                    return Some(style.clone());
+                }
+            }
+            // Get parent's parent
+            current_parent = highlights
+                .get(parent_name)
+                .and_then(|p| p.parent.as_deref());
+        }
+
+        None
     }
 
     /// Generate CSS for this theme with the given selector prefix.
-    pub fn to_css(&self, selector_prefix: &str) -> String {
+    pub fn to_css(&self, selector_prefix: &str, highlights: &Highlights) -> String {
         let mut css = String::new();
 
         writeln!(css, "{selector_prefix} {{").unwrap();
@@ -103,49 +131,43 @@ impl Theme {
             writeln!(css, "  --fg: {};", fg.to_hex()).unwrap();
         }
 
-        // Find function and keyword colors for accent
-        let function_idx = HIGHLIGHTS.iter().position(|h| h.name == "function");
-        let keyword_idx = HIGHLIGHTS.iter().position(|h| h.name == "keyword");
-        let comment_idx = HIGHLIGHTS.iter().position(|h| h.name == "comment");
-
         // --accent: use function color, fallback to keyword, fallback to foreground
-        let accent = function_idx
-            .and_then(|i| self.styles.get(i))
+        let accent = self
+            .styles
+            .get("function")
             .and_then(|s| s.fg)
-            .or_else(|| {
-                keyword_idx
-                    .and_then(|i| self.styles.get(i))
-                    .and_then(|s| s.fg)
-            })
+            .or_else(|| self.styles.get("keyword").and_then(|s| s.fg))
             .or(self.foreground);
         if let Some(c) = accent {
             writeln!(css, "  --accent: {};", c.to_hex()).unwrap();
         }
 
         // --muted: use comment color
-        let muted = comment_idx
-            .and_then(|i| self.styles.get(i))
-            .and_then(|s| s.fg);
-        if let Some(c) = muted {
+        if let Some(c) = self.styles.get("comment").and_then(|s| s.fg) {
             writeln!(css, "  --muted: {};", c.to_hex()).unwrap();
         }
 
         writeln!(css, "}}").unwrap();
 
-        // Generate styles for each highlight tag
-        // Track emitted tags to avoid duplicates (multiple HIGHLIGHTS can share the same tag)
+        // Generate styles for each highlight tag with fallback resolution
+        // Track emitted tags to avoid duplicates (some highlights share tags)
         let mut emitted_tags: std::collections::HashSet<&str> = std::collections::HashSet::new();
-        for (i, def) in HIGHLIGHTS.iter().enumerate() {
-            if def.tag.is_empty() || emitted_tags.contains(def.tag) {
+
+        for def in &highlights.defs {
+            if def.tag.is_empty() || emitted_tags.contains(def.tag.as_str()) {
                 continue;
             }
-            if let Some(style) = self.styles.get(i) {
+
+            // Resolve style with fallback
+            if let Some(style) = self.resolve_style(def, highlights) {
                 if style.is_empty() {
                     continue;
                 }
-                emitted_tags.insert(def.tag);
+
+                emitted_tags.insert(&def.tag);
                 write!(css, "{selector_prefix} a-{}", def.tag).unwrap();
                 css.push_str(" {\n");
+
                 if let Some(fg) = &style.fg {
                     writeln!(css, "  color: {};", fg.to_hex()).unwrap();
                 }
@@ -161,6 +183,7 @@ impl Theme {
                 if style.strikethrough {
                     writeln!(css, "  text-decoration: line-through;").unwrap();
                 }
+
                 css.push_str("}\n");
             }
         }
@@ -168,383 +191,6 @@ impl Theme {
         css
     }
 }
-
-/// Highlight definition with name, tag for HTML, and parent tag for fallback.
-#[derive(Debug, Clone)]
-pub struct HighlightDef {
-    pub name: &'static str,
-    pub tag: &'static str,
-    pub parent_tag: &'static str,
-}
-
-/// All highlight definitions - this is the source of truth for theme slots.
-pub static HIGHLIGHTS: &[HighlightDef] = &[
-    HighlightDef {
-        name: "attribute",
-        tag: "at",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "constant",
-        tag: "co",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "constant.builtin",
-        tag: "co",
-        parent_tag: "co",
-    },
-    HighlightDef {
-        name: "constructor",
-        tag: "cr",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "function.builtin",
-        tag: "fb",
-        parent_tag: "f",
-    },
-    HighlightDef {
-        name: "function",
-        tag: "f",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "function.method",
-        tag: "f",
-        parent_tag: "f",
-    },
-    HighlightDef {
-        name: "keyword",
-        tag: "k",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "keyword.conditional",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.coroutine",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.debug",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.exception",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.function",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.import",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.operator",
-        tag: "o",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.repeat",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.return",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.type",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "operator",
-        tag: "o",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "property",
-        tag: "pr",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "punctuation",
-        tag: "p",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "punctuation.bracket",
-        tag: "p",
-        parent_tag: "p",
-    },
-    HighlightDef {
-        name: "punctuation.delimiter",
-        tag: "p",
-        parent_tag: "p",
-    },
-    HighlightDef {
-        name: "punctuation.special",
-        tag: "p",
-        parent_tag: "p",
-    },
-    HighlightDef {
-        name: "string",
-        tag: "s",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "string.special",
-        tag: "s",
-        parent_tag: "s",
-    },
-    HighlightDef {
-        name: "tag",
-        tag: "tg",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "tag.delimiter",
-        tag: "tg",
-        parent_tag: "tg",
-    },
-    HighlightDef {
-        name: "tag.error",
-        tag: "err",
-        parent_tag: "tg",
-    },
-    HighlightDef {
-        name: "type",
-        tag: "t",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "type.builtin",
-        tag: "t",
-        parent_tag: "t",
-    },
-    HighlightDef {
-        name: "type.qualifier",
-        tag: "t",
-        parent_tag: "t",
-    },
-    HighlightDef {
-        name: "variable",
-        tag: "v",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "variable.builtin",
-        tag: "v",
-        parent_tag: "v",
-    },
-    HighlightDef {
-        name: "variable.parameter",
-        tag: "v",
-        parent_tag: "v",
-    },
-    HighlightDef {
-        name: "comment",
-        tag: "c",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "comment.documentation",
-        tag: "c",
-        parent_tag: "c",
-    },
-    HighlightDef {
-        name: "macro",
-        tag: "m",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "label",
-        tag: "l",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "diff.addition",
-        tag: "da",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "diff.deletion",
-        tag: "dd",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "number",
-        tag: "n",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "text.literal",
-        tag: "tl",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "text.emphasis",
-        tag: "em",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "text.strong",
-        tag: "st",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "text.uri",
-        tag: "tu",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "text.reference",
-        tag: "tr",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "string.escape",
-        tag: "se",
-        parent_tag: "s",
-    },
-    HighlightDef {
-        name: "text.title",
-        tag: "tt",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "text.strikethrough",
-        tag: "ts",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "spell",
-        tag: "",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "embedded",
-        tag: "eb",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "error",
-        tag: "err",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "namespace",
-        tag: "ns",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "include",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "storageclass",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "repeat",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "conditional",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "exception",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "preproc",
-        tag: "pp",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "none",
-        tag: "",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "character",
-        tag: "ch",
-        parent_tag: "s",
-    },
-    HighlightDef {
-        name: "character.special",
-        tag: "ch",
-        parent_tag: "ch",
-    },
-    HighlightDef {
-        name: "variable.member",
-        tag: "pr",
-        parent_tag: "v",
-    },
-    HighlightDef {
-        name: "function.definition",
-        tag: "f",
-        parent_tag: "f",
-    },
-    HighlightDef {
-        name: "type.definition",
-        tag: "t",
-        parent_tag: "t",
-    },
-    HighlightDef {
-        name: "function.call",
-        tag: "f",
-        parent_tag: "f",
-    },
-    HighlightDef {
-        name: "keyword.modifier",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "keyword.directive",
-        tag: "k",
-        parent_tag: "k",
-    },
-    HighlightDef {
-        name: "string.regexp",
-        tag: "sr",
-        parent_tag: "s",
-    },
-    HighlightDef {
-        name: "nospell",
-        tag: "",
-        parent_tag: "",
-    },
-    HighlightDef {
-        name: "float",
-        tag: "n",
-        parent_tag: "n",
-    },
-    HighlightDef {
-        name: "boolean",
-        tag: "bo",
-        parent_tag: "co",
-    },
-];
 
 /// Parse all themes from the themes directory.
 pub fn parse_all_themes(crates_dir: &Utf8Path) -> Result<Vec<Theme>, String> {
@@ -576,7 +222,7 @@ pub fn parse_all_themes(crates_dir: &Utf8Path) -> Result<Vec<Theme>, String> {
 }
 
 // ============================================================================
-// Internal types and functions for code generation
+// Internal parsing functions
 // ============================================================================
 
 /// Parse a hex color string like "#ff0000" or "ff0000" into (r, g, b).
@@ -591,153 +237,8 @@ fn parse_hex(s: &str) -> Option<(u8, u8, u8)> {
     Some((r, g, b))
 }
 
-/// Internal parsed style (uses tuples instead of Color for codegen).
-#[derive(Debug, Default, Clone)]
-struct ParsedStyle {
-    fg: Option<(u8, u8, u8)>,
-    bg: Option<(u8, u8, u8)>,
-    bold: bool,
-    italic: bool,
-    underline: bool,
-    strikethrough: bool,
-}
-
-impl ParsedStyle {
-    fn is_empty(&self) -> bool {
-        self.fg.is_none()
-            && self.bg.is_none()
-            && !self.bold
-            && !self.italic
-            && !self.underline
-            && !self.strikethrough
-    }
-
-    fn to_style(&self) -> Style {
-        Style {
-            fg: self.fg.map(|(r, g, b)| Color(r, g, b)),
-            bg: self.bg.map(|(r, g, b)| Color(r, g, b)),
-            bold: self.bold,
-            italic: self.italic,
-            underline: self.underline,
-            strikethrough: self.strikethrough,
-        }
-    }
-}
-
-/// Internal parsed theme for codegen.
-#[derive(Debug)]
-struct ParsedTheme {
-    name: String,
-    is_dark: bool,
-    source_url: Option<String>,
-    background: Option<(u8, u8, u8)>,
-    foreground: Option<(u8, u8, u8)>,
-    styles: Vec<ParsedStyle>,
-}
-
-impl ParsedTheme {
-    fn to_theme(&self) -> Theme {
-        Theme {
-            name: self.name.clone(),
-            is_dark: self.is_dark,
-            source_url: self.source_url.clone(),
-            background: self.background.map(|(r, g, b)| Color(r, g, b)),
-            foreground: self.foreground.map(|(r, g, b)| Color(r, g, b)),
-            styles: self.styles.iter().map(|s| s.to_style()).collect(),
-        }
-    }
-}
-
-/// The highlight definitions - must match arborium_theme::highlights::HIGHLIGHTS order.
-const HIGHLIGHT_NAMES: &[&str] = &[
-    "attribute",
-    "constant",
-    "constant.builtin",
-    "constructor",
-    "function.builtin",
-    "function",
-    "function.method",
-    "keyword",
-    "keyword.conditional",
-    "keyword.coroutine",
-    "keyword.debug",
-    "keyword.exception",
-    "keyword.function",
-    "keyword.import",
-    "keyword.operator",
-    "keyword.repeat",
-    "keyword.return",
-    "keyword.type",
-    "operator",
-    "property",
-    "punctuation",
-    "punctuation.bracket",
-    "punctuation.delimiter",
-    "punctuation.special",
-    "string",
-    "string.special",
-    "tag",
-    "tag.delimiter",
-    "tag.error",
-    "type",
-    "type.builtin",
-    "type.qualifier",
-    "variable",
-    "variable.builtin",
-    "variable.parameter",
-    "comment",
-    "comment.documentation",
-    "macro",
-    "label",
-    "diff.addition",
-    "diff.deletion",
-    "number",
-    "text.literal",
-    "text.emphasis",
-    "text.strong",
-    "text.uri",
-    "text.reference",
-    "string.escape",
-    "text.title",
-    "text.strikethrough",
-    "spell",
-    "embedded",
-    "error",
-    "namespace",
-    "include",
-    "storageclass",
-    "repeat",
-    "conditional",
-    "exception",
-    "preproc",
-    "none",
-    "character",
-    "character.special",
-    "variable.member",
-    "function.definition",
-    "type.definition",
-    "function.call",
-    "keyword.modifier",
-    "keyword.directive",
-    "string.regexp",
-    "nospell",
-    "float",
-    "boolean",
-];
-
-/// Extra mappings from Helix theme names to our names.
-const EXTRA_MAPPINGS: &[(&str, &str)] = &[
-    ("keyword.control", "keyword"),
-    ("keyword.storage", "keyword"),
-    ("comment.line", "comment"),
-    ("comment.block", "comment"),
-    ("function.macro", "macro"),
-    ("diff.plus", "diff.addition"),
-    ("diff.minus", "diff.deletion"),
-];
-
 /// Parse a theme from TOML content.
-fn parse_theme(toml_str: &str) -> Result<ParsedTheme, String> {
+pub fn parse_theme_toml(toml_str: &str) -> Result<Theme, String> {
     let value: toml::Value = toml_str
         .parse()
         .map_err(|e| format!("TOML parse error: {e}"))?;
@@ -804,19 +305,25 @@ fn parse_theme(toml_str: &str) -> Result<ParsedTheme, String> {
         foreground = resolve_color(fg_str);
     }
 
-    // Parse a style value (string or table)
-    let parse_style_value = |value: &toml::Value| -> ParsedStyle {
-        let mut style = ParsedStyle::default();
+    // Parse styles into HashMap
+    let parse_style_value = |value: &toml::Value| -> Style {
+        let mut style = Style::default();
         match value {
             toml::Value::String(s) => {
-                style.fg = resolve_color(s);
+                if let Some((r, g, b)) = resolve_color(s) {
+                    style.fg = Some(Color(r, g, b));
+                }
             }
             toml::Value::Table(t) => {
                 if let Some(fg) = t.get("fg").and_then(|v| v.as_str()) {
-                    style.fg = resolve_color(fg);
+                    if let Some((r, g, b)) = resolve_color(fg) {
+                        style.fg = Some(Color(r, g, b));
+                    }
                 }
                 if let Some(bg) = t.get("bg").and_then(|v| v.as_str()) {
-                    style.bg = resolve_color(bg);
+                    if let Some((r, g, b)) = resolve_color(bg) {
+                        style.bg = Some(Color(r, g, b));
+                    }
                 }
                 if let Some(mods) = t.get("modifiers").and_then(|v| v.as_array()) {
                     for m in mods {
@@ -837,61 +344,61 @@ fn parse_theme(toml_str: &str) -> Result<ParsedTheme, String> {
         style
     };
 
-    // Initialize styles array
-    let mut styles: Vec<ParsedStyle> = (0..HIGHLIGHT_NAMES.len())
-        .map(|_| ParsedStyle::default())
-        .collect();
+    // Collect all styles
+    let mut styles = HashMap::new();
 
-    // Parse each highlight rule
-    for (i, name) in HIGHLIGHT_NAMES.iter().enumerate() {
-        if let Some(rule) = table.get(*name) {
-            styles[i] = parse_style_value(rule);
+    // Known style keys - any key that looks like a highlight name
+    for (key, value) in table {
+        // Skip metadata keys
+        if matches!(
+            key.as_str(),
+            "name" | "variant" | "source" | "background" | "foreground" | "palette"
+        ) {
+            continue;
+        }
+
+        // Skip ui.* keys (not highlights)
+        if key.starts_with("ui.") {
+            continue;
+        }
+
+        let style = parse_style_value(value);
+        if !style.is_empty() {
+            styles.insert(key.clone(), style);
         }
     }
 
-    // Handle extra mappings
-    for (helix_name, our_name) in EXTRA_MAPPINGS {
-        if let Some(rule) = table.get(*helix_name) {
-            if let Some(i) = HIGHLIGHT_NAMES.iter().position(|n| n == our_name) {
-                if styles[i].is_empty() {
-                    styles[i] = parse_style_value(rule);
-                }
-            }
-        }
-    }
-
-    Ok(ParsedTheme {
+    Ok(Theme {
         name,
         is_dark,
         source_url,
-        background,
-        foreground,
+        background: background.map(|(r, g, b)| Color(r, g, b)),
+        foreground: foreground.map(|(r, g, b)| Color(r, g, b)),
         styles,
     })
 }
 
-/// Parse a theme from TOML content and return the public Theme type.
-pub fn parse_theme_toml(toml_str: &str) -> Result<Theme, String> {
-    parse_theme(toml_str).map(|p| p.to_theme())
-}
+// ============================================================================
+// Code generation
+// ============================================================================
 
 /// Generate Rust code for a color option.
-fn gen_color_option(color: &Option<(u8, u8, u8)>) -> String {
+fn gen_color_option(color: &Option<Color>) -> String {
     match color {
-        Some((r, g, b)) => format!("Some(Color::new({r}, {g}, {b}))"),
+        Some(Color(r, g, b)) => format!("Some(Color::new({r}, {g}, {b}))"),
         None => "None".to_string(),
     }
 }
 
 /// Generate Rust code for a style.
-fn gen_style(style: &ParsedStyle) -> String {
+fn gen_style(style: &Style) -> String {
     if style.is_empty() {
         return "Style::new()".to_string();
     }
 
     let mut parts = vec!["Style::new()".to_string()];
 
-    if let Some((r, g, b)) = style.fg {
+    if let Some(Color(r, g, b)) = style.fg {
         parts.push(format!(".fg(Color::new({r}, {g}, {b}))"));
     }
 
@@ -911,16 +418,62 @@ fn gen_style(style: &ParsedStyle) -> String {
     parts.join("")
 }
 
+// STYLE_SLOT_NAMES is no longer hardcoded - we use the highlight definitions directly.
+
 /// Theme definition for code generation.
 struct ThemeDef {
     fn_name: String,
-    theme: ParsedTheme,
+    name: String,
+    is_dark: bool,
+    source_url: Option<String>,
+    background: Option<Color>,
+    foreground: Option<Color>,
+    styles: HashMap<String, Style>,
+}
+
+/// Parse highlights and get the parent chain for fallback.
+fn get_parent_chain(highlights: &Highlights, name: &str) -> Vec<String> {
+    let mut chain = Vec::new();
+    let mut current = highlights.get(name).and_then(|d| d.parent.as_deref());
+    while let Some(parent) = current {
+        chain.push(parent.to_string());
+        current = highlights.get(parent).and_then(|d| d.parent.as_deref());
+    }
+    chain
+}
+
+/// Resolve style for a name using fallback chain.
+fn resolve_style_for_slot(
+    styles: &HashMap<String, Style>,
+    name: &str,
+    highlights: &Highlights,
+) -> Style {
+    // Try exact match first
+    if let Some(style) = styles.get(name) {
+        if !style.is_empty() {
+            return style.clone();
+        }
+    }
+
+    // Try parent chain
+    for parent in get_parent_chain(highlights, name) {
+        if let Some(style) = styles.get(&parent) {
+            if !style.is_empty() {
+                return style.clone();
+            }
+        }
+    }
+
+    Style::default()
 }
 
 /// Generate builtin_generated.rs from all theme TOML files.
 pub fn generate_theme_code(crates_dir: &Utf8Path) -> Result<(), String> {
     let themes_dir = crates_dir.join("arborium-theme/themes");
     let output_path = crates_dir.join("arborium-theme/src/builtin_generated.rs");
+
+    // Parse highlights for fallback resolution
+    let highlights = highlight_gen::parse_highlights(crates_dir)?;
 
     println!(
         "{} Generating theme Rust code from {}",
@@ -950,10 +503,18 @@ pub fn generate_theme_code(crates_dir: &Utf8Path) -> Result<(), String> {
             let content =
                 fs::read_to_string(&path).map_err(|e| format!("Failed to read {:?}: {e}", path))?;
 
-            let theme =
-                parse_theme(&content).map_err(|e| format!("Failed to parse {:?}: {e}", path))?;
+            let theme = parse_theme_toml(&content)
+                .map_err(|e| format!("Failed to parse {:?}: {e}", path))?;
 
-            themes.push(ThemeDef { fn_name, theme });
+            themes.push(ThemeDef {
+                fn_name,
+                name: theme.name,
+                is_dark: theme.is_dark,
+                source_url: theme.source_url,
+                background: theme.background,
+                foreground: theme.foreground,
+                styles: theme.styles,
+            });
         }
     }
 
@@ -979,19 +540,17 @@ pub fn generate_theme_code(crates_dir: &Utf8Path) -> Result<(), String> {
 
     // Generate each theme as a static function
     for def in &themes {
-        let theme = &def.theme;
-
-        writeln!(code, "/// {} theme.", theme.name).unwrap();
-        if let Some(ref url) = theme.source_url {
+        writeln!(code, "/// {} theme.", def.name).unwrap();
+        if let Some(ref url) = def.source_url {
             writeln!(code, "///").unwrap();
             writeln!(code, "/// Source: {url}").unwrap();
         }
         writeln!(code, "pub fn {}() -> Theme {{", def.fn_name).unwrap();
         writeln!(code, "    Theme {{").unwrap();
-        writeln!(code, "        name: {:?}.to_string(),", theme.name).unwrap();
-        writeln!(code, "        is_dark: {},", theme.is_dark).unwrap();
+        writeln!(code, "        name: {:?}.to_string(),", def.name).unwrap();
+        writeln!(code, "        is_dark: {},", def.is_dark).unwrap();
 
-        match &theme.source_url {
+        match &def.source_url {
             Some(url) => {
                 writeln!(code, "        source_url: Some({:?}.to_string()),", url).unwrap()
             }
@@ -1001,20 +560,25 @@ pub fn generate_theme_code(crates_dir: &Utf8Path) -> Result<(), String> {
         writeln!(
             code,
             "        background: {},",
-            gen_color_option(&theme.background)
+            gen_color_option(&def.background)
         )
         .unwrap();
         writeln!(
             code,
             "        foreground: {},",
-            gen_color_option(&theme.foreground)
+            gen_color_option(&def.foreground)
         )
         .unwrap();
 
         writeln!(code, "        styles: [").unwrap();
-        for (i, style) in theme.styles.iter().enumerate() {
-            let trailing = if i == theme.styles.len() - 1 { "" } else { "," };
-            writeln!(code, "            {}{}", gen_style(style), trailing).unwrap();
+        for (i, highlight_def) in highlights.defs.iter().enumerate() {
+            let style = resolve_style_for_slot(&def.styles, &highlight_def.name, &highlights);
+            let trailing = if i == highlights.defs.len() - 1 {
+                ""
+            } else {
+                ","
+            };
+            writeln!(code, "            {}{}", gen_style(&style), trailing).unwrap();
         }
         writeln!(code, "        ],").unwrap();
         writeln!(code, "    }}").unwrap();

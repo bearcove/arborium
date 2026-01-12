@@ -11,6 +11,7 @@ mod cache;
 mod ci;
 mod deploy_website;
 mod generate;
+mod highlight_gen;
 mod lint_new;
 mod theme_gen;
 
@@ -247,7 +248,7 @@ fn main() {
         if let Some(text) = e.help_text() {
             eprintln!("{text}");
         } else {
-            eprintln!("{:?}", e);
+            eprintln!("{e}");
         }
         std::process::exit(1);
     });
@@ -264,15 +265,13 @@ fn main() {
 
     match args.command {
         Command::Version => unreachable!(),
-        Command::CacheKey => {
-            match cache::compute_global_cache_key(&repo_root) {
-                Ok(key) => println!("{}", key),
-                Err(e) => {
-                    eprintln!("Error computing cache key: {}", e);
-                    std::process::exit(1);
-                }
+        Command::CacheKey => match cache::compute_global_cache_key(&repo_root) {
+            Ok(key) => println!("{}", key),
+            Err(e) => {
+                eprintln!("Error computing cache key: {}", e);
+                std::process::exit(1);
             }
-        }
+        },
         Command::GenManifest => {
             let repo_root = util::find_repo_root().expect("Could not find repo root");
             let repo_root = camino::Utf8PathBuf::from_path_buf(repo_root).expect("non-UTF8 path");

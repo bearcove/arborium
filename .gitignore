@@ -14,6 +14,9 @@ version.json
 # Grammar generation cache
 .cache/
 
+# Claude Code handoff documents
+.handoffs/
+
 # Node modules (created during grammar regeneration)
 node_modules/
 **/node_modules/

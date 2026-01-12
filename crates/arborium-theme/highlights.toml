@@ -1,0 +1,287 @@
+# Highlight definitions - must match HIGHLIGHTS array in highlights.rs exactly
+#
+# This file is the source of truth for CSS generation in xtask.
+# The order and names must match the HIGHLIGHTS array in highlights.rs.
+#
+# Each entry has:
+#   tag = "xx"           # Short tag for HTML elements (e.g., "k" -> <a-k>)
+#   parent = "name"      # Optional parent for style fallback
+#   aliases = [...]      # Optional alternative capture names that map here
+#
+# NOTE: Use quoted keys for dotted names like ["keyword.function"]
+
+[attribute]
+tag = "at"
+
+[constant]
+tag = "co"
+
+["constant.builtin"]
+tag = "cb"
+parent = "constant"
+aliases = ["constant.builtin.boolean"]
+
+[constructor]
+tag = "cr"
+
+["function.builtin"]
+tag = "fb"
+parent = "function"
+
+[function]
+tag = "f"
+
+["function.method"]
+tag = "fm"
+parent = "function"
+
+[keyword]
+tag = "k"
+
+["keyword.conditional"]
+tag = "kc"
+parent = "keyword"
+
+["keyword.coroutine"]
+tag = "ko"
+parent = "keyword"
+
+["keyword.debug"]
+tag = "kd"
+parent = "keyword"
+
+["keyword.exception"]
+tag = "ke"
+parent = "keyword"
+
+["keyword.function"]
+tag = "kf"
+parent = "keyword"
+
+["keyword.import"]
+tag = "ki"
+parent = "keyword"
+
+["keyword.operator"]
+tag = "kp"
+parent = "keyword"
+
+["keyword.repeat"]
+tag = "kr"
+parent = "keyword"
+
+["keyword.return"]
+tag = "kt"
+parent = "keyword"
+
+["keyword.type"]
+tag = "ky"
+parent = "keyword"
+
+[operator]
+tag = "o"
+
+[property]
+tag = "pr"
+
+[punctuation]
+tag = "p"
+
+["punctuation.bracket"]
+tag = "pb"
+parent = "punctuation"
+
+["punctuation.delimiter"]
+tag = "pd"
+parent = "punctuation"
+
+["punctuation.special"]
+tag = "ps"
+parent = "punctuation"
+
+[string]
+tag = "s"
+
+["string.special"]
+tag = "ss"
+parent = "string"
+aliases = ["string.special.symbol", "string.special.path"]
+
+[tag]
+tag = "tg"
+
+["tag.delimiter"]
+tag = "td"
+parent = "tag"
+
+["tag.error"]
+tag = "te"
+parent = "tag"
+
+[type]
+tag = "t"
+
+["type.builtin"]
+tag = "tb"
+parent = "type"
+
+["type.qualifier"]
+tag = "tq"
+parent = "type"
+
+[variable]
+tag = "v"
+
+["variable.builtin"]
+tag = "vb"
+parent = "variable"
+
+["variable.parameter"]
+tag = "vp"
+parent = "variable"
+aliases = ["parameter"]
+
+[comment]
+tag = "c"
+
+["comment.documentation"]
+tag = "cd"
+parent = "comment"
+
+[macro]
+tag = "m"
+
+[label]
+tag = "l"
+
+["diff.addition"]
+tag = "da"
+aliases = ["diff.plus", "diff.delta"]
+
+["diff.deletion"]
+tag = "dd"
+aliases = ["diff.minus"]
+
+[number]
+tag = "n"
+aliases = ["constant.numeric"]
+
+["text.literal"]
+tag = "tl"
+aliases = ["markup.raw"]
+
+["text.emphasis"]
+tag = "em"
+aliases = ["markup.italic"]
+
+["text.strong"]
+tag = "st"
+aliases = ["markup.bold"]
+
+["text.uri"]
+tag = "tu"
+aliases = ["markup.link.url"]
+
+["text.reference"]
+tag = "tr"
+aliases = ["markup.link.text"]
+
+["string.escape"]
+tag = "se"
+parent = "string"
+aliases = ["escape"]
+
+["text.title"]
+tag = "tt"
+aliases = ["markup.heading"]
+
+["text.strikethrough"]
+tag = "tx"
+aliases = ["markup.strikethrough"]
+
+[spell]
+tag = "sp"
+
+[embedded]
+tag = "eb"
+
+[error]
+tag = "er"
+
+[namespace]
+tag = "ns"
+aliases = ["module"]
+
+# Legacy/alternative names used by some grammars
+[include]
+tag = "in"
+parent = "keyword"
+
+[storageclass]
+tag = "sc"
+parent = "keyword"
+
+[repeat]
+tag = "rp"
+parent = "keyword"
+
+[conditional]
+tag = "cn"
+parent = "keyword"
+
+[exception]
+tag = "ex"
+parent = "keyword"
+
+[preproc]
+tag = "pp"
+parent = "keyword"
+
+[none]
+tag = ""
+
+[character]
+tag = "ch"
+parent = "string"
+
+["character.special"]
+tag = "cs"
+parent = "string"
+
+["variable.member"]
+tag = "vm"
+parent = "variable"
+
+["function.definition"]
+tag = "fd"
+parent = "function"
+
+["type.definition"]
+tag = "tf"
+parent = "type"
+
+["function.call"]
+tag = "fc"
+parent = "function"
+
+["keyword.modifier"]
+tag = "km"
+parent = "keyword"
+
+["keyword.directive"]
+tag = "dr"
+parent = "keyword"
+
+["string.regexp"]
+tag = "rx"
+parent = "string"
+aliases = ["string.regex"]
+
+[nospell]
+tag = ""
+
+[float]
+tag = "n"
+
+[boolean]
+tag = "cb"
