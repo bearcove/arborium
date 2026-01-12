@@ -42,6 +42,9 @@ let globalConfig: Required<ArboriumConfig> = { ...defaultConfig };
 // Grammar plugins cache
 const grammarCache = new Map<string, GrammarPlugin>();
 
+// In-flight grammar load promises (to prevent double-loading)
+const grammarLoadPromises = new Map<string, Promise<GrammarPlugin | null>>();
+
 // Languages we know are available (bundled at build time)
 const knownLanguages: Set<string> = new Set(availableLanguages);
 
@@ -135,13 +138,34 @@ interface GrammarPlugin {
 
 /** Load a grammar plugin */
 async function loadGrammarPlugin(language: string, config: Required<ArboriumConfig>): Promise<GrammarPlugin | null> {
-  // Check cache
+  // Check cache first
   const cached = grammarCache.get(language);
   if (cached) {
     console.debug(`[arborium] Grammar '${language}' found in cache`);
     return cached;
   }
 
+  // Check if there's already an in-flight load for this language
+  const inFlight = grammarLoadPromises.get(language);
+  if (inFlight) {
+    console.debug(`[arborium] Grammar '${language}' already loading, waiting...`);
+    return inFlight;
+  }
+
+  // Start the actual load and track the promise
+  const loadPromise = loadGrammarPluginInner(language, config);
+  grammarLoadPromises.set(language, loadPromise);
+
+  try {
+    return await loadPromise;
+  } finally {
+    // Clean up the in-flight promise once done
+    grammarLoadPromises.delete(language);
+  }
+}
+
+/** Internal grammar loading - called only once per language */
+async function loadGrammarPluginInner(language: string, config: Required<ArboriumConfig>): Promise<GrammarPlugin | null> {
   // Load local manifest if in dev mode
   await ensureLocalManifest(config);
 

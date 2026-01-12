@@ -1286,7 +1286,7 @@ mod tests {
         let kw_idx = slot_to_highlight_index(capture_to_slot("keyword")).unwrap();
         let fn_idx = slot_to_highlight_index(capture_to_slot("function")).unwrap();
 
-        let ansi = spans_to_ansi(source, spans, theme);
+        let ansi = spans_to_ansi(source, spans, &theme);
 
         let expected = format!(
             "{}fn{} {}main{}",
@@ -1311,7 +1311,7 @@ mod tests {
         let mut options = AnsiOptions::default();
         options.use_theme_base_style = true;
 
-        let ansi = spans_to_ansi_with_options(source, spans, theme, &options);
+        let ansi = spans_to_ansi_with_options(source, spans, &theme, &options);
         let base = theme.ansi_base_style();
 
         assert!(ansi.starts_with(&base));
@@ -1333,7 +1333,7 @@ mod tests {
         options.width = Some(4);
         options.pad_to_width = false;
 
-        let ansi = spans_to_ansi_with_options(source, spans, theme, &options);
+        let ansi = spans_to_ansi_with_options(source, spans, &theme, &options);
 
         assert!(ansi.contains('\n'));
         assert!(ansi.ends_with(Theme::ANSI_RESET));
@@ -1357,7 +1357,7 @@ mod tests {
         ];
 
         let kw_idx = slot_to_highlight_index(capture_to_slot("keyword")).unwrap();
-        let ansi = spans_to_ansi(source, spans, theme);
+        let ansi = spans_to_ansi(source, spans, &theme);
 
         let expected = format!("{}keyword{}", theme.ansi_style(kw_idx), Theme::ANSI_RESET);
         assert_eq!(ansi, expected);
@@ -1525,5 +1525,69 @@ mod tests {
                 html
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod html_tests {
+    use super::*;
+    use crate::Span;
+
+    #[test]
+    fn test_spans_to_html_cpp_sample() {
+        let sample = std::fs::read_to_string(
+            concat!(env!("CARGO_MANIFEST_DIR"), "/../../demo/samples/cpp.cc")
+        ).expect("Failed to read cpp sample");
+
+        // Create some fake spans that cover the whole file
+        let spans = vec![
+            Span { start: 0, end: 10, capture: "comment".into() },
+            Span { start: 100, end: 110, capture: "keyword".into() },
+        ];
+
+        // This should not panic
+        let html = spans_to_html(&sample, spans, &HtmlFormat::default());
+        assert!(!html.is_empty());
+    }
+
+    #[test]
+    fn test_spans_to_html_real_cpp_grammar() {
+        use crate::{CompiledGrammar, GrammarConfig, ParseContext};
+
+        let sample = std::fs::read_to_string(
+            concat!(env!("CARGO_MANIFEST_DIR"), "/../../demo/samples/cpp.cc")
+        ).expect("Failed to read cpp sample");
+
+        // Load the actual cpp grammar
+        let config = GrammarConfig {
+            language: arborium_cpp::language().into(),
+            highlights_query: &arborium_cpp::HIGHLIGHTS_QUERY,
+            injections_query: arborium_cpp::INJECTIONS_QUERY,
+            locals_query: "",
+        };
+
+        let grammar = CompiledGrammar::new(config).expect("Failed to compile grammar");
+        let mut ctx = ParseContext::for_grammar(&grammar).expect("Failed to create context");
+
+        // Parse the sample
+        let result = grammar.parse(&mut ctx, &sample);
+
+        println!("Got {} spans from parsing", result.spans.len());
+
+        // Check some spans for validity
+        for (i, span) in result.spans.iter().enumerate().take(20) {
+            println!("Span {}: {}..{} {:?}", i, span.start, span.end, span.capture);
+            let start = span.start as usize;
+            let end = span.end as usize;
+            assert!(start <= sample.len(), "Span {} start {} > len {}", i, start, sample.len());
+            assert!(end <= sample.len(), "Span {} end {} > len {}", i, end, sample.len());
+            assert!(sample.is_char_boundary(start), "Span {} start {} not char boundary", i, start);
+            assert!(sample.is_char_boundary(end), "Span {} end {} not char boundary", i, end);
+        }
+
+        // Now try to render - this should not panic
+        let html = spans_to_html(&sample, result.spans, &HtmlFormat::default());
+        assert!(!html.is_empty());
+        println!("Generated {} bytes of HTML", html.len());
     }
 }

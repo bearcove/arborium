@@ -43,47 +43,6 @@ use arborium_tree_sitter::{
 };
 use arborium_wire::{Edit, Injection, ParseError, ParseResult, Span};
 
-/// Batch convert UTF-8 byte offsets to UTF-16 code unit indices in a single pass.
-///
-/// This is O(n + m) where n is string length and m is number of offsets,
-/// much better than O(n * m) for individual conversions.
-///
-/// The offsets slice must be sorted in ascending order.
-fn batch_utf8_to_utf16(text: &str, offsets: &[usize]) -> Vec<u32> {
-    let mut results = Vec::with_capacity(offsets.len());
-    if offsets.is_empty() {
-        return results;
-    }
-
-    let mut offset_idx = 0;
-    let mut utf16_index = 0u32;
-    let mut byte_index = 0usize;
-
-    for c in text.chars() {
-        // Emit results for all offsets at current byte position
-        while offset_idx < offsets.len() && byte_index >= offsets[offset_idx] {
-            results.push(utf16_index);
-            offset_idx += 1;
-        }
-
-        if offset_idx >= offsets.len() {
-            break;
-        }
-
-        byte_index += c.len_utf8();
-        // Code points >= 0x10000 use surrogate pairs (2 UTF-16 code units)
-        utf16_index += if c as u32 >= 0x10000 { 2 } else { 1 };
-    }
-
-    // Handle any remaining offsets at or past the end
-    while offset_idx < offsets.len() {
-        results.push(utf16_index);
-        offset_idx += 1;
-    }
-
-    results
-}
-
 /// Configuration for syntax highlighting.
 ///
 /// Contains the compiled queries for highlights, injections, and locals.
@@ -411,35 +370,14 @@ impl PluginRuntime {
             }
         }
 
-        // Collect all byte offsets and batch convert to UTF-16
-        let mut all_offsets: Vec<usize> = Vec::with_capacity(
-            (raw_spans.len() + raw_injections.len()) * 2
-        );
-        for span in &raw_spans {
-            all_offsets.push(span.start);
-            all_offsets.push(span.end);
-        }
-        for inj in &raw_injections {
-            all_offsets.push(inj.start);
-            all_offsets.push(inj.end);
-        }
-        all_offsets.sort_unstable();
-
-        let utf16_offsets = batch_utf8_to_utf16(text, &all_offsets);
-
-        // Build a lookup from byte offset to UTF-16 offset
-        // (using binary search since offsets are sorted)
-        let lookup = |byte_offset: usize| -> u32 {
-            let idx = all_offsets.binary_search(&byte_offset).unwrap_or_else(|x| x);
-            utf16_offsets.get(idx).copied().unwrap_or(0)
-        };
-
-        // Convert spans
+        // Output raw UTF-8 byte offsets (native to tree-sitter).
+        // The Rust host needs UTF-8 byte offsets for string slicing.
+        // The JS fallback path will convert to UTF-16 indices if needed.
         let mut spans: Vec<Span> = raw_spans
             .into_iter()
             .map(|s| Span {
-                start: lookup(s.start),
-                end: lookup(s.end),
+                start: s.start as u32,
+                end: s.end as u32,
                 capture: s.capture,
             })
             .collect();
@@ -447,12 +385,12 @@ impl PluginRuntime {
         // Sort spans by start position for consistent output
         spans.sort_by_key(|s| (s.start, s.end));
 
-        // Convert injections
+        // Convert injections (also UTF-8 byte offsets)
         let injections: Vec<Injection> = raw_injections
             .into_iter()
             .map(|i| Injection {
-                start: lookup(i.start),
-                end: lookup(i.end),
+                start: i.start as u32,
+                end: i.end as u32,
                 language: i.language,
                 include_children: i.include_children,
             })
@@ -469,83 +407,10 @@ impl PluginRuntime {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
-    #[test]
-    fn test_batch_utf8_to_utf16_ascii() {
-        // ASCII: 1 byte UTF-8 = 1 UTF-16 code unit
-        let text = "hello";
-        let offsets = [0, 1, 5];
-        let result = batch_utf8_to_utf16(text, &offsets);
-        assert_eq!(result, vec![0, 1, 5]);
-    }
-
-    #[test]
-    fn test_batch_utf8_to_utf16_two_byte() {
-        // é is 2 bytes in UTF-8, 1 UTF-16 code unit
-        let text = "café";
-        // c=0, a=1, f=2, é=3-4 (2 bytes)
-        let offsets = [0, 3, 5];
-        let result = batch_utf8_to_utf16(text, &offsets);
-        assert_eq!(result, vec![0, 3, 4]); // byte 5 = UTF-16 index 4
-    }
-
-    #[test]
-    fn test_batch_utf8_to_utf16_three_byte() {
-        // 中 is 3 bytes in UTF-8, 1 UTF-16 code unit
-        let text = "a中b";
-        // a=0 (1 byte), 中=1-3 (3 bytes), b=4 (1 byte)
-        let offsets = [0, 1, 4, 5];
-        let result = batch_utf8_to_utf16(text, &offsets);
-        assert_eq!(result, vec![0, 1, 2, 3]);
-    }
-
-    #[test]
-    fn test_batch_utf8_to_utf16_four_byte_emoji() {
-        // 🦀 is 4 bytes in UTF-8, 2 UTF-16 code units (surrogate pair)
-        let text = "a🦀b";
-        // a=0 (1 byte), 🦀=1-4 (4 bytes), b=5 (1 byte)
-        let offsets = [0, 1, 5, 6];
-        let result = batch_utf8_to_utf16(text, &offsets);
-        assert_eq!(result, vec![0, 1, 3, 4]); // emoji takes 2 UTF-16 units
-    }
-
-    #[test]
-    fn test_batch_utf8_to_utf16_mixed() {
-        // Mix of ASCII, 2-byte, 3-byte, and 4-byte characters
-        let text = "hi🌍世界";
-        // h=0, i=1, 🌍=2-5 (4 bytes), 世=6-8 (3 bytes), 界=9-11 (3 bytes)
-        let offsets = [0, 2, 6, 9, 12];
-        let result = batch_utf8_to_utf16(text, &offsets);
-        assert_eq!(result, vec![0, 2, 4, 5, 6]); // 🌍 = 2 UTF-16 units
-    }
-
-    #[test]
-    fn test_batch_utf8_to_utf16_works_with_js_slice() {
-        // This test verifies that the conversion produces indices
-        // that would work correctly with JavaScript's String.slice()
-        let text = "hello🌍world";
-
-        // In JS: "hello🌍world".slice(0, 5) === "hello"
-        // In JS: "hello🌍world".slice(5, 7) === "🌍" (emoji is 2 UTF-16 code units)
-        // In JS: "hello🌍world".slice(7, 12) === "world"
-        let offsets = [0, 5, 9, 14];
-        let result = batch_utf8_to_utf16(text, &offsets);
-        assert_eq!(result, vec![0, 5, 7, 12]);
-    }
-
-    #[test]
-    fn test_batch_utf8_to_utf16_empty() {
-        let text = "hello";
-        let offsets: [usize; 0] = [];
-        let result = batch_utf8_to_utf16(text, &offsets);
-        assert!(result.is_empty());
-    }
-
     // Integration tests that require a grammar - only available after grammar generation
     #[cfg(feature = "integration-tests")]
     mod integration {
-        use super::*;
+        use super::super::*;
 
         #[test]
         fn test_parse_rust_code() {
