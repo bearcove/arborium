@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="tokyo-night">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>arborium IIFE Demo</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%2350C878' d='m7.2 14.2c.8-1 1.6-1.8 2.4-2.4 1.5-1.3 2.8-1.8 2.8-1.8s-.7 1.1-1.8 2.7c-.2.4-.5.8-.8 1.3-.3.4-.5.9-.8 1.4s-.5 1-.8 1.5c-.2.5-.6 1.1-.8 1.6s-.5 1.1-.7 1.6c-.1.2-.2.5-.3.7 3.3 1.9 7.7 1.5 10.4-1.4 5-5.4.6-7.7 5.2-17.2 0 0-10.2-2.1-17.5 5.1-3.3 3.3-3.3 8.6 0 12 .2-.6.4-1.2.7-1.8.5-1.2 1.2-2.4 2-3.3z'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* Theme variables - Tokyo Night */
+        :root {
+            --bg: #1a1b26;
+            --fg: #a9b1d6;
+            --surface: #24283b;
+            --accent: #7aa2f7;
+            --muted: #565f89;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .arborium-icon {
+            font-size: 1em;
+        }
+
+        .tagline {
+            color: var(--muted);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        /* Section headings */
+        h2 {
+            color: var(--fg);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 2rem 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+        }
+
+        h2:first-of-type {
+            margin-top: 0;
+        }
+
+        /* Code blocks */
+        pre {
+            background: var(--surface);
+            border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 0 0 1rem 0;
+            box-shadow:
+                0 2px 4px -1px rgba(0, 0, 0, 0.15),
+                0 4px 8px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        code {
+            font-family: 'Iosevka', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Description text */
+        .description {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 3rem;
+            padding: 1rem 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+            border-top: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        footer a:hover {
+            color: var(--fg);
+        }
+
+        .footer-sep {
+            opacity: 0.5;
+        }
+
+        /* Links */
+        a {
+            color: var(--accent);
+        }
+
+        /* Error panel */
+        #error-panel {
+            display: none;
+            background: #2d1f1f;
+            border: 1px solid #f7768e;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        #error-panel.visible {
+            display: block;
+        }
+
+        #error-panel h3 {
+            color: #f7768e;
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        #error-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        #error-list li {
+            font-family: 'Iosevka', 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #ffa0a0;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(247, 118, 142, 0.2);
+        }
+
+        #error-list li:last-child {
+            border-bottom: none;
+        }
+
+        .error-source {
+            color: var(--muted);
+            font-size: 0.75rem;
+        }
+    </style>
+    <script>
+        // Error catching - must be before any other scripts
+        (function() {
+            const errors = [];
+            const maxErrors = 10;
+
+            function addError(msg, source) {
+                if (errors.length >= maxErrors) return;
+                errors.push({ msg, source });
+                updatePanel();
+            }
+
+            function updatePanel() {
+                const panel = document.getElementById('error-panel');
+                const list = document.getElementById('error-list');
+                if (!panel || !list) return;
+
+                panel.classList.add('visible');
+                list.innerHTML = errors.map(e =>
+                    `<li>${escapeHtml(e.msg)}${e.source ? `<br><span class="error-source">${escapeHtml(e.source)}</span>` : ''}</li>`
+                ).join('');
+            }
+
+            function escapeHtml(str) {
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            window.onerror = function(msg, url, line, col, error) {
+                const source = url ? `${url}:${line}:${col}` : '';
+                addError(String(msg), source);
+                return false;
+            };
+
+            window.addEventListener('unhandledrejection', function(e) {
+                const msg = e.reason?.message || e.reason?.toString() || 'Unhandled promise rejection';
+                addError(msg, e.reason?.stack?.split('\n')[1]?.trim() || '');
+            });
+
+            // Expose for manual error reporting
+            window.__arboriumDemoError = addError;
+        })();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>
+                <span class="arborium-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em"><path fill="#50C878" d="m7.2 14.2c.8-1 1.6-1.8 2.4-2.4 1.5-1.3 2.8-1.8 2.8-1.8s-.7 1.1-1.8 2.7c-.2.4-.5.8-.8 1.3-.3.4-.5.9-.8 1.4s-.5 1-.8 1.5c-.2.5-.6 1.1-.8 1.6s-.5 1.1-.7 1.6c-.1.2-.2.5-.3.7 3.3 1.9 7.7 1.5 10.4-1.4 5-5.4.6-7.7 5.2-17.2 0 0-10.2-2.1-17.5 5.1-3.3 3.3-3.3 8.6 0 12 .2-.6.4-1.2.7-1.8.5-1.2 1.2-2.4 2-3.3z"/></svg></span>
+                arborium
+            </h1>
+            <span class="tagline">IIFE Demo</span>
+        </div>
+
+        <p class="description">Testing the script tag integration via CDN. All code blocks below are automatically highlighted using tree-sitter grammars loaded on demand.</p>
+
+        <div id="error-panel">
+            <h3>Errors</h3>
+            <ul id="error-list"></ul>
+        </div>
+
+        <h2>Rust</h2>
+        <pre><code class="language-rust">fn main() {
+    let message = "Hello, world!";
+    println!("{}", message);
+}
+
+struct Point {
+    x: f64,
+    y: f64,
+}
+
+impl Point {
+    fn distance(&self, other: &Point) -> f64 {
+        ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt()
+    }
+}</code></pre>
+
+        <h2>JavaScript</h2>
+        <pre><code class="language-javascript">async function fetchData(url) {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.items.map(item => ({
+        id: item.id,
+        name: item.name.toUpperCase()
+    }));
+}
+
+class EventEmitter {
+    constructor() {
+        this.events = new Map();
+    }
+
+    on(event, callback) {
+        if (!this.events.has(event)) {
+            this.events.set(event, []);
+        }
+        this.events.get(event).push(callback);
+    }
+}</code></pre>
+
+        <h2>Python</h2>
+        <pre><code class="language-python">from dataclasses import dataclass
+from typing import List, Optional
+
+@dataclass
+class User:
+    name: str
+    email: str
+    age: Optional[int] = None
+
+def process_users(users: List[User]) -> dict:
+    return {
+        user.name: user.email
+        for user in users
+        if user.age is None or user.age >= 18
+    }</code></pre>
+
+        <h2>Auto-detect (no language specified)</h2>
+        <pre><code>SELECT u.name, u.email, COUNT(o.id) as order_count
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+WHERE u.created_at > '2024-01-01'
+GROUP BY u.id
+HAVING order_count > 5
+ORDER BY order_count DESC;</code></pre>
+
+        <footer>
+            <span><a href="https://github.com/bearcove/arborium">arborium</a> by <a href="https://fasterthanli.me/">fasterthanlime</a></span>
+            <span class="footer-sep">·</span>
+            <span>IIFE Demo</span>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@arborium/arborium@1/dist/arborium.iife.js"></script>
+</body>
+</html>

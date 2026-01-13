@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="arborium docs.rs demo"><title>arborium_docsrs_demo - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="arborium_docsrs_demo" data-themes="" data-resource-suffix="" data-rustdoc-version="1.92.0 (ded5c06cf 2025-12-08)" data-channel="1.92.0" data-search-js="search-d69d8955.js" data-stringdex-js="stringdex-c3e638e9.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-ce535bd0.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Crate arborium_docsrs_demo</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../arborium_docsrs_demo/index.html">arborium_<wbr>docsrs_<wbr>demo</a><span class="version">2.6.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#arborium-docsrs-demo" title="arborium docs.rs demo">arborium docs.rs demo</a><ul><li><a href="#toml" title="TOML">TOML</a></li><li><a href="#shell" title="Shell">Shell</a></li><li><a href="#json" title="JSON">JSON</a></li><li><a href="#yaml" title="YAML">YAML</a></li><li><a href="#sql" title="SQL">SQL</a></li><li><a href="#javascript" title="JavaScript">JavaScript</a></li><li><a href="#typescript" title="TypeScript">TypeScript</a></li><li><a href="#python" title="Python">Python</a></li><li><a href="#dockerfile" title="Dockerfile">Dockerfile</a></li><li><a href="#nix" title="Nix">Nix</a></li><li><a href="#graphql" title="GraphQL">GraphQL</a></li><li><a href="#css" title="CSS">CSS</a></li><li><a href="#rust-for-comparison" title="Rust (for comparison)">Rust (for comparison)</a></li></ul></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>arborium_<wbr>docsrs_<wbr>demo</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/arborium_docsrs_demo/lib.rs.html#1-295">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="arborium-docsrs-demo"><a class="doc-anchor" href="#arborium-docsrs-demo">§</a>arborium docs.rs demo</h2>
+<p>This crate demonstrates <a href="https://github.com/bearcove/arborium">arborium</a>
+syntax highlighting on docs.rs. Rust code is already highlighted by rustdoc,
+but other languages are left plain. arborium fixes that!</p>
+<h3 id="toml"><a class="doc-anchor" href="#toml">§</a>TOML</h3>
+<p>Configuration files are everywhere in the Rust ecosystem:</p>
+<div class="example-wrap"><pre class="language-toml"><code>[package]
+name = &quot;my-awesome-crate&quot;
+version = &quot;1.0.0&quot;
+edition = &quot;2021&quot;
+
+[dependencies]
+serde = { version = &quot;1.0&quot;, features = [&quot;derive&quot;] }
+tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+
+[dev-dependencies]
+criterion = &quot;0.5&quot;
+
+[features]
+default = [&quot;std&quot;]
+std = []
+async = [&quot;tokio&quot;]</code></pre></div><h3 id="shell"><a class="doc-anchor" href="#shell">§</a>Shell</h3>
+<p>Installation and usage instructions often include shell commands:</p>
+<div class="example-wrap"><pre class="language-bash"><code># Install the crate
+cargo install my-awesome-crate
+
+# Run with arguments
+my-awesome-crate --config config.toml --verbose
+
+# Set environment variables
+export RUST_LOG=debug
+cargo run -- serve --port 8080</code></pre></div><h3 id="json"><a class="doc-anchor" href="#json">§</a>JSON</h3>
+<p>API responses, configuration, and data interchange:</p>
+<div class="example-wrap"><pre class="language-json"><code>{
+  &quot;name&quot;: &quot;arborium&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;features&quot;: [&quot;syntax-highlighting&quot;, &quot;tree-sitter&quot;, &quot;wasm&quot;],
+  &quot;languages&quot;: 69,
+  &quot;config&quot;: {
+    &quot;theme&quot;: &quot;tokyo-night&quot;,
+    &quot;maxDepth&quot;: 3
+  }
+}</code></pre></div><h3 id="yaml"><a class="doc-anchor" href="#yaml">§</a>YAML</h3>
+<p>CI/CD pipelines and Kubernetes configs:</p>
+<div class="example-wrap"><pre class="language-yaml"><code>name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Run tests
+        run: cargo test --all-features</code></pre></div><h3 id="sql"><a class="doc-anchor" href="#sql">§</a>SQL</h3>
+<p>Database queries and migrations:</p>
+<div class="example-wrap"><pre class="language-sql"><code>-- Create a users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Query with joins
+SELECT u.username, COUNT(p.id) as post_count
+FROM users u
+LEFT JOIN posts p ON p.author_id = u.id
+WHERE u.created_at &gt; &#39;2024-01-01&#39;
+GROUP BY u.id
+ORDER BY post_count DESC
+LIMIT 10;</code></pre></div><h3 id="javascript"><a class="doc-anchor" href="#javascript">§</a>JavaScript</h3>
+<p>Browser code and Node.js examples:</p>
+<div class="example-wrap"><pre class="language-javascript"><code>import { loadGrammar, highlight } from &#39;@arborium/arborium&#39;;
+
+async function highlightCode(language, source) {
+  const grammar = await loadGrammar(language);
+  const html = grammar.highlight(source);
+  document.getElementById(&#39;output&#39;).innerHTML = html;
+}
+
+// Auto-highlight all code blocks
+document.querySelectorAll(&#39;pre code&#39;).forEach(block =&gt; {
+  const lang = block.className.match(/language-(\w+)/)?.[1];
+  if (lang) highlightCode(lang, block.textContent);
+});</code></pre></div><h3 id="typescript"><a class="doc-anchor" href="#typescript">§</a>TypeScript</h3>
+<p>Type-safe JavaScript:</p>
+<div class="example-wrap"><pre class="language-typescript"><code>interface HighlightConfig {
+  theme: string;
+  selector: string;
+  maxDepth?: number;
+}
+
+async function highlight(
+  language: string,
+  source: string,
+  config?: HighlightConfig
+): Promise&lt;string&gt; {
+  const grammar = await loadGrammar(language);
+  return grammar.highlight(source);
+}
+
+const config: HighlightConfig = {
+  theme: &#39;mocha&#39;,
+  selector: &#39;pre &gt; code&#39;,
+};</code></pre></div><h3 id="python"><a class="doc-anchor" href="#python">§</a>Python</h3>
+<p>Scripts and tooling:</p>
+<div class="example-wrap"><pre class="language-python"><code>import subprocess
+from pathlib import Path
+
+def build_and_test(project_dir: Path) -&gt; bool:
+    &quot;&quot;&quot;Build the project and run tests.&quot;&quot;&quot;
+    result = subprocess.run(
+        [&quot;cargo&quot;, &quot;test&quot;, &quot;--all-features&quot;],
+        cwd=project_dir,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(f&quot;Tests failed:\n{result.stderr}&quot;)
+        return False
+    return True
+
+if __name__ == &quot;__main__&quot;:
+    success = build_and_test(Path.cwd())
+    exit(0 if success else 1)</code></pre></div><h3 id="dockerfile"><a class="doc-anchor" href="#dockerfile">§</a>Dockerfile</h3>
+<p>Container builds:</p>
+<div class="example-wrap"><pre class="language-dockerfile"><code>FROM rust:1.75 as builder
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+RUN cargo build --release
+
+FROM debian:bookworm-slim
+RUN apt-get update &amp;&amp; apt-get install -y ca-certificates &amp;&amp; rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/target/release/myapp /usr/local/bin/
+ENTRYPOINT [&quot;myapp&quot;]</code></pre></div><h3 id="nix"><a class="doc-anchor" href="#nix">§</a>Nix</h3>
+<p>Reproducible builds:</p>
+<div class="example-wrap"><pre class="language-nix"><code>{ pkgs ? import &lt;nixpkgs&gt; {} }:
+
+pkgs.rustPlatform.buildRustPackage rec {
+  pname = &quot;arborium&quot;;
+  version = &quot;1.0.0&quot;;
+
+  src = ./.;
+
+  cargoLock = {
+    lockFile = ./Cargo.lock;
+  };
+
+  nativeBuildInputs = [ pkgs.pkg-config ];
+  buildInputs = [ pkgs.openssl ];
+}</code></pre></div><h3 id="graphql"><a class="doc-anchor" href="#graphql">§</a>GraphQL</h3>
+<p>API schemas:</p>
+<div class="example-wrap"><pre class="language-graphql"><code>type Query {
+  user(id: ID!): User
+  posts(limit: Int = 10, offset: Int = 0): [Post!]!
+}
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  posts: [Post!]!
+}
+
+type Post {
+  id: ID!
+  title: String!
+  content: String!
+  author: User!
+  createdAt: DateTime!
+}
+
+mutation CreatePost($input: CreatePostInput!) {
+  createPost(input: $input) {
+    id
+    title
+  }
+}</code></pre></div><h3 id="css"><a class="doc-anchor" href="#css">§</a>CSS</h3>
+<p>Styling:</p>
+<div class="example-wrap"><pre class="language-css"><code>:root {
+  --primary-color: #50C878;
+  --background: #1a1b26;
+  --foreground: #c0caf5;
+}
+
+.code-block {
+  background: var(--background);
+  color: var(--foreground);
+  padding: 1rem;
+  border-radius: 8px;
+  font-family: &#39;Iosevka&#39;, monospace;
+  overflow-x: auto;
+}
+
+.code-block a-k { color: #bb9af7; }  /* keywords */
+.code-block a-s { color: #9ece6a; }  /* strings */
+.code-block a-n { color: #ff9e64; }  /* numbers */</code></pre></div><h3 id="rust-for-comparison"><a class="doc-anchor" href="#rust-for-comparison">§</a>Rust (for comparison)</h3>
+<p>Rust code is already highlighted by rustdoc - arborium skips it:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::collections::HashMap;
+
+<span class="kw">pub fn </span>highlight(language: <span class="kw-2">&amp;</span>str, source: <span class="kw-2">&amp;</span>str) -&gt; String {
+    <span class="kw">let </span><span class="kw-2">mut </span>cache: HashMap&lt;String, Grammar&gt; = HashMap::new();
+
+    <span class="kw">let </span>grammar = cache
+        .entry(language.to_string())
+        .or_insert_with(|| load_grammar(language));
+
+    grammar.highlight(source)
+}</code></pre></div>
+<hr />
+<p>This demo is powered by <a href="https://github.com/bearcove/arborium">arborium</a>.
+See the <a href="https://arborium.bearcove.eu/">integration guide</a> for setup instructions.</p>
+</div></details></section></div></main></body></html>

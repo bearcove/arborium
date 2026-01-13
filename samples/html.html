@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Component</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --surface: #1e1e2e;
+            --text: #cdd6f4;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fade-in 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="app">
+        <h2>Welcome</h2>
+        <p>Click to increment: <span id="count">0</span></p>
+        <button class="btn" onclick="increment()">Add One</button>
+        <button class="btn" onclick="reset()" style="background: #ef4444;">Reset</button>
+    </div>
+
+    <template id="toast-template">
+        <div class="toast animate-in" role="alert">
+            <span class="toast-message"></span>
+            <button onclick="this.parentElement.remove()">&times;</button>
+        </div>
+    </template>
+
+    <script>
+        let count = 0;
+        const countEl = document.getElementById('count');
+
+        function increment() {
+            count++;
+            countEl.textContent = count;
+            countEl.classList.add('animate-in');
+            setTimeout(() => countEl.classList.remove('animate-in'), 300);
+
+            if (count % 10 === 0) {
+                showToast(`Milestone: ${count}!`);
+            }
+        }
+
+        function reset() {
+            count = 0;
+            countEl.textContent = count;
+        }
+
+        function showToast(message) {
+            const template = document.getElementById('toast-template');
+            const clone = template.content.cloneNode(true);
+            clone.querySelector('.toast-message').textContent = message;
+            document.body.appendChild(clone);
+        }
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '+' || e.key === '=') increment();
+            if (e.key === 'Escape') reset();
+        });
+    </script>
+</body>
+</html>

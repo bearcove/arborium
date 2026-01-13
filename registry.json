@@ -1,0 +1,2416 @@
+{
+  "grammars": [
+    {
+      "id": "ada",
+      "crate": "arborium-ada",
+      "name": "Ada",
+      "icon": "mdi:alpha-a-box-outline",
+      "tier": 5,
+      "tag": "code",
+      "description": "General-purpose systems language created for the U.S. Department of Defense; emphasizes safety and reliability.",
+      "inventor": "Jean Ichbiah",
+      "year": 1983,
+      "link": "https://en.wikipedia.org/wiki/Ada_(programming_language)",
+      "trivia": "Named after Ada Lovelace; standardized first in 1983 (Ada 83) and later revisions Ada 95, 2005, 2012, 2022.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/briot/tree-sitter-ada",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/inventory.adb",
+          "description": "Handwritten Ada program using vectors, records, and procedures to manage an inventory."
+        }
+      ]
+    },
+    {
+      "id": "agda",
+      "crate": "arborium-agda",
+      "name": "Agda",
+      "icon": null,
+      "tier": 4,
+      "tag": "code",
+      "description": "A dependently typed functional programming language and proof assistant.",
+      "inventor": "Ulf Norell",
+      "year": 2007,
+      "link": "https://en.wikipedia.org/wiki/Agda_(programming_language)",
+      "trivia": "Agda's name comes from a Swedish song about a woman named Agda who had a hen that laid eggs containing the words of the song.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-agda",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/List.agda",
+          "description": "Agda standard library List module with dependent types and pattern matching."
+        }
+      ]
+    },
+    {
+      "id": "asciidoc",
+      "crate": "arborium-asciidoc",
+      "name": "Asciidoc",
+      "icon": "mdi:text-box",
+      "tier": 5,
+      "tag": "markup",
+      "description": "A lightweight markup language for writing technical documentation and books.",
+      "inventor": "Stuart Rackham",
+      "year": 2002,
+      "link": "https://en.wikipedia.org/wiki/AsciiDoc",
+      "trivia": "O'Reilly Media uses AsciiDoc as the source format for many of their technical books.",
+      "aliases": [
+        "adoc"
+      ],
+      "grammar_repo": "https://github.com/cathaysia/tree-sitter-asciidoc",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/readme.adoc",
+          "description": "AsciiDoc readme showing headers, code blocks, tables, and admonitions."
+        }
+      ]
+    },
+    {
+      "id": "asm",
+      "crate": "arborium-asm",
+      "name": "Assembly",
+      "icon": "mdi:memory",
+      "tier": 3,
+      "tag": "code",
+      "description": "Low-level programming language that maps mnemonic instructions directly to machine code; the earliest published example was Booth's 1947 ARC2 'Contracted Notation' assembler (<a href=\"https://en.wikipedia.org/wiki/Kathleen_Booth\">Kathleen Booth</a>).",
+      "inventor": "Kathleen Booth",
+      "year": 1947,
+      "link": "https://en.wikipedia.org/wiki/Assembly_language",
+      "trivia": "Booth detailed one of the first assemblers in her 1947 ARC report, and backward compatibility means the <a href=\"https://archive.org/details/Intel8086ProgrammersReferenceManual\">Intel 8086 Programmer's Reference Manual</a> is still relevant today.",
+      "aliases": [
+        "assembly"
+      ],
+      "grammar_repo": "https://github.com/RubixDev/tree-sitter-asm",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/struc.asm",
+          "description": "Exercises NASM struc/istruc directives, offsets, and data definitions."
+        }
+      ]
+    },
+    {
+      "id": "awk",
+      "crate": "arborium-awk",
+      "name": "AWK",
+      "icon": "mdi:text-box-outline",
+      "tier": 4,
+      "tag": "code",
+      "description": "Pattern-scanning and text processing language; original description in the 1978 paper 'AWK — A Pattern Scanning and Processing Language'.",
+      "inventor": "Alfred Aho, Peter Weinberger, Brian Kernighan",
+      "year": 1977,
+      "link": "https://en.wikipedia.org/wiki/AWK",
+      "trivia": "Name comes from creators' initials Aho–Weinberger–Kernighan; see the <a href=\"https://dl.acm.org/doi/10.5555/104836\">ACM paper</a> and Unix V7 manual pages for the classic implementation.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/Beaglefoot/tree-sitter-awk",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/chem.awk",
+          "description": "AWK script from one-true-awk tests exercising records, fields, loops, and functions."
+        }
+      ]
+    },
+    {
+      "id": "bash",
+      "crate": "arborium-bash",
+      "name": "Bash",
+      "icon": "devicon-plain:bash",
+      "tier": 1,
+      "tag": "shell",
+      "description": "Unix shell and command language for GNU; see the official <a href=\"https://www.gnu.org/software/bash/manual/\">Bash manual</a>.",
+      "inventor": "Brian Fox",
+      "year": 1989,
+      "link": "https://en.wikipedia.org/wiki/Bash_(Unix_shell)",
+      "trivia": "Bash means 'Bourne Again SHell', a nod to the Bourne shell; Fox began coding it in January 1988 and released the first beta in June 1989 for the GNU Project (<a href=\"https://www.gnu.org/software/bash/manual/bash.html#Bash-History\">Bash History</a>).",
+      "aliases": [
+        "sh",
+        "shell"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-bash",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/doorbell.sh",
+          "description": "doorbell.sh notifier with POSIX shell features, signals, file descriptors, and scheduling."
+        }
+      ]
+    },
+    {
+      "id": "batch",
+      "crate": "arborium-batch",
+      "name": "Batch",
+      "icon": "mdi:console",
+      "tier": 5,
+      "tag": "shell",
+      "description": "DOS/Windows batch scripting (.bat/.cmd); commands documented in the <a href=\"https://winworldpc.com/product/ms-dos/5x\">MS-DOS 5.x manual</a> and modern <a href=\"https://learn.microsoft.com/windows-server/administration/windows-commands/windows-commands\">Windows Commands reference</a>.",
+      "inventor": "Tim Paterson",
+      "year": 1981,
+      "link": "https://en.wikipedia.org/wiki/Batch_file",
+      "trivia": "Batch files originated with 86-DOS/MS-DOS; Microsoft retained backward compatibility through cmd.exe—see the historical MS-DOS manuals for syntax.",
+      "aliases": [
+        "bat",
+        "cmd"
+      ],
+      "grammar_repo": "https://github.com/davidevofficial/tree-sitter-batch",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/init.bat",
+          "description": "Cmder console emulator init script with argument parsing, path setup, and library calls."
+        }
+      ]
+    },
+    {
+      "id": "c",
+      "crate": "arborium-c",
+      "name": "C",
+      "icon": "devicon-plain:c",
+      "tier": 1,
+      "tag": "code",
+      "description": "General-purpose systems language created at Bell Labs.",
+      "inventor": "Dennis Ritchie",
+      "year": 1972,
+      "link": "https://en.wikipedia.org/wiki/C_(programming_language)",
+      "trivia": "C evolved from B/BCPL during 1969-1973 alongside Unix; the name comes from its predecessor B.",
+      "aliases": [
+        "h"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-c",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/shortest.c",
+          "description": "Dijkstra's shortest path algorithm for FSM traversal."
+        }
+      ]
+    },
+    {
+      "id": "c-sharp",
+      "crate": "arborium-c-sharp",
+      "name": "C#",
+      "icon": "devicon-plain:csharp",
+      "tier": 1,
+      "tag": "code",
+      "description": "Modern object-oriented language for .NET; official spec is published as <a href=\"https://www.ecma-international.org/publications-and-standards/standards/ecma-334/\">ECMA-334</a>.",
+      "inventor": "Anders Hejlsberg",
+      "year": 2000,
+      "link": "https://en.wikipedia.org/wiki/C_Sharp_(programming_language)",
+      "trivia": "Originally code-named 'Cool' (C-like Object Oriented Language) inside Microsoft before being renamed C#; see the <a href=\"https://www.ecma-international.org/publications-and-standards/standards/ecma-334/\">ECMA-334 specification</a> and early .NET announcements.",
+      "aliases": [
+        "cs",
+        "csharp"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-c-sharp",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/ref_readonly_program.cs",
+          "description": "Demonstrates ref readonly structs, in parameters, default arguments, and static refs."
+        },
+        {
+          "path": "samples/ref_readonly_point3d.cs",
+          "description": "Supporting struct definitions with ref readonly properties and readonly struct."
+        }
+      ]
+    },
+    {
+      "id": "caddy",
+      "crate": "arborium-caddy",
+      "name": "Caddyfile",
+      "icon": "simple-icons:caddy",
+      "tier": 5,
+      "tag": "config",
+      "description": "Caddyfile configuration language for the Caddy web server; official docs at <a href=\"https://caddyserver.com/docs/caddyfile\">caddyserver.com</a>.",
+      "inventor": "Matt Holt and Caddy contributors",
+      "year": 2015,
+      "link": "https://caddyserver.com/docs/",
+      "trivia": "Caddy launched in 2015 with automatic HTTPS via Let's Encrypt; minimal syntax allows a single-line site definition—documented in the <a href=\"https://caddyserver.com/docs/caddyfile\">Caddyfile documentation</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/Samonitari/tree-sitter-caddy",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Caddyfile",
+          "description": "Default Caddy distribution config showing sites, reverse proxy, and TLS settings."
+        }
+      ]
+    },
+    {
+      "id": "capnp",
+      "crate": "arborium-capnp",
+      "name": "Cap'n Proto",
+      "icon": "mdi:message-fast-outline",
+      "tier": 4,
+      "tag": "data",
+      "description": "Cap'n Proto serialization and RPC system; design and spec at <a href=\"https://capnproto.org/\">capnproto.org</a>.",
+      "inventor": "Kenton Varda",
+      "year": 2013,
+      "link": "https://en.wikipedia.org/wiki/Cap'n_Proto",
+      "trivia": "Varda released Cap'n Proto on April 1, 2013, as a faster, zero-copy successor to Protocol Buffers; the <a href=\"https://capnproto.org/faq.html\">FAQ</a> explains the zero-copy format.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-capnp",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/addressbook.capnp",
+          "description": "Cap'n Proto address book example with structs, lists, and annotations."
+        }
+      ]
+    },
+    {
+      "id": "cedar",
+      "crate": "arborium-cedar",
+      "name": "Cedar",
+      "icon": "mdi:pine-tree",
+      "tier": 5,
+      "tag": "config",
+      "description": "Cedar is a language for defining permissions as policies.",
+      "inventor": "Amazon Web Services",
+      "year": 2023,
+      "link": "https://www.cedarpolicy.com/",
+      "trivia": "Cedar powered Amazon Verified Permissions internally before AWS open-sourced it in May 2023.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/DuskSystems/tree-sitter-cedar",
+      "grammar_license": "MIT OR Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/example.cedar",
+          "description": "GitApp example with permit policies, action groups, and attribute-based conditions."
+        }
+      ]
+    },
+    {
+      "id": "cedarschema",
+      "crate": "arborium-cedarschema",
+      "name": "Cedar Schema",
+      "icon": "mdi:pine-tree",
+      "tier": 5,
+      "tag": "config",
+      "description": "Cedar Schema defines the entity types and actions that Cedar policies can reference.",
+      "inventor": "Amazon Web Services",
+      "year": 2023,
+      "link": "https://www.cedarpolicy.com/",
+      "trivia": "Cedar Schema syntax was added in Cedar v3.1; before that, schemas were JSON only.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/DuskSystems/tree-sitter-cedar",
+      "grammar_license": "MIT OR Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/example.cedarschema",
+          "description": "GitApp example with entity types, attributes, and action declarations."
+        }
+      ]
+    },
+    {
+      "id": "clojure",
+      "crate": "arborium-clojure",
+      "name": "Clojure",
+      "icon": "simple-icons:clojure",
+      "tier": 2,
+      "tag": "code",
+      "description": "Functional Lisp dialect for the JVM with strong concurrency support; official site: <a href=\"https://clojure.org/\">clojure.org</a>.",
+      "inventor": "Rich Hickey",
+      "year": 2007,
+      "link": "https://en.wikipedia.org/wiki/Clojure",
+      "trivia": "Hickey designed Clojure to simplify concurrent programming; the language was announced publicly in 2007 and documented in the <a href=\"https://clojure.org/releases/downloads\">release downloads</a>.",
+      "aliases": [
+        "clj"
+      ],
+      "grammar_repo": "https://github.com/sogaiu/tree-sitter-clojure",
+      "grammar_license": "Unlicense",
+      "samples": [
+        {
+          "path": "samples/params.clj",
+          "description": "Ring middleware for parsing params and multipart requests; showcases namespaces, metadata, higher-order functions."
+        }
+      ]
+    },
+    {
+      "id": "cmake",
+      "crate": "arborium-cmake",
+      "name": "CMake",
+      "icon": "devicon-plain:cmake",
+      "tier": 3,
+      "tag": "build",
+      "description": "A cross-platform build system generator for C/C++ projects.",
+      "inventor": "Bill Hoffman",
+      "year": 2000,
+      "link": "https://en.wikipedia.org/wiki/CMake",
+      "trivia": "CMake was originally developed to support the cross-platform build needs of the Insight Segmentation and Registration Toolkit (ITK).",
+      "aliases": [],
+      "grammar_repo": "https://github.com/uyha/tree-sitter-cmake",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/catch2_cmakelists.cmake",
+          "description": "Catch2 testing framework build configuration with options, subdirectories, and installation setup."
+        }
+      ]
+    },
+    {
+      "id": "cobol",
+      "crate": "arborium-cobol",
+      "name": "COBOL",
+      "icon": "file-icons:cobol",
+      "tier": 4,
+      "tag": "code",
+      "description": "COBOL (Common Business-Oriented Language) is a compiled English-like programming language designed for business use; still runs critical systems in finance, government, and insurance.",
+      "inventor": "Grace Hopper and CODASYL",
+      "year": 1959,
+      "link": "https://en.wikipedia.org/wiki/COBOL",
+      "trivia": "COBOL was designed to be readable by managers; an estimated 95% of ATM transactions and 80% of in-person transactions still use COBOL code.",
+      "aliases": [
+        "cbl",
+        "cob",
+        "cpy"
+      ],
+      "grammar_repo": "https://github.com/zharinov/tree-sitter-cobol",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/hello.cbl",
+          "description": "Classic COBOL program structure with divisions and sections."
+        }
+      ]
+    },
+    {
+      "id": "commonlisp",
+      "crate": "arborium-commonlisp",
+      "name": "Common Lisp",
+      "icon": "mdi:lambda",
+      "tier": 4,
+      "tag": "code",
+      "description": "A multi-paradigm dialect of Lisp standardized by ANSI with powerful macro capabilities.",
+      "inventor": "ANSI X3J13 committee",
+      "year": 1994,
+      "link": "https://en.wikipedia.org/wiki/Common_Lisp",
+      "trivia": "The Common Lisp standard is over 1,000 pages long and defines nearly 1,000 symbols—making it one of the most comprehensive language specifications ever written.",
+      "aliases": [
+        "lisp",
+        "cl"
+      ],
+      "grammar_repo": "https://github.com/theHamsta/tree-sitter-commonlisp",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/session_middleware.lisp",
+          "description": "Lack web framework session middleware with closures, macros, and hash tables."
+        }
+      ]
+    },
+    {
+      "id": "cpp",
+      "crate": "arborium-cpp",
+      "name": "C++",
+      "icon": "devicon-plain:cplusplus",
+      "tier": 1,
+      "tag": "code",
+      "description": "General-purpose language extending C with zero-overhead abstractions; see Stroustrup's official overview at <a href=\"https://isocpp.org/about\">isocpp.org</a>.",
+      "inventor": "Bjarne Stroustrup",
+      "year": 1985,
+      "link": "https://en.wikipedia.org/wiki/C%2B%2B",
+      "trivia": "Began as 'C with Classes' in 1979 and was renamed C++ (using the C increment operator) in 1983; Stroustrup recounts the history in <a href=\"https://www.stroustrup.com/dne.html\">The Design and Evolution of C++</a>.",
+      "aliases": [
+        "c++",
+        "cxx",
+        "hpp"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-cpp",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/chrono-test.cc",
+          "description": "fmtlib chrono tests with templates, user-defined literals, chrono formatting, and GoogleTest macros."
+        },
+        {
+          "path": "samples/BytecodeReader.cpp",
+          "description": "Ark bytecode reader handling chunk parsing, endian conversion, and error cases."
+        }
+      ]
+    },
+    {
+      "id": "css",
+      "crate": "arborium-css",
+      "name": "CSS",
+      "icon": "devicon-plain:css3",
+      "tier": 2,
+      "tag": "markup",
+      "description": "Style sheet language for web documents; the living standard is maintained by the <a href=\"https://www.w3.org/TR/CSS/\">W3C</a>.",
+      "inventor": "Håkon Wium Lie",
+      "year": 1996,
+      "link": "https://en.wikipedia.org/wiki/CSS",
+      "trivia": "Wium Lie proposed CSS on 10 Oct 1994 while at CERN and it became a W3C Recommendation in 1996; see his <a href=\"https://www.w3.org/People/howcome/p/Spec/\">original proposal</a> and the <a href=\"https://www.w3.org/TR/REC-CSS1-961217\">CSS1 specification</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-css",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/pico.css",
+          "description": "Pico CSS framework with typography, form inputs, and utility selectors."
+        }
+      ]
+    },
+    {
+      "id": "d",
+      "crate": "arborium-d",
+      "name": "D",
+      "icon": "mdi:alpha-d-box-outline",
+      "tier": 4,
+      "tag": "code",
+      "description": "A systems programming language with C-like syntax, designed as a more modern alternative to C++.",
+      "inventor": "Walter Bright",
+      "year": 2001,
+      "link": "https://en.wikipedia.org/wiki/D_(programming_language)",
+      "trivia": "Walter Bright wrote D's first compiler entirely by himself—he previously created the first native-code C++ compiler for DOS.",
+      "aliases": [
+        "dlang"
+      ],
+      "grammar_repo": "https://github.com/gdamore/tree-sitter-d",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/platform.d",
+          "description": "Build platform detection from Dub package manager; showcases D's version conditions and compile-time metaprogramming."
+        }
+      ]
+    },
+    {
+      "id": "dart",
+      "crate": "arborium-dart",
+      "name": "Dart",
+      "icon": "devicon-plain:dart",
+      "tier": 2,
+      "tag": "code",
+      "description": "Object-oriented language optimized for UI development; official site: <a href=\"https://dart.dev/\">dart.dev</a>.",
+      "inventor": "Lars Bak and Kasper Lund",
+      "year": 2011,
+      "link": "https://en.wikipedia.org/wiki/Dart_(programming_language)",
+      "trivia": "Unveiled at GOTO Aarhus 2011 by Bak and Lund; the <a href=\"https://dart.dev/guides/language/language-tour\">language tour</a> documents its core goals, and Dart became the language behind Flutter when Google released Flutter in May 2017.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/UserNobody14/tree-sitter-dart",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/fluid_api.dart",
+          "description": "Extension methods demo with fluent API, getters, operators, and generics."
+        }
+      ]
+    },
+    {
+      "id": "devicetree",
+      "crate": "arborium-devicetree",
+      "name": "Device Tree",
+      "icon": "mdi:file-tree",
+      "tier": 5,
+      "tag": "config",
+      "description": "Data structure for describing hardware; documented in the <a href=\"https://www.devicetree.org/specifications/\">Device Tree specifications</a>.",
+      "inventor": "Sun Microsystems (Open Firmware)",
+      "year": 1988,
+      "link": "https://en.wikipedia.org/wiki/Devicetree",
+      "trivia": "Originated with Open Firmware (IEEE 1275-1994); the Flattened Device Tree format for Linux was introduced in 2005—see the <a href=\"https://www.devicetree.org/specifications/\">specifications</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/joelspadin/tree-sitter-devicetree",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/decawave_dwm1001_dev.dts",
+          "description": "Zephyr board DTS describing SPI, UART, regulators, GPIOs, and sensors."
+        }
+      ]
+    },
+    {
+      "id": "diff",
+      "crate": "arborium-diff",
+      "name": "Diff",
+      "icon": "mdi:file-compare",
+      "tier": 3,
+      "tag": "data",
+      "description": "Unified diff format for representing file differences; GNU diffutils manual documents the format (<a href=\"https://www.gnu.org/software/diffutils/manual/\">diffutils manual</a>).",
+      "inventor": "Wayne Davison",
+      "year": 1990,
+      "link": "https://en.wikipedia.org/wiki/Diff",
+      "trivia": "Wayne Davison proposed the unified format in Aug 1990 on comp.sources.misc; GNU diff added support in version 1.15 (Jan 1991) per the <a href=\"https://git.savannah.gnu.org/gitweb/?p=diffutils.git;a=blob;f=NEWS;hb=refs/tags/v1.15\">NEWS file</a>.",
+      "aliases": [
+        "patch"
+      ],
+      "grammar_repo": "https://github.com/the-mikedavis/tree-sitter-diff",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/t-apply-1.patch",
+          "description": "Git rename refactoring patch from rpull/rpush to ssh-pull/ssh-push with docs, Makefile, and C sources."
+        }
+      ]
+    },
+    {
+      "id": "dockerfile",
+      "crate": "arborium-dockerfile",
+      "name": "Dockerfile",
+      "icon": "devicon-plain:docker",
+      "tier": 3,
+      "tag": "config",
+      "description": "Declarative format for Docker image builds; official reference: <a href=\"https://docs.docker.com/engine/reference/builder/\">Dockerfile reference</a>.",
+      "inventor": "Solomon Hykes and Docker, Inc.",
+      "year": 2013,
+      "link": "https://docs.docker.com/engine/reference/builder/",
+      "trivia": "Introduced with Docker's first public release in 2013; the <a href=\"https://docs.docker.com/engine/reference/builder/\">reference</a> documents each instruction and the layer-caching model that made Docker adoption explode.",
+      "aliases": [
+        "docker"
+      ],
+      "grammar_repo": "https://github.com/camdencheek/tree-sitter-dockerfile",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/python-bookworm.Dockerfile",
+          "description": "Official Python 3.12 Docker image with GPG verification, build optimization, and multi-arch support."
+        }
+      ]
+    },
+    {
+      "id": "dot",
+      "crate": "arborium-dot",
+      "name": "DOT/Graphviz",
+      "icon": "mdi:graph",
+      "tier": 4,
+      "tag": "data",
+      "description": "A graph description language for defining nodes, edges, and graph layouts in Graphviz.",
+      "inventor": "Stephen North and AT&T Bell Labs",
+      "year": 1991,
+      "link": "https://en.wikipedia.org/wiki/DOT_(graph_description_language)",
+      "trivia": "Graphviz layout algorithms were developed at AT&T Labs and have been used to visualize everything from compiler internals to social networks.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/rydesun/tree-sitter-dot",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/crazy.gv",
+          "description": "Unix family tree visualization; demonstrates creative node styling with distortion, orientation, and skew parameters."
+        }
+      ]
+    },
+    {
+      "id": "elisp",
+      "crate": "arborium-elisp",
+      "name": "Emacs Lisp",
+      "icon": "simple-icons:gnuemacs",
+      "tier": 4,
+      "tag": "code",
+      "description": "A Lisp dialect used to extend and customize the GNU Emacs text editor.",
+      "inventor": "Richard Stallman",
+      "year": 1985,
+      "link": "https://en.wikipedia.org/wiki/Emacs_Lisp",
+      "trivia": "Emacs Lisp has been called 'the most widely used Lisp dialect' due to Emacs's popularity—millions of lines of Elisp packages exist.",
+      "aliases": [
+        "emacs-lisp",
+        "el"
+      ],
+      "grammar_repo": "https://github.com/Wilfred/tree-sitter-elisp",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/simple.el",
+          "description": "Emacs simple.el with defuns, defvars, and interactive commands."
+        }
+      ]
+    },
+    {
+      "id": "elixir",
+      "crate": "arborium-elixir",
+      "name": "Elixir",
+      "icon": "devicon-plain:elixir",
+      "tier": 1,
+      "tag": "code",
+      "description": "Functional, concurrent language on the BEAM VM; <a href=\"https://elixir-lang.org/\">official site</a>.",
+      "inventor": "José Valim",
+      "year": 2011,
+      "link": "https://en.wikipedia.org/wiki/Elixir_(programming_language)",
+      "trivia": "Valim announced Elixir in 2011 to blend Ruby-like ergonomics with Erlang's fault-tolerance; see the <a href=\"https://elixir-lang.org/getting-started/introduction.html\">getting started guide</a> and the original <a href=\"https://elixir-lang.org/blog/2011/01/09/introducing-elixir/\">announcement blog post</a>.",
+      "aliases": [
+        "ex",
+        "exs"
+      ],
+      "grammar_repo": "https://github.com/elixir-lang/tree-sitter-elixir",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/controller.ex",
+          "description": "Phoenix controller module with plugs, alias/import/use macros, pattern matching, and response helpers."
+        }
+      ]
+    },
+    {
+      "id": "elm",
+      "crate": "arborium-elm",
+      "name": "Elm",
+      "icon": "devicon-plain:elm",
+      "tier": 2,
+      "tag": "code",
+      "description": "Purely functional language for reliable web apps; see the official <a href=\"https://guide.elm-lang.org/\">guide</a>.",
+      "inventor": "Evan Czaplicki",
+      "year": 2012,
+      "link": "https://en.wikipedia.org/wiki/Elm_(programming_language)",
+      "trivia": "Introduced by Czaplicki in 2012 with 'The Elm Architecture' that later inspired Redux; documented in the <a href=\"https://guide.elm-lang.org/architecture/\">architecture section</a> of the guide.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/elm-tooling/tree-sitter-elm",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Article.elm",
+          "description": "Elm SPA article page with Model-View-Update, commands, and HTML rendering."
+        }
+      ]
+    },
+    {
+      "id": "erlang",
+      "crate": "arborium-erlang",
+      "name": "Erlang",
+      "icon": "devicon-plain:erlang",
+      "tier": 2,
+      "tag": "code",
+      "description": "A concurrent, functional language designed for building fault-tolerant distributed systems.",
+      "inventor": "Joe Armstrong, Robert Virding, Mike Williams",
+      "year": 1986,
+      "link": "https://en.wikipedia.org/wiki/Erlang_(programming_language)",
+      "trivia": "Erlang was developed at Ericsson for telecom switches—it achieved 'nine nines' (99.9999999%) uptime in production systems.",
+      "aliases": [
+        "erl"
+      ],
+      "grammar_repo": "https://github.com/WhatsApp/tree-sitter-erlang",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/lists.erl",
+          "description": "OTP's lists module with pattern matching, guards, and list comprehensions."
+        }
+      ]
+    },
+    {
+      "id": "fish",
+      "crate": "arborium-fish",
+      "name": "Fish",
+      "icon": "mdi:fish",
+      "tier": 4,
+      "tag": "shell",
+      "description": "A user-friendly interactive shell with syntax highlighting and autosuggestions out of the box.",
+      "inventor": "Axel Liljencrantz",
+      "year": 2005,
+      "link": "https://en.wikipedia.org/wiki/Friendly_interactive_shell",
+      "trivia": "Fish intentionally breaks POSIX compatibility for a cleaner syntax—its slogan is 'Finally, a command line shell for the 90s!'",
+      "aliases": [],
+      "grammar_repo": "https://github.com/ram02z/tree-sitter-fish",
+      "grammar_license": "Unlicense",
+      "samples": [
+        {
+          "path": "samples/fisher.fish",
+          "description": "Fisher plugin manager with functions, conditionals, and command substitution."
+        }
+      ]
+    },
+    {
+      "id": "fsharp",
+      "crate": "arborium-fsharp",
+      "name": "F#",
+      "icon": "devicon-plain:fsharp",
+      "tier": 2,
+      "tag": "code",
+      "description": "Functional-first .NET language with type inference; <a href=\"https://learn.microsoft.com/dotnet/fsharp/\">official docs</a>.",
+      "inventor": "Don Syme",
+      "year": 2005,
+      "link": "https://en.wikipedia.org/wiki/F_Sharp_(programming_language)",
+      "trivia": "Developed at Microsoft Research and first released publicly in 2005; see Syme's early <a href=\"https://learn.microsoft.com/dotnet/fsharp/language-reference/\">language reference</a> and the 2010 <a href=\"https://learn.microsoft.com/dotnet/fsharp/language-reference/language-specification\">language specification</a>.",
+      "aliases": [
+        "fs",
+        "f#"
+      ],
+      "grammar_repo": "https://github.com/ionide/tree-sitter-fsharp",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Http.fs",
+          "description": "FSharp.Data HTTP utilities with modules, constants, request headers, and content types."
+        }
+      ]
+    },
+    {
+      "id": "gleam",
+      "crate": "arborium-gleam",
+      "name": "Gleam",
+      "icon": "devicon-plain:gleam",
+      "tier": 1,
+      "tag": "code",
+      "description": "Statically typed functional language for the BEAM; <a href=\"https://gleam.run/\">official docs</a>.",
+      "inventor": "Louis Pilfold",
+      "year": 2016,
+      "link": "https://en.wikipedia.org/wiki/Gleam_(programming_language)",
+      "trivia": "Pilfold announced Gleam in 2016 to bring ML-style typing to Erlang; version 1.0 shipped in March 2024 per the <a href=\"https://gleam.run/news/gleam-v1.0/\">v1.0 announcement</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/gleam-lang/tree-sitter-gleam",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/router.gleam",
+          "description": "Gleam list operations with types, pattern matching, and tail recursion."
+        }
+      ]
+    },
+    {
+      "id": "glsl",
+      "crate": "arborium-glsl",
+      "name": "GLSL",
+      "icon": "devicon-plain:opengl",
+      "tier": 3,
+      "tag": "code",
+      "description": "OpenGL Shading Language for programmable GPUs; defined in the <a href=\"https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.4.60.pdf\">GLSL 4.60 specification</a>.",
+      "inventor": "OpenGL ARB",
+      "year": 2004,
+      "link": "https://en.wikipedia.org/wiki/OpenGL_Shading_Language",
+      "trivia": "Introduced with OpenGL 2.0 to replace the fixed pipeline; the Khronos/ARB spec (e.g., version 4.60) is the authoritative reference.",
+      "aliases": [
+        "vert",
+        "frag"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-glsl",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/phong.frag",
+          "description": "Fragment shader from Vulkan samples using samplers, structs, and lighting calculations."
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "crate": "arborium-go",
+      "name": "Go",
+      "icon": "devicon-plain:go",
+      "tier": 1,
+      "tag": "code",
+      "description": "Statically typed compiled language from Google; the canonical <a href=\"https://go.dev/ref/spec\">language specification</a>.",
+      "inventor": "Robert Griesemer, Rob Pike, Ken Thompson",
+      "year": 2009,
+      "link": "https://en.wikipedia.org/wiki/Go_(programming_language)",
+      "trivia": "Announced publicly in Nov 2009; its mascot the Gopher was created by Renée French and documented on the <a href=\"https://go.dev/blog/gopher\">Go blog</a>.",
+      "aliases": [
+        "golang"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-go",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/explore_repo.go",
+          "description": "Gitea explore page with imports, constants, structs, and HTTP handler functions."
+        },
+        {
+          "path": "samples/repo.go",
+          "description": "Gitea explore/repo handler showing routing, templating, pagination, and service calls."
+        }
+      ]
+    },
+    {
+      "id": "graphql",
+      "crate": "arborium-graphql",
+      "name": "GraphQL",
+      "icon": "devicon-plain:graphql",
+      "tier": 3,
+      "tag": "query",
+      "description": "A query language for APIs that lets clients request exactly the data they need.",
+      "inventor": "Lee Byron, Nick Schrock",
+      "year": 2012,
+      "link": "https://en.wikipedia.org/wiki/GraphQL",
+      "trivia": "GraphQL was developed internally at Facebook starting in 2012 to power the News Feed on mobile apps before being open-sourced in 2015.",
+      "aliases": [
+        "gql"
+      ],
+      "grammar_repo": "https://github.com/bkegley/tree-sitter-graphql",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/starwars_schema.graphql",
+          "description": "Star Wars schema from graphql-js with interfaces, types, enums, and query definitions."
+        }
+      ]
+    },
+    {
+      "id": "groovy",
+      "crate": "arborium-groovy",
+      "name": "Groovy",
+      "icon": "devicon-plain:groovy",
+      "tier": 2,
+      "tag": "code",
+      "description": "Apache Groovy is a dynamic language for the JVM with syntax inspired by Java, featuring optional typing, closures, and powerful DSL capabilities that make it ideal for scripting and build tools like Gradle.",
+      "inventor": "James Strachan",
+      "year": 2003,
+      "link": "https://en.wikipedia.org/wiki/Apache_Groovy",
+      "trivia": "Groovy was created by James Strachan in 2003 and became an Apache project in 2015. It powers the popular Gradle build system and is widely used for creating domain-specific languages due to its flexible syntax and metaprogramming features.",
+      "aliases": [
+        "gvy",
+        "gy",
+        "gsh"
+      ],
+      "grammar_repo": "https://github.com/murtaza64/tree-sitter-groovy",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/example.groovy",
+          "description": "Comprehensive Groovy syntax featuring classes, closures, string interpolation, operators, and functional programming constructs"
+        },
+        {
+          "path": "samples/builder.groovy",
+          "description": "Advanced Groovy DSL patterns including builder pattern, XML generation, configuration DSL, and method_missing metaprogramming"
+        }
+      ]
+    },
+    {
+      "id": "haskell",
+      "crate": "arborium-haskell",
+      "name": "Haskell",
+      "icon": "devicon-plain:haskell",
+      "tier": 1,
+      "tag": "code",
+      "description": "Purely functional language with lazy evaluation and strong typing; see the <a href=\"https://www.haskell.org/onlinereport/haskell2010/\">Haskell 2010 Report</a> for the language definition.",
+      "inventor": "Simon Peyton Jones, Paul Hudak, Philip Wadler, et al.",
+      "year": 1990,
+      "link": "https://en.wikipedia.org/wiki/Haskell",
+      "trivia": "Named after logician Haskell Curry; standardized in 1990 by a committee that published successive language reports—the 2010 Report remains the latest official spec.",
+      "aliases": [
+        "hs"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-haskell",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Version.hs",
+          "description": "Cabal's Version type with pragmas, data types, typeclass instances, and bit manipulation."
+        }
+      ]
+    },
+    {
+      "id": "hcl",
+      "crate": "arborium-hcl",
+      "name": "HCL",
+      "icon": "devicon-plain:terraform",
+      "tier": 3,
+      "tag": "config",
+      "description": "HashiCorp Configuration Language for IaC; <a href=\"https://developer.hashicorp.com/terraform/language/syntax/configuration\">language spec</a> lives in the Terraform docs.",
+      "inventor": "HashiCorp",
+      "year": 2014,
+      "link": "https://github.com/hashicorp/hcl",
+      "trivia": "Designed to be both human-readable and machine-friendly; Terraform accepts both JSON and native HCL, documented in the <a href=\"https://developer.hashicorp.com/terraform/language\">Terraform language guide</a>.",
+      "aliases": [
+        "terraform",
+        "tf"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-hcl",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/vpc-main.tf",
+          "description": "Terraform VPC example using providers, modules, variables, and resource blocks."
+        }
+      ]
+    },
+    {
+      "id": "hlsl",
+      "crate": "arborium-hlsl",
+      "name": "HLSL",
+      "icon": "mdi:cube-outline",
+      "tier": 3,
+      "tag": "code",
+      "description": "High-Level Shading Language for DirectX; <a href=\"https://learn.microsoft.com/windows/win32/direct3dhlsl/dx-graphics-hlsl-pguide\">official reference</a>.",
+      "inventor": "Microsoft",
+      "year": 2002,
+      "link": "https://en.wikipedia.org/wiki/High-Level_Shading_Language",
+      "trivia": "Introduced with DirectX 9; modern compiler <code>dxc</code> targets DXIL and SPIR-V—see <a href=\"https://github.com/microsoft/DirectXShaderCompiler\">DirectX Shader Compiler</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-hlsl",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/HelloTriangle.hlsl",
+          "description": "DirectX 12 HelloTriangle shader showing vertex/pixel stages and constant buffers."
+        }
+      ]
+    },
+    {
+      "id": "html",
+      "crate": "arborium-html",
+      "name": "HTML",
+      "icon": "devicon-plain:html5",
+      "tier": 2,
+      "tag": "markup",
+      "description": "Standard markup language for web documents; current <a href=\"https://html.spec.whatwg.org/\">living standard</a> is maintained by WHATWG.",
+      "inventor": "Tim Berners-Lee",
+      "year": 1993,
+      "link": "https://en.wikipedia.org/wiki/HTML",
+      "trivia": "Berners-Lee introduced HTML in 1991; the first public description appeared in 1993, and the modern living standard is maintained by <a href=\"https://whatwg.org/\">WHATWG</a> as the authoritative spec.",
+      "aliases": [
+        "htm"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-html",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/component.html",
+          "description": "Interactive component with inline CSS, JavaScript, templates, and event handlers."
+        }
+      ]
+    },
+    {
+      "id": "idris",
+      "crate": "arborium-idris",
+      "name": "Idris",
+      "icon": "mdi:alpha-i-box-outline",
+      "tier": 4,
+      "tag": "code",
+      "description": "Dependently typed functional language for verified software; see the <a href=\"https://www.idris-lang.org/\">official site</a>.",
+      "inventor": "Edwin Brady",
+      "year": 2009,
+      "link": "https://en.wikipedia.org/wiki/Idris_(programming_language)",
+      "trivia": "Brady introduced Idris in 2009 to bring dependent types to general-purpose programming; the <a href=\"https://www.idris-lang.org/documentation/\">documentation</a> demonstrates length-indexed vectors and other proofs in code.",
+      "aliases": [
+        "idr"
+      ],
+      "grammar_repo": "https://github.com/kayhide/tree-sitter-idris",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/List.idr",
+          "description": "Idris2 Data.List module with dependent types, proofs, and list operations."
+        }
+      ]
+    },
+    {
+      "id": "ini",
+      "crate": "arborium-ini",
+      "name": "INI",
+      "icon": "mdi:cog-outline",
+      "tier": 3,
+      "tag": "config",
+      "description": "Simple key-value configuration format; Microsoft documented the <code>.ini</code> structure in early Windows SDKs (e.g., <a href=\"https://win16.org/\">Win16 documentation</a>).",
+      "inventor": "Unknown (popularized by Microsoft Windows)",
+      "year": 1985,
+      "link": "https://en.wikipedia.org/wiki/INI_file",
+      "trivia": "Windows 1.0 (1985) popularized <code>.ini</code> for application settings; the legacy WinAPI functions <code>GetPrivateProfileString</code> etc. are still documented in <a href=\"https://learn.microsoft.com/windows/win32/api/winbase/\">Windows API documentation</a>.",
+      "aliases": [
+        "conf",
+        "cfg"
+      ],
+      "grammar_repo": "https://github.com/justinmk/tree-sitter-ini",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/pytest.ini",
+          "description": "Combined Python linting config with pycodestyle, flake8, pylint sections and pytest markers."
+        }
+      ]
+    },
+    {
+      "id": "java",
+      "crate": "arborium-java",
+      "name": "Java",
+      "icon": "devicon-plain:java",
+      "tier": 1,
+      "tag": "code",
+      "description": "Object-oriented, class-based language targeting the JVM; authoritative <a href=\"https://docs.oracle.com/javase/specs/\">Java Language Specification</a>.",
+      "inventor": "James Gosling",
+      "year": 1995,
+      "link": "https://en.wikipedia.org/wiki/Java_(programming_language)",
+      "trivia": "Started as 'Oak' then renamed Java after Java coffee; the 'write once, run anywhere' mantra comes from Sun's 1995 launch. The <a href=\"https://docs.oracle.com/javase/specs/\">Java Language Specification</a> defines the language across versions.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-java",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Vet.java",
+          "description": "Spring Petclinic domain entity using annotations, collections, comparators."
+        }
+      ]
+    },
+    {
+      "id": "javascript",
+      "crate": "arborium-javascript",
+      "name": "JavaScript",
+      "icon": "devicon-plain:javascript",
+      "tier": 1,
+      "tag": "code",
+      "description": "High-level, dynamic language for the web and beyond; the current <a href=\"https://tc39.es/ecma262/\">ECMAScript specification</a>.",
+      "inventor": "Brendan Eich",
+      "year": 1995,
+      "link": "https://en.wikipedia.org/wiki/JavaScript",
+      "trivia": "Eich created JavaScript in 10 days at Netscape in May 1995; it shipped in Netscape Navigator 2.0. TC39 now standardizes it via <a href=\"https://tc39.es/ecma262/\">ECMAScript specification</a>, and the official name of the language is ECMAScript.",
+      "aliases": [
+        "js",
+        "jsx",
+        "mjs",
+        "cjs"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-javascript",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/x-model.js",
+          "description": "Alpine.js x-model directive with reactivity, DOM binding, and event handling."
+        }
+      ]
+    },
+    {
+      "id": "jinja2",
+      "crate": "arborium-jinja2",
+      "name": "Jinja2",
+      "icon": "mdi:code-braces",
+      "tier": 5,
+      "tag": "markup",
+      "description": "Python templating engine inspired by Django; <a href=\"https://jinja.palletsprojects.com/\">official docs</a>.",
+      "inventor": "Armin Ronacher",
+      "year": 2008,
+      "link": "https://en.wikipedia.org/wiki/Jinja_(template_engine)",
+      "trivia": "Named after the Jinja shrine; released as part of the Pocoo suite. See the <a href=\"https://jinja.palletsprojects.com/en/stable/#design-goals\">design goals</a> and early release history in the docs.",
+      "aliases": [
+        "jinja",
+        "j2"
+      ],
+      "grammar_repo": "https://github.com/dbt-labs/tree-sitter-jinja2",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/admin-base.html",
+          "description": "Django admin base template with blocks, conditionals, i18n, and component includes."
+        }
+      ]
+    },
+    {
+      "id": "jq",
+      "crate": "arborium-jq",
+      "name": "jq",
+      "icon": "mdi:code-json",
+      "tier": 4,
+      "tag": "query",
+      "description": "Command-line JSON processor; <a href=\"https://stedolan.github.io/jq/manual/\">manual</a> at the official site.",
+      "inventor": "Stephen Dolan",
+      "year": 2012,
+      "link": "https://en.wikipedia.org/wiki/Jq_(programming_language)",
+      "trivia": "jq debuted in 2012 inspired by AWK/sed but for JSON; language features and functions are specified in the <a href=\"https://stedolan.github.io/jq/manual/\">manual</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/flurie/tree-sitter-jq",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/geo.jq",
+          "description": "Geographic calculations in jq - haversine distance, bearing, coordinate conversions."
+        }
+      ]
+    },
+    {
+      "id": "json",
+      "crate": "arborium-json",
+      "name": "JSON",
+      "icon": "mdi:code-json",
+      "tier": 2,
+      "tag": "data",
+      "description": "Lightweight data interchange format; see the <a href=\"https://www.ecma-international.org/publications-and-standards/standards/ecma-404/\">ECMA-404 standard</a>.",
+      "inventor": "Douglas Crockford",
+      "year": 2001,
+      "link": "https://en.wikipedia.org/wiki/JSON",
+      "trivia": "Crockford documented JSON in 2001 while at State Software; it was standardized as <a href=\"https://www.rfc-editor.org/rfc/rfc8259\">RFC 8259</a> and <a href=\"https://www.ecma-international.org/publications-and-standards/standards/ecma-404/\">ECMA-404</a>.",
+      "aliases": [
+        "jsonc"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-json",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/package.json",
+          "description": "Vite monorepo package.json with scripts, dependencies, and workspace configuration."
+        }
+      ]
+    },
+    {
+      "id": "julia",
+      "crate": "arborium-julia",
+      "name": "Julia",
+      "icon": "devicon-plain:julia",
+      "tier": 1,
+      "tag": "code",
+      "description": "A high-performance language for numerical and scientific computing with Python-like syntax.",
+      "inventor": "Jeff Bezanson, Stefan Karpinski, Viral B. Shah, Alan Edelman",
+      "year": 2012,
+      "link": "https://en.wikipedia.org/wiki/Julia_(programming_language)",
+      "trivia": "Julia solves the 'two-language problem'—you can prototype in Julia and get C-like speed without rewriting in a lower-level language.",
+      "aliases": [
+        "jl"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-julia",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/array.jl",
+          "description": "Julia's core array implementation with docstrings, macros, and multiple dispatch."
+        }
+      ]
+    },
+    {
+      "id": "kotlin",
+      "crate": "arborium-kotlin",
+      "name": "Kotlin",
+      "icon": "devicon-plain:kotlin",
+      "tier": 1,
+      "tag": "code",
+      "description": "A modern programming language that runs on the JVM, official for Android development",
+      "inventor": "JetBrains",
+      "year": 2011,
+      "link": "https://en.wikipedia.org/wiki/Kotlin_(programming_language)",
+      "trivia": "Kotlin was named after Kotlin Island in the Gulf of Finland, near St. Petersburg, Russia, as an homage similar to Java being named after an Indonesian island. Google announced Kotlin as an official Android development language in 2017, and in 2019 made it the preferred language for Android app development.",
+      "aliases": [
+        "kt",
+        "kts"
+      ],
+      "grammar_repo": "https://github.com/fwcd/tree-sitter-kotlin",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Sequences.kt",
+          "description": "Kotlin standard library sequence operations with lazy evaluation, inline functions, and extension methods."
+        }
+      ]
+    },
+    {
+      "id": "lean",
+      "crate": "arborium-lean",
+      "name": "Lean",
+      "icon": "mdi:alpha-l-box-outline",
+      "tier": 4,
+      "tag": "code",
+      "description": "Proof assistant and functional language based on dependent type theory; <a href=\"https://lean-lang.org/\">official docs</a>.",
+      "inventor": "Leonardo de Moura",
+      "year": 2013,
+      "link": "https://en.wikipedia.org/wiki/Lean_(proof_assistant)",
+      "trivia": "Used to formalize the 2023 Polynomial Freiman–Ruzsa proof by Gowers, Green, Manners, and Tao; the Lean community formalized it in mathlib. mathlib contained over 210,000 theorems as of <a href=\"https://lean-lang.org/blog/2024/05/16/mathlib-200k/\">May 2024</a>; AlphaProof (DeepMind) achieved IMO silver-equivalent performance in <a href=\"https://www.deepmind.com/blog/alphaproof-ai-for-mathematical-reasoning\">2024</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/Julian/tree-sitter-lean",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/bintree.lean",
+          "description": "Lean 4 example defining binary trees, recursion, and proofs."
+        }
+      ]
+    },
+    {
+      "id": "lua",
+      "crate": "arborium-lua",
+      "name": "Lua",
+      "icon": "devicon-plain:lua",
+      "tier": 1,
+      "tag": "code",
+      "description": "Lightweight embeddable scripting language from PUC-Rio; <a href=\"https://www.lua.org/manual/5.4/\">official reference manual</a>.",
+      "inventor": "Roberto Ierusalimschy, Waldemar Celes, Luiz Henrique de Figueiredo",
+      "year": 1993,
+      "link": "https://en.wikipedia.org/wiki/Lua_(programming_language)",
+      "trivia": "Lua (meaning 'moon' in Portuguese) succeeded SOL ('sun'); see the <a href=\"https://www.lua.org/history.html\">history page</a> and the 1993 technical report introducing Lua.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-lua",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/utf8.lua",
+          "description": "Lua UTF-8 test exercising pattern matching, loops, and standard library calls."
+        }
+      ]
+    },
+    {
+      "id": "markdown",
+      "crate": "arborium-markdown",
+      "name": "Markdown",
+      "icon": "simple-icons:markdown",
+      "tier": 2,
+      "tag": "markup",
+      "description": "Lightweight markup language for plain-text formatting; original spec on <a href=\"https://daringfireball.net/projects/markdown/\">Gruber's site</a>.",
+      "inventor": "John Gruber and Aaron Swartz",
+      "year": 2004,
+      "link": "https://en.wikipedia.org/wiki/Markdown",
+      "trivia": "Gruber published Markdown 1.0 with Swartz as beta tester in 2004; the canonical description and reference implementation are on <a href=\"https://daringfireball.net/projects/markdown/\">Gruber's site</a>.",
+      "aliases": [
+        "md",
+        "mdx"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-markdown",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/rust-readme.md",
+          "description": "Rust language README with headings, lists, links, images, and code fences."
+        }
+      ]
+    },
+    {
+      "id": "matlab",
+      "crate": "arborium-matlab",
+      "name": "MATLAB",
+      "icon": "devicon-plain:matlab",
+      "tier": 4,
+      "tag": "code",
+      "description": "A numerical computing environment and programming language for matrix operations and data visualization.",
+      "inventor": "Cleve Moler",
+      "year": 1984,
+      "link": "https://en.wikipedia.org/wiki/MATLAB",
+      "trivia": "MATLAB was originally written to give students access to LINPACK and EISPACK without learning Fortran—the name means 'MATrix LABoratory.'",
+      "aliases": [
+        "m"
+      ],
+      "grammar_repo": "https://github.com/acristoffers/tree-sitter-matlab",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/fft_example.m",
+          "description": "FFT signal analysis with functions, plotting, and matrix operations."
+        }
+      ]
+    },
+    {
+      "id": "meson",
+      "crate": "arborium-meson",
+      "name": "Meson",
+      "icon": "mdi:hammer-wrench",
+      "tier": 4,
+      "tag": "build",
+      "description": "Fast, user-friendly build system using Ninja backend; official docs at <a href=\"https://mesonbuild.com/Manual.html\">mesonbuild.com</a>.",
+      "inventor": "Jussi Pakkanen",
+      "year": 2013,
+      "link": "https://en.wikipedia.org/wiki/Meson_(software)",
+      "trivia": "Pakkanen published Meson in Feb 2013; see the <a href=\"https://nibblestew.blogspot.com/2013/02/introducing-meson-build-system.html\">announcement blog post</a> and the manual highlighting sub-1s configure times.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-meson",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/meson.build",
+          "description": "Real-world Meson build with MSVC/GCC detection, subprojects, and conditional dependencies."
+        }
+      ]
+    },
+    {
+      "id": "nginx",
+      "crate": "arborium-nginx",
+      "name": "nginx",
+      "icon": "simple-icons:nginx",
+      "tier": 5,
+      "tag": "config",
+      "description": "Configuration language for the nginx web server; official reference at <a href=\"https://nginx.org/en/docs/dirindex.html\">nginx.org</a>.",
+      "inventor": "Igor Sysoev",
+      "year": 2004,
+      "link": "https://en.wikipedia.org/wiki/Nginx",
+      "trivia": "Sysoev began nginx in 2002; first public release in 2004. The configuration syntax is documented in the <a href=\"https://nginx.org/en/docs/\">official documentation</a>.",
+      "aliases": [],
+      "grammar_repo": "https://gitlab.com/joncoole/tree-sitter-nginx",
+      "grammar_license": "GPL-3.0",
+      "samples": [
+        {
+          "path": "samples/nginx.conf",
+          "description": "H5BP nginx.conf with includes, gzip, SSL, maps, and logging directives."
+        }
+      ]
+    },
+    {
+      "id": "ninja",
+      "crate": "arborium-ninja",
+      "name": "Ninja",
+      "icon": "mdi:ninja",
+      "tier": 4,
+      "tag": "build",
+      "description": "A small, fast build system focused on speed, designed as a backend for higher-level build systems.",
+      "inventor": "Evan Martin",
+      "year": 2011,
+      "link": "https://ninja-build.org",
+      "trivia": "Ninja was created at Google to speed up Chrome builds—it's intentionally minimal and meant to be generated by tools like CMake or Meson.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/alemuller/tree-sitter-ninja",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/build.ninja",
+          "description": "Ninja build file with rules, variables, and build edges for C++."
+        }
+      ]
+    },
+    {
+      "id": "nix",
+      "crate": "arborium-nix",
+      "name": "Nix",
+      "icon": "devicon-plain:nixos",
+      "tier": 2,
+      "tag": "config",
+      "description": "Purely functional package manager and language for reproducible builds; see <a href=\"https://edolstra.github.io/pubs/phd-thesis.pdf\">Dolstra's PhD thesis</a>.",
+      "inventor": "Eelco Dolstra",
+      "year": 2003,
+      "link": "https://en.wikipedia.org/wiki/Nix_(package_manager)",
+      "trivia": "Nix stores packages in hash-addressed store paths (e.g., /nix/store/...), eliminating dependency hell. The design is formalized in Dolstra's 2006 thesis and underpins NixOS.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/nix-community/tree-sitter-nix",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/buildDepsOnly.nix",
+          "description": "crane helper derivation that builds dependencies only, showing functions, let bindings, overrides, and mkDerivation usage."
+        }
+      ]
+    },
+    {
+      "id": "objc",
+      "crate": "arborium-objc",
+      "name": "Objective-C",
+      "icon": "devicon-plain:objectivec",
+      "tier": 3,
+      "tag": "code",
+      "description": "Object-oriented superset of C used for macOS/iOS; Apple's modern reference is the <a href=\"https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/\">Programming with Objective-C guide</a>.",
+      "inventor": "Brad Cox and Tom Love",
+      "year": 1984,
+      "link": "https://en.wikipedia.org/wiki/Objective-C",
+      "trivia": "Derived from Smalltalk messaging added to C; NeXT licensed it in 1988, leading to its adoption by Apple after 1996—documented in Apple's developer library.",
+      "aliases": [
+        "objective-c",
+        "mm"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-objc",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/RCTLog.mm",
+          "description": "React Native logging utility showing categories, macros, Objective-C classes, and C functions."
+        }
+      ]
+    },
+    {
+      "id": "ocaml",
+      "crate": "arborium-ocaml",
+      "name": "OCaml",
+      "icon": "devicon-plain:ocaml",
+      "tier": 2,
+      "tag": "code",
+      "description": "A multi-paradigm programming language with emphasis on expressiveness and safety",
+      "inventor": "Xavier Leroy, Jérôme Vouillon, Damien Doligez, Didier Rémy",
+      "year": 1996,
+      "link": "https://en.wikipedia.org/wiki/OCaml",
+      "trivia": "The 'O' in OCaml stands for 'Objective', as it was called Objective Caml before 2011. OCaml is used extensively in formal verification and financial trading systems. Jane Street, one of the largest proprietary trading firms, uses OCaml for over 30 million lines of production code.",
+      "aliases": [
+        "ml"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-ocaml",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/option.ml",
+          "description": "OCaml standard library option type with pattern matching, monadic operations, and syntax extensions."
+        }
+      ]
+    },
+    {
+      "id": "perl",
+      "crate": "arborium-perl",
+      "name": "Perl",
+      "icon": "devicon-plain:perl",
+      "tier": 2,
+      "tag": "code",
+      "description": "General-purpose scripting language renowned for text processing; core docs at <a href=\"https://perldoc.perl.org/\">perldoc.perl.org</a>.",
+      "inventor": "Larry Wall",
+      "year": 1987,
+      "link": "https://en.wikipedia.org/wiki/Perl",
+      "trivia": "Wall released Perl 1.0 on 18 Dec 1987; the motto 'There's more than one way to do it' is from the official <a href=\"https://perldoc.perl.org/perlstyle\">perlstyle</a> and <a href=\"https://perldoc.perl.org/perlintro\">perlintro</a> documentation.",
+      "aliases": [
+        "pl",
+        "pm"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-perl/tree-sitter-perl",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/gmtime.pm",
+          "description": "Perl5 Time::gmtime module with exports, OO wrappers, and POD documentation."
+        }
+      ]
+    },
+    {
+      "id": "php",
+      "crate": "arborium-php",
+      "name": "PHP",
+      "icon": "devicon-plain:php",
+      "tier": 2,
+      "tag": "code",
+      "description": "Server-side scripting language; the official manual is at <a href=\"https://www.php.net/manual/en/\">php.net</a>.",
+      "inventor": "Rasmus Lerdorf",
+      "year": 1995,
+      "link": "https://en.wikipedia.org/wiki/PHP",
+      "trivia": "Started as 'Personal Home Page Tools' in 1994/95; renamed 'PHP: Hypertext Preprocessor' in 1997. History is documented in the <a href=\"https://www.php.net/ChangeLog-8.php\">ChangeLog</a> and manual preface.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-php",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/SessionGuard.php",
+          "description": "Laravel SessionGuard with authentication, traits, and typed properties."
+        }
+      ]
+    },
+    {
+      "id": "postscript",
+      "crate": "arborium-postscript",
+      "name": "PostScript",
+      "icon": "mdi:printer",
+      "tier": 5,
+      "tag": "code",
+      "description": "Page description and programming language from Adobe; reference in the <a href=\"https://www.adobe.com/content/dam/acom/en/devnet/actionscript/articles/PLRM.pdf\">PostScript Language Reference Manual</a>.",
+      "inventor": "John Warnock and Charles Geschke",
+      "year": 1984,
+      "link": "https://en.wikipedia.org/wiki/PostScript",
+      "trivia": "Adobe released PostScript in 1984; the LaserWriter (1985) used it to ignite desktop publishing. The 'Red Book' PLRM is the definitive spec.",
+      "aliases": [
+        "ps"
+      ],
+      "grammar_repo": "https://github.com/smoeding/tree-sitter-postscript",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/tiger.ps",
+          "description": "Ghostscript tiger example showcasing PostScript drawing, paths, fills, and strokes."
+        }
+      ]
+    },
+    {
+      "id": "powershell",
+      "crate": "arborium-powershell",
+      "name": "PowerShell",
+      "icon": "devicon-plain:powershell",
+      "tier": 1,
+      "tag": "shell",
+      "description": "Task automation shell and scripting language; official docs at <a href=\"https://learn.microsoft.com/powershell/\">Microsoft Learn</a>.",
+      "inventor": "Jeffrey Snover",
+      "year": 2006,
+      "link": "https://en.wikipedia.org/wiki/PowerShell",
+      "trivia": "Born from Snover's 2002 'Monad Manifesto'; first released 2006. Open-sourced and cross-platform in 2016 as PowerShell Core—see the <a href=\"https://github.com/PowerShell/PowerShell\">PowerShell repository</a>.",
+      "aliases": [
+        "ps1",
+        "pwsh"
+      ],
+      "grammar_repo": "https://github.com/airbus-cert/tree-sitter-powershell",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Get-ChildItem.Tests.ps1",
+          "description": "PowerShell test script exercising cmdlets, parameter sets, error handling, and assertions."
+        }
+      ]
+    },
+    {
+      "id": "prolog",
+      "crate": "arborium-prolog",
+      "name": "Prolog",
+      "icon": "mdi:head-question",
+      "tier": 4,
+      "tag": "code",
+      "description": "Logic programming language for AI and computational linguistics; early definition in Colmerauer's 1972 Marseille reports.",
+      "inventor": "Alain Colmerauer and Philippe Roussel",
+      "year": 1972,
+      "link": "https://en.wikipedia.org/wiki/Prolog",
+      "trivia": "Prolog (PROgrammation en LOGique) emerged in 1972; used in Japan's Fifth Generation Project (1982). The ISO standard is <a href=\"https://www.iso.org/standard/21413.html\">ISO/IEC 13211-1:1995</a>.",
+      "aliases": [
+        "pro"
+      ],
+      "grammar_repo": "https://codeberg.org/foxy/tree-sitter-prolog",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/http_server.pl",
+          "description": "SWI-Prolog HTTP server example with predicates, handlers, and threading."
+        }
+      ]
+    },
+    {
+      "id": "python",
+      "crate": "arborium-python",
+      "name": "Python",
+      "icon": "devicon-plain:python",
+      "tier": 1,
+      "tag": "code",
+      "description": "High-level general-purpose language emphasizing readability; authoritative reference is the <a href=\"https://docs.python.org/3/reference/\">Python Language Reference</a>.",
+      "inventor": "Guido van Rossum",
+      "year": 1991,
+      "link": "https://en.wikipedia.org/wiki/Python_(programming_language)",
+      "trivia": "Named after Monty Python; van Rossum released Python 0.9.0 in Feb 1991. The 'Zen of Python' is documented in <code>import this</code> and <a href=\"https://peps.python.org/pep-0020/\">PEP 20</a>.",
+      "aliases": [
+        "py",
+        "py3",
+        "python3"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-python",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/dynamic_progress.py",
+          "description": "Rich demo showing dynamic progress bars, context managers, multiple progress tasks."
+        }
+      ]
+    },
+    {
+      "id": "query",
+      "crate": "arborium-query",
+      "name": "Tree-sitter Query",
+      "icon": "mdi:file-tree-outline",
+      "tier": 5,
+      "tag": "query",
+      "description": "A S-expression based pattern language for matching nodes in tree-sitter syntax trees.",
+      "inventor": "Max Brunsfeld",
+      "year": 2019,
+      "link": "https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries",
+      "trivia": "Tree-sitter queries power syntax highlighting in editors like Neovim, Helix, and Zed—this is what arborium uses under the hood.",
+      "aliases": [
+        "scm"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-query",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/highlights.scm",
+          "description": "Tree-sitter highlight queries with S-expressions and captures."
+        }
+      ]
+    },
+    {
+      "id": "r",
+      "crate": "arborium-r",
+      "name": "R",
+      "icon": "devicon-plain:r",
+      "tier": 1,
+      "tag": "code",
+      "description": "Language and environment for statistical computing; official manuals at <a href=\"https://cran.r-project.org/manuals.html\">CRAN</a>.",
+      "inventor": "Ross Ihaka and Robert Gentleman",
+      "year": 1993,
+      "link": "https://en.wikipedia.org/wiki/R_(programming_language)",
+      "trivia": "Named for Ross and Robert and as a successor to S; initial public release was 1995. The <a href=\"https://cran.r-project.org/doc/manuals/r-release/R-lang.html\">R Language Definition</a> documents core semantics.",
+      "aliases": [
+        "rlang"
+      ],
+      "grammar_repo": "https://github.com/r-lib/tree-sitter-r",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/detect.R",
+          "description": "stringr functions for detecting patterns; showcases vectorization and tidyverse style."
+        }
+      ]
+    },
+    {
+      "id": "rescript",
+      "crate": "arborium-rescript",
+      "name": "ReScript",
+      "icon": "simple-icons:rescript",
+      "tier": 4,
+      "tag": "code",
+      "description": "Functional language that compiles to JavaScript, evolved from BuckleScript/Reason; docs at <a href=\"https://rescript-lang.org/docs/latest\">rescript-lang.org</a>.",
+      "inventor": "Hongbo Zhang and the ReScript team",
+      "year": 2020,
+      "link": "https://rescript-lang.org/",
+      "trivia": "Rebranded from BuckleScript/Reason in 2020 to focus on a JS-centric pipeline; see the <a href=\"https://rescript-lang.org/blog/announcement\">announcement</a> and docs for the syntax and compiler.",
+      "aliases": [
+        "res"
+      ],
+      "grammar_repo": "https://github.com/rescript-lang/tree-sitter-rescript",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Core__Array.res",
+          "description": "ReScript Core array module with external bindings, recursive functions, and comparisons."
+        }
+      ]
+    },
+    {
+      "id": "ron",
+      "crate": "arborium-ron",
+      "name": "RON",
+      "icon": "devicon-plain:rust",
+      "tier": 4,
+      "tag": "data",
+      "description": "Rusty Object Notation, a Rust-friendly data format; reference at <a href=\"https://docs.rs/ron/latest/ron/\">docs.rs/ron</a>.",
+      "inventor": "kvark and torkleyy",
+      "year": 2015,
+      "link": "https://github.com/ron-rs/ron",
+      "trivia": "Designed for a (canceled) game project and revived by the Rust community; features trailing commas, comments, and Rust-like enums—see the <a href=\"https://docs.rs/ron\">crate docs</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-ron",
+      "grammar_license": "MIT OR Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/kits.ron",
+          "description": "Veloren game server kit definitions with nested item tuples, comments, and RON extensions."
+        }
+      ]
+    },
+    {
+      "id": "ruby",
+      "crate": "arborium-ruby",
+      "name": "Ruby",
+      "icon": "devicon-plain:ruby",
+      "tier": 1,
+      "tag": "code",
+      "description": "A dynamic, object-oriented language designed for programmer happiness and productivity.",
+      "inventor": "Yukihiro Matsumoto",
+      "year": 1995,
+      "link": "https://en.wikipedia.org/wiki/Ruby_(programming_language)",
+      "trivia": "Matz (Yukihiro Matsumoto) chose the name Ruby as a playful reference to Perl—ruby is a precious stone, like pearl.",
+      "aliases": [
+        "rb"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-ruby",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/inflector_methods.rb",
+          "description": "Rails ActiveSupport inflector with pluralize, singularize, and camelize methods."
+        }
+      ]
+    },
+    {
+      "id": "rust",
+      "crate": "arborium-rust",
+      "name": "Rust",
+      "icon": "devicon-plain:rust",
+      "tier": 1,
+      "tag": "code",
+      "description": "Systems language focused on safety and performance without GC; official docs at <a href=\"https://doc.rust-lang.org/book/\">The Rust Book</a>.",
+      "inventor": "Graydon Hoare",
+      "year": 2006,
+      "link": "https://en.wikipedia.org/wiki/Rust_(programming_language)",
+      "trivia": "Hoare began Rust as a side project at Mozilla in 2006; it became a Mozilla-backed project in 2009. The ownership/borrow checker model is documented in the <a href=\"https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html\">Understanding Ownership chapter</a>.",
+      "aliases": [
+        "rs"
+      ],
+      "grammar_repo": "https://codeberg.org/grammar-orchard/tree-sitter-rust-orchard",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/expl_impl_clone_on_copy.rs",
+          "description": "Clippy lint implementation with trait checking, generic handling, and diagnostics."
+        }
+      ]
+    },
+    {
+      "id": "scala",
+      "crate": "arborium-scala",
+      "name": "Scala",
+      "icon": "devicon-plain:scala",
+      "tier": 2,
+      "tag": "code",
+      "description": "Multi-paradigm JVM language blending OO and FP; official docs at <a href=\"https://docs.scala-lang.org/\">docs.scala-lang.org</a>.",
+      "inventor": "Martin Odersky",
+      "year": 2004,
+      "link": "https://en.wikipedia.org/wiki/Scala_(programming_language)",
+      "trivia": "The name abbreviates 'scalable language'; Odersky announced Scala in 2004 after work on Java generics and the Pizza language. The <a href=\"https://docs.scala-lang.org/scala3/reference/\">Scala 3 reference</a> documents current syntax and features.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-scala",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/ResultResolver.scala",
+          "description": "Sangria GraphQL result resolver with pattern matching, options, and marshallers."
+        }
+      ]
+    },
+    {
+      "id": "scheme",
+      "crate": "arborium-scheme",
+      "name": "Scheme",
+      "icon": "mdi:lambda",
+      "tier": 2,
+      "tag": "code",
+      "description": "A minimalist dialect of Lisp with lexical scope, first-class procedures, and tail-call optimization",
+      "inventor": "Guy L. Steele Jr., Gerald Jay Sussman",
+      "year": 1975,
+      "link": "https://en.wikipedia.org/wiki/Scheme_(programming_language)",
+      "trivia": "Scheme was created at MIT AI Lab and influenced the design of many languages including JavaScript (which borrowed first-class functions and closures). The language was intentionally small - the original spec fit on 50 pages. Scheme's name comes from 'Schemer', after the AI language Planner, but was shortened due to filename length limits.",
+      "aliases": [
+        "ss",
+        "rkt"
+      ],
+      "grammar_repo": "https://github.com/6cdh/tree-sitter-scheme",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/list.rkt",
+          "description": "Racket list utilities with macros, recursive functions, tail-call optimization, and comprehensive error handling."
+        }
+      ]
+    },
+    {
+      "id": "scss",
+      "crate": "arborium-scss",
+      "name": "SCSS",
+      "icon": "simple-icons:sass",
+      "tier": 3,
+      "tag": "markup",
+      "description": "Sass/SCSS is a CSS superset adding variables, nesting, and mixins; see the official <a href=\"https://sass-lang.com/documentation/\">documentation</a>.",
+      "inventor": "Hampton Catlin, Natalie Weizenbaum, Chris Eppstein",
+      "year": 2006,
+      "link": "https://en.wikipedia.org/wiki/Sass_(style_sheet_language)",
+      "trivia": "SCSS syntax arrived with Sass 3 (2010) to mirror CSS; history and design notes are in the <a href=\"https://sass-lang.com/blog/\">Sass blog</a> and <a href=\"https://sass-lang.com/documentation/syntax\">syntax documentation</a>.",
+      "aliases": [
+        "sass"
+      ],
+      "grammar_repo": "https://github.com/serenadeai/tree-sitter-scss",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/_buttons.scss",
+          "description": "Bootstrap buttons partial with variables, mixins, nesting, and interpolation."
+        }
+      ]
+    },
+    {
+      "id": "solidity",
+      "crate": "arborium-solidity",
+      "name": "Solidity",
+      "icon": "devicon-plain:solidity",
+      "tier": 2,
+      "tag": "code",
+      "description": "Solidity is a programming language for implementing smart contracts on various blockchain platforms, most notably, Ethereum.",
+      "inventor": "Gavin Wood",
+      "year": 2014,
+      "link": "https://en.wikipedia.org/wiki/Solidity",
+      "trivia": "Solidity doesn't have native support for floating-point numbers by design. Floating-point arithmetic can produce slightly different results on different machines, which would break blockchain consensus, so everything is done with integers and fixed-point math.",
+      "aliases": [
+        "sol"
+      ],
+      "grammar_repo": "https://github.com/JoranHonig/tree-sitter-solidity",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/example.sol",
+          "description": "Typical contract found in the widely used OpenZeppelin library, making use of multiple language features like inline assembly and inheritance"
+        }
+      ]
+    },
+    {
+      "id": "sparql",
+      "crate": "arborium-sparql",
+      "name": "SPARQL",
+      "icon": "mdi:graph-outline",
+      "tier": 5,
+      "tag": "query",
+      "description": "A query language for retrieving and manipulating data stored in RDF (Resource Description Framework) format.",
+      "inventor": "W3C RDF Data Access Working Group",
+      "year": 2008,
+      "link": "https://en.wikipedia.org/wiki/SPARQL",
+      "trivia": "SPARQL is a recursive acronym: 'SPARQL Protocol and RDF Query Language'—it powers knowledge graphs like Wikidata and DBpedia.",
+      "aliases": [
+        "rq"
+      ],
+      "grammar_repo": "https://github.com/GordianDziwis/tree-sitter-sparql",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/query.sparql",
+          "description": "SPARQL queries with SELECT, CONSTRUCT, FILTER, and aggregations."
+        }
+      ]
+    },
+    {
+      "id": "sql",
+      "crate": "arborium-sql",
+      "name": "SQL",
+      "icon": "mdi:database-outline",
+      "tier": 2,
+      "tag": "query",
+      "description": "Structured Query Language for relational databases; standardized by ANSI/ISO, see <a href=\"https://www.iso.org/standard/63555.html\">ISO/IEC 9075</a> (paywalled) and <a href=\"https://sqlite.org/lang.html\">SQLite documentation</a> as an open reference.",
+      "inventor": "Donald D. Chamberlin and Raymond F. Boyce",
+      "year": 1974,
+      "link": "https://en.wikipedia.org/wiki/SQL",
+      "trivia": "Initially called SEQUEL at IBM for System R; trademark issues shortened it to SQL. Early history is recounted in Chamberlin's paper 'SEQUEL: A Structured English Query Language'.",
+      "aliases": [
+        "mysql",
+        "postgresql",
+        "postgres",
+        "sqlite"
+      ],
+      "grammar_repo": "https://github.com/DerekStride/tree-sitter-sql",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/join.sql",
+          "description": "PostgreSQL regression test covering joins, lateral, outer joins, aggregates, and set operations."
+        }
+      ]
+    },
+    {
+      "id": "ssh-config",
+      "crate": "arborium-ssh-config",
+      "name": "SSH Config",
+      "icon": "mdi:key-chain",
+      "tier": 5,
+      "tag": "config",
+      "description": "Configuration file format for OpenSSH client settings like hosts, keys, and connection options.",
+      "inventor": "Tatu Ylönen",
+      "year": 1995,
+      "link": "https://man.openbsd.org/ssh_config",
+      "trivia": "SSH was created in 1995 after a password-sniffing attack at Helsinki University of Technology prompted Tatu Ylönen to develop a secure replacement for rlogin.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/ObserverOfTime/tree-sitter-ssh-config",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/config",
+          "description": "SSH client configuration with hosts, identity files, and forwarding."
+        }
+      ]
+    },
+    {
+      "id": "starlark",
+      "crate": "arborium-starlark",
+      "name": "Starlark",
+      "icon": "mdi:star-outline",
+      "tier": 4,
+      "tag": "build",
+      "description": "Deterministic, hermetic build language used by Bazel/Buck2; spec at <a href=\"https://bazel.build/rules/language\">bazel.build/rules/language</a>.",
+      "inventor": "Laurent Le Brun and Google",
+      "year": 2015,
+      "link": "https://en.wikipedia.org/wiki/Starlark",
+      "trivia": "Originally named Skylark (2015), renamed Starlark in 2018; deterministic semantics documented in the <a href=\"https://bazel.build/rules/language\">Bazel language guide</a>.",
+      "aliases": [
+        "bzl",
+        "bazel"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-starlark",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/http.bzl",
+          "description": "Bazel repository rule definitions using load, attrs, functions, and repository_ctx."
+        }
+      ]
+    },
+    {
+      "id": "svelte",
+      "crate": "arborium-svelte",
+      "name": "Svelte",
+      "icon": "devicon-plain:svelte",
+      "tier": 3,
+      "tag": "markup",
+      "description": "Compiler-based UI framework that outputs minimal JS; official tutorial at <a href=\"https://svelte.dev/docs/introduction\">svelte.dev</a>.",
+      "inventor": "Rich Harris",
+      "year": 2016,
+      "link": "https://en.wikipedia.org/wiki/Svelte",
+      "trivia": "Harris announced Svelte in 2016 to eliminate the virtual DOM; the <a href=\"https://svelte.dev/blog\">Svelte blog</a> covers milestones like SvelteKit and run-time improvements.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-svelte",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/App.svelte",
+          "description": "Svelte starter component with props, scoped styles, and reactive declarations."
+        }
+      ]
+    },
+    {
+      "id": "swift",
+      "crate": "arborium-swift",
+      "name": "Swift",
+      "icon": "devicon-plain:swift",
+      "tier": 1,
+      "tag": "code",
+      "description": "A powerful and intuitive programming language for Apple platforms",
+      "inventor": "Chris Lattner",
+      "year": 2014,
+      "link": "https://en.wikipedia.org/wiki/Swift_(programming_language)",
+      "trivia": "Chris Lattner started Swift as a personal project in 2010 while working at Apple, spending 18 months on it before getting approval to make it official. He also created LLVM and Clang. Swift was designed to be a safer language than Objective-C, eliminating entire categories of bugs through features like optionals and automatic memory management.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/alex-pinkus/tree-sitter-swift",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/DirectoryConfiguration.swift",
+          "description": "Vapor directory configuration with platform-specific imports, working directory detection, and string extensions."
+        }
+      ]
+    },
+    {
+      "id": "textproto",
+      "crate": "arborium-textproto",
+      "name": "Text Proto",
+      "icon": "mdi:message-outline",
+      "tier": 4,
+      "tag": "data",
+      "description": "A human-readable text format for Protocol Buffer messages, commonly used for configuration files.",
+      "inventor": "Google",
+      "year": 2001,
+      "link": "https://github.com/protocolbuffers/protobuf",
+      "trivia": "Protocol Buffers were developed at Google in 2001 and are used for nearly all inter-machine communication at the company.",
+      "aliases": [
+        "pbtxt",
+        "textpb"
+      ],
+      "grammar_repo": "https://github.com/PorterAtGoogle/tree-sitter-textproto",
+      "grammar_license": "ISC",
+      "samples": [
+        {
+          "path": "samples/config.textproto",
+          "description": "Protocol Buffer text format with nested messages and repeated fields."
+        }
+      ]
+    },
+    {
+      "id": "thrift",
+      "crate": "arborium-thrift",
+      "name": "Thrift",
+      "icon": "mdi:swap-horizontal",
+      "tier": 4,
+      "tag": "data",
+      "description": "Interface Definition Language and RPC framework; official Apache docs at <a href=\"https://thrift.apache.org/docs\">thrift.apache.org</a>.",
+      "inventor": "Facebook",
+      "year": 2007,
+      "link": "https://en.wikipedia.org/wiki/Apache_Thrift",
+      "trivia": "Developed at Facebook starting 2006, open-sourced April 2007; entered Apache Incubator in May 2008 and became a TLP in October 2010—see the <a href=\"https://thrift.apache.org/\">Apache Thrift site</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-thrift",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/tutorial.thrift",
+          "description": "Official Apache Thrift tutorial showing services, structs, enums, and exceptions."
+        }
+      ]
+    },
+    {
+      "id": "tlaplus",
+      "crate": "arborium-tlaplus",
+      "name": "TLA+",
+      "icon": "mdi:math-integral",
+      "tier": 4,
+      "tag": "code",
+      "description": "Temporal Logic of Actions (TLA+) for formal specs; the canonical reference is <a href=\"https://lamport.azurewebsites.net/tla/book.html\">Lamport's book</a>.",
+      "inventor": "Leslie Lamport",
+      "year": 1999,
+      "link": "https://en.wikipedia.org/wiki/TLA+",
+      "trivia": "Lamport introduced TLA+ in the late 1990s; AWS famously uses it to find subtle bugs—see Lamport's papers and the TLA+ hyperbook.",
+      "aliases": [
+        "tla"
+      ],
+      "grammar_repo": "https://github.com/tlaplus-community/tree-sitter-tlaplus",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/TwoPhase.tla",
+          "description": "Paxos consensus algorithm specification with message-passing, quorums, and ballot phases."
+        }
+      ]
+    },
+    {
+      "id": "toml",
+      "crate": "arborium-toml",
+      "name": "TOML",
+      "icon": "simple-icons:toml",
+      "tier": 2,
+      "tag": "config",
+      "description": "Tom's Obvious, Minimal Language for configuration; official spec at <a href=\"https://toml.io/en/\">toml.io</a>.",
+      "inventor": "Tom Preston-Werner",
+      "year": 2013,
+      "link": "https://en.wikipedia.org/wiki/TOML",
+      "trivia": "TOML 1.0.0 was released January 2021 after 8 years of iteration; see the spec changelog on <a href=\"https://toml.io/en/v1.0.0\">toml.io</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-toml",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/starship.toml",
+          "description": "Starship Cargo.toml with dependencies, features, and build configuration."
+        }
+      ]
+    },
+    {
+      "id": "tsx",
+      "crate": "arborium-tsx",
+      "name": "TSX",
+      "icon": "simple-icons:react",
+      "tier": 3,
+      "tag": "code",
+      "description": "TypeScript with JSX support for React component development",
+      "inventor": "Facebook (Jordan Walke for React/JSX) + Microsoft (TypeScript)",
+      "year": 2013,
+      "link": "https://en.wikipedia.org/wiki/TypeScript",
+      "trivia": "TSX combines TypeScript's static type checking with JSX's declarative UI syntax. JSX was introduced by Facebook for React in 2013, and TypeScript added TSX support in 2015 with version 1.6. Today, TSX is the de facto standard for React development in TypeScript codebases.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-typescript",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/basic-query.tsx",
+          "description": "TanStack Query basic example with data fetching, caching, custom hooks, and React components."
+        }
+      ]
+    },
+    {
+      "id": "typescript",
+      "crate": "arborium-typescript",
+      "name": "TypeScript",
+      "icon": "devicon-plain:typescript",
+      "tier": 1,
+      "tag": "code",
+      "description": "Statically typed superset of JavaScript; official handbook at <a href=\"https://www.typescriptlang.org/docs/\">typescriptlang.org</a>.",
+      "inventor": "Anders Hejlsberg",
+      "year": 2012,
+      "link": "https://en.wikipedia.org/wiki/TypeScript",
+      "trivia": "Announced by Microsoft in Oct 2012 to add optional types to JS; design is documented in the TypeScript spec and Handbook.",
+      "aliases": [
+        "ts",
+        "mts",
+        "cts"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-typescript",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/dot-print.ts",
+          "description": "DOT printer for function graphs with generics, async IO, and string templating."
+        }
+      ]
+    },
+    {
+      "id": "typst",
+      "crate": "arborium-typst",
+      "name": "Typst",
+      "icon": "simple-icons:typst",
+      "tier": 3,
+      "tag": "markup",
+      "description": "A modern markup-based typesetting system designed as a faster, friendlier alternative to LaTeX.",
+      "inventor": "Laurenz Mädje and Martin Haug",
+      "year": 2023,
+      "link": "https://typst.app",
+      "trivia": "Typst compiles documents incrementally—changes preview instantly, unlike LaTeX which must recompile the entire document.",
+      "aliases": [
+        "typ"
+      ],
+      "grammar_repo": "https://github.com/uben0/tree-sitter-typst",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/simple.typ",
+          "description": "Polylux presentation theme with slide layouts; showcases Typst's page styling, state management, and function definitions."
+        }
+      ]
+    },
+    {
+      "id": "uiua",
+      "crate": "arborium-uiua",
+      "name": "Uiua",
+      "icon": "mdi:alpha-u-box-outline",
+      "tier": 5,
+      "tag": "code",
+      "description": "A stack-based array programming language with a focus on tacit (point-free) code using Unicode glyphs.",
+      "inventor": "Kai Schmidt",
+      "year": 2023,
+      "link": "https://www.uiua.org",
+      "trivia": "Uiua (pronounced 'wee-wuh') uses Unicode symbols for operations—you can type them with ASCII shortcuts that auto-convert.",
+      "aliases": [
+        "ua"
+      ],
+      "grammar_repo": "https://github.com/shnarazk/tree-sitter-uiua",
+      "grammar_license": "MPL-2.0",
+      "samples": [
+        {
+          "path": "samples/macros.ua",
+          "description": "Uiua array language with stack-based operations and unicode glyphs."
+        }
+      ]
+    },
+    {
+      "id": "vb",
+      "crate": "arborium-vb",
+      "name": "Visual Basic",
+      "icon": "devicon-plain:visualbasic",
+      "tier": 5,
+      "tag": "code",
+      "description": "Visual Basic .NET, object-oriented language for the .NET Framework; language reference at <a href=\"https://learn.microsoft.com/dotnet/visual-basic/\">learn.microsoft.com</a>.",
+      "inventor": "Microsoft",
+      "year": 2002,
+      "link": "https://en.wikipedia.org/wiki/Visual_Basic_(.NET)",
+      "trivia": "Launched with .NET Framework 1.0 in 2002 as a rewrite of VB6; the <a href=\"https://learn.microsoft.com/dotnet/visual-basic/language-reference/\">VB.NET language reference</a> documents syntax changes and OO features.",
+      "aliases": [
+        "vbnet",
+        "visualbasic"
+      ],
+      "grammar_repo": "https://github.com/CodeAnt-AI/tree-sitter-vb-dotnet",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/Math.vb",
+          "description": "Roslyn VB.NET operation factory with Select Case, DirectCast, and compiler internals."
+        }
+      ]
+    },
+    {
+      "id": "verilog",
+      "crate": "arborium-verilog",
+      "name": "Verilog",
+      "icon": "mdi:chip",
+      "tier": 5,
+      "tag": "code",
+      "description": "Hardware description language standardized as <a href=\"https://standards.ieee.org/ieee/1364/2985/\">IEEE 1364</a>.",
+      "inventor": "Phil Moorby and Prabhu Goel",
+      "year": 1984,
+      "link": "https://en.wikipedia.org/wiki/Verilog",
+      "trivia": "Created at Gateway Design Automation (later Cadence) in 1984; became an open IEEE standard in 1995 (IEEE 1364-1995).",
+      "aliases": [
+        "v",
+        "sv",
+        "systemverilog"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter/tree-sitter-verilog",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/lint_style.sv",
+          "description": "CVA6 RISC-V ALU module with parameters, always_comb, generate blocks, and bit manipulation."
+        },
+        {
+          "path": "samples/state_machine.v",
+          "description": "BE-P decoder state machine with always blocks, parameters, and nonblocking assignments."
+        }
+      ]
+    },
+    {
+      "id": "vhdl",
+      "crate": "arborium-vhdl",
+      "name": "VHDL",
+      "icon": "mdi:chip",
+      "tier": 5,
+      "tag": "code",
+      "description": "VHSIC Hardware Description Language; standardized as <a href=\"https://standards.ieee.org/ieee/1076/7424/\">IEEE 1076</a>.",
+      "inventor": "U.S. Department of Defense",
+      "year": 1983,
+      "link": "https://en.wikipedia.org/wiki/VHDL",
+      "trivia": "Developed under the VHSIC program and standardized in 1987 as IEEE 1076; later revisions added numeric_std and child standards.",
+      "aliases": [
+        "vhd"
+      ],
+      "grammar_repo": "https://github.com/alemuller/tree-sitter-vhdl",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/issue1220.vhdl",
+          "description": "GHDL finite state machine test with entity, architecture, process, and case statement."
+        }
+      ]
+    },
+    {
+      "id": "vim",
+      "crate": "arborium-vim",
+      "name": "Vimscript",
+      "icon": "devicon-plain:vim",
+      "tier": 3,
+      "tag": "config",
+      "description": "Scripting language for the Vim editor; see the official Vim documentation at <http://vimdoc.sourceforge.net/>.",
+      "inventor": "Bram Moolenaar",
+      "year": 1991,
+      "link": "https://en.wikipedia.org/wiki/Vim_(text_editor)",
+      "trivia": "Vimscript evolved alongside Vim since 1991; Vim 7 (2006) added major scripting features. Bram maintained Vim until his passing in 2023.",
+      "aliases": [
+        "vimscript",
+        "viml"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-vim",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/plugin.vim",
+          "description": "Vim plugin with functions, autocommands, mappings, and conditionals."
+        }
+      ]
+    },
+    {
+      "id": "vue",
+      "crate": "arborium-vue",
+      "name": "Vue",
+      "icon": "devicon-plain:vuejs",
+      "tier": 3,
+      "tag": "markup",
+      "description": "Progressive JavaScript framework for UIs; official docs at <a href=\"https://vuejs.org/guide/introduction.html\">vuejs.org</a>.",
+      "inventor": "Evan You",
+      "year": 2014,
+      "link": "https://en.wikipedia.org/wiki/Vue.js",
+      "trivia": "You released Vue in Feb 2014 after working on Angular at Google; <a href=\"https://github.com/vuejs/core/releases\">release history</a> and guide document its evolution from 0.10 to Vue 3/4 composition API.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-vue",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/App.vue",
+          "description": "Element Plus Button component with Vue 3 Composition API, TypeScript, and dynamic styling."
+        }
+      ]
+    },
+    {
+      "id": "wit",
+      "crate": "arborium-wit",
+      "name": "WIT",
+      "icon": "simple-icons:webassembly",
+      "tier": 3,
+      "tag": "data",
+      "description": "WebAssembly Interface Types - an interface definition language for the WebAssembly Component Model; spec and docs at <a href=\"https://component-model.bytecodealliance.org/\">component-model.bytecodealliance.org</a>.",
+      "inventor": "Bytecode Alliance",
+      "year": 2021,
+      "link": "https://component-model.bytecodealliance.org/design/wit.html",
+      "trivia": "WIT is part of the WebAssembly Component Model initiative, enabling language-neutral component interfaces; the design doc at <a href=\"https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md\">github.com/WebAssembly/component-model</a> details its syntax and semantics.",
+      "aliases": [
+        "wasm-interface"
+      ],
+      "grammar_repo": "https://github.com/bytecodealliance/tree-sitter-wit",
+      "grammar_license": "Apache-2.0 WITH LLVM-exception",
+      "samples": [
+        {
+          "path": "samples/example.wit",
+          "description": "WIT interface showing records, variants, enums, flags, and type aliases from the Component Model design doc."
+        }
+      ]
+    },
+    {
+      "id": "x86asm",
+      "crate": "arborium-x86asm",
+      "name": "x86 Assembly",
+      "icon": "mdi:memory",
+      "tier": 3,
+      "tag": "code",
+      "description": "Assembly language family for Intel x86; reference manuals at <a href=\"https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html\">Intel SDM</a>.",
+      "inventor": "Intel (Stephen P. Morse et al.)",
+      "year": 1978,
+      "link": "https://en.wikipedia.org/wiki/X86_assembly_language",
+      "trivia": "Built on the 8086 ISA released June 1978; Intel's Software Developer Manuals document backward compatibility that lets 1978-era code run on modern CPUs.",
+      "aliases": [
+        "nasm",
+        "x86"
+      ],
+      "grammar_repo": null,
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/elftest.asm",
+          "description": "NASM ELF test exercising labels, externs, sections, and symbol definitions."
+        }
+      ]
+    },
+    {
+      "id": "xml",
+      "crate": "arborium-xml",
+      "name": "XML",
+      "icon": "devicon-plain:xml",
+      "tier": 3,
+      "tag": "markup",
+      "description": "Extensible Markup Language defined by the W3C XML 1.0 Recommendation.",
+      "inventor": "W3C XML Working Group",
+      "year": 1998,
+      "link": "https://en.wikipedia.org/wiki/XML",
+      "trivia": "Work began in 1996; XML 1.0 became a W3C Recommendation on Feb 10, 1998, led by Bray, Paoli, and Sperberg-McQueen.",
+      "aliases": [
+        "xsl",
+        "xslt",
+        "svg"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-xml",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/pom.xml",
+          "description": "Spring Petclinic Maven POM with dependencies, plugins, profiles, and properties."
+        }
+      ]
+    },
+    {
+      "id": "yaml",
+      "crate": "arborium-yaml",
+      "name": "YAML",
+      "icon": "devicon-plain:yaml",
+      "tier": 2,
+      "tag": "config",
+      "description": "Human-friendly data serialization language; official 1.2 spec at <a href=\"https://yaml.org/spec/1.2.2/\">yaml.org</a>.",
+      "inventor": "Clark Evans, Ingy döt Net, Oren Ben-Kiki",
+      "year": 2001,
+      "link": "https://en.wikipedia.org/wiki/YAML",
+      "trivia": "Originally 'Yet Another Markup Language', later 'YAML Ain't Markup Language'; first proposed in 2001—see the <a href=\"https://yaml.org/spec/history/2001-01.html\">YAML history</a>.",
+      "aliases": [
+        "yml"
+      ],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-yaml",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/bookinfo.yaml",
+          "description": "Istio Bookinfo sample with Services, ServiceAccounts, and Deployments for microservices."
+        }
+      ]
+    },
+    {
+      "id": "yuri",
+      "crate": "arborium-yuri",
+      "name": "Yuri",
+      "icon": "mdi:palette",
+      "tier": 5,
+      "tag": "code",
+      "description": "Yuri shader language; see repository README for current design status.",
+      "inventor": "Yuri contributors",
+      "year": 2024,
+      "link": "https://git.gay/yuri/yuri",
+      "trivia": "Yuri is an in-progress shader language and compiler; the design is not finalized and is released under Apache-2.0.",
+      "aliases": [],
+      "grammar_repo": "https://git.gay/yuri/tree-sitter-yuri",
+      "grammar_license": "Apache-2.0",
+      "samples": [
+        {
+          "path": "samples/example.yuri",
+          "description": "Example Yuri shader demonstrating language syntax."
+        }
+      ]
+    },
+    {
+      "id": "zig",
+      "crate": "arborium-zig",
+      "name": "Zig",
+      "icon": "simple-icons:zig",
+      "tier": null,
+      "tag": "code",
+      "description": "General-purpose systems language focused on simplicity and control; docs at <a href=\"https://ziglang.org/documentation/master/\">ziglang.org</a>.",
+      "inventor": "Andrew Kelley",
+      "year": 2016,
+      "link": "https://en.wikipedia.org/wiki/Zig_(programming_language)",
+      "trivia": "Kelley introduced Zig in 2016 as a C replacement without hidden control flow; the self-hosted compiler milestone is chronicled on the <a href=\"https://ziglang.org/news/\">Zig news</a>.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/tree-sitter-grammars/tree-sitter-zig",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/generic.zig",
+          "description": "Args-lex generic tokenizer with slices, enums, error sets, and comptime parsing."
+        }
+      ]
+    },
+    {
+      "id": "zsh",
+      "crate": "arborium-zsh",
+      "name": "Zsh",
+      "icon": "mdi:console",
+      "tier": 3,
+      "tag": "shell",
+      "description": "Extended Unix shell with rich scripting; reference manual at <a href=\"https://zsh.sourceforge.io/Doc/\">zsh.sourceforge.io</a>.",
+      "inventor": "Paul Falstad",
+      "year": 1990,
+      "link": "https://en.wikipedia.org/wiki/Z_shell",
+      "trivia": "Created by Falstad while at Princeton; named after TA Zhong Shao. The <a href=\"https://zsh.sourceforge.io/FAQ/\">Zsh FAQ</a> documents its history and feature set.",
+      "aliases": [],
+      "grammar_repo": "https://github.com/georgeharker/tree-sitter-zsh",
+      "grammar_license": "MIT",
+      "samples": [
+        {
+          "path": "samples/git.plugin.zsh",
+          "description": "oh-my-zsh git plugin with aliases, functions, and completions."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+# Ninja build file example
+# Build configuration for a C++ project
+
+ninja_required_version = 1.5
+
+# Variables
+cc = clang
+cxx = clang++
+cflags = -Wall -Wextra -O2
+cxxflags = $cflags -std=c++17
+ldflags = -lpthread
+
+builddir = build
+
+# Rules
+rule cc
+  command = $cc $cflags -MMD -MF $out.d -c $in -o $out
+  depfile = $out.d
+  description = CC $out
+
+rule cxx
+  command = $cxx $cxxflags -MMD -MF $out.d -c $in -o $out
+  depfile = $out.d
+  description = CXX $out
+
+rule link
+  command = $cxx $ldflags -o $out $in
+  description = LINK $out
+
+rule ar
+  command = ar rcs $out $in
+  description = AR $out
+
+# Build edges
+build $builddir/main.o: cxx src/main.cpp
+build $builddir/utils.o: cxx src/utils.cpp
+build $builddir/parser.o: cxx src/parser.cpp
+
+build $builddir/libutils.a: ar $builddir/utils.o $builddir/parser.o
+
+build $builddir/app: link $builddir/main.o $builddir/libutils.a
+
+# Phony targets
+build all: phony $builddir/app
+default all

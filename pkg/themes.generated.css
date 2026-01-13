@@ -1,0 +1,6541 @@
+/* Alabaster (light) */
+/* Source: https://github.com/tonsky/vscode-theme-alabaster */
+[data-theme="alabaster"] {
+  background: #f7f7f7;
+  --bg: #f7f7f7;
+  --surface: #eaeaea;
+  color: #000000;
+  --fg: #000000;
+  --accent: #325cc0;
+  --muted: #aa3731;
+}
+[data-theme="alabaster"] a-at {
+  color: #7a3e9d;
+}
+[data-theme="alabaster"] a-co {
+  color: #7a3e9d;
+}
+[data-theme="alabaster"] a-cb {
+  color: #7a3e9d;
+}
+[data-theme="alabaster"] a-fb {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-f {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-fm {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-k {
+  color: #000000;
+}
+[data-theme="alabaster"] a-kc {
+  color: #000000;
+}
+[data-theme="alabaster"] a-ko {
+  color: #000000;
+}
+[data-theme="alabaster"] a-kd {
+  color: #000000;
+}
+[data-theme="alabaster"] a-ke {
+  color: #000000;
+}
+[data-theme="alabaster"] a-kf {
+  color: #000000;
+}
+[data-theme="alabaster"] a-ki {
+  color: #000000;
+}
+[data-theme="alabaster"] a-kp {
+  color: #000000;
+}
+[data-theme="alabaster"] a-kr {
+  color: #000000;
+}
+[data-theme="alabaster"] a-kt {
+  color: #000000;
+}
+[data-theme="alabaster"] a-ky {
+  color: #000000;
+}
+[data-theme="alabaster"] a-o {
+  color: #777777;
+}
+[data-theme="alabaster"] a-pr {
+  color: #000000;
+}
+[data-theme="alabaster"] a-p {
+  color: #777777;
+}
+[data-theme="alabaster"] a-pb {
+  color: #777777;
+}
+[data-theme="alabaster"] a-pd {
+  color: #777777;
+}
+[data-theme="alabaster"] a-ps {
+  color: #777777;
+}
+[data-theme="alabaster"] a-s {
+  color: #448c27;
+}
+[data-theme="alabaster"] a-ss {
+  color: #777777;
+}
+[data-theme="alabaster"] a-tg {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-td {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-te {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-t {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-tb {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-tq {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-v {
+  color: #000000;
+}
+[data-theme="alabaster"] a-vb {
+  color: #7a3e9d;
+}
+[data-theme="alabaster"] a-vp {
+  color: #000000;
+}
+[data-theme="alabaster"] a-c {
+  color: #aa3731;
+}
+[data-theme="alabaster"] a-cd {
+  color: #aa3731;
+}
+[data-theme="alabaster"] a-m {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-l {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-n {
+  color: #7a3e9d;
+}
+[data-theme="alabaster"] a-tl {
+  color: #000000;
+}
+[data-theme="alabaster"] a-em {
+  font-style: italic;
+}
+[data-theme="alabaster"] a-st {
+  font-weight: bold;
+}
+[data-theme="alabaster"] a-tu {
+  color: #325cc0;
+  text-decoration: underline;
+}
+[data-theme="alabaster"] a-tr {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-se {
+  color: #777777;
+}
+[data-theme="alabaster"] a-tt {
+  color: #325cc0;
+  font-weight: bold;
+}
+[data-theme="alabaster"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="alabaster"] a-sp {
+  color: #000000;
+}
+[data-theme="alabaster"] a-in {
+  color: #000000;
+}
+[data-theme="alabaster"] a-sc {
+  color: #000000;
+}
+[data-theme="alabaster"] a-rp {
+  color: #000000;
+}
+[data-theme="alabaster"] a-cn {
+  color: #000000;
+}
+[data-theme="alabaster"] a-ex {
+  color: #000000;
+}
+[data-theme="alabaster"] a-pp {
+  color: #000000;
+}
+[data-theme="alabaster"] a-ch {
+  color: #448c27;
+}
+[data-theme="alabaster"] a-cs {
+  color: #448c27;
+}
+[data-theme="alabaster"] a-vm {
+  color: #000000;
+}
+[data-theme="alabaster"] a-fd {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-tf {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-fc {
+  color: #325cc0;
+}
+[data-theme="alabaster"] a-km {
+  color: #000000;
+}
+[data-theme="alabaster"] a-dr {
+  color: #000000;
+}
+[data-theme="alabaster"] a-rx {
+  color: #448c27;
+}
+
+/* Ayu Dark (dark) */
+/* Source: https://github.com/ayu-theme/ayu-colors */
+[data-theme="ayu-dark"] {
+  background: #0d1017;
+  --bg: #0d1017;
+  --surface: #202329;
+  color: #bfbdb6;
+  --fg: #bfbdb6;
+  --accent: #ffb454;
+  --muted: #626a73;
+}
+[data-theme="ayu-dark"] a-co {
+  color: #d2a6ff;
+}
+[data-theme="ayu-dark"] a-cb {
+  color: #d2a6ff;
+}
+[data-theme="ayu-dark"] a-fb {
+  color: #ffb454;
+}
+[data-theme="ayu-dark"] a-f {
+  color: #ffb454;
+}
+[data-theme="ayu-dark"] a-fm {
+  color: #ffb454;
+}
+[data-theme="ayu-dark"] a-k {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-kc {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-ko {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-kd {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-ke {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-kf {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-ki {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-kp {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-kr {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-kt {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-ky {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-o {
+  color: #f29668;
+}
+[data-theme="ayu-dark"] a-pr {
+  color: #59c2ff;
+}
+[data-theme="ayu-dark"] a-ps {
+  color: #e6b673;
+}
+[data-theme="ayu-dark"] a-s {
+  color: #aad94c;
+}
+[data-theme="ayu-dark"] a-ss {
+  color: #95e6cb;
+}
+[data-theme="ayu-dark"] a-tg {
+  color: #39bae6;
+}
+[data-theme="ayu-dark"] a-td {
+  color: #39bae6;
+}
+[data-theme="ayu-dark"] a-te {
+  color: #39bae6;
+}
+[data-theme="ayu-dark"] a-t {
+  color: #59c2ff;
+}
+[data-theme="ayu-dark"] a-tb {
+  color: #59c2ff;
+}
+[data-theme="ayu-dark"] a-tq {
+  color: #59c2ff;
+}
+[data-theme="ayu-dark"] a-v {
+  color: #bfbdb6;
+}
+[data-theme="ayu-dark"] a-vb {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-vp {
+  color: #bfbdb6;
+}
+[data-theme="ayu-dark"] a-c {
+  color: #626a73;
+  font-style: italic;
+}
+[data-theme="ayu-dark"] a-cd {
+  color: #626a73;
+  font-style: italic;
+}
+[data-theme="ayu-dark"] a-m {
+  color: #ffb454;
+}
+[data-theme="ayu-dark"] a-l {
+  color: #39bae6;
+}
+[data-theme="ayu-dark"] a-n {
+  color: #d2a6ff;
+}
+[data-theme="ayu-dark"] a-tl {
+  color: #bfbdb6;
+}
+[data-theme="ayu-dark"] a-em {
+  font-style: italic;
+}
+[data-theme="ayu-dark"] a-st {
+  font-weight: bold;
+}
+[data-theme="ayu-dark"] a-tu {
+  color: #39bae6;
+  text-decoration: underline;
+}
+[data-theme="ayu-dark"] a-tr {
+  color: #59c2ff;
+}
+[data-theme="ayu-dark"] a-se {
+  color: #95e6cb;
+}
+[data-theme="ayu-dark"] a-tt {
+  color: #59c2ff;
+  font-weight: bold;
+}
+[data-theme="ayu-dark"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="ayu-dark"] a-sp {
+  color: #bfbdb6;
+}
+[data-theme="ayu-dark"] a-in {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-sc {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-rp {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-cn {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-ex {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-pp {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-ch {
+  color: #aad94c;
+}
+[data-theme="ayu-dark"] a-cs {
+  color: #aad94c;
+}
+[data-theme="ayu-dark"] a-vm {
+  color: #bfbdb6;
+}
+[data-theme="ayu-dark"] a-fd {
+  color: #ffb454;
+}
+[data-theme="ayu-dark"] a-tf {
+  color: #59c2ff;
+}
+[data-theme="ayu-dark"] a-fc {
+  color: #ffb454;
+}
+[data-theme="ayu-dark"] a-km {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-dr {
+  color: #ff8f40;
+}
+[data-theme="ayu-dark"] a-rx {
+  color: #aad94c;
+}
+
+/* Ayu Light (light) */
+/* Source: https://github.com/ayu-theme/ayu-colors */
+[data-theme="ayu-light"] {
+  background: #fafafa;
+  --bg: #fafafa;
+  --surface: #ededed;
+  color: #5c6166;
+  --fg: #5c6166;
+  --accent: #f2ae49;
+  --muted: #8a9199;
+}
+[data-theme="ayu-light"] a-co {
+  color: #a37acc;
+}
+[data-theme="ayu-light"] a-cb {
+  color: #a37acc;
+}
+[data-theme="ayu-light"] a-fb {
+  color: #f2ae49;
+}
+[data-theme="ayu-light"] a-f {
+  color: #f2ae49;
+}
+[data-theme="ayu-light"] a-fm {
+  color: #f2ae49;
+}
+[data-theme="ayu-light"] a-k {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-kc {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-ko {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-kd {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-ke {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-kf {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-ki {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-kp {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-kr {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-kt {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-ky {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-o {
+  color: #ed9366;
+}
+[data-theme="ayu-light"] a-pr {
+  color: #399ee6;
+}
+[data-theme="ayu-light"] a-ps {
+  color: #e6ba7e;
+}
+[data-theme="ayu-light"] a-s {
+  color: #86b300;
+}
+[data-theme="ayu-light"] a-ss {
+  color: #4cbf99;
+}
+[data-theme="ayu-light"] a-tg {
+  color: #55b4d4;
+}
+[data-theme="ayu-light"] a-td {
+  color: #55b4d4;
+}
+[data-theme="ayu-light"] a-te {
+  color: #55b4d4;
+}
+[data-theme="ayu-light"] a-t {
+  color: #399ee6;
+}
+[data-theme="ayu-light"] a-tb {
+  color: #399ee6;
+}
+[data-theme="ayu-light"] a-tq {
+  color: #399ee6;
+}
+[data-theme="ayu-light"] a-v {
+  color: #5c6166;
+}
+[data-theme="ayu-light"] a-vb {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-vp {
+  color: #5c6166;
+}
+[data-theme="ayu-light"] a-c {
+  color: #8a9199;
+  font-style: italic;
+}
+[data-theme="ayu-light"] a-cd {
+  color: #8a9199;
+  font-style: italic;
+}
+[data-theme="ayu-light"] a-m {
+  color: #f2ae49;
+}
+[data-theme="ayu-light"] a-l {
+  color: #55b4d4;
+}
+[data-theme="ayu-light"] a-n {
+  color: #a37acc;
+}
+[data-theme="ayu-light"] a-tl {
+  color: #5c6166;
+}
+[data-theme="ayu-light"] a-em {
+  font-style: italic;
+}
+[data-theme="ayu-light"] a-st {
+  font-weight: bold;
+}
+[data-theme="ayu-light"] a-tu {
+  color: #55b4d4;
+  text-decoration: underline;
+}
+[data-theme="ayu-light"] a-tr {
+  color: #399ee6;
+}
+[data-theme="ayu-light"] a-se {
+  color: #4cbf99;
+}
+[data-theme="ayu-light"] a-tt {
+  color: #399ee6;
+  font-weight: bold;
+}
+[data-theme="ayu-light"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="ayu-light"] a-sp {
+  color: #5c6166;
+}
+[data-theme="ayu-light"] a-in {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-sc {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-rp {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-cn {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-ex {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-pp {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-ch {
+  color: #86b300;
+}
+[data-theme="ayu-light"] a-cs {
+  color: #86b300;
+}
+[data-theme="ayu-light"] a-vm {
+  color: #5c6166;
+}
+[data-theme="ayu-light"] a-fd {
+  color: #f2ae49;
+}
+[data-theme="ayu-light"] a-tf {
+  color: #399ee6;
+}
+[data-theme="ayu-light"] a-fc {
+  color: #f2ae49;
+}
+[data-theme="ayu-light"] a-km {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-dr {
+  color: #fa8d3e;
+}
+[data-theme="ayu-light"] a-rx {
+  color: #86b300;
+}
+
+/* Catppuccin Frappé (dark) */
+/* Source: https://github.com/catppuccin/catppuccin */
+[data-theme="catppuccin-frappe"] {
+  background: #303446;
+  --bg: #303446;
+  --surface: #404454;
+  color: #c6d0f5;
+  --fg: #c6d0f5;
+  --accent: #8caaee;
+  --muted: #737994;
+}
+[data-theme="catppuccin-frappe"] a-at {
+  color: #e5c890;
+}
+[data-theme="catppuccin-frappe"] a-co {
+  color: #ef9f76;
+}
+[data-theme="catppuccin-frappe"] a-cb {
+  color: #ef9f76;
+}
+[data-theme="catppuccin-frappe"] a-fb {
+  color: #99d1db;
+}
+[data-theme="catppuccin-frappe"] a-f {
+  color: #8caaee;
+}
+[data-theme="catppuccin-frappe"] a-fm {
+  color: #8caaee;
+}
+[data-theme="catppuccin-frappe"] a-k {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-kc {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-ko {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-kd {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-ke {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-kf {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-ki {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-kp {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-kr {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-kt {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-ky {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-o {
+  color: #81c8be;
+}
+[data-theme="catppuccin-frappe"] a-pr {
+  color: #8caaee;
+}
+[data-theme="catppuccin-frappe"] a-p {
+  color: #949cbb;
+}
+[data-theme="catppuccin-frappe"] a-pb {
+  color: #949cbb;
+}
+[data-theme="catppuccin-frappe"] a-pd {
+  color: #949cbb;
+}
+[data-theme="catppuccin-frappe"] a-ps {
+  color: #f4b8e4;
+}
+[data-theme="catppuccin-frappe"] a-s {
+  color: #a6d189;
+}
+[data-theme="catppuccin-frappe"] a-ss {
+  color: #e78284;
+}
+[data-theme="catppuccin-frappe"] a-tg {
+  color: #8caaee;
+}
+[data-theme="catppuccin-frappe"] a-td {
+  color: #8caaee;
+}
+[data-theme="catppuccin-frappe"] a-te {
+  color: #8caaee;
+}
+[data-theme="catppuccin-frappe"] a-t {
+  color: #e5c890;
+}
+[data-theme="catppuccin-frappe"] a-tb {
+  color: #e5c890;
+}
+[data-theme="catppuccin-frappe"] a-tq {
+  color: #e5c890;
+}
+[data-theme="catppuccin-frappe"] a-v {
+  color: #c6d0f5;
+}
+[data-theme="catppuccin-frappe"] a-vb {
+  color: #e78284;
+}
+[data-theme="catppuccin-frappe"] a-vp {
+  color: #ef9f76;
+}
+[data-theme="catppuccin-frappe"] a-c {
+  color: #737994;
+}
+[data-theme="catppuccin-frappe"] a-cd {
+  color: #737994;
+}
+[data-theme="catppuccin-frappe"] a-m {
+  color: #81c8be;
+}
+[data-theme="catppuccin-frappe"] a-l {
+  color: #f4b8e4;
+}
+[data-theme="catppuccin-frappe"] a-n {
+  color: #ef9f76;
+}
+[data-theme="catppuccin-frappe"] a-tl {
+  color: #c6d0f5;
+}
+[data-theme="catppuccin-frappe"] a-em {
+  font-style: italic;
+}
+[data-theme="catppuccin-frappe"] a-st {
+  font-weight: bold;
+}
+[data-theme="catppuccin-frappe"] a-tu {
+  color: #8caaee;
+  text-decoration: underline;
+}
+[data-theme="catppuccin-frappe"] a-tr {
+  color: #99d1db;
+}
+[data-theme="catppuccin-frappe"] a-se {
+  color: #ef9f76;
+}
+[data-theme="catppuccin-frappe"] a-tt {
+  color: #ca9ee6;
+  font-weight: bold;
+}
+[data-theme="catppuccin-frappe"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="catppuccin-frappe"] a-sp {
+  color: #c6d0f5;
+}
+[data-theme="catppuccin-frappe"] a-in {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-sc {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-rp {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-cn {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-ex {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-pp {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-ch {
+  color: #a6d189;
+}
+[data-theme="catppuccin-frappe"] a-cs {
+  color: #a6d189;
+}
+[data-theme="catppuccin-frappe"] a-vm {
+  color: #c6d0f5;
+}
+[data-theme="catppuccin-frappe"] a-fd {
+  color: #8caaee;
+}
+[data-theme="catppuccin-frappe"] a-tf {
+  color: #e5c890;
+}
+[data-theme="catppuccin-frappe"] a-fc {
+  color: #8caaee;
+}
+[data-theme="catppuccin-frappe"] a-km {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-dr {
+  color: #ca9ee6;
+}
+[data-theme="catppuccin-frappe"] a-rx {
+  color: #a6d189;
+}
+
+/* Catppuccin Latte (light) */
+/* Source: https://github.com/catppuccin/catppuccin */
+[data-theme="catppuccin-latte"] {
+  background: #eff1f5;
+  --bg: #eff1f5;
+  --surface: #e3e4e8;
+  color: #4c4f69;
+  --fg: #4c4f69;
+  --accent: #1e66f5;
+  --muted: #9ca0b0;
+}
+[data-theme="catppuccin-latte"] a-at {
+  color: #df8e1d;
+}
+[data-theme="catppuccin-latte"] a-co {
+  color: #fe640b;
+}
+[data-theme="catppuccin-latte"] a-cb {
+  color: #fe640b;
+}
+[data-theme="catppuccin-latte"] a-fb {
+  color: #04a5e5;
+}
+[data-theme="catppuccin-latte"] a-f {
+  color: #1e66f5;
+}
+[data-theme="catppuccin-latte"] a-fm {
+  color: #1e66f5;
+}
+[data-theme="catppuccin-latte"] a-k {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-kc {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-ko {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-kd {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-ke {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-kf {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-ki {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-kp {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-kr {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-kt {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-ky {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-o {
+  color: #179299;
+}
+[data-theme="catppuccin-latte"] a-pr {
+  color: #1e66f5;
+}
+[data-theme="catppuccin-latte"] a-p {
+  color: #7c7f93;
+}
+[data-theme="catppuccin-latte"] a-pb {
+  color: #7c7f93;
+}
+[data-theme="catppuccin-latte"] a-pd {
+  color: #7c7f93;
+}
+[data-theme="catppuccin-latte"] a-ps {
+  color: #ea76cb;
+}
+[data-theme="catppuccin-latte"] a-s {
+  color: #40a02b;
+}
+[data-theme="catppuccin-latte"] a-ss {
+  color: #d20f39;
+}
+[data-theme="catppuccin-latte"] a-tg {
+  color: #1e66f5;
+}
+[data-theme="catppuccin-latte"] a-td {
+  color: #1e66f5;
+}
+[data-theme="catppuccin-latte"] a-te {
+  color: #1e66f5;
+}
+[data-theme="catppuccin-latte"] a-t {
+  color: #df8e1d;
+}
+[data-theme="catppuccin-latte"] a-tb {
+  color: #df8e1d;
+}
+[data-theme="catppuccin-latte"] a-tq {
+  color: #df8e1d;
+}
+[data-theme="catppuccin-latte"] a-v {
+  color: #4c4f69;
+}
+[data-theme="catppuccin-latte"] a-vb {
+  color: #d20f39;
+}
+[data-theme="catppuccin-latte"] a-vp {
+  color: #fe640b;
+}
+[data-theme="catppuccin-latte"] a-c {
+  color: #9ca0b0;
+}
+[data-theme="catppuccin-latte"] a-cd {
+  color: #9ca0b0;
+}
+[data-theme="catppuccin-latte"] a-m {
+  color: #179299;
+}
+[data-theme="catppuccin-latte"] a-l {
+  color: #ea76cb;
+}
+[data-theme="catppuccin-latte"] a-n {
+  color: #fe640b;
+}
+[data-theme="catppuccin-latte"] a-tl {
+  color: #4c4f69;
+}
+[data-theme="catppuccin-latte"] a-em {
+  font-style: italic;
+}
+[data-theme="catppuccin-latte"] a-st {
+  font-weight: bold;
+}
+[data-theme="catppuccin-latte"] a-tu {
+  color: #1e66f5;
+  text-decoration: underline;
+}
+[data-theme="catppuccin-latte"] a-tr {
+  color: #04a5e5;
+}
+[data-theme="catppuccin-latte"] a-se {
+  color: #fe640b;
+}
+[data-theme="catppuccin-latte"] a-tt {
+  color: #8839ef;
+  font-weight: bold;
+}
+[data-theme="catppuccin-latte"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="catppuccin-latte"] a-sp {
+  color: #4c4f69;
+}
+[data-theme="catppuccin-latte"] a-in {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-sc {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-rp {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-cn {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-ex {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-pp {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-ch {
+  color: #40a02b;
+}
+[data-theme="catppuccin-latte"] a-cs {
+  color: #40a02b;
+}
+[data-theme="catppuccin-latte"] a-vm {
+  color: #4c4f69;
+}
+[data-theme="catppuccin-latte"] a-fd {
+  color: #1e66f5;
+}
+[data-theme="catppuccin-latte"] a-tf {
+  color: #df8e1d;
+}
+[data-theme="catppuccin-latte"] a-fc {
+  color: #1e66f5;
+}
+[data-theme="catppuccin-latte"] a-km {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-dr {
+  color: #8839ef;
+}
+[data-theme="catppuccin-latte"] a-rx {
+  color: #40a02b;
+}
+
+/* Catppuccin Macchiato (dark) */
+/* Source: https://github.com/catppuccin/catppuccin */
+[data-theme="catppuccin-macchiato"] {
+  background: #24273a;
+  --bg: #24273a;
+  --surface: #353849;
+  color: #cad3f5;
+  --fg: #cad3f5;
+  --accent: #8aadf4;
+  --muted: #6e738d;
+}
+[data-theme="catppuccin-macchiato"] a-at {
+  color: #eed49f;
+}
+[data-theme="catppuccin-macchiato"] a-co {
+  color: #f5a97f;
+}
+[data-theme="catppuccin-macchiato"] a-cb {
+  color: #f5a97f;
+}
+[data-theme="catppuccin-macchiato"] a-fb {
+  color: #91d7e3;
+}
+[data-theme="catppuccin-macchiato"] a-f {
+  color: #8aadf4;
+}
+[data-theme="catppuccin-macchiato"] a-fm {
+  color: #8aadf4;
+}
+[data-theme="catppuccin-macchiato"] a-k {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-kc {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-ko {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-kd {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-ke {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-kf {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-ki {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-kp {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-kr {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-kt {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-ky {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-o {
+  color: #8bd5ca;
+}
+[data-theme="catppuccin-macchiato"] a-pr {
+  color: #8aadf4;
+}
+[data-theme="catppuccin-macchiato"] a-p {
+  color: #939ab7;
+}
+[data-theme="catppuccin-macchiato"] a-pb {
+  color: #939ab7;
+}
+[data-theme="catppuccin-macchiato"] a-pd {
+  color: #939ab7;
+}
+[data-theme="catppuccin-macchiato"] a-ps {
+  color: #f5bde6;
+}
+[data-theme="catppuccin-macchiato"] a-s {
+  color: #a6da95;
+}
+[data-theme="catppuccin-macchiato"] a-ss {
+  color: #ed8796;
+}
+[data-theme="catppuccin-macchiato"] a-tg {
+  color: #8aadf4;
+}
+[data-theme="catppuccin-macchiato"] a-td {
+  color: #8aadf4;
+}
+[data-theme="catppuccin-macchiato"] a-te {
+  color: #8aadf4;
+}
+[data-theme="catppuccin-macchiato"] a-t {
+  color: #eed49f;
+}
+[data-theme="catppuccin-macchiato"] a-tb {
+  color: #eed49f;
+}
+[data-theme="catppuccin-macchiato"] a-tq {
+  color: #eed49f;
+}
+[data-theme="catppuccin-macchiato"] a-v {
+  color: #cad3f5;
+}
+[data-theme="catppuccin-macchiato"] a-vb {
+  color: #ed8796;
+}
+[data-theme="catppuccin-macchiato"] a-vp {
+  color: #f5a97f;
+}
+[data-theme="catppuccin-macchiato"] a-c {
+  color: #6e738d;
+}
+[data-theme="catppuccin-macchiato"] a-cd {
+  color: #6e738d;
+}
+[data-theme="catppuccin-macchiato"] a-m {
+  color: #8bd5ca;
+}
+[data-theme="catppuccin-macchiato"] a-l {
+  color: #f5bde6;
+}
+[data-theme="catppuccin-macchiato"] a-n {
+  color: #f5a97f;
+}
+[data-theme="catppuccin-macchiato"] a-tl {
+  color: #cad3f5;
+}
+[data-theme="catppuccin-macchiato"] a-em {
+  font-style: italic;
+}
+[data-theme="catppuccin-macchiato"] a-st {
+  font-weight: bold;
+}
+[data-theme="catppuccin-macchiato"] a-tu {
+  color: #8aadf4;
+  text-decoration: underline;
+}
+[data-theme="catppuccin-macchiato"] a-tr {
+  color: #91d7e3;
+}
+[data-theme="catppuccin-macchiato"] a-se {
+  color: #f5a97f;
+}
+[data-theme="catppuccin-macchiato"] a-tt {
+  color: #c6a0f6;
+  font-weight: bold;
+}
+[data-theme="catppuccin-macchiato"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="catppuccin-macchiato"] a-sp {
+  color: #cad3f5;
+}
+[data-theme="catppuccin-macchiato"] a-in {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-sc {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-rp {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-cn {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-ex {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-pp {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-ch {
+  color: #a6da95;
+}
+[data-theme="catppuccin-macchiato"] a-cs {
+  color: #a6da95;
+}
+[data-theme="catppuccin-macchiato"] a-vm {
+  color: #cad3f5;
+}
+[data-theme="catppuccin-macchiato"] a-fd {
+  color: #8aadf4;
+}
+[data-theme="catppuccin-macchiato"] a-tf {
+  color: #eed49f;
+}
+[data-theme="catppuccin-macchiato"] a-fc {
+  color: #8aadf4;
+}
+[data-theme="catppuccin-macchiato"] a-km {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-dr {
+  color: #c6a0f6;
+}
+[data-theme="catppuccin-macchiato"] a-rx {
+  color: #a6da95;
+}
+
+/* Catppuccin Mocha (dark) */
+/* Source: https://github.com/catppuccin/catppuccin */
+[data-theme="catppuccin-mocha"] {
+  background: #1e1e2e;
+  --bg: #1e1e2e;
+  --surface: #30303e;
+  color: #cdd6f4;
+  --fg: #cdd6f4;
+  --accent: #89b4fa;
+  --muted: #6c7086;
+}
+[data-theme="catppuccin-mocha"] a-at {
+  color: #f9e2af;
+}
+[data-theme="catppuccin-mocha"] a-co {
+  color: #fab387;
+}
+[data-theme="catppuccin-mocha"] a-cb {
+  color: #fab387;
+}
+[data-theme="catppuccin-mocha"] a-fb {
+  color: #89dceb;
+}
+[data-theme="catppuccin-mocha"] a-f {
+  color: #89b4fa;
+}
+[data-theme="catppuccin-mocha"] a-fm {
+  color: #89b4fa;
+}
+[data-theme="catppuccin-mocha"] a-k {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-kc {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-ko {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-kd {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-ke {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-kf {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-ki {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-kp {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-kr {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-kt {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-ky {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-o {
+  color: #94e2d5;
+}
+[data-theme="catppuccin-mocha"] a-pr {
+  color: #89b4fa;
+}
+[data-theme="catppuccin-mocha"] a-p {
+  color: #9399b2;
+}
+[data-theme="catppuccin-mocha"] a-pb {
+  color: #9399b2;
+}
+[data-theme="catppuccin-mocha"] a-pd {
+  color: #9399b2;
+}
+[data-theme="catppuccin-mocha"] a-ps {
+  color: #f5c2e7;
+}
+[data-theme="catppuccin-mocha"] a-s {
+  color: #a6e3a1;
+}
+[data-theme="catppuccin-mocha"] a-ss {
+  color: #f38ba8;
+}
+[data-theme="catppuccin-mocha"] a-tg {
+  color: #89b4fa;
+}
+[data-theme="catppuccin-mocha"] a-td {
+  color: #89b4fa;
+}
+[data-theme="catppuccin-mocha"] a-te {
+  color: #89b4fa;
+}
+[data-theme="catppuccin-mocha"] a-t {
+  color: #f9e2af;
+}
+[data-theme="catppuccin-mocha"] a-tb {
+  color: #f9e2af;
+}
+[data-theme="catppuccin-mocha"] a-tq {
+  color: #f9e2af;
+}
+[data-theme="catppuccin-mocha"] a-v {
+  color: #cdd6f4;
+}
+[data-theme="catppuccin-mocha"] a-vb {
+  color: #f38ba8;
+}
+[data-theme="catppuccin-mocha"] a-vp {
+  color: #fab387;
+}
+[data-theme="catppuccin-mocha"] a-c {
+  color: #6c7086;
+}
+[data-theme="catppuccin-mocha"] a-cd {
+  color: #6c7086;
+}
+[data-theme="catppuccin-mocha"] a-m {
+  color: #94e2d5;
+}
+[data-theme="catppuccin-mocha"] a-l {
+  color: #f5c2e7;
+}
+[data-theme="catppuccin-mocha"] a-n {
+  color: #fab387;
+}
+[data-theme="catppuccin-mocha"] a-tl {
+  color: #cdd6f4;
+}
+[data-theme="catppuccin-mocha"] a-em {
+  font-style: italic;
+}
+[data-theme="catppuccin-mocha"] a-st {
+  font-weight: bold;
+}
+[data-theme="catppuccin-mocha"] a-tu {
+  color: #89b4fa;
+  text-decoration: underline;
+}
+[data-theme="catppuccin-mocha"] a-tr {
+  color: #89dceb;
+}
+[data-theme="catppuccin-mocha"] a-se {
+  color: #fab387;
+}
+[data-theme="catppuccin-mocha"] a-tt {
+  color: #cba6f7;
+  font-weight: bold;
+}
+[data-theme="catppuccin-mocha"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="catppuccin-mocha"] a-sp {
+  color: #cdd6f4;
+}
+[data-theme="catppuccin-mocha"] a-in {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-sc {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-rp {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-cn {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-ex {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-pp {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-ch {
+  color: #a6e3a1;
+}
+[data-theme="catppuccin-mocha"] a-cs {
+  color: #a6e3a1;
+}
+[data-theme="catppuccin-mocha"] a-vm {
+  color: #cdd6f4;
+}
+[data-theme="catppuccin-mocha"] a-fd {
+  color: #89b4fa;
+}
+[data-theme="catppuccin-mocha"] a-tf {
+  color: #f9e2af;
+}
+[data-theme="catppuccin-mocha"] a-fc {
+  color: #89b4fa;
+}
+[data-theme="catppuccin-mocha"] a-km {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-dr {
+  color: #cba6f7;
+}
+[data-theme="catppuccin-mocha"] a-rx {
+  color: #a6e3a1;
+}
+
+/* Cobalt2 (dark) */
+/* Source: https://github.com/wesbos/cobalt2-vscode */
+[data-theme="cobalt2"] {
+  background: #193549;
+  --bg: #193549;
+  --surface: #2b4557;
+  color: #ffffff;
+  --fg: #ffffff;
+  --accent: #ffc600;
+  --muted: #0088ff;
+}
+[data-theme="cobalt2"] a-at {
+  color: #ffc600;
+}
+[data-theme="cobalt2"] a-co {
+  color: #ff628c;
+}
+[data-theme="cobalt2"] a-cb {
+  color: #ff628c;
+}
+[data-theme="cobalt2"] a-fb {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-f {
+  color: #ffc600;
+}
+[data-theme="cobalt2"] a-fm {
+  color: #ffc600;
+}
+[data-theme="cobalt2"] a-k {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-kc {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-ko {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-kd {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-ke {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-kf {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-ki {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-kp {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-kr {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-kt {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-ky {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-o {
+  color: #ffffff;
+}
+[data-theme="cobalt2"] a-pr {
+  color: #9effff;
+}
+[data-theme="cobalt2"] a-p {
+  color: #ffffff;
+}
+[data-theme="cobalt2"] a-pb {
+  color: #ffffff;
+}
+[data-theme="cobalt2"] a-pd {
+  color: #ffffff;
+}
+[data-theme="cobalt2"] a-ps {
+  color: #9effff;
+}
+[data-theme="cobalt2"] a-s {
+  color: #a5ff90;
+}
+[data-theme="cobalt2"] a-ss {
+  color: #3ad900;
+}
+[data-theme="cobalt2"] a-tg {
+  color: #ffc600;
+}
+[data-theme="cobalt2"] a-td {
+  color: #ffc600;
+}
+[data-theme="cobalt2"] a-te {
+  color: #ffc600;
+}
+[data-theme="cobalt2"] a-t {
+  color: #ff68b8;
+}
+[data-theme="cobalt2"] a-tb {
+  color: #ff68b8;
+}
+[data-theme="cobalt2"] a-tq {
+  color: #ff68b8;
+}
+[data-theme="cobalt2"] a-v {
+  color: #e1efff;
+}
+[data-theme="cobalt2"] a-vb {
+  color: #ff628c;
+}
+[data-theme="cobalt2"] a-vp {
+  color: #e1efff;
+}
+[data-theme="cobalt2"] a-c {
+  color: #0088ff;
+  font-style: italic;
+}
+[data-theme="cobalt2"] a-cd {
+  color: #0088ff;
+  font-style: italic;
+}
+[data-theme="cobalt2"] a-m {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-l {
+  color: #9effff;
+}
+[data-theme="cobalt2"] a-n {
+  color: #ff628c;
+}
+[data-theme="cobalt2"] a-tl {
+  color: #ffffff;
+}
+[data-theme="cobalt2"] a-em {
+  font-style: italic;
+}
+[data-theme="cobalt2"] a-st {
+  font-weight: bold;
+}
+[data-theme="cobalt2"] a-tu {
+  color: #0088ff;
+  text-decoration: underline;
+}
+[data-theme="cobalt2"] a-tr {
+  color: #9effff;
+}
+[data-theme="cobalt2"] a-se {
+  color: #ff628c;
+}
+[data-theme="cobalt2"] a-tt {
+  color: #ffc600;
+  font-weight: bold;
+}
+[data-theme="cobalt2"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="cobalt2"] a-sp {
+  color: #ffffff;
+}
+[data-theme="cobalt2"] a-in {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-sc {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-rp {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-cn {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-ex {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-pp {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-ch {
+  color: #a5ff90;
+}
+[data-theme="cobalt2"] a-cs {
+  color: #a5ff90;
+}
+[data-theme="cobalt2"] a-vm {
+  color: #e1efff;
+}
+[data-theme="cobalt2"] a-fd {
+  color: #ffc600;
+}
+[data-theme="cobalt2"] a-tf {
+  color: #ff68b8;
+}
+[data-theme="cobalt2"] a-fc {
+  color: #ffc600;
+}
+[data-theme="cobalt2"] a-km {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-dr {
+  color: #ff9d00;
+}
+[data-theme="cobalt2"] a-rx {
+  color: #a5ff90;
+}
+
+/* Dayfox (light) */
+/* Source: https://github.com/EdenEast/nightfox.nvim */
+[data-theme="dayfox"] {
+  background: #f6f2ee;
+  --bg: #f6f2ee;
+  --surface: #e9e5e2;
+  color: #3d2b5a;
+  --fg: #3d2b5a;
+  --accent: #2848a9;
+  --muted: #837a72;
+}
+[data-theme="dayfox"] a-at {
+  color: #955f61;
+}
+[data-theme="dayfox"] a-co {
+  color: #287980;
+}
+[data-theme="dayfox"] a-cb {
+  color: #287980;
+}
+[data-theme="dayfox"] a-fb {
+  color: #287980;
+}
+[data-theme="dayfox"] a-f {
+  color: #2848a9;
+}
+[data-theme="dayfox"] a-fm {
+  color: #2848a9;
+}
+[data-theme="dayfox"] a-k {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-kc {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-ko {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-kd {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-ke {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-kf {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-ki {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-kp {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-kr {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-kt {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-ky {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-o {
+  color: #3d2b5a;
+}
+[data-theme="dayfox"] a-pr {
+  color: #287980;
+}
+[data-theme="dayfox"] a-p {
+  color: #824d5b;
+}
+[data-theme="dayfox"] a-pb {
+  color: #824d5b;
+}
+[data-theme="dayfox"] a-pd {
+  color: #824d5b;
+}
+[data-theme="dayfox"] a-ps {
+  color: #a440b5;
+}
+[data-theme="dayfox"] a-s {
+  color: #396847;
+}
+[data-theme="dayfox"] a-ss {
+  color: #955f61;
+}
+[data-theme="dayfox"] a-tg {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-td {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-te {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-t {
+  color: #ac5402;
+}
+[data-theme="dayfox"] a-tb {
+  color: #ac5402;
+}
+[data-theme="dayfox"] a-tq {
+  color: #ac5402;
+}
+[data-theme="dayfox"] a-v {
+  color: #3d2b5a;
+}
+[data-theme="dayfox"] a-vb {
+  color: #a5222f;
+}
+[data-theme="dayfox"] a-vp {
+  color: #643f61;
+}
+[data-theme="dayfox"] a-c {
+  color: #837a72;
+}
+[data-theme="dayfox"] a-cd {
+  color: #837a72;
+}
+[data-theme="dayfox"] a-m {
+  color: #287980;
+}
+[data-theme="dayfox"] a-l {
+  color: #a440b5;
+}
+[data-theme="dayfox"] a-n {
+  color: #955f61;
+}
+[data-theme="dayfox"] a-tl {
+  color: #3d2b5a;
+}
+[data-theme="dayfox"] a-em {
+  font-style: italic;
+}
+[data-theme="dayfox"] a-st {
+  font-weight: bold;
+}
+[data-theme="dayfox"] a-tu {
+  color: #2848a9;
+  text-decoration: underline;
+}
+[data-theme="dayfox"] a-tr {
+  color: #287980;
+}
+[data-theme="dayfox"] a-se {
+  color: #a440b5;
+}
+[data-theme="dayfox"] a-tt {
+  color: #2848a9;
+  font-weight: bold;
+}
+[data-theme="dayfox"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="dayfox"] a-sp {
+  color: #3d2b5a;
+}
+[data-theme="dayfox"] a-in {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-sc {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-rp {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-cn {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-ex {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-pp {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-ch {
+  color: #396847;
+}
+[data-theme="dayfox"] a-cs {
+  color: #396847;
+}
+[data-theme="dayfox"] a-vm {
+  color: #3d2b5a;
+}
+[data-theme="dayfox"] a-fd {
+  color: #2848a9;
+}
+[data-theme="dayfox"] a-tf {
+  color: #ac5402;
+}
+[data-theme="dayfox"] a-fc {
+  color: #2848a9;
+}
+[data-theme="dayfox"] a-km {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-dr {
+  color: #6e33ce;
+}
+[data-theme="dayfox"] a-rx {
+  color: #396847;
+}
+
+/* Desert256 (dark) */
+/* Source: https://github.com/vim-scripts/desert256.vim */
+[data-theme="desert256"] {
+  background: #000000;
+  --bg: #000000;
+  --surface: #141414;
+  color: #cccccc;
+  --fg: #cccccc;
+  --accent: #f0e68c;
+  --muted: #87ceeb;
+}
+[data-theme="desert256"] a-at {
+  color: #cd5c5c;
+}
+[data-theme="desert256"] a-co {
+  color: #ffa0a0;
+}
+[data-theme="desert256"] a-cb {
+  color: #ffa0a0;
+}
+[data-theme="desert256"] a-fb {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-f {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-fm {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-k {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-kc {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-ko {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-kd {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-ke {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-kf {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-ki {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-kp {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-kr {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-kt {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-ky {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-o {
+  color: #cccccc;
+}
+[data-theme="desert256"] a-pr {
+  color: #98fb98;
+}
+[data-theme="desert256"] a-p {
+  color: #cccccc;
+}
+[data-theme="desert256"] a-pb {
+  color: #cccccc;
+}
+[data-theme="desert256"] a-pd {
+  color: #cccccc;
+}
+[data-theme="desert256"] a-ps {
+  color: #ffdead;
+}
+[data-theme="desert256"] a-s {
+  color: #ffa0a0;
+}
+[data-theme="desert256"] a-ss {
+  color: #ffdead;
+}
+[data-theme="desert256"] a-tg {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-td {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-te {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-t {
+  color: #bdb76b;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-tb {
+  color: #bdb76b;
+}
+[data-theme="desert256"] a-tq {
+  color: #bdb76b;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-v {
+  color: #98fb98;
+}
+[data-theme="desert256"] a-vb {
+  color: #ffa0a0;
+}
+[data-theme="desert256"] a-vp {
+  color: #98fb98;
+}
+[data-theme="desert256"] a-c {
+  color: #87ceeb;
+}
+[data-theme="desert256"] a-cd {
+  color: #87ceeb;
+}
+[data-theme="desert256"] a-m {
+  color: #cd5c5c;
+}
+[data-theme="desert256"] a-l {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-n {
+  color: #ffa0a0;
+}
+[data-theme="desert256"] a-tl {
+  color: #cccccc;
+}
+[data-theme="desert256"] a-em {
+  font-style: italic;
+}
+[data-theme="desert256"] a-st {
+  font-weight: bold;
+}
+[data-theme="desert256"] a-tu {
+  color: #87ceeb;
+  text-decoration: underline;
+}
+[data-theme="desert256"] a-tr {
+  color: #87ceeb;
+}
+[data-theme="desert256"] a-se {
+  color: #ffdead;
+}
+[data-theme="desert256"] a-tt {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="desert256"] a-sp {
+  color: #cccccc;
+}
+[data-theme="desert256"] a-in {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-sc {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-rp {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-cn {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-ex {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-pp {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-ch {
+  color: #ffa0a0;
+}
+[data-theme="desert256"] a-cs {
+  color: #ffa0a0;
+}
+[data-theme="desert256"] a-vm {
+  color: #98fb98;
+}
+[data-theme="desert256"] a-fd {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-tf {
+  color: #bdb76b;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-fc {
+  color: #f0e68c;
+}
+[data-theme="desert256"] a-km {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-dr {
+  color: #f0e68c;
+  font-weight: bold;
+}
+[data-theme="desert256"] a-rx {
+  color: #ffa0a0;
+}
+
+/* Dracula (dark) */
+/* Source: https://draculatheme.com */
+[data-theme="dracula"] {
+  background: #282a36;
+  --bg: #282a36;
+  --surface: #393b46;
+  color: #f8f8f2;
+  --fg: #f8f8f2;
+  --accent: #50fa7b;
+  --muted: #6272a4;
+}
+[data-theme="dracula"] a-at {
+  color: #50fa7b;
+}
+[data-theme="dracula"] a-co {
+  color: #bd93f9;
+}
+[data-theme="dracula"] a-cb {
+  color: #bd93f9;
+}
+[data-theme="dracula"] a-fb {
+  color: #8be9fd;
+}
+[data-theme="dracula"] a-f {
+  color: #50fa7b;
+}
+[data-theme="dracula"] a-fm {
+  color: #50fa7b;
+}
+[data-theme="dracula"] a-k {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-kc {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-ko {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-kd {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-ke {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-kf {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-ki {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-kp {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-kr {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-kt {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-ky {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-o {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-pr {
+  color: #8be9fd;
+}
+[data-theme="dracula"] a-p {
+  color: #f8f8f2;
+}
+[data-theme="dracula"] a-pb {
+  color: #f8f8f2;
+}
+[data-theme="dracula"] a-pd {
+  color: #f8f8f2;
+}
+[data-theme="dracula"] a-ps {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-s {
+  color: #f1fa8c;
+}
+[data-theme="dracula"] a-ss {
+  color: #ff5555;
+}
+[data-theme="dracula"] a-tg {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-td {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-te {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-t {
+  color: #8be9fd;
+}
+[data-theme="dracula"] a-tb {
+  color: #8be9fd;
+}
+[data-theme="dracula"] a-tq {
+  color: #8be9fd;
+}
+[data-theme="dracula"] a-v {
+  color: #f8f8f2;
+}
+[data-theme="dracula"] a-vb {
+  color: #bd93f9;
+}
+[data-theme="dracula"] a-vp {
+  color: #ffb86c;
+}
+[data-theme="dracula"] a-c {
+  color: #6272a4;
+}
+[data-theme="dracula"] a-cd {
+  color: #6272a4;
+}
+[data-theme="dracula"] a-m {
+  color: #50fa7b;
+}
+[data-theme="dracula"] a-l {
+  color: #8be9fd;
+}
+[data-theme="dracula"] a-n {
+  color: #bd93f9;
+}
+[data-theme="dracula"] a-tl {
+  color: #f8f8f2;
+}
+[data-theme="dracula"] a-em {
+  font-style: italic;
+}
+[data-theme="dracula"] a-st {
+  font-weight: bold;
+}
+[data-theme="dracula"] a-tu {
+  color: #8be9fd;
+  text-decoration: underline;
+}
+[data-theme="dracula"] a-tr {
+  color: #8be9fd;
+}
+[data-theme="dracula"] a-se {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-tt {
+  color: #bd93f9;
+  font-weight: bold;
+}
+[data-theme="dracula"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="dracula"] a-sp {
+  color: #f8f8f2;
+}
+[data-theme="dracula"] a-in {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-sc {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-rp {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-cn {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-ex {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-pp {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-ch {
+  color: #f1fa8c;
+}
+[data-theme="dracula"] a-cs {
+  color: #f1fa8c;
+}
+[data-theme="dracula"] a-vm {
+  color: #f8f8f2;
+}
+[data-theme="dracula"] a-fd {
+  color: #50fa7b;
+}
+[data-theme="dracula"] a-tf {
+  color: #8be9fd;
+}
+[data-theme="dracula"] a-fc {
+  color: #50fa7b;
+}
+[data-theme="dracula"] a-km {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-dr {
+  color: #ff79c6;
+}
+[data-theme="dracula"] a-rx {
+  color: #f1fa8c;
+}
+
+/* EF Melissa Dark (dark) */
+/* Source: https://protesilaos.com/emacs/ef-themes */
+[data-theme="ef-melissa-dark"] {
+  background: #352718;
+  --bg: #352718;
+  --surface: #45382a;
+  color: #e8e4b1;
+  --fg: #e8e4b1;
+  --accent: #c6a2fe;
+  --muted: #90918a;
+}
+[data-theme="ef-melissa-dark"] a-at {
+  color: #e4b53f;
+}
+[data-theme="ef-melissa-dark"] a-co {
+  color: #6fcad0;
+}
+[data-theme="ef-melissa-dark"] a-cb {
+  color: #6fcad0;
+}
+[data-theme="ef-melissa-dark"] a-fb {
+  color: #f0aac5;
+}
+[data-theme="ef-melissa-dark"] a-f {
+  color: #c6a2fe;
+}
+[data-theme="ef-melissa-dark"] a-fm {
+  color: #c6a2fe;
+}
+[data-theme="ef-melissa-dark"] a-k {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-kc {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-ko {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-kd {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-ke {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-kf {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-ki {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-kp {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-kr {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-kt {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-ky {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-o {
+  color: #ccaa70;
+}
+[data-theme="ef-melissa-dark"] a-pr {
+  color: #7fc5df;
+}
+[data-theme="ef-melissa-dark"] a-p {
+  color: #90918a;
+}
+[data-theme="ef-melissa-dark"] a-pb {
+  color: #90918a;
+}
+[data-theme="ef-melissa-dark"] a-pd {
+  color: #90918a;
+}
+[data-theme="ef-melissa-dark"] a-ps {
+  color: #ff7f7f;
+}
+[data-theme="ef-melissa-dark"] a-s {
+  color: #a0d13a;
+}
+[data-theme="ef-melissa-dark"] a-ss {
+  color: #65d590;
+}
+[data-theme="ef-melissa-dark"] a-tg {
+  color: #e7a06f;
+}
+[data-theme="ef-melissa-dark"] a-td {
+  color: #e7a06f;
+}
+[data-theme="ef-melissa-dark"] a-te {
+  color: #e7a06f;
+}
+[data-theme="ef-melissa-dark"] a-t {
+  color: #70e0cf;
+}
+[data-theme="ef-melissa-dark"] a-tb {
+  color: #6fcad0;
+}
+[data-theme="ef-melissa-dark"] a-tq {
+  color: #70e0cf;
+}
+[data-theme="ef-melissa-dark"] a-v {
+  color: #e8e4b1;
+}
+[data-theme="ef-melissa-dark"] a-vb {
+  color: #ff8f98;
+}
+[data-theme="ef-melissa-dark"] a-vp {
+  color: #dfcfe0;
+}
+[data-theme="ef-melissa-dark"] a-c {
+  color: #90918a;
+  font-style: italic;
+}
+[data-theme="ef-melissa-dark"] a-cd {
+  color: #90918a;
+  font-style: italic;
+}
+[data-theme="ef-melissa-dark"] a-m {
+  color: #fa90aa;
+}
+[data-theme="ef-melissa-dark"] a-l {
+  color: #98bfff;
+}
+[data-theme="ef-melissa-dark"] a-n {
+  color: #62cfef;
+}
+[data-theme="ef-melissa-dark"] a-tl {
+  color: #e8e4b1;
+}
+[data-theme="ef-melissa-dark"] a-em {
+  font-style: italic;
+}
+[data-theme="ef-melissa-dark"] a-st {
+  font-weight: bold;
+}
+[data-theme="ef-melissa-dark"] a-tu {
+  color: #57aff6;
+  text-decoration: underline;
+}
+[data-theme="ef-melissa-dark"] a-tr {
+  color: #7fc5df;
+}
+[data-theme="ef-melissa-dark"] a-se {
+  color: #eab780;
+}
+[data-theme="ef-melissa-dark"] a-tt {
+  color: #e4b53f;
+  font-weight: bold;
+}
+[data-theme="ef-melissa-dark"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="ef-melissa-dark"] a-sp {
+  color: #e8e4b1;
+}
+[data-theme="ef-melissa-dark"] a-in {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-sc {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-rp {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-cn {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-ex {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-pp {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-ch {
+  color: #a0d13a;
+}
+[data-theme="ef-melissa-dark"] a-cs {
+  color: #a0d13a;
+}
+[data-theme="ef-melissa-dark"] a-vm {
+  color: #e8e4b1;
+}
+[data-theme="ef-melissa-dark"] a-fd {
+  color: #c6a2fe;
+}
+[data-theme="ef-melissa-dark"] a-tf {
+  color: #70e0cf;
+}
+[data-theme="ef-melissa-dark"] a-fc {
+  color: #c6a2fe;
+}
+[data-theme="ef-melissa-dark"] a-km {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-dr {
+  color: #ffa21f;
+}
+[data-theme="ef-melissa-dark"] a-rx {
+  color: #a0d13a;
+}
+
+/* GitHub Dark (dark) */
+/* Source: https://github.com/primer/github-vscode-theme */
+[data-theme="github-dark"] {
+  background: #0d1117;
+  --bg: #0d1117;
+  --surface: #202429;
+  color: #c9d1d9;
+  --fg: #c9d1d9;
+  --accent: #d2a8ff;
+  --muted: #8b949e;
+}
+[data-theme="github-dark"] a-at {
+  color: #79c0ff;
+}
+[data-theme="github-dark"] a-co {
+  color: #79c0ff;
+}
+[data-theme="github-dark"] a-cb {
+  color: #79c0ff;
+}
+[data-theme="github-dark"] a-fb {
+  color: #d2a8ff;
+}
+[data-theme="github-dark"] a-f {
+  color: #d2a8ff;
+}
+[data-theme="github-dark"] a-fm {
+  color: #d2a8ff;
+}
+[data-theme="github-dark"] a-k {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-kc {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-ko {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-kd {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-ke {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-kf {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-ki {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-kp {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-kr {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-kt {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-ky {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-o {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-pr {
+  color: #79c0ff;
+}
+[data-theme="github-dark"] a-p {
+  color: #c9d1d9;
+}
+[data-theme="github-dark"] a-pb {
+  color: #c9d1d9;
+}
+[data-theme="github-dark"] a-pd {
+  color: #c9d1d9;
+}
+[data-theme="github-dark"] a-ps {
+  color: #79c0ff;
+}
+[data-theme="github-dark"] a-s {
+  color: #a5d6ff;
+}
+[data-theme="github-dark"] a-ss {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-tg {
+  color: #7ee787;
+}
+[data-theme="github-dark"] a-td {
+  color: #7ee787;
+}
+[data-theme="github-dark"] a-te {
+  color: #7ee787;
+}
+[data-theme="github-dark"] a-t {
+  color: #ffa657;
+}
+[data-theme="github-dark"] a-tb {
+  color: #ffa657;
+}
+[data-theme="github-dark"] a-tq {
+  color: #ffa657;
+}
+[data-theme="github-dark"] a-v {
+  color: #c9d1d9;
+}
+[data-theme="github-dark"] a-vb {
+  color: #ffa657;
+}
+[data-theme="github-dark"] a-vp {
+  color: #ffa657;
+}
+[data-theme="github-dark"] a-c {
+  color: #8b949e;
+}
+[data-theme="github-dark"] a-cd {
+  color: #8b949e;
+}
+[data-theme="github-dark"] a-m {
+  color: #79c0ff;
+}
+[data-theme="github-dark"] a-l {
+  color: #d2a8ff;
+}
+[data-theme="github-dark"] a-n {
+  color: #79c0ff;
+}
+[data-theme="github-dark"] a-tl {
+  color: #c9d1d9;
+}
+[data-theme="github-dark"] a-em {
+  font-style: italic;
+}
+[data-theme="github-dark"] a-st {
+  font-weight: bold;
+}
+[data-theme="github-dark"] a-tu {
+  color: #58a6ff;
+  text-decoration: underline;
+}
+[data-theme="github-dark"] a-tr {
+  color: #d2a8ff;
+}
+[data-theme="github-dark"] a-se {
+  color: #79c0ff;
+}
+[data-theme="github-dark"] a-tt {
+  color: #d2a8ff;
+  font-weight: bold;
+}
+[data-theme="github-dark"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="github-dark"] a-sp {
+  color: #c9d1d9;
+}
+[data-theme="github-dark"] a-in {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-sc {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-rp {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-cn {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-ex {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-pp {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-ch {
+  color: #a5d6ff;
+}
+[data-theme="github-dark"] a-cs {
+  color: #a5d6ff;
+}
+[data-theme="github-dark"] a-vm {
+  color: #c9d1d9;
+}
+[data-theme="github-dark"] a-fd {
+  color: #d2a8ff;
+}
+[data-theme="github-dark"] a-tf {
+  color: #ffa657;
+}
+[data-theme="github-dark"] a-fc {
+  color: #d2a8ff;
+}
+[data-theme="github-dark"] a-km {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-dr {
+  color: #ff7b72;
+}
+[data-theme="github-dark"] a-rx {
+  color: #a5d6ff;
+}
+
+/* GitHub Light (light) */
+/* Source: https://github.com/primer/github-vscode-theme */
+[data-theme="github-light"] {
+  background: #ffffff;
+  --bg: #ffffff;
+  --surface: #f2f2f2;
+  color: #24292f;
+  --fg: #24292f;
+  --accent: #8250df;
+  --muted: #6e7781;
+}
+[data-theme="github-light"] a-at {
+  color: #0550ae;
+}
+[data-theme="github-light"] a-co {
+  color: #0550ae;
+}
+[data-theme="github-light"] a-cb {
+  color: #0550ae;
+}
+[data-theme="github-light"] a-fb {
+  color: #8250df;
+}
+[data-theme="github-light"] a-f {
+  color: #8250df;
+}
+[data-theme="github-light"] a-fm {
+  color: #8250df;
+}
+[data-theme="github-light"] a-k {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-kc {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-ko {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-kd {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-ke {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-kf {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-ki {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-kp {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-kr {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-kt {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-ky {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-o {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-pr {
+  color: #0550ae;
+}
+[data-theme="github-light"] a-p {
+  color: #24292f;
+}
+[data-theme="github-light"] a-pb {
+  color: #24292f;
+}
+[data-theme="github-light"] a-pd {
+  color: #24292f;
+}
+[data-theme="github-light"] a-ps {
+  color: #0550ae;
+}
+[data-theme="github-light"] a-s {
+  color: #0a3069;
+}
+[data-theme="github-light"] a-ss {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-tg {
+  color: #116329;
+}
+[data-theme="github-light"] a-td {
+  color: #116329;
+}
+[data-theme="github-light"] a-te {
+  color: #116329;
+}
+[data-theme="github-light"] a-t {
+  color: #953800;
+}
+[data-theme="github-light"] a-tb {
+  color: #953800;
+}
+[data-theme="github-light"] a-tq {
+  color: #953800;
+}
+[data-theme="github-light"] a-v {
+  color: #24292f;
+}
+[data-theme="github-light"] a-vb {
+  color: #953800;
+}
+[data-theme="github-light"] a-vp {
+  color: #953800;
+}
+[data-theme="github-light"] a-c {
+  color: #6e7781;
+}
+[data-theme="github-light"] a-cd {
+  color: #6e7781;
+}
+[data-theme="github-light"] a-m {
+  color: #0550ae;
+}
+[data-theme="github-light"] a-l {
+  color: #8250df;
+}
+[data-theme="github-light"] a-n {
+  color: #0550ae;
+}
+[data-theme="github-light"] a-tl {
+  color: #24292f;
+}
+[data-theme="github-light"] a-em {
+  font-style: italic;
+}
+[data-theme="github-light"] a-st {
+  font-weight: bold;
+}
+[data-theme="github-light"] a-tu {
+  color: #0969da;
+  text-decoration: underline;
+}
+[data-theme="github-light"] a-tr {
+  color: #8250df;
+}
+[data-theme="github-light"] a-se {
+  color: #0550ae;
+}
+[data-theme="github-light"] a-tt {
+  color: #8250df;
+  font-weight: bold;
+}
+[data-theme="github-light"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="github-light"] a-sp {
+  color: #24292f;
+}
+[data-theme="github-light"] a-in {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-sc {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-rp {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-cn {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-ex {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-pp {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-ch {
+  color: #0a3069;
+}
+[data-theme="github-light"] a-cs {
+  color: #0a3069;
+}
+[data-theme="github-light"] a-vm {
+  color: #24292f;
+}
+[data-theme="github-light"] a-fd {
+  color: #8250df;
+}
+[data-theme="github-light"] a-tf {
+  color: #953800;
+}
+[data-theme="github-light"] a-fc {
+  color: #8250df;
+}
+[data-theme="github-light"] a-km {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-dr {
+  color: #cf222e;
+}
+[data-theme="github-light"] a-rx {
+  color: #0a3069;
+}
+
+/* Gruvbox Dark (dark) */
+/* Source: https://github.com/morhetz/gruvbox */
+[data-theme="gruvbox-dark"] {
+  background: #282828;
+  --bg: #282828;
+  --surface: #393939;
+  color: #ebdbb2;
+  --fg: #ebdbb2;
+  --accent: #8ec07c;
+  --muted: #928374;
+}
+[data-theme="gruvbox-dark"] a-at {
+  color: #fabd2f;
+}
+[data-theme="gruvbox-dark"] a-co {
+  color: #d3869b;
+}
+[data-theme="gruvbox-dark"] a-cb {
+  color: #d3869b;
+}
+[data-theme="gruvbox-dark"] a-fb {
+  color: #8ec07c;
+}
+[data-theme="gruvbox-dark"] a-f {
+  color: #8ec07c;
+}
+[data-theme="gruvbox-dark"] a-fm {
+  color: #8ec07c;
+}
+[data-theme="gruvbox-dark"] a-k {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-kc {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-ko {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-kd {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-ke {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-kf {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-ki {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-kp {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-kr {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-kt {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-ky {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-o {
+  color: #ebdbb2;
+}
+[data-theme="gruvbox-dark"] a-pr {
+  color: #83a598;
+}
+[data-theme="gruvbox-dark"] a-p {
+  color: #ebdbb2;
+}
+[data-theme="gruvbox-dark"] a-pb {
+  color: #ebdbb2;
+}
+[data-theme="gruvbox-dark"] a-pd {
+  color: #ebdbb2;
+}
+[data-theme="gruvbox-dark"] a-ps {
+  color: #fe8019;
+}
+[data-theme="gruvbox-dark"] a-s {
+  color: #b8bb26;
+}
+[data-theme="gruvbox-dark"] a-ss {
+  color: #fe8019;
+}
+[data-theme="gruvbox-dark"] a-tg {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-td {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-te {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-t {
+  color: #fabd2f;
+}
+[data-theme="gruvbox-dark"] a-tb {
+  color: #fabd2f;
+}
+[data-theme="gruvbox-dark"] a-tq {
+  color: #fabd2f;
+}
+[data-theme="gruvbox-dark"] a-v {
+  color: #ebdbb2;
+}
+[data-theme="gruvbox-dark"] a-vb {
+  color: #fe8019;
+}
+[data-theme="gruvbox-dark"] a-vp {
+  color: #83a598;
+}
+[data-theme="gruvbox-dark"] a-c {
+  color: #928374;
+}
+[data-theme="gruvbox-dark"] a-cd {
+  color: #928374;
+}
+[data-theme="gruvbox-dark"] a-m {
+  color: #8ec07c;
+}
+[data-theme="gruvbox-dark"] a-l {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-n {
+  color: #d3869b;
+}
+[data-theme="gruvbox-dark"] a-tl {
+  color: #ebdbb2;
+}
+[data-theme="gruvbox-dark"] a-em {
+  font-style: italic;
+}
+[data-theme="gruvbox-dark"] a-st {
+  font-weight: bold;
+}
+[data-theme="gruvbox-dark"] a-tu {
+  color: #83a598;
+  text-decoration: underline;
+}
+[data-theme="gruvbox-dark"] a-tr {
+  color: #8ec07c;
+}
+[data-theme="gruvbox-dark"] a-se {
+  color: #fe8019;
+}
+[data-theme="gruvbox-dark"] a-tt {
+  color: #b8bb26;
+  font-weight: bold;
+}
+[data-theme="gruvbox-dark"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="gruvbox-dark"] a-sp {
+  color: #ebdbb2;
+}
+[data-theme="gruvbox-dark"] a-in {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-sc {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-rp {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-cn {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-ex {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-pp {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-ch {
+  color: #b8bb26;
+}
+[data-theme="gruvbox-dark"] a-cs {
+  color: #b8bb26;
+}
+[data-theme="gruvbox-dark"] a-vm {
+  color: #ebdbb2;
+}
+[data-theme="gruvbox-dark"] a-fd {
+  color: #8ec07c;
+}
+[data-theme="gruvbox-dark"] a-tf {
+  color: #fabd2f;
+}
+[data-theme="gruvbox-dark"] a-fc {
+  color: #8ec07c;
+}
+[data-theme="gruvbox-dark"] a-km {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-dr {
+  color: #fb4934;
+}
+[data-theme="gruvbox-dark"] a-rx {
+  color: #b8bb26;
+}
+
+/* Gruvbox Light (light) */
+/* Source: https://github.com/morhetz/gruvbox */
+[data-theme="gruvbox-light"] {
+  background: #fbf1c7;
+  --bg: #fbf1c7;
+  --surface: #eee4bd;
+  color: #3c3836;
+  --fg: #3c3836;
+  --accent: #427b58;
+  --muted: #928374;
+}
+[data-theme="gruvbox-light"] a-at {
+  color: #b57614;
+}
+[data-theme="gruvbox-light"] a-co {
+  color: #8f3f71;
+}
+[data-theme="gruvbox-light"] a-cb {
+  color: #8f3f71;
+}
+[data-theme="gruvbox-light"] a-fb {
+  color: #427b58;
+}
+[data-theme="gruvbox-light"] a-f {
+  color: #427b58;
+}
+[data-theme="gruvbox-light"] a-fm {
+  color: #427b58;
+}
+[data-theme="gruvbox-light"] a-k {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-kc {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-ko {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-kd {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-ke {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-kf {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-ki {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-kp {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-kr {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-kt {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-ky {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-o {
+  color: #3c3836;
+}
+[data-theme="gruvbox-light"] a-pr {
+  color: #076678;
+}
+[data-theme="gruvbox-light"] a-p {
+  color: #3c3836;
+}
+[data-theme="gruvbox-light"] a-pb {
+  color: #3c3836;
+}
+[data-theme="gruvbox-light"] a-pd {
+  color: #3c3836;
+}
+[data-theme="gruvbox-light"] a-ps {
+  color: #af3a03;
+}
+[data-theme="gruvbox-light"] a-s {
+  color: #79740e;
+}
+[data-theme="gruvbox-light"] a-ss {
+  color: #af3a03;
+}
+[data-theme="gruvbox-light"] a-tg {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-td {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-te {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-t {
+  color: #b57614;
+}
+[data-theme="gruvbox-light"] a-tb {
+  color: #b57614;
+}
+[data-theme="gruvbox-light"] a-tq {
+  color: #b57614;
+}
+[data-theme="gruvbox-light"] a-v {
+  color: #3c3836;
+}
+[data-theme="gruvbox-light"] a-vb {
+  color: #af3a03;
+}
+[data-theme="gruvbox-light"] a-vp {
+  color: #076678;
+}
+[data-theme="gruvbox-light"] a-c {
+  color: #928374;
+}
+[data-theme="gruvbox-light"] a-cd {
+  color: #928374;
+}
+[data-theme="gruvbox-light"] a-m {
+  color: #427b58;
+}
+[data-theme="gruvbox-light"] a-l {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-n {
+  color: #8f3f71;
+}
+[data-theme="gruvbox-light"] a-tl {
+  color: #3c3836;
+}
+[data-theme="gruvbox-light"] a-em {
+  font-style: italic;
+}
+[data-theme="gruvbox-light"] a-st {
+  font-weight: bold;
+}
+[data-theme="gruvbox-light"] a-tu {
+  color: #076678;
+  text-decoration: underline;
+}
+[data-theme="gruvbox-light"] a-tr {
+  color: #427b58;
+}
+[data-theme="gruvbox-light"] a-se {
+  color: #af3a03;
+}
+[data-theme="gruvbox-light"] a-tt {
+  color: #79740e;
+  font-weight: bold;
+}
+[data-theme="gruvbox-light"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="gruvbox-light"] a-sp {
+  color: #3c3836;
+}
+[data-theme="gruvbox-light"] a-in {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-sc {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-rp {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-cn {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-ex {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-pp {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-ch {
+  color: #79740e;
+}
+[data-theme="gruvbox-light"] a-cs {
+  color: #79740e;
+}
+[data-theme="gruvbox-light"] a-vm {
+  color: #3c3836;
+}
+[data-theme="gruvbox-light"] a-fd {
+  color: #427b58;
+}
+[data-theme="gruvbox-light"] a-tf {
+  color: #b57614;
+}
+[data-theme="gruvbox-light"] a-fc {
+  color: #427b58;
+}
+[data-theme="gruvbox-light"] a-km {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-dr {
+  color: #9d0006;
+}
+[data-theme="gruvbox-light"] a-rx {
+  color: #79740e;
+}
+
+/* Kanagawa Dragon (dark) */
+/* Source: https://github.com/rebelot/kanagawa.nvim */
+[data-theme="kanagawa-dragon"] {
+  background: #181616;
+  --bg: #181616;
+  --surface: #2a2828;
+  color: #c5c9c5;
+  --fg: #c5c9c5;
+  --accent: #8ba4b0;
+  --muted: #625e5a;
+}
+[data-theme="kanagawa-dragon"] a-at {
+  color: #c4b28a;
+}
+[data-theme="kanagawa-dragon"] a-co {
+  color: #b6927b;
+}
+[data-theme="kanagawa-dragon"] a-cb {
+  color: #b6927b;
+}
+[data-theme="kanagawa-dragon"] a-fb {
+  color: #7aa89f;
+}
+[data-theme="kanagawa-dragon"] a-f {
+  color: #8ba4b0;
+}
+[data-theme="kanagawa-dragon"] a-fm {
+  color: #8ba4b0;
+}
+[data-theme="kanagawa-dragon"] a-k {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-kc {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-ko {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-kd {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-ke {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-kf {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-ki {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-kp {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-kr {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-kt {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-ky {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-o {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-pr {
+  color: #c4b28a;
+}
+[data-theme="kanagawa-dragon"] a-p {
+  color: #c5c9c5;
+}
+[data-theme="kanagawa-dragon"] a-pb {
+  color: #c5c9c5;
+}
+[data-theme="kanagawa-dragon"] a-pd {
+  color: #c5c9c5;
+}
+[data-theme="kanagawa-dragon"] a-ps {
+  color: #7aa89f;
+}
+[data-theme="kanagawa-dragon"] a-s {
+  color: #8a9a7b;
+}
+[data-theme="kanagawa-dragon"] a-ss {
+  color: #a292a3;
+}
+[data-theme="kanagawa-dragon"] a-tg {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-td {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-te {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-t {
+  color: #8ea4a2;
+}
+[data-theme="kanagawa-dragon"] a-tb {
+  color: #8ea4a2;
+}
+[data-theme="kanagawa-dragon"] a-tq {
+  color: #8ea4a2;
+}
+[data-theme="kanagawa-dragon"] a-v {
+  color: #c5c9c5;
+}
+[data-theme="kanagawa-dragon"] a-vb {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-vp {
+  color: #9c9c9c;
+}
+[data-theme="kanagawa-dragon"] a-c {
+  color: #625e5a;
+}
+[data-theme="kanagawa-dragon"] a-cd {
+  color: #625e5a;
+}
+[data-theme="kanagawa-dragon"] a-m {
+  color: #7aa89f;
+}
+[data-theme="kanagawa-dragon"] a-l {
+  color: #a292a3;
+}
+[data-theme="kanagawa-dragon"] a-n {
+  color: #a292a3;
+}
+[data-theme="kanagawa-dragon"] a-tl {
+  color: #c5c9c5;
+}
+[data-theme="kanagawa-dragon"] a-em {
+  font-style: italic;
+}
+[data-theme="kanagawa-dragon"] a-st {
+  font-weight: bold;
+}
+[data-theme="kanagawa-dragon"] a-tu {
+  color: #8ba4b0;
+  text-decoration: underline;
+}
+[data-theme="kanagawa-dragon"] a-tr {
+  color: #7aa89f;
+}
+[data-theme="kanagawa-dragon"] a-se {
+  color: #a292a3;
+}
+[data-theme="kanagawa-dragon"] a-tt {
+  color: #8ea4a2;
+  font-weight: bold;
+}
+[data-theme="kanagawa-dragon"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="kanagawa-dragon"] a-sp {
+  color: #c5c9c5;
+}
+[data-theme="kanagawa-dragon"] a-in {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-sc {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-rp {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-cn {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-ex {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-pp {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-ch {
+  color: #8a9a7b;
+}
+[data-theme="kanagawa-dragon"] a-cs {
+  color: #8a9a7b;
+}
+[data-theme="kanagawa-dragon"] a-vm {
+  color: #c5c9c5;
+}
+[data-theme="kanagawa-dragon"] a-fd {
+  color: #8ba4b0;
+}
+[data-theme="kanagawa-dragon"] a-tf {
+  color: #8ea4a2;
+}
+[data-theme="kanagawa-dragon"] a-fc {
+  color: #8ba4b0;
+}
+[data-theme="kanagawa-dragon"] a-km {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-dr {
+  color: #c4746e;
+}
+[data-theme="kanagawa-dragon"] a-rx {
+  color: #8a9a7b;
+}
+
+/* Light Owl (light) */
+/* Source: https://github.com/sdras/night-owl-vscode-theme */
+[data-theme="light-owl"] {
+  background: #fbfbfb;
+  --bg: #fbfbfb;
+  --surface: #eeeeee;
+  color: #403f53;
+  --fg: #403f53;
+  --accent: #4876d6;
+  --muted: #989fb1;
+}
+[data-theme="light-owl"] a-at {
+  color: #4876d6;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-co {
+  color: #4876d6;
+}
+[data-theme="light-owl"] a-cb {
+  color: #4876d6;
+}
+[data-theme="light-owl"] a-fb {
+  color: #4876d6;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-f {
+  color: #4876d6;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-fm {
+  color: #4876d6;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-k {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-kc {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-ko {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-kd {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-ke {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-kf {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-ki {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-kp {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-kr {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-kt {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-ky {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-o {
+  color: #0c969b;
+}
+[data-theme="light-owl"] a-pr {
+  color: #4876d6;
+}
+[data-theme="light-owl"] a-p {
+  color: #403f53;
+}
+[data-theme="light-owl"] a-pb {
+  color: #403f53;
+}
+[data-theme="light-owl"] a-pd {
+  color: #403f53;
+}
+[data-theme="light-owl"] a-ps {
+  color: #0c969b;
+}
+[data-theme="light-owl"] a-s {
+  color: #c96765;
+}
+[data-theme="light-owl"] a-ss {
+  color: #5ca7e4;
+}
+[data-theme="light-owl"] a-tg {
+  color: #994cc3;
+}
+[data-theme="light-owl"] a-td {
+  color: #994cc3;
+}
+[data-theme="light-owl"] a-te {
+  color: #994cc3;
+}
+[data-theme="light-owl"] a-t {
+  color: #111111;
+}
+[data-theme="light-owl"] a-tb {
+  color: #111111;
+}
+[data-theme="light-owl"] a-tq {
+  color: #111111;
+}
+[data-theme="light-owl"] a-v {
+  color: #403f53;
+}
+[data-theme="light-owl"] a-vb {
+  color: #bc5454;
+}
+[data-theme="light-owl"] a-vp {
+  color: #403f53;
+}
+[data-theme="light-owl"] a-c {
+  color: #989fb1;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-cd {
+  color: #989fb1;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-m {
+  color: #994cc3;
+}
+[data-theme="light-owl"] a-l {
+  color: #0c969b;
+}
+[data-theme="light-owl"] a-n {
+  color: #aa0982;
+}
+[data-theme="light-owl"] a-tl {
+  color: #403f53;
+}
+[data-theme="light-owl"] a-em {
+  font-style: italic;
+}
+[data-theme="light-owl"] a-st {
+  font-weight: bold;
+}
+[data-theme="light-owl"] a-tu {
+  color: #4876d6;
+  text-decoration: underline;
+}
+[data-theme="light-owl"] a-tr {
+  color: #4876d6;
+}
+[data-theme="light-owl"] a-se {
+  color: #0c969b;
+}
+[data-theme="light-owl"] a-tt {
+  color: #994cc3;
+  font-weight: bold;
+}
+[data-theme="light-owl"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="light-owl"] a-sp {
+  color: #403f53;
+}
+[data-theme="light-owl"] a-in {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-sc {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-rp {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-cn {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-ex {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-pp {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-ch {
+  color: #c96765;
+}
+[data-theme="light-owl"] a-cs {
+  color: #c96765;
+}
+[data-theme="light-owl"] a-vm {
+  color: #403f53;
+}
+[data-theme="light-owl"] a-fd {
+  color: #4876d6;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-tf {
+  color: #111111;
+}
+[data-theme="light-owl"] a-fc {
+  color: #4876d6;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-km {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-dr {
+  color: #994cc3;
+  font-style: italic;
+}
+[data-theme="light-owl"] a-rx {
+  color: #c96765;
+}
+
+/* Lucius Light (light) */
+/* Source: https://github.com/jonathanfilip/vim-lucius */
+[data-theme="lucius-light"] {
+  background: #eeeeee;
+  --bg: #eeeeee;
+  --surface: #e2e2e2;
+  color: #444444;
+  --fg: #444444;
+  --accent: #008700;
+  --muted: #808080;
+}
+[data-theme="lucius-light"] a-at {
+  color: #008787;
+}
+[data-theme="lucius-light"] a-co {
+  color: #af5f00;
+}
+[data-theme="lucius-light"] a-cb {
+  color: #af5f00;
+}
+[data-theme="lucius-light"] a-fb {
+  color: #008700;
+}
+[data-theme="lucius-light"] a-f {
+  color: #008700;
+}
+[data-theme="lucius-light"] a-fm {
+  color: #008700;
+}
+[data-theme="lucius-light"] a-k {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-kc {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-ko {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-kd {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-ke {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-kf {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-ki {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-kp {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-kr {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-kt {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-ky {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-o {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-pr {
+  color: #008700;
+}
+[data-theme="lucius-light"] a-p {
+  color: #444444;
+}
+[data-theme="lucius-light"] a-pb {
+  color: #444444;
+}
+[data-theme="lucius-light"] a-pd {
+  color: #444444;
+}
+[data-theme="lucius-light"] a-ps {
+  color: #870087;
+}
+[data-theme="lucius-light"] a-s {
+  color: #af5f00;
+}
+[data-theme="lucius-light"] a-ss {
+  color: #870087;
+}
+[data-theme="lucius-light"] a-tg {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-td {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-te {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-t {
+  color: #005f87;
+}
+[data-theme="lucius-light"] a-tb {
+  color: #005f87;
+}
+[data-theme="lucius-light"] a-tq {
+  color: #005f87;
+}
+[data-theme="lucius-light"] a-v {
+  color: #444444;
+}
+[data-theme="lucius-light"] a-vb {
+  color: #870087;
+}
+[data-theme="lucius-light"] a-vp {
+  color: #444444;
+}
+[data-theme="lucius-light"] a-c {
+  color: #808080;
+  font-style: italic;
+}
+[data-theme="lucius-light"] a-cd {
+  color: #808080;
+  font-style: italic;
+}
+[data-theme="lucius-light"] a-m {
+  color: #008787;
+}
+[data-theme="lucius-light"] a-l {
+  color: #008787;
+}
+[data-theme="lucius-light"] a-n {
+  color: #af5f00;
+}
+[data-theme="lucius-light"] a-tl {
+  color: #444444;
+}
+[data-theme="lucius-light"] a-em {
+  font-style: italic;
+}
+[data-theme="lucius-light"] a-st {
+  font-weight: bold;
+}
+[data-theme="lucius-light"] a-tu {
+  color: #005faf;
+  text-decoration: underline;
+}
+[data-theme="lucius-light"] a-tr {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-se {
+  color: #008787;
+}
+[data-theme="lucius-light"] a-tt {
+  color: #005faf;
+  font-weight: bold;
+}
+[data-theme="lucius-light"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="lucius-light"] a-sp {
+  color: #444444;
+}
+[data-theme="lucius-light"] a-in {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-sc {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-rp {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-cn {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-ex {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-pp {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-ch {
+  color: #af5f00;
+}
+[data-theme="lucius-light"] a-cs {
+  color: #af5f00;
+}
+[data-theme="lucius-light"] a-vm {
+  color: #444444;
+}
+[data-theme="lucius-light"] a-fd {
+  color: #008700;
+}
+[data-theme="lucius-light"] a-tf {
+  color: #005f87;
+}
+[data-theme="lucius-light"] a-fc {
+  color: #008700;
+}
+[data-theme="lucius-light"] a-km {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-dr {
+  color: #005faf;
+}
+[data-theme="lucius-light"] a-rx {
+  color: #af5f00;
+}
+
+/* Melange Dark (dark) */
+/* Source: https://github.com/savq/melange-nvim */
+[data-theme="melange-dark"] {
+  background: #292522;
+  --bg: #292522;
+  --surface: #3a3633;
+  color: #ece1d7;
+  --fg: #ece1d7;
+  --accent: #a3a9ce;
+  --muted: #867462;
+}
+[data-theme="melange-dark"] a-at {
+  color: #c1a78e;
+}
+[data-theme="melange-dark"] a-co {
+  color: #cf9bc2;
+}
+[data-theme="melange-dark"] a-cb {
+  color: #cf9bc2;
+}
+[data-theme="melange-dark"] a-fb {
+  color: #a3a9ce;
+}
+[data-theme="melange-dark"] a-f {
+  color: #a3a9ce;
+}
+[data-theme="melange-dark"] a-fm {
+  color: #a3a9ce;
+}
+[data-theme="melange-dark"] a-k {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-kc {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-ko {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-kd {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-ke {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-kf {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-ki {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-kp {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-kr {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-kt {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-ky {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-o {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-pr {
+  color: #c1a78e;
+}
+[data-theme="melange-dark"] a-p {
+  color: #ece1d7;
+}
+[data-theme="melange-dark"] a-pb {
+  color: #ece1d7;
+}
+[data-theme="melange-dark"] a-pd {
+  color: #ece1d7;
+}
+[data-theme="melange-dark"] a-ps {
+  color: #cf9bc2;
+}
+[data-theme="melange-dark"] a-s {
+  color: #85b695;
+}
+[data-theme="melange-dark"] a-ss {
+  color: #d47766;
+}
+[data-theme="melange-dark"] a-tg {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-td {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-te {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-t {
+  color: #c1a78e;
+}
+[data-theme="melange-dark"] a-tb {
+  color: #c1a78e;
+}
+[data-theme="melange-dark"] a-tq {
+  color: #c1a78e;
+}
+[data-theme="melange-dark"] a-v {
+  color: #ece1d7;
+}
+[data-theme="melange-dark"] a-vb {
+  color: #d47766;
+}
+[data-theme="melange-dark"] a-vp {
+  color: #c1a78e;
+}
+[data-theme="melange-dark"] a-c {
+  color: #867462;
+  font-style: italic;
+}
+[data-theme="melange-dark"] a-cd {
+  color: #867462;
+  font-style: italic;
+}
+[data-theme="melange-dark"] a-m {
+  color: #a3a9ce;
+}
+[data-theme="melange-dark"] a-l {
+  color: #cf9bc2;
+}
+[data-theme="melange-dark"] a-n {
+  color: #cf9bc2;
+}
+[data-theme="melange-dark"] a-tl {
+  color: #ece1d7;
+}
+[data-theme="melange-dark"] a-em {
+  font-style: italic;
+}
+[data-theme="melange-dark"] a-st {
+  font-weight: bold;
+}
+[data-theme="melange-dark"] a-tu {
+  color: #a3a9ce;
+  text-decoration: underline;
+}
+[data-theme="melange-dark"] a-tr {
+  color: #a3a9ce;
+}
+[data-theme="melange-dark"] a-se {
+  color: #ebc06d;
+}
+[data-theme="melange-dark"] a-tt {
+  color: #c1a78e;
+  font-weight: bold;
+}
+[data-theme="melange-dark"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="melange-dark"] a-sp {
+  color: #ece1d7;
+}
+[data-theme="melange-dark"] a-in {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-sc {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-rp {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-cn {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-ex {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-pp {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-ch {
+  color: #85b695;
+}
+[data-theme="melange-dark"] a-cs {
+  color: #85b695;
+}
+[data-theme="melange-dark"] a-vm {
+  color: #ece1d7;
+}
+[data-theme="melange-dark"] a-fd {
+  color: #a3a9ce;
+}
+[data-theme="melange-dark"] a-tf {
+  color: #c1a78e;
+}
+[data-theme="melange-dark"] a-fc {
+  color: #a3a9ce;
+}
+[data-theme="melange-dark"] a-km {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-dr {
+  color: #bd8183;
+}
+[data-theme="melange-dark"] a-rx {
+  color: #85b695;
+}
+
+/* Melange Light (light) */
+/* Source: https://github.com/savq/melange-nvim */
+[data-theme="melange-light"] {
+  background: #f1f1f1;
+  --bg: #f1f1f1;
+  --surface: #e4e4e4;
+  color: #54433a;
+  --fg: #54433a;
+  --accent: #465aa4;
+  --muted: #7d6658;
+}
+[data-theme="melange-light"] a-at {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-co {
+  color: #904180;
+}
+[data-theme="melange-light"] a-cb {
+  color: #904180;
+}
+[data-theme="melange-light"] a-fb {
+  color: #465aa4;
+}
+[data-theme="melange-light"] a-f {
+  color: #465aa4;
+}
+[data-theme="melange-light"] a-fm {
+  color: #465aa4;
+}
+[data-theme="melange-light"] a-k {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-kc {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-ko {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-kd {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-ke {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-kf {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-ki {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-kp {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-kr {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-kt {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-ky {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-o {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-pr {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-p {
+  color: #54433a;
+}
+[data-theme="melange-light"] a-pb {
+  color: #54433a;
+}
+[data-theme="melange-light"] a-pd {
+  color: #54433a;
+}
+[data-theme="melange-light"] a-ps {
+  color: #904180;
+}
+[data-theme="melange-light"] a-s {
+  color: #3a684a;
+}
+[data-theme="melange-light"] a-ss {
+  color: #bf0021;
+}
+[data-theme="melange-light"] a-tg {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-td {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-te {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-t {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-tb {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-tq {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-v {
+  color: #54433a;
+}
+[data-theme="melange-light"] a-vb {
+  color: #bf0021;
+}
+[data-theme="melange-light"] a-vp {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-c {
+  color: #7d6658;
+  font-style: italic;
+}
+[data-theme="melange-light"] a-cd {
+  color: #7d6658;
+  font-style: italic;
+}
+[data-theme="melange-light"] a-m {
+  color: #465aa4;
+}
+[data-theme="melange-light"] a-l {
+  color: #904180;
+}
+[data-theme="melange-light"] a-n {
+  color: #904180;
+}
+[data-theme="melange-light"] a-tl {
+  color: #54433a;
+}
+[data-theme="melange-light"] a-em {
+  font-style: italic;
+}
+[data-theme="melange-light"] a-st {
+  font-weight: bold;
+}
+[data-theme="melange-light"] a-tu {
+  color: #465aa4;
+  text-decoration: underline;
+}
+[data-theme="melange-light"] a-tr {
+  color: #465aa4;
+}
+[data-theme="melange-light"] a-se {
+  color: #a06d00;
+}
+[data-theme="melange-light"] a-tt {
+  color: #bc5c00;
+  font-weight: bold;
+}
+[data-theme="melange-light"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="melange-light"] a-sp {
+  color: #54433a;
+}
+[data-theme="melange-light"] a-in {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-sc {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-rp {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-cn {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-ex {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-pp {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-ch {
+  color: #3a684a;
+}
+[data-theme="melange-light"] a-cs {
+  color: #3a684a;
+}
+[data-theme="melange-light"] a-vm {
+  color: #54433a;
+}
+[data-theme="melange-light"] a-fd {
+  color: #465aa4;
+}
+[data-theme="melange-light"] a-tf {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-fc {
+  color: #465aa4;
+}
+[data-theme="melange-light"] a-km {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-dr {
+  color: #bc5c00;
+}
+[data-theme="melange-light"] a-rx {
+  color: #3a684a;
+}
+
+/* Monokai (dark) */
+/* Source: https://monokai.pro */
+[data-theme="monokai"] {
+  background: #2d2a2e;
+  --bg: #2d2a2e;
+  --surface: #3d3b3e;
+  color: #fcfcfa;
+  --fg: #fcfcfa;
+  --accent: #a9dc76;
+  --muted: #727072;
+}
+[data-theme="monokai"] a-at {
+  color: #a9dc76;
+}
+[data-theme="monokai"] a-co {
+  color: #ab9df2;
+}
+[data-theme="monokai"] a-cb {
+  color: #ab9df2;
+}
+[data-theme="monokai"] a-fb {
+  color: #78dce8;
+}
+[data-theme="monokai"] a-f {
+  color: #a9dc76;
+}
+[data-theme="monokai"] a-fm {
+  color: #a9dc76;
+}
+[data-theme="monokai"] a-k {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-kc {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-ko {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-kd {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-ke {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-kf {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-ki {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-kp {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-kr {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-kt {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-ky {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-o {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-pr {
+  color: #78dce8;
+}
+[data-theme="monokai"] a-p {
+  color: #fcfcfa;
+}
+[data-theme="monokai"] a-pb {
+  color: #fcfcfa;
+}
+[data-theme="monokai"] a-pd {
+  color: #fcfcfa;
+}
+[data-theme="monokai"] a-ps {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-s {
+  color: #ffd866;
+}
+[data-theme="monokai"] a-ss {
+  color: #ab9df2;
+}
+[data-theme="monokai"] a-tg {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-td {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-te {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-t {
+  color: #78dce8;
+}
+[data-theme="monokai"] a-tb {
+  color: #78dce8;
+}
+[data-theme="monokai"] a-tq {
+  color: #78dce8;
+}
+[data-theme="monokai"] a-v {
+  color: #fcfcfa;
+}
+[data-theme="monokai"] a-vb {
+  color: #ab9df2;
+}
+[data-theme="monokai"] a-vp {
+  color: #fc9867;
+}
+[data-theme="monokai"] a-c {
+  color: #727072;
+}
+[data-theme="monokai"] a-cd {
+  color: #727072;
+}
+[data-theme="monokai"] a-m {
+  color: #78dce8;
+}
+[data-theme="monokai"] a-l {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-n {
+  color: #ab9df2;
+}
+[data-theme="monokai"] a-tl {
+  color: #fcfcfa;
+}
+[data-theme="monokai"] a-em {
+  font-style: italic;
+}
+[data-theme="monokai"] a-st {
+  font-weight: bold;
+}
+[data-theme="monokai"] a-tu {
+  color: #78dce8;
+  text-decoration: underline;
+}
+[data-theme="monokai"] a-tr {
+  color: #78dce8;
+}
+[data-theme="monokai"] a-se {
+  color: #ab9df2;
+}
+[data-theme="monokai"] a-tt {
+  color: #ffd866;
+  font-weight: bold;
+}
+[data-theme="monokai"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="monokai"] a-sp {
+  color: #fcfcfa;
+}
+[data-theme="monokai"] a-in {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-sc {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-rp {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-cn {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-ex {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-pp {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-ch {
+  color: #ffd866;
+}
+[data-theme="monokai"] a-cs {
+  color: #ffd866;
+}
+[data-theme="monokai"] a-vm {
+  color: #fcfcfa;
+}
+[data-theme="monokai"] a-fd {
+  color: #a9dc76;
+}
+[data-theme="monokai"] a-tf {
+  color: #78dce8;
+}
+[data-theme="monokai"] a-fc {
+  color: #a9dc76;
+}
+[data-theme="monokai"] a-km {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-dr {
+  color: #ff6188;
+}
+[data-theme="monokai"] a-rx {
+  color: #ffd866;
+}
+
+/* Nord (dark) */
+/* Source: https://www.nordtheme.com */
+[data-theme="nord"] {
+  background: #2e3440;
+  --bg: #2e3440;
+  --surface: #3e444f;
+  color: #eceff4;
+  --fg: #eceff4;
+  --accent: #88c0d0;
+  --muted: #616e88;
+}
+[data-theme="nord"] a-at {
+  color: #8fbcbb;
+}
+[data-theme="nord"] a-co {
+  color: #b48ead;
+}
+[data-theme="nord"] a-cb {
+  color: #b48ead;
+}
+[data-theme="nord"] a-fb {
+  color: #88c0d0;
+}
+[data-theme="nord"] a-f {
+  color: #88c0d0;
+}
+[data-theme="nord"] a-fm {
+  color: #88c0d0;
+}
+[data-theme="nord"] a-k {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-kc {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-ko {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-kd {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-ke {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-kf {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-ki {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-kp {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-kr {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-kt {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-ky {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-o {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-pr {
+  color: #88c0d0;
+}
+[data-theme="nord"] a-p {
+  color: #eceff4;
+}
+[data-theme="nord"] a-pb {
+  color: #eceff4;
+}
+[data-theme="nord"] a-pd {
+  color: #eceff4;
+}
+[data-theme="nord"] a-ps {
+  color: #d08770;
+}
+[data-theme="nord"] a-s {
+  color: #a3be8c;
+}
+[data-theme="nord"] a-ss {
+  color: #bf616a;
+}
+[data-theme="nord"] a-tg {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-td {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-te {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-t {
+  color: #8fbcbb;
+}
+[data-theme="nord"] a-tb {
+  color: #8fbcbb;
+}
+[data-theme="nord"] a-tq {
+  color: #8fbcbb;
+}
+[data-theme="nord"] a-v {
+  color: #eceff4;
+}
+[data-theme="nord"] a-vb {
+  color: #bf616a;
+}
+[data-theme="nord"] a-vp {
+  color: #d08770;
+}
+[data-theme="nord"] a-c {
+  color: #616e88;
+}
+[data-theme="nord"] a-cd {
+  color: #616e88;
+}
+[data-theme="nord"] a-m {
+  color: #5e81ac;
+}
+[data-theme="nord"] a-l {
+  color: #d08770;
+}
+[data-theme="nord"] a-n {
+  color: #b48ead;
+}
+[data-theme="nord"] a-tl {
+  color: #eceff4;
+}
+[data-theme="nord"] a-em {
+  font-style: italic;
+}
+[data-theme="nord"] a-st {
+  font-weight: bold;
+}
+[data-theme="nord"] a-tu {
+  color: #88c0d0;
+  text-decoration: underline;
+}
+[data-theme="nord"] a-tr {
+  color: #88c0d0;
+}
+[data-theme="nord"] a-se {
+  color: #ebcb8b;
+}
+[data-theme="nord"] a-tt {
+  color: #81a1c1;
+  font-weight: bold;
+}
+[data-theme="nord"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="nord"] a-sp {
+  color: #eceff4;
+}
+[data-theme="nord"] a-in {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-sc {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-rp {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-cn {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-ex {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-pp {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-ch {
+  color: #a3be8c;
+}
+[data-theme="nord"] a-cs {
+  color: #a3be8c;
+}
+[data-theme="nord"] a-vm {
+  color: #eceff4;
+}
+[data-theme="nord"] a-fd {
+  color: #88c0d0;
+}
+[data-theme="nord"] a-tf {
+  color: #8fbcbb;
+}
+[data-theme="nord"] a-fc {
+  color: #88c0d0;
+}
+[data-theme="nord"] a-km {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-dr {
+  color: #81a1c1;
+}
+[data-theme="nord"] a-rx {
+  color: #a3be8c;
+}
+
+/* One Dark (dark) */
+/* Source: https://github.com/atom/one-dark-syntax */
+[data-theme="one-dark"] {
+  background: #282c34;
+  --bg: #282c34;
+  --surface: #393c44;
+  color: #abb2bf;
+  --fg: #abb2bf;
+  --accent: #61afef;
+  --muted: #5c6370;
+}
+[data-theme="one-dark"] a-at {
+  color: #d19a66;
+}
+[data-theme="one-dark"] a-co {
+  color: #d19a66;
+}
+[data-theme="one-dark"] a-cb {
+  color: #d19a66;
+}
+[data-theme="one-dark"] a-fb {
+  color: #56b6c2;
+}
+[data-theme="one-dark"] a-f {
+  color: #61afef;
+}
+[data-theme="one-dark"] a-fm {
+  color: #61afef;
+}
+[data-theme="one-dark"] a-k {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-kc {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-ko {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-kd {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-ke {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-kf {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-ki {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-kp {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-kr {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-kt {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-ky {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-o {
+  color: #56b6c2;
+}
+[data-theme="one-dark"] a-pr {
+  color: #e06c75;
+}
+[data-theme="one-dark"] a-p {
+  color: #abb2bf;
+}
+[data-theme="one-dark"] a-pb {
+  color: #abb2bf;
+}
+[data-theme="one-dark"] a-pd {
+  color: #abb2bf;
+}
+[data-theme="one-dark"] a-ps {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-s {
+  color: #98c379;
+}
+[data-theme="one-dark"] a-ss {
+  color: #e06c75;
+}
+[data-theme="one-dark"] a-tg {
+  color: #e06c75;
+}
+[data-theme="one-dark"] a-td {
+  color: #e06c75;
+}
+[data-theme="one-dark"] a-te {
+  color: #e06c75;
+}
+[data-theme="one-dark"] a-t {
+  color: #e5c07b;
+}
+[data-theme="one-dark"] a-tb {
+  color: #e5c07b;
+}
+[data-theme="one-dark"] a-tq {
+  color: #e5c07b;
+}
+[data-theme="one-dark"] a-v {
+  color: #abb2bf;
+}
+[data-theme="one-dark"] a-vb {
+  color: #e06c75;
+}
+[data-theme="one-dark"] a-vp {
+  color: #d19a66;
+}
+[data-theme="one-dark"] a-c {
+  color: #5c6370;
+}
+[data-theme="one-dark"] a-cd {
+  color: #5c6370;
+}
+[data-theme="one-dark"] a-m {
+  color: #56b6c2;
+}
+[data-theme="one-dark"] a-l {
+  color: #e06c75;
+}
+[data-theme="one-dark"] a-n {
+  color: #d19a66;
+}
+[data-theme="one-dark"] a-tl {
+  color: #abb2bf;
+}
+[data-theme="one-dark"] a-em {
+  font-style: italic;
+}
+[data-theme="one-dark"] a-st {
+  font-weight: bold;
+}
+[data-theme="one-dark"] a-tu {
+  color: #61afef;
+  text-decoration: underline;
+}
+[data-theme="one-dark"] a-tr {
+  color: #56b6c2;
+}
+[data-theme="one-dark"] a-se {
+  color: #56b6c2;
+}
+[data-theme="one-dark"] a-tt {
+  color: #e06c75;
+  font-weight: bold;
+}
+[data-theme="one-dark"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="one-dark"] a-sp {
+  color: #abb2bf;
+}
+[data-theme="one-dark"] a-in {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-sc {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-rp {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-cn {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-ex {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-pp {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-ch {
+  color: #98c379;
+}
+[data-theme="one-dark"] a-cs {
+  color: #98c379;
+}
+[data-theme="one-dark"] a-vm {
+  color: #abb2bf;
+}
+[data-theme="one-dark"] a-fd {
+  color: #61afef;
+}
+[data-theme="one-dark"] a-tf {
+  color: #e5c07b;
+}
+[data-theme="one-dark"] a-fc {
+  color: #61afef;
+}
+[data-theme="one-dark"] a-km {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-dr {
+  color: #c678dd;
+}
+[data-theme="one-dark"] a-rx {
+  color: #98c379;
+}
+
+/* Rosé Pine Moon (dark) */
+/* Source: https://rosepinetheme.com */
+[data-theme="rose-pine-moon"] {
+  background: #232136;
+  --bg: #232136;
+  --surface: #343246;
+  color: #e0def4;
+  --fg: #e0def4;
+  --accent: #ea9a97;
+  --muted: #6e6a86;
+}
+[data-theme="rose-pine-moon"] a-at {
+  color: #f6c177;
+}
+[data-theme="rose-pine-moon"] a-co {
+  color: #f6c177;
+}
+[data-theme="rose-pine-moon"] a-cb {
+  color: #f6c177;
+}
+[data-theme="rose-pine-moon"] a-fb {
+  color: #9ccfd8;
+}
+[data-theme="rose-pine-moon"] a-f {
+  color: #ea9a97;
+}
+[data-theme="rose-pine-moon"] a-fm {
+  color: #ea9a97;
+}
+[data-theme="rose-pine-moon"] a-k {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-kc {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-ko {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-kd {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-ke {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-kf {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-ki {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-kp {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-kr {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-kt {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-ky {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-o {
+  color: #908caa;
+}
+[data-theme="rose-pine-moon"] a-pr {
+  color: #9ccfd8;
+}
+[data-theme="rose-pine-moon"] a-p {
+  color: #908caa;
+}
+[data-theme="rose-pine-moon"] a-pb {
+  color: #908caa;
+}
+[data-theme="rose-pine-moon"] a-pd {
+  color: #908caa;
+}
+[data-theme="rose-pine-moon"] a-ps {
+  color: #908caa;
+}
+[data-theme="rose-pine-moon"] a-s {
+  color: #f6c177;
+}
+[data-theme="rose-pine-moon"] a-ss {
+  color: #eb6f92;
+}
+[data-theme="rose-pine-moon"] a-tg {
+  color: #9ccfd8;
+}
+[data-theme="rose-pine-moon"] a-td {
+  color: #9ccfd8;
+}
+[data-theme="rose-pine-moon"] a-te {
+  color: #9ccfd8;
+}
+[data-theme="rose-pine-moon"] a-t {
+  color: #c4a7e7;
+}
+[data-theme="rose-pine-moon"] a-tb {
+  color: #c4a7e7;
+}
+[data-theme="rose-pine-moon"] a-tq {
+  color: #c4a7e7;
+}
+[data-theme="rose-pine-moon"] a-v {
+  color: #e0def4;
+}
+[data-theme="rose-pine-moon"] a-vb {
+  color: #eb6f92;
+}
+[data-theme="rose-pine-moon"] a-vp {
+  color: #c4a7e7;
+}
+[data-theme="rose-pine-moon"] a-c {
+  color: #6e6a86;
+  font-style: italic;
+}
+[data-theme="rose-pine-moon"] a-cd {
+  color: #6e6a86;
+  font-style: italic;
+}
+[data-theme="rose-pine-moon"] a-m {
+  color: #9ccfd8;
+}
+[data-theme="rose-pine-moon"] a-l {
+  color: #9ccfd8;
+}
+[data-theme="rose-pine-moon"] a-n {
+  color: #f6c177;
+}
+[data-theme="rose-pine-moon"] a-tl {
+  color: #e0def4;
+}
+[data-theme="rose-pine-moon"] a-em {
+  font-style: italic;
+}
+[data-theme="rose-pine-moon"] a-st {
+  font-weight: bold;
+}
+[data-theme="rose-pine-moon"] a-tu {
+  color: #c4a7e7;
+  text-decoration: underline;
+}
+[data-theme="rose-pine-moon"] a-tr {
+  color: #9ccfd8;
+}
+[data-theme="rose-pine-moon"] a-se {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-tt {
+  color: #f6c177;
+  font-weight: bold;
+}
+[data-theme="rose-pine-moon"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="rose-pine-moon"] a-sp {
+  color: #e0def4;
+}
+[data-theme="rose-pine-moon"] a-in {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-sc {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-rp {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-cn {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-ex {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-pp {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-ch {
+  color: #f6c177;
+}
+[data-theme="rose-pine-moon"] a-cs {
+  color: #f6c177;
+}
+[data-theme="rose-pine-moon"] a-vm {
+  color: #e0def4;
+}
+[data-theme="rose-pine-moon"] a-fd {
+  color: #ea9a97;
+}
+[data-theme="rose-pine-moon"] a-tf {
+  color: #c4a7e7;
+}
+[data-theme="rose-pine-moon"] a-fc {
+  color: #ea9a97;
+}
+[data-theme="rose-pine-moon"] a-km {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-dr {
+  color: #3e8fb0;
+}
+[data-theme="rose-pine-moon"] a-rx {
+  color: #f6c177;
+}
+
+/* Rustdoc Ayu (dark) */
+/* Source: https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/ayu.css */
+[data-theme="rustdoc-ayu"] {
+  background: #191f26;
+  --bg: #191f26;
+  --surface: #2b3037;
+  color: #c5c5c5;
+  --fg: #c5c5c5;
+  --accent: #fdd687;
+  --muted: #788797;
+}
+[data-theme="rustdoc-ayu"] a-at {
+  color: #e6e1cf;
+}
+[data-theme="rustdoc-ayu"] a-co {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-cb {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-fb {
+  color: #69f2df;
+}
+[data-theme="rustdoc-ayu"] a-f {
+  color: #fdd687;
+}
+[data-theme="rustdoc-ayu"] a-fm {
+  color: #fdd687;
+}
+[data-theme="rustdoc-ayu"] a-k {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-kc {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-ko {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-kd {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-ke {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-kf {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-ki {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-kp {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-kr {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-kt {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-ky {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-o {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-pr {
+  color: #69f2df;
+}
+[data-theme="rustdoc-ayu"] a-p {
+  color: #c5c5c5;
+}
+[data-theme="rustdoc-ayu"] a-pb {
+  color: #c5c5c5;
+}
+[data-theme="rustdoc-ayu"] a-pd {
+  color: #c5c5c5;
+}
+[data-theme="rustdoc-ayu"] a-ps {
+  color: #ff9011;
+}
+[data-theme="rustdoc-ayu"] a-s {
+  color: #b8cc52;
+}
+[data-theme="rustdoc-ayu"] a-ss {
+  color: #b8cc52;
+}
+[data-theme="rustdoc-ayu"] a-tg {
+  color: #a37acc;
+}
+[data-theme="rustdoc-ayu"] a-td {
+  color: #a37acc;
+}
+[data-theme="rustdoc-ayu"] a-te {
+  color: #a37acc;
+}
+[data-theme="rustdoc-ayu"] a-t {
+  color: #ffa0a5;
+}
+[data-theme="rustdoc-ayu"] a-tb {
+  color: #69f2df;
+}
+[data-theme="rustdoc-ayu"] a-tq {
+  color: #ffa0a5;
+}
+[data-theme="rustdoc-ayu"] a-v {
+  color: #c5c5c5;
+}
+[data-theme="rustdoc-ayu"] a-vb {
+  color: #36a3d9;
+}
+[data-theme="rustdoc-ayu"] a-vp {
+  color: #c5c5c5;
+}
+[data-theme="rustdoc-ayu"] a-c {
+  color: #788797;
+}
+[data-theme="rustdoc-ayu"] a-cd {
+  color: #788797;
+}
+[data-theme="rustdoc-ayu"] a-m {
+  color: #a37acc;
+}
+[data-theme="rustdoc-ayu"] a-l {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-n {
+  color: #b8cc52;
+}
+[data-theme="rustdoc-ayu"] a-tl {
+  color: #c5c5c5;
+}
+[data-theme="rustdoc-ayu"] a-em {
+  font-style: italic;
+}
+[data-theme="rustdoc-ayu"] a-st {
+  font-weight: bold;
+}
+[data-theme="rustdoc-ayu"] a-tu {
+  color: #69f2df;
+  text-decoration: underline;
+}
+[data-theme="rustdoc-ayu"] a-tr {
+  color: #ffa0a5;
+}
+[data-theme="rustdoc-ayu"] a-se {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-tt {
+  color: #ffa0a5;
+  font-weight: bold;
+}
+[data-theme="rustdoc-ayu"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="rustdoc-ayu"] a-sp {
+  color: #c5c5c5;
+}
+[data-theme="rustdoc-ayu"] a-in {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-sc {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-rp {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-cn {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-ex {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-pp {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-ch {
+  color: #b8cc52;
+}
+[data-theme="rustdoc-ayu"] a-cs {
+  color: #b8cc52;
+}
+[data-theme="rustdoc-ayu"] a-vm {
+  color: #c5c5c5;
+}
+[data-theme="rustdoc-ayu"] a-fd {
+  color: #fdd687;
+}
+[data-theme="rustdoc-ayu"] a-tf {
+  color: #ffa0a5;
+}
+[data-theme="rustdoc-ayu"] a-fc {
+  color: #fdd687;
+}
+[data-theme="rustdoc-ayu"] a-km {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-dr {
+  color: #ff7733;
+}
+[data-theme="rustdoc-ayu"] a-rx {
+  color: #b8cc52;
+}
+
+/* Rustdoc Dark (dark) */
+/* Source: https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/dark.css */
+[data-theme="rustdoc-dark"] {
+  background: #2a2a2a;
+  --bg: #2a2a2a;
+  --surface: #3b3b3b;
+  color: #dddddd;
+  --fg: #dddddd;
+  --accent: #2bab63;
+  --muted: #8d8d8b;
+}
+[data-theme="rustdoc-dark"] a-at {
+  color: #ee6868;
+}
+[data-theme="rustdoc-dark"] a-co {
+  color: #ee6868;
+}
+[data-theme="rustdoc-dark"] a-cb {
+  color: #ee6868;
+}
+[data-theme="rustdoc-dark"] a-fb {
+  color: #769acb;
+}
+[data-theme="rustdoc-dark"] a-f {
+  color: #2bab63;
+}
+[data-theme="rustdoc-dark"] a-fm {
+  color: #2bab63;
+}
+[data-theme="rustdoc-dark"] a-k {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-kc {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-ko {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-kd {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-ke {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-kf {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-ki {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-kp {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-kr {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-kt {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-ky {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-o {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-pr {
+  color: #769acb;
+}
+[data-theme="rustdoc-dark"] a-p {
+  color: #dddddd;
+}
+[data-theme="rustdoc-dark"] a-pb {
+  color: #dddddd;
+}
+[data-theme="rustdoc-dark"] a-pd {
+  color: #dddddd;
+}
+[data-theme="rustdoc-dark"] a-ps {
+  color: #ff9011;
+}
+[data-theme="rustdoc-dark"] a-s {
+  color: #83a300;
+}
+[data-theme="rustdoc-dark"] a-ss {
+  color: #83a300;
+}
+[data-theme="rustdoc-dark"] a-tg {
+  color: #3e999f;
+}
+[data-theme="rustdoc-dark"] a-td {
+  color: #3e999f;
+}
+[data-theme="rustdoc-dark"] a-te {
+  color: #3e999f;
+}
+[data-theme="rustdoc-dark"] a-t {
+  color: #2dbfb8;
+}
+[data-theme="rustdoc-dark"] a-tb {
+  color: #769acb;
+}
+[data-theme="rustdoc-dark"] a-tq {
+  color: #2dbfb8;
+}
+[data-theme="rustdoc-dark"] a-v {
+  color: #dddddd;
+}
+[data-theme="rustdoc-dark"] a-vb {
+  color: #ee6868;
+}
+[data-theme="rustdoc-dark"] a-vp {
+  color: #dddddd;
+}
+[data-theme="rustdoc-dark"] a-c {
+  color: #8d8d8b;
+}
+[data-theme="rustdoc-dark"] a-cd {
+  color: #8d8d8b;
+}
+[data-theme="rustdoc-dark"] a-m {
+  color: #3e999f;
+}
+[data-theme="rustdoc-dark"] a-l {
+  color: #d97f26;
+}
+[data-theme="rustdoc-dark"] a-n {
+  color: #83a300;
+}
+[data-theme="rustdoc-dark"] a-tl {
+  color: #dddddd;
+}
+[data-theme="rustdoc-dark"] a-em {
+  font-style: italic;
+}
+[data-theme="rustdoc-dark"] a-st {
+  font-weight: bold;
+}
+[data-theme="rustdoc-dark"] a-tu {
+  color: #769acb;
+  text-decoration: underline;
+}
+[data-theme="rustdoc-dark"] a-tr {
+  color: #2dbfb8;
+}
+[data-theme="rustdoc-dark"] a-se {
+  color: #d97f26;
+}
+[data-theme="rustdoc-dark"] a-tt {
+  color: #2dbfb8;
+  font-weight: bold;
+}
+[data-theme="rustdoc-dark"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="rustdoc-dark"] a-sp {
+  color: #dddddd;
+}
+[data-theme="rustdoc-dark"] a-in {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-sc {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-rp {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-cn {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-ex {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-pp {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-ch {
+  color: #83a300;
+}
+[data-theme="rustdoc-dark"] a-cs {
+  color: #83a300;
+}
+[data-theme="rustdoc-dark"] a-vm {
+  color: #dddddd;
+}
+[data-theme="rustdoc-dark"] a-fd {
+  color: #2bab63;
+}
+[data-theme="rustdoc-dark"] a-tf {
+  color: #2dbfb8;
+}
+[data-theme="rustdoc-dark"] a-fc {
+  color: #2bab63;
+}
+[data-theme="rustdoc-dark"] a-km {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-dr {
+  color: #ab8ac1;
+}
+[data-theme="rustdoc-dark"] a-rx {
+  color: #83a300;
+}
+
+/* Rustdoc Light (light) */
+/* Source: https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/light.css */
+[data-theme="rustdoc-light"] {
+  background: #f5f5f5;
+  --bg: #f5f5f5;
+  --surface: #e8e8e8;
+  color: #24292e;
+  --fg: #24292e;
+  --accent: #ad7c37;
+  --muted: #8e908c;
+}
+[data-theme="rustdoc-light"] a-at {
+  color: #c82829;
+}
+[data-theme="rustdoc-light"] a-co {
+  color: #c82829;
+}
+[data-theme="rustdoc-light"] a-cb {
+  color: #c82829;
+}
+[data-theme="rustdoc-light"] a-fb {
+  color: #4271ae;
+}
+[data-theme="rustdoc-light"] a-f {
+  color: #ad7c37;
+}
+[data-theme="rustdoc-light"] a-fm {
+  color: #ad7c37;
+}
+[data-theme="rustdoc-light"] a-k {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-kc {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-ko {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-kd {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-ke {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-kf {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-ki {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-kp {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-kr {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-kt {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-ky {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-o {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-pr {
+  color: #4271ae;
+}
+[data-theme="rustdoc-light"] a-p {
+  color: #24292e;
+}
+[data-theme="rustdoc-light"] a-pb {
+  color: #24292e;
+}
+[data-theme="rustdoc-light"] a-pd {
+  color: #24292e;
+}
+[data-theme="rustdoc-light"] a-ps {
+  color: #ff9011;
+}
+[data-theme="rustdoc-light"] a-s {
+  color: #718c00;
+}
+[data-theme="rustdoc-light"] a-ss {
+  color: #718c00;
+}
+[data-theme="rustdoc-light"] a-tg {
+  color: #3e999f;
+}
+[data-theme="rustdoc-light"] a-td {
+  color: #3e999f;
+}
+[data-theme="rustdoc-light"] a-te {
+  color: #3e999f;
+}
+[data-theme="rustdoc-light"] a-t {
+  color: #ad378a;
+}
+[data-theme="rustdoc-light"] a-tb {
+  color: #4271ae;
+}
+[data-theme="rustdoc-light"] a-tq {
+  color: #ad378a;
+}
+[data-theme="rustdoc-light"] a-v {
+  color: #24292e;
+}
+[data-theme="rustdoc-light"] a-vb {
+  color: #c82829;
+}
+[data-theme="rustdoc-light"] a-vp {
+  color: #24292e;
+}
+[data-theme="rustdoc-light"] a-c {
+  color: #8e908c;
+}
+[data-theme="rustdoc-light"] a-cd {
+  color: #8e908c;
+}
+[data-theme="rustdoc-light"] a-m {
+  color: #3e999f;
+}
+[data-theme="rustdoc-light"] a-l {
+  color: #b76514;
+}
+[data-theme="rustdoc-light"] a-n {
+  color: #718c00;
+}
+[data-theme="rustdoc-light"] a-tl {
+  color: #24292e;
+}
+[data-theme="rustdoc-light"] a-em {
+  font-style: italic;
+}
+[data-theme="rustdoc-light"] a-st {
+  font-weight: bold;
+}
+[data-theme="rustdoc-light"] a-tu {
+  color: #4271ae;
+  text-decoration: underline;
+}
+[data-theme="rustdoc-light"] a-tr {
+  color: #ad378a;
+}
+[data-theme="rustdoc-light"] a-se {
+  color: #b76514;
+}
+[data-theme="rustdoc-light"] a-tt {
+  color: #ad378a;
+  font-weight: bold;
+}
+[data-theme="rustdoc-light"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="rustdoc-light"] a-sp {
+  color: #24292e;
+}
+[data-theme="rustdoc-light"] a-in {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-sc {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-rp {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-cn {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-ex {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-pp {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-ch {
+  color: #718c00;
+}
+[data-theme="rustdoc-light"] a-cs {
+  color: #718c00;
+}
+[data-theme="rustdoc-light"] a-vm {
+  color: #24292e;
+}
+[data-theme="rustdoc-light"] a-fd {
+  color: #ad7c37;
+}
+[data-theme="rustdoc-light"] a-tf {
+  color: #ad378a;
+}
+[data-theme="rustdoc-light"] a-fc {
+  color: #ad7c37;
+}
+[data-theme="rustdoc-light"] a-km {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-dr {
+  color: #8959a8;
+}
+[data-theme="rustdoc-light"] a-rx {
+  color: #718c00;
+}
+
+/* Solarized Dark (dark) */
+/* Source: https://ethanschoonover.com/solarized/ */
+[data-theme="solarized-dark"] {
+  background: #002b36;
+  --bg: #002b36;
+  --surface: #143b46;
+  color: #839496;
+  --fg: #839496;
+  --accent: #268bd2;
+  --muted: #586e75;
+}
+[data-theme="solarized-dark"] a-at {
+  color: #b58900;
+}
+[data-theme="solarized-dark"] a-co {
+  color: #2aa198;
+}
+[data-theme="solarized-dark"] a-cb {
+  color: #2aa198;
+}
+[data-theme="solarized-dark"] a-fb {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-f {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-fm {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-k {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-kc {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-ko {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-kd {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-ke {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-kf {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-ki {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-kp {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-kr {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-kt {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-ky {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-o {
+  color: #93a1a1;
+}
+[data-theme="solarized-dark"] a-pr {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-p {
+  color: #93a1a1;
+}
+[data-theme="solarized-dark"] a-pb {
+  color: #93a1a1;
+}
+[data-theme="solarized-dark"] a-pd {
+  color: #93a1a1;
+}
+[data-theme="solarized-dark"] a-ps {
+  color: #dc322f;
+}
+[data-theme="solarized-dark"] a-s {
+  color: #2aa198;
+}
+[data-theme="solarized-dark"] a-ss {
+  color: #cb4b16;
+}
+[data-theme="solarized-dark"] a-tg {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-td {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-te {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-t {
+  color: #b58900;
+}
+[data-theme="solarized-dark"] a-tb {
+  color: #b58900;
+}
+[data-theme="solarized-dark"] a-tq {
+  color: #b58900;
+}
+[data-theme="solarized-dark"] a-v {
+  color: #839496;
+}
+[data-theme="solarized-dark"] a-vb {
+  color: #d33682;
+}
+[data-theme="solarized-dark"] a-vp {
+  color: #839496;
+}
+[data-theme="solarized-dark"] a-c {
+  color: #586e75;
+  font-style: italic;
+}
+[data-theme="solarized-dark"] a-cd {
+  color: #586e75;
+  font-style: italic;
+}
+[data-theme="solarized-dark"] a-m {
+  color: #cb4b16;
+}
+[data-theme="solarized-dark"] a-l {
+  color: #6c71c4;
+}
+[data-theme="solarized-dark"] a-n {
+  color: #d33682;
+}
+[data-theme="solarized-dark"] a-tl {
+  color: #839496;
+}
+[data-theme="solarized-dark"] a-em {
+  font-style: italic;
+}
+[data-theme="solarized-dark"] a-st {
+  font-weight: bold;
+}
+[data-theme="solarized-dark"] a-tu {
+  color: #2aa198;
+  text-decoration: underline;
+}
+[data-theme="solarized-dark"] a-tr {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-se {
+  color: #cb4b16;
+}
+[data-theme="solarized-dark"] a-tt {
+  color: #b58900;
+  font-weight: bold;
+}
+[data-theme="solarized-dark"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="solarized-dark"] a-sp {
+  color: #839496;
+}
+[data-theme="solarized-dark"] a-in {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-sc {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-rp {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-cn {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-ex {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-pp {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-ch {
+  color: #2aa198;
+}
+[data-theme="solarized-dark"] a-cs {
+  color: #2aa198;
+}
+[data-theme="solarized-dark"] a-vm {
+  color: #839496;
+}
+[data-theme="solarized-dark"] a-fd {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-tf {
+  color: #b58900;
+}
+[data-theme="solarized-dark"] a-fc {
+  color: #268bd2;
+}
+[data-theme="solarized-dark"] a-km {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-dr {
+  color: #859900;
+}
+[data-theme="solarized-dark"] a-rx {
+  color: #2aa198;
+}
+
+/* Solarized Light (light) */
+/* Source: https://ethanschoonover.com/solarized/ */
+[data-theme="solarized-light"] {
+  background: #fdf6e3;
+  --bg: #fdf6e3;
+  --surface: #f0e9d7;
+  color: #657b83;
+  --fg: #657b83;
+  --accent: #268bd2;
+  --muted: #93a1a1;
+}
+[data-theme="solarized-light"] a-at {
+  color: #b58900;
+}
+[data-theme="solarized-light"] a-co {
+  color: #2aa198;
+}
+[data-theme="solarized-light"] a-cb {
+  color: #2aa198;
+}
+[data-theme="solarized-light"] a-fb {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-f {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-fm {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-k {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-kc {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-ko {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-kd {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-ke {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-kf {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-ki {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-kp {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-kr {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-kt {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-ky {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-o {
+  color: #586e75;
+}
+[data-theme="solarized-light"] a-pr {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-p {
+  color: #586e75;
+}
+[data-theme="solarized-light"] a-pb {
+  color: #586e75;
+}
+[data-theme="solarized-light"] a-pd {
+  color: #586e75;
+}
+[data-theme="solarized-light"] a-ps {
+  color: #dc322f;
+}
+[data-theme="solarized-light"] a-s {
+  color: #2aa198;
+}
+[data-theme="solarized-light"] a-ss {
+  color: #cb4b16;
+}
+[data-theme="solarized-light"] a-tg {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-td {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-te {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-t {
+  color: #b58900;
+}
+[data-theme="solarized-light"] a-tb {
+  color: #b58900;
+}
+[data-theme="solarized-light"] a-tq {
+  color: #b58900;
+}
+[data-theme="solarized-light"] a-v {
+  color: #657b83;
+}
+[data-theme="solarized-light"] a-vb {
+  color: #d33682;
+}
+[data-theme="solarized-light"] a-vp {
+  color: #657b83;
+}
+[data-theme="solarized-light"] a-c {
+  color: #93a1a1;
+  font-style: italic;
+}
+[data-theme="solarized-light"] a-cd {
+  color: #93a1a1;
+  font-style: italic;
+}
+[data-theme="solarized-light"] a-m {
+  color: #cb4b16;
+}
+[data-theme="solarized-light"] a-l {
+  color: #6c71c4;
+}
+[data-theme="solarized-light"] a-n {
+  color: #d33682;
+}
+[data-theme="solarized-light"] a-tl {
+  color: #657b83;
+}
+[data-theme="solarized-light"] a-em {
+  font-style: italic;
+}
+[data-theme="solarized-light"] a-st {
+  font-weight: bold;
+}
+[data-theme="solarized-light"] a-tu {
+  color: #2aa198;
+  text-decoration: underline;
+}
+[data-theme="solarized-light"] a-tr {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-se {
+  color: #cb4b16;
+}
+[data-theme="solarized-light"] a-tt {
+  color: #b58900;
+  font-weight: bold;
+}
+[data-theme="solarized-light"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="solarized-light"] a-sp {
+  color: #657b83;
+}
+[data-theme="solarized-light"] a-in {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-sc {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-rp {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-cn {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-ex {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-pp {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-ch {
+  color: #2aa198;
+}
+[data-theme="solarized-light"] a-cs {
+  color: #2aa198;
+}
+[data-theme="solarized-light"] a-vm {
+  color: #657b83;
+}
+[data-theme="solarized-light"] a-fd {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-tf {
+  color: #b58900;
+}
+[data-theme="solarized-light"] a-fc {
+  color: #268bd2;
+}
+[data-theme="solarized-light"] a-km {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-dr {
+  color: #859900;
+}
+[data-theme="solarized-light"] a-rx {
+  color: #2aa198;
+}
+
+/* Tokyo Night (dark) */
+/* Source: https://github.com/enkia/tokyo-night-vscode-theme */
+[data-theme="tokyo-night"] {
+  background: #1a1b26;
+  --bg: #1a1b26;
+  --surface: #2c2d37;
+  color: #c0caf5;
+  --fg: #c0caf5;
+  --accent: #7aa2f7;
+  --muted: #565f89;
+}
+[data-theme="tokyo-night"] a-at {
+  color: #e0af68;
+}
+[data-theme="tokyo-night"] a-co {
+  color: #ff9e64;
+}
+[data-theme="tokyo-night"] a-cb {
+  color: #ff9e64;
+}
+[data-theme="tokyo-night"] a-fb {
+  color: #7dcfff;
+}
+[data-theme="tokyo-night"] a-f {
+  color: #7aa2f7;
+}
+[data-theme="tokyo-night"] a-fm {
+  color: #7aa2f7;
+}
+[data-theme="tokyo-night"] a-k {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-kc {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-ko {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-kd {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-ke {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-kf {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-ki {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-kp {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-kr {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-kt {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-ky {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-o {
+  color: #89ddff;
+}
+[data-theme="tokyo-night"] a-pr {
+  color: #7aa2f7;
+}
+[data-theme="tokyo-night"] a-p {
+  color: #a9b1d6;
+}
+[data-theme="tokyo-night"] a-pb {
+  color: #a9b1d6;
+}
+[data-theme="tokyo-night"] a-pd {
+  color: #a9b1d6;
+}
+[data-theme="tokyo-night"] a-ps {
+  color: #89ddff;
+}
+[data-theme="tokyo-night"] a-s {
+  color: #9ece6a;
+}
+[data-theme="tokyo-night"] a-ss {
+  color: #f7768e;
+}
+[data-theme="tokyo-night"] a-tg {
+  color: #f7768e;
+}
+[data-theme="tokyo-night"] a-td {
+  color: #f7768e;
+}
+[data-theme="tokyo-night"] a-te {
+  color: #f7768e;
+}
+[data-theme="tokyo-night"] a-t {
+  color: #2ac3de;
+}
+[data-theme="tokyo-night"] a-tb {
+  color: #2ac3de;
+}
+[data-theme="tokyo-night"] a-tq {
+  color: #2ac3de;
+}
+[data-theme="tokyo-night"] a-v {
+  color: #c0caf5;
+}
+[data-theme="tokyo-night"] a-vb {
+  color: #f7768e;
+}
+[data-theme="tokyo-night"] a-vp {
+  color: #e0af68;
+}
+[data-theme="tokyo-night"] a-c {
+  color: #565f89;
+}
+[data-theme="tokyo-night"] a-cd {
+  color: #565f89;
+}
+[data-theme="tokyo-night"] a-m {
+  color: #7dcfff;
+}
+[data-theme="tokyo-night"] a-l {
+  color: #ff9e64;
+}
+[data-theme="tokyo-night"] a-n {
+  color: #ff9e64;
+}
+[data-theme="tokyo-night"] a-tl {
+  color: #a9b1d6;
+}
+[data-theme="tokyo-night"] a-em {
+  font-style: italic;
+}
+[data-theme="tokyo-night"] a-st {
+  font-weight: bold;
+}
+[data-theme="tokyo-night"] a-tu {
+  color: #7aa2f7;
+  text-decoration: underline;
+}
+[data-theme="tokyo-night"] a-tr {
+  color: #7dcfff;
+}
+[data-theme="tokyo-night"] a-se {
+  color: #89ddff;
+}
+[data-theme="tokyo-night"] a-tt {
+  color: #bb9af7;
+  font-weight: bold;
+}
+[data-theme="tokyo-night"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="tokyo-night"] a-sp {
+  color: #a9b1d6;
+}
+[data-theme="tokyo-night"] a-in {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-sc {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-rp {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-cn {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-ex {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-pp {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-ch {
+  color: #9ece6a;
+}
+[data-theme="tokyo-night"] a-cs {
+  color: #9ece6a;
+}
+[data-theme="tokyo-night"] a-vm {
+  color: #c0caf5;
+}
+[data-theme="tokyo-night"] a-fd {
+  color: #7aa2f7;
+}
+[data-theme="tokyo-night"] a-tf {
+  color: #2ac3de;
+}
+[data-theme="tokyo-night"] a-fc {
+  color: #7aa2f7;
+}
+[data-theme="tokyo-night"] a-km {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-dr {
+  color: #bb9af7;
+}
+[data-theme="tokyo-night"] a-rx {
+  color: #9ece6a;
+}
+
+/* Zenburn (dark) */
+/* Source: https://github.com/jnurmine/Zenburn */
+[data-theme="zenburn"] {
+  background: #3f3f3f;
+  --bg: #3f3f3f;
+  --surface: #4e4e4e;
+  color: #dcdccc;
+  --fg: #dcdccc;
+  --accent: #efef8f;
+  --muted: #7f9f7f;
+}
+[data-theme="zenburn"] a-at {
+  color: #dfaf8f;
+}
+[data-theme="zenburn"] a-co {
+  color: #dca3a3;
+}
+[data-theme="zenburn"] a-cb {
+  color: #dca3a3;
+}
+[data-theme="zenburn"] a-fb {
+  color: #efef8f;
+}
+[data-theme="zenburn"] a-f {
+  color: #efef8f;
+}
+[data-theme="zenburn"] a-fm {
+  color: #efef8f;
+}
+[data-theme="zenburn"] a-k {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-kc {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-ko {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-kd {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-ke {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-kf {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-ki {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-kp {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-kr {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-kt {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-ky {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-o {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-pr {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-p {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-pb {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-pd {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-ps {
+  color: #dca3a3;
+}
+[data-theme="zenburn"] a-s {
+  color: #cc9393;
+}
+[data-theme="zenburn"] a-ss {
+  color: #dca3a3;
+}
+[data-theme="zenburn"] a-tg {
+  color: #efef8f;
+}
+[data-theme="zenburn"] a-td {
+  color: #efef8f;
+}
+[data-theme="zenburn"] a-te {
+  color: #efef8f;
+}
+[data-theme="zenburn"] a-t {
+  color: #dfdfbf;
+}
+[data-theme="zenburn"] a-tb {
+  color: #dfdfbf;
+}
+[data-theme="zenburn"] a-tq {
+  color: #dfdfbf;
+}
+[data-theme="zenburn"] a-v {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-vb {
+  color: #dca3a3;
+}
+[data-theme="zenburn"] a-vp {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-c {
+  color: #7f9f7f;
+}
+[data-theme="zenburn"] a-cd {
+  color: #7f9f7f;
+}
+[data-theme="zenburn"] a-m {
+  color: #dfaf8f;
+}
+[data-theme="zenburn"] a-l {
+  color: #8cd0d3;
+}
+[data-theme="zenburn"] a-n {
+  color: #8cd0d3;
+}
+[data-theme="zenburn"] a-tl {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-em {
+  font-style: italic;
+}
+[data-theme="zenburn"] a-st {
+  font-weight: bold;
+}
+[data-theme="zenburn"] a-tu {
+  color: #8cd0d3;
+  text-decoration: underline;
+}
+[data-theme="zenburn"] a-tr {
+  color: #8cd0d3;
+}
+[data-theme="zenburn"] a-se {
+  color: #dca3a3;
+}
+[data-theme="zenburn"] a-tt {
+  color: #efef8f;
+  font-weight: bold;
+}
+[data-theme="zenburn"] a-tx {
+  text-decoration: line-through;
+}
+[data-theme="zenburn"] a-sp {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-in {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-sc {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-rp {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-cn {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-ex {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-pp {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-ch {
+  color: #cc9393;
+}
+[data-theme="zenburn"] a-cs {
+  color: #cc9393;
+}
+[data-theme="zenburn"] a-vm {
+  color: #dcdccc;
+}
+[data-theme="zenburn"] a-fd {
+  color: #efef8f;
+}
+[data-theme="zenburn"] a-tf {
+  color: #dfdfbf;
+}
+[data-theme="zenburn"] a-fc {
+  color: #efef8f;
+}
+[data-theme="zenburn"] a-km {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-dr {
+  color: #f0dfaf;
+}
+[data-theme="zenburn"] a-rx {
+  color: #cc9393;
+}
+

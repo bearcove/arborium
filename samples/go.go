@@ -1,0 +1,120 @@
+// Copyright 2021 The Gitea Authors. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package explore
+
+import (
+	"net/http"
+
+	"code.gitea.io/gitea/models/db"
+	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/sitemap"
+	"code.gitea.io/gitea/modules/templates"
+	"code.gitea.io/gitea/services/context"
+)
+
+const (
+	// tplExploreRepos explore repositories page template
+	tplExploreRepos        templates.TplName = "explore/repos"
+	relevantReposOnlyParam string            = "only_show_relevant"
+)
+
+// RepoSearchOptions when calling search repositories
+type RepoSearchOptions struct {
+	OwnerID          int64
+	Private          bool
+	Restricted       bool
+	PageSize         int
+	OnlyShowRelevant bool
+	TplName          templates.TplName
+}
+
+// RenderRepoSearch render repositories search page
+// This function is also used to render the Admin Repository Management page.
+func RenderRepoSearch(ctx *context.Context, opts *RepoSearchOptions) {
+	// Sitemap index for sitemap paths
+	page := ctx.PathParamInt("idx")
+	isSitemap := ctx.PathParam("idx") != ""
+	if page <= 1 {
+		page = ctx.FormInt("page")
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if isSitemap {
+		opts.PageSize = setting.UI.SitemapPagingNum
+	}
+
+	var (
+		repos   []*repo_model.Repository
+		count   int64
+		err     error
+		orderBy db.SearchOrderBy
+	)
+
+	sortOrder := ctx.FormString("sort")
+	if sortOrder == "" {
+		sortOrder = setting.UI.ExploreDefaultSort
+	}
+
+	if order, ok := repo_model.OrderByFlatMap[sortOrder]; ok {
+		orderBy = order
+	} else {
+		sortOrder = "recentupdate"
+		orderBy = db.SearchOrderByRecentUpdated
+	}
+	ctx.Data["SortType"] = sortOrder
+
+	keyword := ctx.FormTrim("q")
+
+	ctx.Data["OnlyShowRelevant"] = opts.OnlyShowRelevant
+
+	topicOnly := ctx.FormBool("topic")
+	ctx.Data["TopicOnly"] = topicOnly
+
+	language := ctx.FormTrim("language")
+	ctx.Data["Language"] = language
+
+	archived := ctx.FormOptionalBool("archived")
+	ctx.Data["IsArchived"] = archived
+
+	fork := ctx.FormOptionalBool("fork")
+	ctx.Data["IsFork"] = fork
+
+	mirror := ctx.FormOptionalBool("mirror")
+	ctx.Data["IsMirror"] = mirror
+
+	template := ctx.FormOptionalBool("template")
+	ctx.Data["IsTemplate"] = template
+
+	private := ctx.FormOptionalBool("private")
+	ctx.Data["IsPrivate"] = private
+
+	repos, count, err = repo_model.SearchRepository(ctx, repo_model.SearchRepoOptions{
+		ListOptions: db.ListOptions{
+			Page:     page,
+			PageSize: opts.PageSize,
+		},
+		Actor:              ctx.Doer,
+		OrderBy:            orderBy,
+		Private:            opts.Private,
+		Keyword:            keyword,
+		OwnerID:            opts.OwnerID,
+		AllPublic:          true,
+		AllLimited:         true,
+		TopicOnly:          topicOnly,
+		Language:           language,
+		IncludeDescription: setting.UI.SearchRepoDescription,
+		OnlyShowRelevant:   opts.OnlyShowRelevant,
+		Archived:           archived,
+		Fork:               fork,
+		Mirror:             mirror,
+		Template:           template,
+		IsPrivate:          private,
+	})
+	if err != nil {
+		ctx.ServerError("SearchRepository", err)

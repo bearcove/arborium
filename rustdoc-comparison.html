@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>arborium - RustDoc Before/After Comparison</title>
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%2350C878' d='m7.2 14.2c.8-1 1.6-1.8 2.4-2.4 1.5-1.3 2.8-1.8 2.8-1.8s-.7 1.1-1.8 2.7c-.2.4-.5.8-.8 1.3-.3.4-.5.9-.8 1.4s-.5 1-.8 1.5c-.2.5-.6 1.1-.8 1.6s-.5 1.1-.7 1.6c-.1.2-.2.5-.3.7 3.3 1.9 7.7 1.5 10.4-1.4 5-5.4.6-7.7 5.2-17.2 0 0-10.2-2.1-17.5 5.1-3.3 3.3-3.3 8.6 0 12 .2-.6.4-1.2.7-1.8.5-1.2 1.2-2.4 2-3.3z'/></svg>"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                background: #1a1a1a;
+                color: #e0e0e0;
+                overflow: hidden;
+            }
+
+            .header {
+                padding: 1rem 2rem;
+                background: #252525;
+                border-bottom: 1px solid #333;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: #50C878;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .header a {
+                color: #50C878;
+                text-decoration: none;
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+                border: 1px solid #50C878;
+                border-radius: 4px;
+                transition: all 0.2s;
+            }
+
+            .header a:hover {
+                background: #50C878;
+                color: #1a1a1a;
+            }
+
+            .comparison-container {
+                display: flex;
+                height: calc(100vh - 60px);
+            }
+
+            .pane {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                border-right: 1px solid #333;
+            }
+
+            .pane:last-child {
+                border-right: none;
+            }
+
+            .pane-header {
+                padding: 0.75rem 1rem;
+                background: #2a2a2a;
+                border-bottom: 1px solid #333;
+                font-weight: 500;
+                font-size: 0.875rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .pane-header .label {
+                padding: 0.25rem 0.5rem;
+                border-radius: 3px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .before .pane-header .label {
+                background: #4a3030;
+                color: #ff8080;
+            }
+
+            .after .pane-header .label {
+                background: #304a30;
+                color: #80ff80;
+            }
+
+            .iframe-container {
+                flex: 1;
+                background: white;
+            }
+
+            .iframe-container iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+
+            .arborium-icon {
+                width: 1.25em;
+                height: 1.25em;
+                display: inline-flex;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>
+                <span class="arborium-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em">
+                        <path fill="#50C878" d="m7.2 14.2c.8-1 1.6-1.8 2.4-2.4 1.5-1.3 2.8-1.8 2.8-1.8s-.7 1.1-1.8 2.7c-.2.4-.5.8-.8 1.3-.3.4-.5.9-.8 1.4s-.5 1-.8 1.5c-.2.5-.6 1.1-.8 1.6s-.5 1.1-.7 1.6c-.1.2-.2.5-.3.7 3.3 1.9 7.7 1.5 10.4-1.4 5-5.4.6-7.7 5.2-17.2 0 0-10.2-2.1-17.5 5.1-3.3 3.3-3.3 8.6 0 12 .2-.6.4-1.2.7-1.8.5-1.2 1.2-2.4 2-3.3z" />
+                    </svg>
+                </span>
+                RustDoc Before/After Comparison
+            </h1>
+            <a href="index.html">← Back to Demo</a>
+        </div>
+        <div class="comparison-container">
+            <div class="pane before">
+                <div class="pane-header">
+                    <span class="label">Before</span>
+                    <span>Standard rustdoc output</span>
+                </div>
+                <div class="iframe-container">
+                    <iframe src="rustdoc-comparison/before/arborium_docsrs_demo/index.html"></iframe>
+                </div>
+            </div>
+            <div class="pane after">
+                <div class="pane-header">
+                    <span class="label">After</span>
+                    <span>Enhanced with arborium-rustdoc</span>
+                </div>
+                <div class="iframe-container">
+                    <iframe src="rustdoc-comparison/after/arborium_docsrs_demo/index.html"></iframe>
+                </div>
+            </div>
+        </div>
+        <script>
+            // Synchronize scroll positions between iframes
+            (function() {
+                const iframes = document.querySelectorAll('iframe');
+                const [beforeIframe, afterIframe] = iframes;
+                let syncing = false;
+
+                function syncScroll(source, target) {
+                    if (syncing) return;
+                    syncing = true;
+
+                    const sourceDoc = source.contentDocument || source.contentWindow.document;
+                    const targetDoc = target.contentDocument || target.contentWindow.document;
+
+                    // Sync scroll position (as percentage to handle different content heights)
+                    const sourceEl = sourceDoc.scrollingElement || sourceDoc.documentElement;
+                    const targetEl = targetDoc.scrollingElement || targetDoc.documentElement;
+
+                    const scrollPercentX = sourceEl.scrollLeft / (sourceEl.scrollWidth - sourceEl.clientWidth || 1);
+                    const scrollPercentY = sourceEl.scrollTop / (sourceEl.scrollHeight - sourceEl.clientHeight || 1);
+
+                    targetEl.scrollLeft = scrollPercentX * (targetEl.scrollWidth - targetEl.clientWidth);
+                    targetEl.scrollTop = scrollPercentY * (targetEl.scrollHeight - targetEl.clientHeight);
+
+                    requestAnimationFrame(() => { syncing = false; });
+                }
+
+                function setupSync() {
+                    try {
+                        const beforeDoc = beforeIframe.contentWindow;
+                        const afterDoc = afterIframe.contentWindow;
+
+                        beforeDoc.addEventListener('scroll', () => syncScroll(beforeIframe, afterIframe));
+                        afterDoc.addEventListener('scroll', () => syncScroll(afterIframe, beforeIframe));
+                    } catch (e) {
+                        console.warn('Could not sync iframe scrolls (cross-origin?):', e);
+                    }
+                }
+
+                // Wait for both iframes to load
+                let loaded = 0;
+                iframes.forEach(iframe => {
+                    iframe.addEventListener('load', () => {
+                        loaded++;
+                        if (loaded === 2) setupSync();
+                    });
+                });
+            })();
+        </script>
+    </body>
+</html>

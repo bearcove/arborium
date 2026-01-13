@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="arborium docs.rs demo"><title>arborium_docsrs_demo - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="arborium_docsrs_demo" data-themes="" data-resource-suffix="" data-rustdoc-version="1.92.0 (ded5c06cf 2025-12-08)" data-channel="1.92.0" data-search-js="search-d69d8955.js" data-stringdex-js="stringdex-c3e638e9.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-ce535bd0.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Crate arborium_docsrs_demo</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../arborium_docsrs_demo/index.html">arborium_<wbr>docsrs_<wbr>demo</a><span class="version">2.6.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#arborium-docsrs-demo" title="arborium docs.rs demo">arborium docs.rs demo</a><ul><li><a href="#toml" title="TOML">TOML</a></li><li><a href="#shell" title="Shell">Shell</a></li><li><a href="#json" title="JSON">JSON</a></li><li><a href="#yaml" title="YAML">YAML</a></li><li><a href="#sql" title="SQL">SQL</a></li><li><a href="#javascript" title="JavaScript">JavaScript</a></li><li><a href="#typescript" title="TypeScript">TypeScript</a></li><li><a href="#python" title="Python">Python</a></li><li><a href="#dockerfile" title="Dockerfile">Dockerfile</a></li><li><a href="#nix" title="Nix">Nix</a></li><li><a href="#graphql" title="GraphQL">GraphQL</a></li><li><a href="#css" title="CSS">CSS</a></li><li><a href="#rust-for-comparison" title="Rust (for comparison)">Rust (for comparison)</a></li></ul></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>arborium_<wbr>docsrs_<wbr>demo</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/arborium_docsrs_demo/lib.rs.html#1-295">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="arborium-docsrs-demo"><a class="doc-anchor" href="#arborium-docsrs-demo">§</a>arborium docs.rs demo</h2>
+<p>This crate demonstrates <a href="https://github.com/bearcove/arborium">arborium</a>
+syntax highlighting on docs.rs. Rust code is already highlighted by rustdoc,
+but other languages are left plain. arborium fixes that!</p>
+<h3 id="toml"><a class="doc-anchor" href="#toml">§</a>TOML</h3>
+<p>Configuration files are everywhere in the Rust ecosystem:</p>
+<div class="example-wrap"><pre class="language-toml"><code><a-p>[</a-p><a-pr>package</a-pr><a-p>]</a-p>
+<a-pr>name</a-pr> <a-o>=</a-o> <a-s>&quot;my-awesome-crate&quot;</a-s>
+<a-pr>version</a-pr> <a-o>=</a-o> <a-s>&quot;1.0.0&quot;</a-s>
+<a-pr>edition</a-pr> <a-o>=</a-o> <a-s>&quot;2021&quot;</a-s>
+
+<a-p>[</a-p><a-pr>dependencies</a-pr><a-p>]</a-p>
+<a-pr>serde</a-pr> <a-o>=</a-o> <a-p>{</a-p> <a-pr>version</a-pr> <a-o>=</a-o> <a-s>&quot;1.0&quot;</a-s><a-p>,</a-p> <a-pr>features</a-pr> <a-o>=</a-o> <a-p>[</a-p><a-s>&quot;derive&quot;</a-s><a-p>]</a-p> <a-p>}</a-p>
+<a-pr>tokio</a-pr> <a-o>=</a-o> <a-p>{</a-p> <a-pr>version</a-pr> <a-o>=</a-o> <a-s>&quot;1&quot;</a-s><a-p>,</a-p> <a-pr>features</a-pr> <a-o>=</a-o> <a-p>[</a-p><a-s>&quot;full&quot;</a-s><a-p>]</a-p> <a-p>}</a-p>
+
+<a-p>[</a-p><a-pr>dev-dependencies</a-pr><a-p>]</a-p>
+<a-pr>criterion</a-pr> <a-o>=</a-o> <a-s>&quot;0.5&quot;</a-s>
+
+<a-p>[</a-p><a-pr>features</a-pr><a-p>]</a-p>
+<a-pr>default</a-pr> <a-o>=</a-o> <a-p>[</a-p><a-s>&quot;std&quot;</a-s><a-p>]</a-p>
+<a-pr>std</a-pr> <a-o>=</a-o> <a-p>[]</a-p>
+<a-pr>async</a-pr> <a-o>=</a-o> <a-p>[</a-p><a-s>&quot;tokio&quot;</a-s><a-p>]</a-p></code></pre></div><h3 id="shell"><a class="doc-anchor" href="#shell">§</a>Shell</h3>
+<p>Installation and usage instructions often include shell commands:</p>
+<div class="example-wrap"><pre class="language-bash"><code><a-c># Install the crate</a-c>
+<a-f>cargo</a-f> install my-awesome-crate
+
+<a-c># Run with arguments</a-c>
+<a-f>my-awesome-crate</a-f> <a-co>--config</a-co> config.toml <a-co>--verbose</a-co>
+
+<a-c># Set environment variables</a-c>
+<a-k>export</a-k> <a-pr>RUST_LOG</a-pr>=debug
+<a-f>cargo</a-f> run <a-co>--</a-co> serve <a-co>--port</a-co> 8080</code></pre></div><h3 id="json"><a class="doc-anchor" href="#json">§</a>JSON</h3>
+<p>API responses, configuration, and data interchange:</p>
+<div class="example-wrap"><pre class="language-json"><code>{
+  <a-s>&quot;name&quot;</a-s>: <a-s>&quot;arborium&quot;</a-s>,
+  <a-s>&quot;version&quot;</a-s>: <a-s>&quot;1.0.0&quot;</a-s>,
+  <a-s>&quot;features&quot;</a-s>: [<a-s>&quot;syntax-highlighting&quot;</a-s>, <a-s>&quot;tree-sitter&quot;</a-s>, <a-s>&quot;wasm&quot;</a-s>],
+  <a-s>&quot;languages&quot;</a-s>: <a-n>69</a-n>,
+  <a-s>&quot;config&quot;</a-s>: {
+    <a-s>&quot;theme&quot;</a-s>: <a-s>&quot;tokyo-night&quot;</a-s>,
+    <a-s>&quot;maxDepth&quot;</a-s>: <a-n>3</a-n>
+  }
+}</code></pre></div><h3 id="yaml"><a class="doc-anchor" href="#yaml">§</a>YAML</h3>
+<p>CI/CD pipelines and Kubernetes configs:</p>
+<div class="example-wrap"><pre class="language-yaml"><code><a-s>name</a-s><a-p>:</a-p> <a-s>CI</a-s>
+<a-s>on</a-s><a-p>:</a-p> <a-p>[</a-p><a-s>push</a-s><a-p>,</a-p> <a-s>pull_request</a-s><a-p>]</a-p>
+
+<a-s>jobs</a-s><a-p>:</a-p>
+  <a-s>test</a-s><a-p>:</a-p>
+    <a-s>runs-on</a-s><a-p>:</a-p> <a-s>ubuntu-latest</a-s>
+    <a-s>steps</a-s><a-p>:</a-p>
+      <a-p>-</a-p> <a-s>uses</a-s><a-p>:</a-p> <a-s>actions/checkout@v4</a-s>
+      <a-p>-</a-p> <a-s>name</a-s><a-p>:</a-p> <a-s>Install Rust</a-s>
+        <a-s>uses</a-s><a-p>:</a-p> <a-s>dtolnay/rust-toolchain@stable</a-s>
+      <a-p>-</a-p> <a-s>name</a-s><a-p>:</a-p> <a-s>Run tests</a-s>
+        <a-s>run</a-s><a-p>:</a-p> <a-s>cargo test --all-features</a-s></code></pre></div><h3 id="sql"><a class="doc-anchor" href="#sql">§</a>SQL</h3>
+<p>Database queries and migrations:</p>
+<div class="example-wrap"><pre class="language-sql"><code><a-c>-- Create a users table</a-c>
+<a-k>CREATE</a-k> <a-k>TABLE</a-k> <a-t>users</a-t> <a-p>(</a-p>
+    id <a-t>SERIAL</a-t> <a-k>PRIMARY</a-k> <a-k>KEY</a-k><a-p>,</a-p>
+    username <a-t>VARCHAR</a-t><a-p>(</a-p><a-s>255</a-s><a-p>)</a-p> <a-k>NOT</a-k> <a-t>NULL</a-t> <a-t>UNIQUE</a-t><a-p>,</a-p>
+    email <a-t>VARCHAR</a-t><a-p>(</a-p><a-s>255</a-s><a-p>)</a-p> <a-k>NOT</a-k> <a-t>NULL</a-t><a-p>,</a-p>
+    created_at <a-t>TIMESTAMP</a-t> <a-at>DEFAULT</a-at> <a-at>CURRENT_TIMESTAMP</a-at>
+<a-p>);</a-p>
+
+<a-c>-- Query with joins</a-c>
+<a-k>SELECT</a-k> <a-t>u</a-t><a-p>.</a-p><a-v>username</a-v><a-p>,</a-p> <a-t>COUNT</a-t><a-p>(</a-p><a-t>p</a-t><a-p>.</a-p><a-v>id</a-v><a-p>)</a-p> <a-k>as</a-k> <a-v>post_count</a-v>
+<a-k>FROM</a-k> <a-t>users</a-t> <a-v>u</a-v>
+<a-k>LEFT</a-k> <a-k>JOIN</a-k> <a-t>posts</a-t> <a-v>p</a-v> <a-k>ON</a-k> <a-t>p</a-t><a-p>.</a-p><a-v>author_id</a-v> <a-o>=</a-o> <a-t>u</a-t><a-p>.</a-p><a-v>id</a-v>
+<a-k>WHERE</a-k> <a-t>u</a-t><a-p>.</a-p><a-v>created_at</a-v> <a-o>&gt;</a-o> <a-s>&#39;2024-01-01&#39;</a-s>
+<a-k>GROUP</a-k> <a-k>BY</a-k> <a-t>u</a-t><a-p>.</a-p><a-v>id</a-v>
+<a-k>ORDER</a-k> <a-k>BY</a-k> <a-v>post_count</a-v> <a-at>DESC</a-at>
+<a-k>LIMIT</a-k> <a-s>10</a-s><a-p>;</a-p></code></pre></div><h3 id="javascript"><a class="doc-anchor" href="#javascript">§</a>JavaScript</h3>
+<p>Browser code and Node.js examples:</p>
+<div class="example-wrap"><pre class="language-javascript"><code><a-k>import</a-k> <a-p>{</a-p> <a-v>loadGrammar</a-v><a-p>,</a-p> <a-v>highlight</a-v> <a-p>}</a-p> <a-k>from</a-k> <a-s>&#39;@arborium/arborium&#39;</a-s><a-p>;</a-p>
+
+<a-k>async</a-k> <a-k>function</a-k> <a-v>highlightCode</a-v><a-p>(</a-p><a-v>language</a-v><a-p>,</a-p> <a-v>source</a-v><a-p>)</a-p> <a-p>{</a-p>
+  <a-k>const</a-k> <a-v>grammar</a-v> <a-o>=</a-o> <a-k>await</a-k> <a-v>loadGrammar</a-v><a-p>(</a-p><a-v>language</a-v><a-p>);</a-p>
+  <a-k>const</a-k> <a-v>html</a-v> <a-o>=</a-o> <a-v>grammar</a-v><a-p>.</a-p><a-pr>highlight</a-pr><a-p>(</a-p><a-v>source</a-v><a-p>);</a-p>
+  <a-v>document</a-v><a-p>.</a-p><a-pr>getElementById</a-pr><a-p>(</a-p><a-s>&#39;output&#39;</a-s><a-p>).</a-p><a-pr>innerHTML</a-pr> <a-o>=</a-o> <a-v>html</a-v><a-p>;</a-p>
+<a-p>}</a-p>
+
+<a-c>// Auto-highlight all code blocks</a-c>
+<a-v>document</a-v><a-p>.</a-p><a-pr>querySelectorAll</a-pr><a-p>(</a-p><a-s>&#39;pre code&#39;</a-s><a-p>).</a-p><a-pr>forEach</a-pr><a-p>(</a-p><a-v>block</a-v> <a-o>=&gt;</a-o> <a-p>{</a-p>
+  <a-k>const</a-k> <a-v>lang</a-v> <a-o>=</a-o> <a-v>block</a-v><a-p>.</a-p><a-pr>className</a-pr><a-p>.</a-p><a-pr>match</a-pr><a-p>(</a-p><a-o>/</a-o><a-s>language-(\w+)</a-s><a-o>/</a-o><a-p>)?.[</a-p><a-n>1</a-n><a-p>];</a-p>
+  <a-k>if</a-k> <a-p>(</a-p><a-v>lang</a-v><a-p>)</a-p> <a-v>highlightCode</a-v><a-p>(</a-p><a-v>lang</a-v><a-p>,</a-p> <a-v>block</a-v><a-p>.</a-p><a-pr>textContent</a-pr><a-p>);</a-p>
+<a-p>});</a-p></code></pre></div><h3 id="typescript"><a class="doc-anchor" href="#typescript">§</a>TypeScript</h3>
+<p>Type-safe JavaScript:</p>
+<div class="example-wrap"><pre class="language-typescript"><code><a-k>interface</a-k> <a-t>HighlightConfig</a-t> <a-p>{</a-p>
+  <a-pr>theme</a-pr>: <a-t>string</a-t><a-p>;</a-p>
+  <a-pr>selector</a-pr>: <a-t>string</a-t><a-p>;</a-p>
+  <a-pr>maxDepth</a-pr>?: <a-t>number</a-t><a-p>;</a-p>
+<a-p>}</a-p>
+
+<a-k>async</a-k> <a-k>function</a-k> <a-v>highlight</a-v><a-p>(</a-p>
+  <a-v>language</a-v>: <a-t>string</a-t><a-p>,</a-p>
+  <a-v>source</a-v>: <a-t>string</a-t><a-p>,</a-p>
+  <a-v>config</a-v>?: <a-t>HighlightConfig</a-t>
+<a-p>)</a-p>: <a-t>Promise</a-t><a-p>&lt;</a-p><a-t>string</a-t><a-o>&gt;</a-o> <a-p>{</a-p>
+  <a-k>const</a-k> <a-v>grammar</a-v> <a-o>=</a-o> <a-k>await</a-k> <a-v>loadGrammar</a-v><a-p>(</a-p><a-v>language</a-v><a-p>);</a-p>
+  <a-k>return</a-k> <a-v>grammar</a-v><a-p>.</a-p><a-pr>highlight</a-pr><a-p>(</a-p><a-v>source</a-v><a-p>);</a-p>
+<a-p>}</a-p>
+
+<a-k>const</a-k> <a-v>config</a-v>: <a-t>HighlightConfig</a-t> <a-o>=</a-o> <a-p>{</a-p>
+  <a-pr>theme</a-pr>: <a-s>&#39;mocha&#39;</a-s><a-p>,</a-p>
+  <a-pr>selector</a-pr>: <a-s>&#39;pre &gt; code&#39;</a-s><a-p>,</a-p>
+<a-p>};</a-p></code></pre></div><h3 id="python"><a class="doc-anchor" href="#python">§</a>Python</h3>
+<p>Scripts and tooling:</p>
+<div class="example-wrap"><pre class="language-python"><code><a-k>import</a-k> <a-v>subprocess</a-v>
+<a-k>from</a-k> <a-v>pathlib</a-v> <a-k>import</a-k> <a-cr>Path</a-cr>
+
+<a-k>def</a-k> <a-v>build_and_test</a-v>(<a-v>project_dir</a-v>: <a-cr>Path</a-cr>) <a-o>-&gt;</a-o> <a-v>bool</a-v>:
+    <a-s>&quot;&quot;&quot;Build the project and run tests.&quot;&quot;&quot;</a-s>
+    <a-v>result</a-v> <a-o>=</a-o> <a-v>subprocess</a-v>.<a-v>run</a-v>(
+        [<a-s>&quot;cargo&quot;</a-s>, <a-s>&quot;test&quot;</a-s>, <a-s>&quot;--all-features&quot;</a-s>],
+        <a-v>cwd</a-v><a-o>=</a-o><a-v>project_dir</a-v>,
+        <a-v>capture_output</a-v><a-o>=</a-o><a-co>True</a-co>,
+        <a-v>text</a-v><a-o>=</a-o><a-co>True</a-co>,
+    )
+    <a-k>if</a-k> <a-v>result</a-v>.<a-v>returncode</a-v> <a-o>!=</a-o> <a-n>0</a-n>:
+        <a-v>print</a-v>(<a-s>f&quot;Tests failed:\n</a-s><a-p>{</a-p><a-v>result</a-v><a-eb>.</a-eb><a-v>stderr</a-v><a-p>}</a-p><a-s>&quot;</a-s>)
+        <a-k>return</a-k> <a-co>False</a-co>
+    <a-k>return</a-k> <a-co>True</a-co>
+
+<a-k>if</a-k> <a-v>__name__</a-v> <a-o>==</a-o> <a-s>&quot;__main__&quot;</a-s>:
+    <a-v>success</a-v> <a-o>=</a-o> <a-v>build_and_test</a-v>(<a-cr>Path</a-cr>.<a-v>cwd</a-v>())
+    <a-v>exit</a-v>(<a-n>0</a-n> <a-k>if</a-k> <a-v>success</a-v> <a-k>else</a-k> <a-n>1</a-n>)</code></pre></div><h3 id="dockerfile"><a class="doc-anchor" href="#dockerfile">§</a>Dockerfile</h3>
+<p>Container builds:</p>
+<div class="example-wrap"><pre class="language-dockerfile"><code><a-k>FROM</a-k> rust<a-o>:</a-o>1.75 <a-k>as</a-k> builder
+<a-k>WORKDIR</a-k> /app
+<a-k>COPY</a-k> Cargo.toml Cargo.lock ./
+<a-k>COPY</a-k> src ./src
+<a-k>RUN</a-k> cargo build --release
+
+<a-k>FROM</a-k> debian<a-o>:</a-o>bookworm-slim
+<a-k>RUN</a-k> apt-get update &amp;&amp; apt-get install -y ca-certificates &amp;&amp; rm -rf /var/lib/apt/lists/*
+<a-k>COPY</a-k> --from=builder /app/target/release/myapp /usr/local/bin/
+<a-k>ENTRYPOINT</a-k> [<a-s>&quot;myapp&quot;</a-s>]</code></pre></div><h3 id="nix"><a class="doc-anchor" href="#nix">§</a>Nix</h3>
+<p>Reproducible builds:</p>
+<div class="example-wrap"><pre class="language-nix"><code><a-p>{</a-p> <a-v>pkgs</a-v> <a-p>?</a-p> <a-v>import</a-v> <a-s>&lt;nixpkgs&gt;</a-s> <a-p>{}</a-p> <a-p>}</a-p>:
+
+<a-v>pkgs</a-v><a-p>.</a-p><a-v>rustPlatform</a-v><a-p>.</a-p><a-v>buildRustPackage</a-v> <a-k>rec</a-k> <a-p>{</a-p>
+  <a-v>pname</a-v> <a-p>=</a-p> <a-s>&quot;arborium&quot;</a-s><a-p>;</a-p>
+  <a-v>version</a-v> <a-p>=</a-p> <a-s>&quot;1.0.0&quot;</a-s><a-p>;</a-p>
+
+  <a-v>src</a-v> <a-p>=</a-p> <a-s>./.</a-s><a-p>;</a-p>
+
+  <a-v>cargoLock</a-v> <a-p>=</a-p> <a-p>{</a-p>
+    <a-v>lockFile</a-v> <a-p>=</a-p> <a-s>./Cargo.lock</a-s><a-p>;</a-p>
+  <a-p>};</a-p>
+
+  <a-v>nativeBuildInputs</a-v> <a-p>=</a-p> <a-p>[</a-p> <a-v>pkgs</a-v><a-p>.</a-p><a-v>pkg-config</a-v> <a-p>];</a-p>
+  <a-v>buildInputs</a-v> <a-p>=</a-p> <a-p>[</a-p> <a-v>pkgs</a-v><a-p>.</a-p><a-v>openssl</a-v> <a-p>];</a-p>
+<a-p>}</a-p></code></pre></div><h3 id="graphql"><a class="doc-anchor" href="#graphql">§</a>GraphQL</h3>
+<p>API schemas:</p>
+<div class="example-wrap"><pre class="language-graphql"><code><a-k>type</a-k> <a-v>Query</a-v> <a-p>{</a-p>
+  <a-v>user</a-v><a-p>(</a-p><a-v>id</a-v><a-p>:</a-p> <a-v>ID</a-v><a-o>!</a-o><a-p>):</a-p> <a-v>User</a-v>
+  <a-v>posts</a-v><a-p>(</a-p><a-v>limit</a-v><a-p>:</a-p> <a-v>Int</a-v> <a-o>=</a-o> <a-n>10</a-n>, <a-v>offset</a-v><a-p>:</a-p> <a-v>Int</a-v> <a-o>=</a-o> <a-n>0</a-n><a-p>):</a-p> <a-p>[</a-p><a-v>Post</a-v><a-o>!</a-o><a-p>]</a-p><a-o>!</a-o>
+<a-p>}</a-p>
+
+<a-k>type</a-k> <a-v>User</a-v> <a-p>{</a-p>
+  <a-v>id</a-v><a-p>:</a-p> <a-v>ID</a-v><a-o>!</a-o>
+  <a-v>username</a-v><a-p>:</a-p> <a-v>String</a-v><a-o>!</a-o>
+  <a-v>email</a-v><a-p>:</a-p> <a-v>String</a-v><a-o>!</a-o>
+  <a-v>posts</a-v><a-p>:</a-p> <a-p>[</a-p><a-v>Post</a-v><a-o>!</a-o><a-p>]</a-p><a-o>!</a-o>
+<a-p>}</a-p>
+
+<a-k>type</a-k> <a-v>Post</a-v> <a-p>{</a-p>
+  <a-v>id</a-v><a-p>:</a-p> <a-v>ID</a-v><a-o>!</a-o>
+  <a-v>title</a-v><a-p>:</a-p> <a-v>String</a-v><a-o>!</a-o>
+  <a-v>content</a-v><a-p>:</a-p> <a-v>String</a-v><a-o>!</a-o>
+  <a-v>author</a-v><a-p>:</a-p> <a-v>User</a-v><a-o>!</a-o>
+  <a-v>createdAt</a-v><a-p>:</a-p> <a-v>DateTime</a-v><a-o>!</a-o>
+<a-p>}</a-p>
+
+<a-k>mutation</a-k> <a-v>CreatePost</a-v><a-p>($</a-p><a-v>input</a-v><a-p>:</a-p> <a-v>CreatePostInput</a-v><a-o>!</a-o><a-p>)</a-p> <a-p>{</a-p>
+  <a-v>createPost</a-v><a-p>(</a-p><a-v>input</a-v><a-p>:</a-p> <a-p>$</a-p><a-v>input</a-v><a-p>)</a-p> <a-p>{</a-p>
+    <a-v>id</a-v>
+    <a-v>title</a-v>
+  <a-p>}</a-p>
+<a-p>}</a-p></code></pre></div><h3 id="css"><a class="doc-anchor" href="#css">§</a>CSS</h3>
+<p>Styling:</p>
+<div class="example-wrap"><pre class="language-css"><code><a-p>:</a-p><a-pr>root</a-pr> <a-p>{</a-p>
+  <a-pr>--primary-color</a-pr><a-p>:</a-p> <a-p>#</a-p><a-s>50C878</a-s><a-p>;</a-p>
+  <a-pr>--background</a-pr><a-p>:</a-p> <a-p>#</a-p><a-s>1a1b26</a-s><a-p>;</a-p>
+  <a-pr>--foreground</a-pr><a-p>:</a-p> <a-p>#</a-p><a-s>c0caf5</a-s><a-p>;</a-p>
+<a-p>}</a-p>
+
+<a-p>.</a-p><a-pr>code-block</a-pr> <a-p>{</a-p>
+  <a-pr>background</a-pr><a-p>:</a-p> <a-f>var</a-f><a-p>(</a-p><a-v>--background</a-v><a-p>);</a-p>
+  <a-pr>color</a-pr><a-p>:</a-p> <a-f>var</a-f><a-p>(</a-p><a-v>--foreground</a-v><a-p>);</a-p>
+  <a-pr>padding</a-pr><a-p>:</a-p> <a-n>1</a-n><a-t>rem</a-t><a-p>;</a-p>
+  <a-pr>border-radius</a-pr><a-p>:</a-p> <a-n>8</a-n><a-t>px</a-t><a-p>;</a-p>
+  <a-pr>font-family</a-pr><a-p>:</a-p> <a-s>&#39;Iosevka&#39;</a-s><a-p>,</a-p> monospace<a-p>;</a-p>
+  <a-pr>overflow-x</a-pr><a-p>:</a-p> auto<a-p>;</a-p>
+<a-p>}</a-p>
+
+<a-p>.</a-p><a-pr>code-block</a-pr> <a-tg>a-k</a-tg> <a-p>{</a-p> <a-pr>color</a-pr><a-p>:</a-p> <a-p>#</a-p><a-s>bb9af7</a-s><a-p>;</a-p> <a-p>}</a-p>  <a-c>/* keywords */</a-c>
+<a-p>.</a-p><a-pr>code-block</a-pr> <a-tg>a-s</a-tg> <a-p>{</a-p> <a-pr>color</a-pr><a-p>:</a-p> <a-p>#</a-p><a-s>9ece6a</a-s><a-p>;</a-p> <a-p>}</a-p>  <a-c>/* strings */</a-c>
+<a-p>.</a-p><a-pr>code-block</a-pr> <a-tg>a-n</a-tg> <a-p>{</a-p> <a-pr>color</a-pr><a-p>:</a-p> <a-p>#</a-p><a-s>ff9e64</a-s><a-p>;</a-p> <a-p>}</a-p>  <a-c>/* numbers */</a-c></code></pre></div><h3 id="rust-for-comparison"><a class="doc-anchor" href="#rust-for-comparison">§</a>Rust (for comparison)</h3>
+<p>Rust code is already highlighted by rustdoc - arborium skips it:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::collections::HashMap;
+
+<span class="kw">pub fn </span>highlight(language: <span class="kw-2">&amp;</span>str, source: <span class="kw-2">&amp;</span>str) -&gt; String {
+    <span class="kw">let </span><span class="kw-2">mut </span>cache: HashMap&lt;String, Grammar&gt; = HashMap::new();
+
+    <span class="kw">let </span>grammar = cache
+        .entry(language.to_string())
+        .or_insert_with(|| load_grammar(language));
+
+    grammar.highlight(source)
+}</code></pre></div>
+<hr />
+<p>This demo is powered by <a href="https://github.com/bearcove/arborium">arborium</a>.
+See the <a href="https://arborium.bearcove.eu/">integration guide</a> for setup instructions.</p>
+</div></details></section></div></main></body></html>

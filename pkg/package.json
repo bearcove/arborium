@@ -1,0 +1,21 @@
+{
+  "name": "arborium-host",
+  "type": "module",
+  "description": "WASM host for arborium syntax highlighting (browser)",
+  "version": "2.6.0",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bearcove/arborium"
+  },
+  "files": [
+    "arborium_host_bg.wasm",
+    "arborium_host.js",
+    "arborium_host.d.ts"
+  ],
+  "main": "arborium_host.js",
+  "types": "arborium_host.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

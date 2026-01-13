@@ -1,0 +1,48 @@
+# SPARQL Query Examples
+# Queries for a knowledge graph about books and authors
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX book: <http://example.org/book/>
+
+# Find all books and their authors
+SELECT ?title ?authorName
+WHERE {
+  ?book rdf:type book:Book .
+  ?book dc:title ?title .
+  ?book dc:creator ?author .
+  ?author foaf:name ?authorName .
+}
+ORDER BY ?authorName
+
+# Find books published after 2000 with optional description
+SELECT ?title ?year ?description
+WHERE {
+  ?book rdf:type book:Book ;
+        dc:title ?title ;
+        dc:date ?year .
+  OPTIONAL { ?book dc:description ?description }
+  FILTER (?year > 2000)
+}
+LIMIT 50
+
+# Count books per author
+SELECT ?authorName (COUNT(?book) AS ?bookCount)
+WHERE {
+  ?book dc:creator ?author .
+  ?author foaf:name ?authorName .
+}
+GROUP BY ?authorName
+HAVING (COUNT(?book) > 5)
+ORDER BY DESC(?bookCount)
+
+# Construct new triples
+CONSTRUCT {
+  ?author book:wrote ?book .
+  ?book book:writtenBy ?author .
+}
+WHERE {
+  ?book dc:creator ?author .
+}
