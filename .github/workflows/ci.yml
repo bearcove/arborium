@@ -128,6 +128,16 @@ jobs:
           set -e
           cargo build --manifest-path crates/arborium/Cargo.toml --all-features --verbose
         shell: bash
+      - name: Build arborium-highlight
+        run: |-
+          set -e
+          cargo build --manifest-path crates/arborium-highlight/Cargo.toml --all-features --verbose
+        shell: bash
+      - name: Test arborium-highlight
+        run: |-
+          set -e
+          cargo nextest run --manifest-path crates/arborium-highlight/Cargo.toml --all-features --verbose
+        shell: bash
       - name: Build arborium-rustdoc
         run: |-
           set -e
@@ -190,6 +200,16 @@ jobs:
         run: |-
           set -e
           cargo nextest run --manifest-path crates/arborium/Cargo.toml --verbose --no-tests=pass
+        shell: bash
+      - name: Build arborium-highlight
+        run: |-
+          set -e
+          cargo build --manifest-path crates/arborium-highlight/Cargo.toml --all-features --verbose
+        shell: bash
+      - name: Test arborium-highlight
+        run: |-
+          set -e
+          cargo nextest run --manifest-path crates/arborium-highlight/Cargo.toml --all-features --verbose
         shell: bash
       - name: Build arborium-rustdoc
         run: |-
