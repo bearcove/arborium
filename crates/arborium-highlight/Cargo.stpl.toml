@@ -29,4 +29,4 @@ unicode-width = { version = "0.1", optional = true }
 terminal_size = { version = "0.4", optional = true }
 
 [dev-dependencies]
-arborium-cpp = { version = "<%= version %>", path = "../../langs/group-birch/cpp/crate" }
+arborium-cpp = { path = "../../langs/group-birch/cpp/crate" }
