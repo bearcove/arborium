@@ -1321,7 +1321,8 @@ mod tests {
     #[test]
     fn test_ansi_wrapping_inserts_newline() {
         let theme = arborium_theme::theme::builtin::dracula();
-        let source = "abcdefgh";
+        // Source must be longer than MIN_CONTENT_WIDTH (10) to trigger wrapping
+        let source = "abcdefghijklmnop";
         let spans = vec![Span {
             start: 0,
             end: source.len() as u32,
@@ -1330,12 +1331,16 @@ mod tests {
 
         let mut options = AnsiOptions::default();
         options.use_theme_base_style = true;
-        options.width = Some(4);
+        options.width = Some(12); // Must be > MIN_CONTENT_WIDTH (10) for wrapping to occur
         options.pad_to_width = false;
 
         let ansi = spans_to_ansi_with_options(source, spans, &theme, &options);
 
-        assert!(ansi.contains('\n'));
+        assert!(
+            ansi.contains('\n'),
+            "Expected newline for wrapping, got: {:?}",
+            ansi
+        );
         assert!(ansi.ends_with(Theme::ANSI_RESET));
     }
 
@@ -1535,14 +1540,24 @@ mod html_tests {
 
     #[test]
     fn test_spans_to_html_cpp_sample() {
-        let sample = std::fs::read_to_string(
-            concat!(env!("CARGO_MANIFEST_DIR"), "/../../demo/samples/cpp.cc")
-        ).expect("Failed to read cpp sample");
+        let sample = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../demo/samples/cpp.cc"
+        ))
+        .expect("Failed to read cpp sample");
 
         // Create some fake spans that cover the whole file
         let spans = vec![
-            Span { start: 0, end: 10, capture: "comment".into() },
-            Span { start: 100, end: 110, capture: "keyword".into() },
+            Span {
+                start: 0,
+                end: 10,
+                capture: "comment".into(),
+            },
+            Span {
+                start: 100,
+                end: 110,
+                capture: "keyword".into(),
+            },
         ];
 
         // This should not panic
@@ -1554,9 +1569,11 @@ mod html_tests {
     fn test_spans_to_html_real_cpp_grammar() {
         use crate::{CompiledGrammar, GrammarConfig, ParseContext};
 
-        let sample = std::fs::read_to_string(
-            concat!(env!("CARGO_MANIFEST_DIR"), "/../../demo/samples/cpp.cc")
-        ).expect("Failed to read cpp sample");
+        let sample = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../demo/samples/cpp.cc"
+        ))
+        .expect("Failed to read cpp sample");
 
         // Load the actual cpp grammar
         let config = GrammarConfig {
@@ -1576,13 +1593,38 @@ mod html_tests {
 
         // Check some spans for validity
         for (i, span) in result.spans.iter().enumerate().take(20) {
-            println!("Span {}: {}..{} {:?}", i, span.start, span.end, span.capture);
+            println!(
+                "Span {}: {}..{} {:?}",
+                i, span.start, span.end, span.capture
+            );
             let start = span.start as usize;
             let end = span.end as usize;
-            assert!(start <= sample.len(), "Span {} start {} > len {}", i, start, sample.len());
-            assert!(end <= sample.len(), "Span {} end {} > len {}", i, end, sample.len());
-            assert!(sample.is_char_boundary(start), "Span {} start {} not char boundary", i, start);
-            assert!(sample.is_char_boundary(end), "Span {} end {} not char boundary", i, end);
+            assert!(
+                start <= sample.len(),
+                "Span {} start {} > len {}",
+                i,
+                start,
+                sample.len()
+            );
+            assert!(
+                end <= sample.len(),
+                "Span {} end {} > len {}",
+                i,
+                end,
+                sample.len()
+            );
+            assert!(
+                sample.is_char_boundary(start),
+                "Span {} start {} not char boundary",
+                i,
+                start
+            );
+            assert!(
+                sample.is_char_boundary(end),
+                "Span {} end {} not char boundary",
+                i,
+                end
+            );
         }
 
         // Now try to render - this should not panic
