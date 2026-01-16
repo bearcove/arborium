@@ -8,7 +8,13 @@
  * 3. Parse and highlight using the grammar's tree-sitter parser
  */
 
-import type { ParseResult, ArboriumConfig, Grammar, Session } from "./types.js";
+import type {
+  Utf8ParseResult,
+  Utf16ParseResult,
+  ArboriumConfig,
+  Grammar,
+  Session,
+} from "./types.js";
 import { availableLanguages, pluginVersion } from "./plugins-manifest.js";
 import { spansToHtml, escapeHtml } from "./utils.js";
 
@@ -116,7 +122,7 @@ type WbgInitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Mo
 /** wasm-bindgen plugin module interface */
 interface WasmBindgenPlugin {
   default: (
-    module_or_path?: { module_or_path: MaybePromise<WbgInitInput> } | undefined
+    module_or_path?: { module_or_path: MaybePromise<WbgInitInput> } | undefined,
     // deprecated: | MaybePromise<WbgInitInput>,
   ) => Promise<void>;
   language_id: () => string;
@@ -124,7 +130,10 @@ interface WasmBindgenPlugin {
   create_session: () => number;
   free_session: (session: number) => void;
   set_text: (session: number, text: string) => void;
-  parse: (session: number) => ParseResult;
+  /** Parse and return UTF-8 byte offsets (for Rust host) */
+  parse: (session: number) => Utf8ParseResult;
+  /** Parse and return UTF-16 code unit indices (for JavaScript) */
+  parse_utf16: (session: number) => Utf16ParseResult;
   cancel: (session: number) => void;
 }
 
@@ -133,11 +142,17 @@ interface GrammarPlugin {
   languageId: string;
   injectionLanguages: string[];
   module: WasmBindgenPlugin;
-  parse: (text: string) => ParseResult;
+  /** Parse returning UTF-8 offsets (for Rust host) */
+  parseUtf8: (text: string) => Utf8ParseResult;
+  /** Parse returning UTF-16 offsets (for JavaScript public API) */
+  parseUtf16: (text: string) => Utf16ParseResult;
 }
 
 /** Load a grammar plugin */
-async function loadGrammarPlugin(language: string, config: Required<ArboriumConfig>): Promise<GrammarPlugin | null> {
+async function loadGrammarPlugin(
+  language: string,
+  config: Required<ArboriumConfig>,
+): Promise<GrammarPlugin | null> {
   // Check cache first
   const cached = grammarCache.get(language);
   if (cached) {
@@ -165,7 +180,10 @@ async function loadGrammarPlugin(language: string, config: Required<ArboriumConf
 }
 
 /** Internal grammar loading - called only once per language */
-async function loadGrammarPluginInner(language: string, config: Required<ArboriumConfig>): Promise<GrammarPlugin | null> {
+async function loadGrammarPluginInner(
+  language: string,
+  config: Required<ArboriumConfig>,
+): Promise<GrammarPlugin | null> {
   // Load local manifest if in dev mode
   await ensureLocalManifest(config);
 
@@ -180,10 +198,15 @@ async function loadGrammarPluginInner(language: string, config: Required<Arboriu
 
   try {
     const baseUrl = getGrammarBaseUrl(language, config);
-    const detail = config.resolveJs === defaultConfig.resolveJs ? ` from ${baseUrl}/grammar.js` : "";
+    const detail =
+      config.resolveJs === defaultConfig.resolveJs ? ` from ${baseUrl}/grammar.js` : "";
     console.debug(`[arborium] Loading grammar '${language}'${detail}`);
 
-    const module = (await config.resolveJs({ language, baseUrl, path: "grammar.js" })) as WasmBindgenPlugin;
+    const module = (await config.resolveJs({
+      language,
+      baseUrl,
+      path: "grammar.js",
+    })) as WasmBindgenPlugin;
     const wasm = await config.resolveWasm({ language, baseUrl, path: "grammar_bg.wasm" });
 
     // Initialize the WASM module
@@ -203,12 +226,29 @@ async function loadGrammarPluginInner(language: string, config: Required<Arboriu
       languageId: language,
       injectionLanguages,
       module,
-      parse: (text: string) => {
+      // UTF-8 parsing for Rust host
+      parseUtf8: (text: string) => {
         const session = module.create_session();
         try {
           module.set_text(session, text);
-          // wasm-bindgen returns ParseResult directly (or throws on error)
           const result = module.parse(session);
+          return {
+            spans: result.spans || [],
+            injections: result.injections || [],
+          };
+        } catch (e) {
+          console.error(`[arborium] Parse error:`, e);
+          return { spans: [], injections: [] };
+        } finally {
+          module.free_session(session);
+        }
+      },
+      // UTF-16 parsing for JavaScript public API
+      parseUtf16: (text: string) => {
+        const session = module.create_session();
+        try {
+          module.set_text(session, text);
+          const result = module.parse_utf16(session);
           return {
             spans: result.spans || [],
             injections: result.injections || [],
@@ -259,11 +299,11 @@ function setupHostInterface(config: Required<ArboriumConfig>): void {
       return handle;
     },
 
-    /** Parse text using a grammar handle (sync) */
-    parse(handle: number, text: string): ParseResult {
+    /** Parse text using a grammar handle (sync) - returns UTF-8 offsets for Rust host */
+    parse(handle: number, text: string): Utf8ParseResult {
       const plugin = handleToPlugin.get(handle);
       if (!plugin) return { spans: [], injections: [] };
-      return plugin.parse(text);
+      return plugin.parseUtf8(text);
     },
   };
 }
@@ -339,12 +379,13 @@ export async function highlight(
   }
 
   // Fallback to JS-only highlighting (no injection support)
+  // Use UTF-16 for JS string slicing in spansToHtml
   const plugin = await loadGrammarPlugin(language, config);
   if (!plugin) {
     return escapeHtml(source);
   }
 
-  const result = plugin.parse(source);
+  const result = plugin.parseUtf16(source);
   return spansToHtml(source, result.spans);
 }
 
@@ -363,17 +404,19 @@ export async function loadGrammar(
     languageId: () => plugin.languageId,
     injectionLanguages: () => plugin.injectionLanguages,
     highlight: async (source: string) => {
-      const result = plugin.parse(source);
+      const result = plugin.parseUtf16(source);
       return spansToHtml(source, result.spans);
     },
-    parse: (source: string) => plugin.parse(source),
+    // Public API returns UTF-16 offsets for JavaScript compatibility
+    parse: (source: string) => plugin.parseUtf16(source),
     createSession: (): Session => {
       const handle = module.create_session();
       return {
         setText: (text: string) => module.set_text(handle, text),
+        // Session.parse() returns UTF-16 offsets for JavaScript compatibility
         parse: () => {
           try {
-            const result = module.parse(handle);
+            const result = module.parse_utf16(handle);
             return {
               spans: result.spans || [],
               injections: result.injections || [],
@@ -407,7 +450,10 @@ export function setConfig(newConfig: Partial<ArboriumConfig>): void {
 }
 
 /** Check if a language is available */
-export async function isLanguageAvailable(language: string, configOverrides?: ArboriumConfig): Promise<boolean> {
+export async function isLanguageAvailable(
+  language: string,
+  configOverrides?: ArboriumConfig,
+): Promise<boolean> {
   const config = getConfig(configOverrides);
   await ensureLocalManifest(config);
   return (

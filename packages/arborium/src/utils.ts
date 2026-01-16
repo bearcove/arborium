@@ -1,83 +1,14 @@
-import type { Span } from "./types.js";
-
-// Shared TextEncoder instance
-const encoder = new TextEncoder();
+import type { Utf16Span } from "./types.js";
 
 /**
- * Get the UTF-8 byte length of a string.
- */
-export function utf8ByteLength(str: string): number {
-  return encoder.encode(str).length;
-}
-
-/**
- * Convert a UTF-8 byte offset to a UTF-16 code unit index.
+ * Convert spans to HTML.
  *
- * This is needed because tree-sitter returns UTF-8 byte offsets,
- * but JavaScript's String methods use UTF-16 code unit indices.
+ * Expects spans with UTF-16 code unit indices (as returned by `grammar.parse()`
+ * and `session.parse()`). The offsets are used directly with `String.slice()`.
  */
-export function utf8OffsetToUtf16(source: string, utf8Offset: number): number {
-  const utf8Bytes = encoder.encode(source);
-
-  if (utf8Offset <= 0) return 0;
-  if (utf8Offset >= utf8Bytes.length) return source.length;
-
-  // Decode just the bytes up to the offset to get the UTF-16 length
-  const decoder = new TextDecoder();
-  const prefix = decoder.decode(utf8Bytes.slice(0, utf8Offset));
-  return prefix.length;
-}
-
-/**
- * Build a mapping from UTF-8 byte offsets to UTF-16 code unit indices.
- *
- * More efficient than calling utf8OffsetToUtf16 repeatedly when you
- * have many offsets to convert for the same string.
- */
-function buildUtf8ToUtf16Map(source: string): Uint32Array {
-  const utf8Bytes = encoder.encode(source);
-  const map = new Uint32Array(utf8Bytes.length + 1);
-
-  let utf8Offset = 0;
-  let utf16Index = 0;
-
-  for (const char of source) {
-    // Record mapping at current UTF-8 position
-    map[utf8Offset] = utf16Index;
-
-    // Get UTF-8 byte length of this character
-    const charUtf8Len = encoder.encode(char).length;
-
-    // Fill intermediate bytes (they map to the same UTF-16 index)
-    for (let i = 1; i < charUtf8Len; i++) {
-      map[utf8Offset + i] = utf16Index;
-    }
-
-    utf8Offset += charUtf8Len;
-    // Characters >= U+10000 are surrogate pairs (2 UTF-16 code units)
-    utf16Index += char.codePointAt(0)! >= 0x10000 ? 2 : 1;
-  }
-
-  // Map the end-of-string position
-  map[utf8Offset] = utf16Index;
-
-  return map;
-}
-
-/** Convert spans to HTML */
-export function spansToHtml(source: string, spans: Span[]): string {
-  // Build UTF-8 to UTF-16 offset mapping
-  const utf8ToUtf16 = buildUtf8ToUtf16Map(source);
-
-  // Convert span offsets from UTF-8 bytes to UTF-16 code units
-  const convertedSpans = spans.map(span => ({
-    ...span,
-    start: utf8ToUtf16[span.start] ?? span.start,
-    end: utf8ToUtf16[span.end] ?? span.end,
-  }));
-
+export function spansToHtml(source: string, spans: Utf16Span[]): string {
   // Sort spans by start position
-  const sorted = [...convertedSpans].sort((a, b) => a.start - b.start);
+  const sorted = [...spans].sort((a, b) => a.start - b.start);
 
   let html = "";
   let pos = 0;

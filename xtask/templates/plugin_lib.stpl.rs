@@ -2,7 +2,7 @@
 
 use wasm_bindgen::prelude::*;
 use arborium_plugin_runtime::{HighlightConfig, PluginRuntime};
-use arborium_wire::ParseResult as WireParseResult;
+use arborium_wire::{Utf8ParseResult, Utf16ParseResult};
 use std::cell::RefCell;
 
 thread_local! {
@@ -70,16 +70,36 @@ pub fn set_text(session: u32, text: &str) {
         .set_text(session, text);
 }
 
-/// Parses the text in a session and returns the result as a JS value.
+/// Parses the text in a session and returns spans with UTF-8 byte offsets.
 ///
-/// The result is a JavaScript object representation of ParseResult containing spans and injections.
+/// Use this for Rust code that needs to slice strings with `&source[start..end]`.
+/// For JavaScript interop, use `parse_utf16` instead.
 #[wasm_bindgen]
 pub fn parse(session: u32) -> Result<JsValue, JsValue> {
-    let result: Result<WireParseResult, _> = get_or_init_runtime()
+    let result: Result<Utf8ParseResult, _> = get_or_init_runtime()
         .borrow_mut()
         .as_mut()
         .expect("runtime not initialized")
         .parse(session);
+
+    match result {
+        Ok(r) => serde_wasm_bindgen::to_value(&r)
+            .map_err(|e| JsValue::from_str(&format!("serialization error: {}", e))),
+        Err(e) => Err(JsValue::from_str(&format!("parse error: {}", e.message))),
+    }
+}
+
+/// Parses the text in a session and returns spans with UTF-16 code unit indices.
+///
+/// Use this for JavaScript code that needs to use `String.prototype.slice()`.
+/// The offsets are compatible with JavaScript string APIs.
+#[wasm_bindgen]
+pub fn parse_utf16(session: u32) -> Result<JsValue, JsValue> {
+    let result: Result<Utf16ParseResult, _> = get_or_init_runtime()
+        .borrow_mut()
+        .as_mut()
+        .expect("runtime not initialized")
+        .parse_utf16(session);
 
     match result {
         Ok(r) => serde_wasm_bindgen::to_value(&r)
