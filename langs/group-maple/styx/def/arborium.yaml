@@ -11,10 +11,10 @@ grammars:
     icon: mdi:file-cog-outline
 
     inventor: Amos Wenger
-    year: 2025
+    year: 2026
     description: "A clean configuration language with schemas, tags, and heredocs. See <a href=\"https://styx.bearcove.eu\">styx.bearcove.eu</a>."
     link: https://styx.bearcove.eu
-    trivia: "Styx schemas are themselves Styx documents, using tags like @string, @object, and @optional to define types."
+    trivia: "Named after the River Styx from Greek mythology that separates the world of the living from the dead. Created by Amos Wenger (@fasterthanlime) in 2026 out of frustration with existing config languages."
 
     samples:
       - path: samples/showcase.styx
