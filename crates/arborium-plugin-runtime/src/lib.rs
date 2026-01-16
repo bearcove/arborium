@@ -215,6 +215,7 @@ struct RawSpan {
     start: usize,
     end: usize,
     capture: String,
+    pattern_index: usize,
 }
 
 struct RawInjection {
@@ -425,6 +426,7 @@ impl PluginRuntime {
                     start: node.start_byte(),
                     end: node.end_byte(),
                     capture: String::from(capture_name),
+                    pattern_index: m.pattern_index,
                 });
             }
         }
@@ -448,6 +450,7 @@ impl PluginRuntime {
                 start: s.start as u32,
                 end: s.end as u32,
                 capture: s.capture,
+                pattern_index: s.pattern_index as u32,
             })
             .collect();
 
@@ -512,6 +515,7 @@ impl PluginRuntime {
                 start: lookup(s.start),
                 end: lookup(s.end),
                 capture: s.capture,
+                pattern_index: s.pattern_index as u32,
             })
             .collect();
 
@@ -710,6 +714,128 @@ mod tests {
 
             // Should return empty result due to cancellation
             assert!(result.spans.is_empty());
+
+            runtime.free_session(session);
+        }
+    }
+
+    /// Test Styx grammar - verifies pattern_index is correct for deduplication
+    mod styx_tests {
+        use super::super::*;
+
+        fn print_spans(spans: &[Utf8Span], source: &str) {
+            eprintln!("\n=== All spans ===");
+            for span in spans {
+                let text = &source[span.start as usize..span.end as usize];
+                eprintln!(
+                    "  [{:3}-{:3}] pattern={:2} capture={:20} text={:?}",
+                    span.start, span.end, span.pattern_index, span.capture, text
+                );
+            }
+            eprintln!();
+        }
+
+        #[test]
+        fn test_styx_doc_comment() {
+            let config = HighlightConfig::new(
+                arborium_styx::language(),
+                arborium_styx::HIGHLIGHTS_QUERY,
+                arborium_styx::INJECTIONS_QUERY,
+                arborium_styx::LOCALS_QUERY,
+            )
+            .expect("failed to create config");
+
+            let mut runtime = PluginRuntime::new(config);
+            let session = runtime.create_session();
+
+            let source = "/// this is a doc comment\n";
+            runtime.set_text(session, source);
+            let result = runtime.parse(session).expect("parse failed");
+
+            print_spans(&result.spans, source);
+
+            // Should have a comment span covering the whole doc comment
+            let comment_spans: Vec<_> = result
+                .spans
+                .iter()
+                .filter(|s| s.capture.contains("comment"))
+                .collect();
+
+            assert!(
+                !comment_spans.is_empty(),
+                "Should have at least one comment span, got: {:?}",
+                result.spans
+            );
+
+            // The comment span should cover "/// this is a doc comment"
+            let comment = &comment_spans[0];
+            let comment_text = &source[comment.start as usize..comment.end as usize];
+            assert!(
+                comment_text.contains("///") && comment_text.contains("this"),
+                "Comment span should cover both '///' and text, got: {:?}",
+                comment_text
+            );
+
+            runtime.free_session(session);
+        }
+
+        #[test]
+        fn test_styx_key_value_pattern_index() {
+            let config = HighlightConfig::new(
+                arborium_styx::language(),
+                arborium_styx::HIGHLIGHTS_QUERY,
+                arborium_styx::INJECTIONS_QUERY,
+                arborium_styx::LOCALS_QUERY,
+            )
+            .expect("failed to create config");
+
+            let mut runtime = PluginRuntime::new(config);
+            let session = runtime.create_session();
+
+            let source = "name value\n";
+            runtime.set_text(session, source);
+            let result = runtime.parse(session).expect("parse failed");
+
+            print_spans(&result.spans, source);
+
+            // Find spans for "name" (the key)
+            let name_spans: Vec<_> = result
+                .spans
+                .iter()
+                .filter(|s| {
+                    let text = &source[s.start as usize..s.end as usize];
+                    text == "name"
+                })
+                .collect();
+
+            eprintln!("Spans for 'name': {:?}", name_spans);
+
+            // Should have both @string and @property for "name"
+            let string_span = name_spans.iter().find(|s| s.capture == "string");
+            let property_span = name_spans.iter().find(|s| s.capture == "property");
+
+            assert!(string_span.is_some(), "Should have @string span for 'name'");
+            assert!(
+                property_span.is_some(),
+                "Should have @property span for 'name'"
+            );
+
+            let string_idx = string_span.unwrap().pattern_index;
+            let property_idx = property_span.unwrap().pattern_index;
+
+            eprintln!(
+                "@string pattern_index: {}, @property pattern_index: {}",
+                string_idx, property_idx
+            );
+
+            // @property should have HIGHER pattern_index than @string
+            // because it comes later in highlights.scm
+            assert!(
+                property_idx > string_idx,
+                "@property (pattern_index={}) should be > @string (pattern_index={}) for deduplication to work correctly",
+                property_idx,
+                string_idx
+            );
 
             runtime.free_session(session);
         }

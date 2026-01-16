@@ -585,6 +585,7 @@ mod tests {
                             start: 0,
                             end: 2,
                             capture: "keyword".into(),
+                            pattern_index: 0,
                         }],
                         injections: vec![],
                     },
@@ -624,6 +625,7 @@ mod tests {
                                 start: 0,
                                 end: 5,
                                 capture: "string".into(),
+                                pattern_index: 0,
                             }],
                             injections: vec![],
                         },
@@ -666,6 +668,7 @@ mod tests {
                             start: 0,
                             end: 2,
                             capture: "keyword".into(),
+                            pattern_index: 0,
                         }],
                         injections: vec![],
                     },
@@ -690,11 +693,13 @@ mod tests {
                 start: 0,
                 end: 3,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "keyword.function".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html("keyword", spans, &HtmlFormat::default());

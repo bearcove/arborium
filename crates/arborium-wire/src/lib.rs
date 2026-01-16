@@ -49,6 +49,9 @@ pub struct Utf8Span {
     pub end: u32,
     /// The capture name (e.g., "keyword", "function", "string").
     pub capture: String,
+    /// Pattern index from the query (higher = later in highlights.scm = higher priority).
+    #[serde(default)]
+    pub pattern_index: u32,
 }
 
 /// An injection point with UTF-8 byte offsets.
@@ -104,6 +107,9 @@ pub struct Utf16Span {
     pub end: u32,
     /// The capture name (e.g., "keyword", "function", "string").
     pub capture: String,
+    /// Pattern index from the query (higher = later in highlights.scm = higher priority).
+    #[serde(default)]
+    pub pattern_index: u32,
 }
 
 /// An injection point with UTF-16 code unit indices.

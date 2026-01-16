@@ -188,6 +188,7 @@ impl CompiledGrammar {
                     start: node.start_byte() as u32,
                     end: node.end_byte() as u32,
                     capture: capture_name.to_string(),
+                    pattern_index: m.pattern_index as u32,
                 });
             }
         }

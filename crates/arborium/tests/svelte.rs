@@ -2,19 +2,34 @@
 //!
 //! Tests that verify CSS and JavaScript injections work correctly in Svelte components.
 
-#![cfg(feature = "lang-svelte")]
+#![cfg(all(
+    feature = "lang-svelte",
+    feature = "lang-css",
+    feature = "lang-javascript",
+    feature = "lang-typescript"
+))]
 
 use arborium::Highlighter;
+use arborium_highlight::Span;
 use indoc::indoc;
+use std::collections::HashSet;
 
-/// Check that HTML contains specific highlight tags
-fn assert_has_tag(html: &str, tag: &str, context: &str) {
-    assert!(
-        html.contains(tag),
-        "{}: Expected tag '{}' not found in HTML",
-        context,
-        tag
-    );
+/// Get all unique capture names from spans
+fn get_captures(spans: &[Span]) -> HashSet<&str> {
+    spans.iter().map(|s| s.capture.as_str()).collect()
+}
+
+/// Check that a specific text range has a specific capture
+fn has_capture_at(spans: &[Span], source: &str, text: &str, capture: &str) -> bool {
+    let Some(pos) = source.find(text) else {
+        return false;
+    };
+    let start = pos as u32;
+    let end = (pos + text.len()) as u32;
+
+    spans
+        .iter()
+        .any(|s| s.start <= start && s.end >= end && s.capture == capture)
 }
 
 // ========================================================================
@@ -32,10 +47,9 @@ fn test_isolated_script() {
     "#};
     let html = highlighter.highlight("svelte", source).unwrap();
 
-    assert_has_tag(
-        &html,
-        "<a-k>",
-        "Svelte script should have keyword highlighting",
+    assert!(
+        html.contains("<a-k>"),
+        "Svelte script should have keyword highlighting"
     );
 }
 
@@ -51,10 +65,9 @@ fn test_script_with_function() {
     "#};
     let html = highlighter.highlight("svelte", source).unwrap();
 
-    assert_has_tag(
-        &html,
-        "<a-k>",
-        "Svelte function should have keyword highlighting",
+    assert!(
+        html.contains("<a-k>"),
+        "Svelte function should have keyword highlighting"
     );
 }
 
@@ -67,10 +80,9 @@ fn test_nested_braces() {
         </script>
     "#};
     let html = highlighter.highlight("svelte", source).unwrap();
-    assert_has_tag(
-        &html,
-        "<a-k>",
-        "Svelte nested braces should have highlighting",
+    assert!(
+        html.contains("<a-k>"),
+        "Svelte nested braces should have highlighting"
     );
 }
 
@@ -89,9 +101,14 @@ fn test_isolated_style() {
             }
         </style>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("svelte", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["property"], "Svelte style injection");
+    assert!(
+        captures.contains("property"),
+        "Svelte style injection should have property highlight. Found: {:?}",
+        captures
+    );
 }
 
 #[test]
@@ -108,9 +125,14 @@ fn test_style_with_multiple_selectors() {
             }
         </style>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("svelte", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["property"], "Svelte multiple selectors");
+    assert!(
+        captures.contains("property"),
+        "Svelte multiple selectors should have property highlight. Found: {:?}",
+        captures
+    );
 }
 
 // ========================================================================
@@ -124,10 +146,10 @@ fn test_template_expressions() {
         <h1>Hello {name}!</h1>
         <p>Count: {count + 1}</p>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("svelte", source).unwrap();
 
-    // Template expressions should produce events
-    assert!(!events.is_empty(), "Svelte template should produce events");
+    // Template expressions should produce spans
+    assert!(!spans.is_empty(), "Svelte template should produce spans");
 }
 
 #[test]
@@ -139,8 +161,8 @@ fn test_only_template() {
             <p>No script or style tags here</p>
         </div>
     "#};
-    let events = record_events(&mut highlighter, source);
-    assert!(!events.is_empty());
+    let spans = highlighter.highlight_spans("svelte", source).unwrap();
+    assert!(!spans.is_empty());
 }
 
 // ========================================================================
@@ -183,15 +205,28 @@ fn test_full_component() {
             }
         </style>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("svelte", source).unwrap();
+    let captures = get_captures(&spans);
 
     // JS keywords
-    assert_has_highlights(&events, &["keyword"], "Svelte full component - JS");
-    assert_text_highlighted(&events, "export", "keyword", "Svelte full component");
-    assert_text_highlighted(&events, "function", "keyword", "Svelte full component");
+    assert!(
+        captures.contains("keyword"),
+        "Svelte full component should have JS keyword highlights"
+    );
+    assert!(
+        has_capture_at(&spans, source, "export", "keyword"),
+        "export should be highlighted as keyword"
+    );
+    assert!(
+        has_capture_at(&spans, source, "function", "keyword"),
+        "function should be highlighted as keyword"
+    );
 
     // CSS properties
-    assert_has_highlights(&events, &["property"], "Svelte full component - CSS");
+    assert!(
+        captures.contains("property"),
+        "Svelte full component should have CSS property highlights"
+    );
 }
 
 // ========================================================================
@@ -211,9 +246,14 @@ fn test_typescript_script() {
             let user: User = { name: "Alice", age: 30 };
         </script>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("svelte", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["keyword"], "Svelte TypeScript");
+    assert!(
+        captures.contains("keyword"),
+        "Svelte TypeScript should have keyword highlights. Found: {:?}",
+        captures
+    );
 }
 
 // ========================================================================
@@ -232,7 +272,7 @@ fn test_highlighter_api() {
         </style>
     "#};
 
-    let html = highlighter.highlight_to_html("svelte", source).unwrap();
+    let html = highlighter.highlight("svelte", source).unwrap();
 
     // JS should be highlighted
     assert!(

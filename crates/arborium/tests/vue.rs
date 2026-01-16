@@ -2,113 +2,34 @@
 //!
 //! Tests that verify CSS and JavaScript injections work correctly in Vue SFCs.
 
-#![cfg(feature = "lang-vue")]
+#![cfg(all(
+    feature = "lang-vue",
+    feature = "lang-css",
+    feature = "lang-javascript",
+    feature = "lang-typescript"
+))]
 
-use arborium::tree_sitter_highlight::{Highlight, HighlightEvent, Highlighter as TsHighlighter};
-use arborium::{HIGHLIGHT_NAMES, Highlighter};
+use arborium::Highlighter;
+use arborium_highlight::Span;
 use indoc::indoc;
+use std::collections::HashSet;
 
-/// A recorded highlight event for testing
-#[derive(Debug, Clone, PartialEq)]
-enum Event {
-    Source { text: String },
-    Start { name: String },
-    End,
+/// Get all unique capture names from spans
+fn get_captures(spans: &[Span]) -> HashSet<&str> {
+    spans.iter().map(|s| s.capture.as_str()).collect()
 }
 
-/// Record all highlight events for Vue source
-fn record_events(highlighter: &mut Highlighter, source: &str) -> Vec<Event> {
-    // Pre-load all needed languages before extracting config references
-    highlighter.get_config_mut("vue");
-    highlighter.get_config_mut("css");
-    highlighter.get_config_mut("javascript");
-    highlighter.get_config_mut("typescript");
+/// Check that a specific text range has a specific capture
+fn has_capture_at(spans: &[Span], source: &str, text: &str, capture: &str) -> bool {
+    let Some(pos) = source.find(text) else {
+        return false;
+    };
+    let start = pos as u32;
+    let end = (pos + text.len()) as u32;
 
-    // Now we can safely get immutable references
-    let config = highlighter
-        .get_config("vue")
-        .expect("Vue language not found");
-
-    let mut ts_highlighter = TsHighlighter::new();
-    let highlights = ts_highlighter
-        .highlight(config, source.as_bytes(), None, |lang| {
-            highlighter.get_config(lang)
-        })
-        .expect("Failed to highlight");
-
-    let mut events = Vec::new();
-    for event in highlights {
-        let event = event.expect("Highlight event error");
-        match event {
-            HighlightEvent::Source { start, end } => {
-                events.push(Event::Source {
-                    text: source[start..end].to_string(),
-                });
-            }
-            HighlightEvent::HighlightStart(Highlight(i)) => {
-                let name = if i < HIGHLIGHT_NAMES.len() {
-                    HIGHLIGHT_NAMES[i].to_string()
-                } else {
-                    format!("unknown_{}", i)
-                };
-                events.push(Event::Start { name });
-            }
-            HighlightEvent::HighlightEnd => {
-                events.push(Event::End);
-            }
-        }
-    }
-    events
-}
-
-/// Check that specific highlight names appear in the events
-fn assert_has_highlights(events: &[Event], expected_names: &[&str], context: &str) {
-    let found_names: std::collections::HashSet<_> = events
+    spans
         .iter()
-        .filter_map(|e| match e {
-            Event::Start { name } => Some(name.as_str()),
-            _ => None,
-        })
-        .collect();
-
-    for expected in expected_names {
-        assert!(
-            found_names.contains(expected),
-            "{}: Expected highlight '{}' not found. Found: {:?}",
-            context,
-            expected,
-            found_names
-        );
-    }
-}
-
-/// Check that a specific text appears with a specific highlight
-fn assert_text_highlighted(events: &[Event], text: &str, highlight: &str, context: &str) {
-    let mut current_highlights: Vec<&str> = Vec::new();
-    let mut found = false;
-
-    for event in events {
-        match event {
-            Event::Start { name } => {
-                current_highlights.push(name);
-            }
-            Event::End => {
-                current_highlights.pop();
-            }
-            Event::Source { text: src } => {
-                if src.contains(text) && current_highlights.contains(&highlight) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    assert!(
-        found,
-        "{}: Text '{}' should be highlighted as '{}'. Events: {:?}",
-        context, text, highlight, events
-    );
+        .any(|s| s.start <= start && s.end >= end && s.capture == capture)
 }
 
 #[test]
@@ -123,10 +44,18 @@ fn test_isolated_script() {
         }
         </script>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("vue", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["keyword"], "Vue script injection");
-    assert_text_highlighted(&events, "export", "keyword", "Vue script injection");
+    assert!(
+        captures.contains("keyword"),
+        "Vue script injection should have keyword highlight. Found: {:?}",
+        captures
+    );
+    assert!(
+        has_capture_at(&spans, source, "export", "keyword"),
+        "export should be highlighted as keyword"
+    );
 }
 
 #[test]
@@ -140,9 +69,14 @@ fn test_isolated_style() {
         }
         </style>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("vue", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["property"], "Vue style injection");
+    assert!(
+        captures.contains("property"),
+        "Vue style injection should have property highlight. Found: {:?}",
+        captures
+    );
 }
 
 #[test]
@@ -155,9 +89,14 @@ fn test_scoped_style() {
         }
         </style>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("vue", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["property"], "Vue scoped style injection");
+    assert!(
+        captures.contains("property"),
+        "Vue scoped style injection should have property highlight. Found: {:?}",
+        captures
+    );
 }
 
 #[test]
@@ -188,10 +127,17 @@ fn test_full_sfc() {
         }
         </style>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("vue", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["keyword"], "Vue SFC - JS");
-    assert_has_highlights(&events, &["property"], "Vue SFC - CSS");
+    assert!(
+        captures.contains("keyword"),
+        "Vue SFC should have JS keyword highlights"
+    );
+    assert!(
+        captures.contains("property"),
+        "Vue SFC should have CSS property highlights"
+    );
 }
 
 #[test]
@@ -212,9 +158,14 @@ fn test_typescript() {
         });
         </script>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("vue", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["keyword"], "Vue TypeScript");
+    assert!(
+        captures.contains("keyword"),
+        "Vue TypeScript should have keyword highlights. Found: {:?}",
+        captures
+    );
 }
 
 #[test]
@@ -231,7 +182,7 @@ fn test_highlighter_api() {
         </style>
     "#};
 
-    let html = highlighter.highlight_to_html("vue", source).unwrap();
+    let html = highlighter.highlight("vue", source).unwrap();
 
     assert!(
         html.contains("<a-k>export</a-k>"),

@@ -86,11 +86,16 @@ fn parse_js_result(value: JsValue) -> ParseResult {
             .ok()
             .and_then(|v| v.as_string())
             .unwrap_or_default();
+        let pattern_index = Reflect::get(&span_obj, &"pattern_index".into())
+            .ok()
+            .and_then(|v| v.as_f64())
+            .unwrap_or(0.0) as u32;
 
         spans.push(Span {
             start,
             end,
             capture,
+            pattern_index,
         });
     }
 
