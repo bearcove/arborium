@@ -2,30 +2,30 @@
 # DO NOT EDIT - edit xtask/src/ci.rs instead
 ---
 name: CI
-"on": 
-  push: 
-    branches: 
+"on":
+  push:
+    branches:
       - main
-    tags: 
+    tags:
       - v*
       - "[0-9]*.[0-9]*.[0-9]*"
-  pull_request: 
-    branches: 
+  pull_request:
+    branches:
       - main
   merge_group: {}
-env: 
+env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
   CARGO_PROFILE_TEST_DEBUG: "0"
-jobs: 
-  generate: 
+jobs:
+  generate:
     name: Generate
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    outputs: 
+    outputs:
       version: ${{ steps.version.outputs.version }}
       is_release: ${{ steps.version.outputs.is_release }}
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Parse version
@@ -34,19 +34,19 @@ jobs:
           # Default to dev version (matches xtask default)
           VERSION="0.0.0"
           IS_RELEASE="false"
-          
+
           # On tag push, use the tag as version
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             TAG="${GITHUB_REF#refs/tags/}"
             TAG="${TAG#v}"
-          
+
             # Only publish on semver-ish tags (optionally with prerelease/build suffix).
             if [[ "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.].*)?$ ]]; then
               VERSION="$TAG"
               IS_RELEASE="true"
             fi
           fi
-          
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "is_release=$IS_RELEASE" >> $GITHUB_OUTPUT
           echo "Version: $VERSION (release: $IS_RELEASE)"
@@ -54,7 +54,7 @@ jobs:
         id: version
       - name: Restore xtask cache
         uses: actions/cache@v4
-        with: 
+        with:
           path: xtask/target
           key: "xtask-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}"
       - name: Build xtask
@@ -70,7 +70,7 @@ jobs:
         id: grammar-cache-key
       - name: Restore grammar generation cache
         uses: actions/cache@v4
-        with: 
+        with:
           path: .cache/arborium
           key: "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-${{ steps.grammar-cache-key.outputs.key }}"
           restore-keys: "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-"
@@ -86,22 +86,22 @@ jobs:
         shell: bash
       - name: Upload generate output
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: generate-output.tar
           retention-days: "1"
-  test-linux: 
+  test-linux:
     name: Test (Linux)
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -111,7 +111,7 @@ jobs:
         shell: bash
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
-        with: 
+        with:
           workspaces: crates/arborium
       - name: Build
         run: |-
@@ -163,17 +163,17 @@ jobs:
           set -e
           cd packages/arborium && pnpm test
         shell: bash
-  test-macos: 
+  test-macos:
     name: Test (macOS)
     runs-on: depot-macos-latest
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -185,11 +185,11 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
-        with: 
+        with:
           workspaces: crates/arborium
       - name: Install nextest
         uses: taiki-e/install-action@v2
-        with: 
+        with:
           tool: cargo-nextest
       - name: Build
         run: |-
@@ -221,18 +221,18 @@ jobs:
           set -e
           cargo test --manifest-path crates/arborium-rustdoc/Cargo.toml --verbose
         shell: bash
-  clippy: 
+  clippy:
     name: Clippy
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -250,18 +250,18 @@ jobs:
           set -e
           cargo clippy --manifest-path crates/arborium-rustdoc/Cargo.toml --all-targets -- -D warnings
         shell: bash
-  docs: 
+  docs:
     name: Documentation
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -274,20 +274,20 @@ jobs:
           set -e
           cargo doc --manifest-path crates/arborium/Cargo.toml --no-deps
         shell: bash
-        env: 
+        env:
           RUSTDOCFLAGS: "-D warnings"
-  build-plugins-acorn: 
+  build-plugins-acorn:
     name: "Plugins (acorn): css, html, javascript, json, scss, tsx, typescript, xml"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -302,22 +302,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-acorn
           path: dist/plugins
           retention-days: "7"
-  build-plugins-birch: 
+  build-plugins-birch:
     name: "Plugins (birch): asm, c, cpp, d, go, objc, rust, x86asm, zig"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -332,22 +332,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-birch
           path: dist/plugins
           retention-days: "7"
-  build-plugins-cedar: 
+  build-plugins-cedar:
     name: "Plugins (cedar): clojure, groovy, java, kotlin, scala"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -362,22 +362,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-cedar
           path: dist/plugins
           retention-days: "7"
-  build-plugins-fern: 
+  build-plugins-fern:
     name: "Plugins (fern): agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -392,22 +392,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-fern
           path: dist/plugins
           retention-days: "7"
-  build-plugins-hazel: 
+  build-plugins-hazel:
     name: "Plugins (hazel): awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -422,22 +422,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-hazel
           path: dist/plugins
           retention-days: "7"
-  build-plugins-maple: 
+  build-plugins-maple:
     name: "Plugins (maple): caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, ron, sql, ssh-config, styx, toml, yaml"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -452,22 +452,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-maple
           path: dist/plugins
           retention-days: "7"
-  build-plugins-moss: 
+  build-plugins-moss:
     name: "Plugins (moss): ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -482,22 +482,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-moss
           path: dist/plugins
           retention-days: "7"
-  build-plugins-pine: 
+  build-plugins-pine:
     name: "Plugins (pine): capnp, dart, devicetree, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -512,22 +512,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-pine
           path: dist/plugins
           retention-days: "7"
-  build-plugins-sage: 
+  build-plugins-sage:
     name: "Plugins (sage): c-sharp, cedar, cedarschema, cobol, elisp, fsharp, postscript, vb, vim"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -542,22 +542,22 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-sage
           path: dist/plugins
           retention-days: "7"
-  build-plugins-willow: 
+  build-plugins-willow:
     name: "Plugins (willow): asciidoc, diff, jinja2, markdown, svelte, typst, vue"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -572,28 +572,28 @@ jobs:
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: plugins-group-willow
           path: dist/plugins
           retention-days: "7"
-  publish-crates: 
+  publish-crates:
     name: Publish crates.io
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
       - test-linux
       - clippy
     if: "needs.generate.outputs.is_release == 'true'"
-    permissions: 
+    permissions:
       id-token: write
       contents: read
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -609,13 +609,13 @@ jobs:
           set -e
           ./xtask/target/release/xtask publish crates
         shell: bash
-        env: 
+        env:
           CARGO_REGISTRY_TOKEN: ${{ steps.crates-io-auth.outputs.token }}
-  publish-npm: 
+  publish-npm:
     name: Publish npm
     runs-on: ubuntu-latest
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
-    needs: 
+    needs:
       - generate
       - build-plugins-acorn
       - build-plugins-birch
@@ -628,15 +628,15 @@ jobs:
       - build-plugins-sage
       - build-plugins-willow
     if: "needs.generate.outputs.is_release == 'true'"
-    permissions: 
+    permissions:
       id-token: write
       contents: read
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download generate output
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: generate-output
           path: .
       - name: Extract generate output
@@ -646,52 +646,52 @@ jobs:
         shell: bash
       - name: Download plugins group acorn
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-acorn
           path: dist/plugins
       - name: Download plugins group birch
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-birch
           path: dist/plugins
       - name: Download plugins group cedar
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-cedar
           path: dist/plugins
       - name: Download plugins group fern
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-fern
           path: dist/plugins
       - name: Download plugins group hazel
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-hazel
           path: dist/plugins
       - name: Download plugins group maple
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-maple
           path: dist/plugins
       - name: Download plugins group moss
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-moss
           path: dist/plugins
       - name: Download plugins group pine
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-pine
           path: dist/plugins
       - name: Download plugins group sage
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-sage
           path: dist/plugins
       - name: Download plugins group willow
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: plugins-group-willow
           path: dist/plugins
       - name: List plugins
@@ -714,4 +714,3 @@ jobs:
           set -e
           ./xtask/target/release/xtask publish npm -o dist/plugins
         shell: bash
-
