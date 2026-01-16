@@ -1,5 +1,5 @@
 repo: https://github.com/bearcove/styx
-commit: fb9d97e3d0c79c5dc2eb0d4eb4e6da20e0d77a3e
+commit: 5b09e6c815afe4a416ec07e569d3211b9c49e604
 license: MIT OR Apache-2.0
 
 grammars:
