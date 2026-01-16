@@ -206,7 +206,7 @@ pub use <%= crate_name.replace('-', "_") %> as lang_<%= grammar_id.replace('-', 
 
 <% } %>
 
-/// Returns the tree-sitter [`Language`] for the given language name.
+/// Returns the tree-sitter `Language` for the given language name.
 ///
 /// This function only returns languages that are enabled via feature flags.
 /// If no grammar matches the provided language name, it returns `None`.
