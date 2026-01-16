@@ -16,10 +16,7 @@ import type {
   Session,
 } from "./types.js";
 import { availableLanguages, pluginVersion } from "./plugins-manifest.js";
-import { spansToHtml, escapeHtml } from "./utils.js";
-
-// Re-export utilities
-export { spansToHtml } from "./utils.js";
+import { escapeHtml } from "./utils.js";
 
 // Default config
 export const defaultConfig: Required<ArboriumConfig> = {
@@ -368,25 +365,18 @@ export async function highlight(
   configOverrides?: ArboriumConfig,
 ): Promise<string> {
   const config = getConfig(configOverrides);
-  // Try to use the Rust host (handles injections properly)
+  // Use the Rust host (handles injections, proper span deduplication, etc.)
   const host = await loadHost(config);
   if (host) {
     try {
       return host.highlight(language, source);
     } catch (e) {
-      console.warn("Host highlight failed, falling back to JS:", e);
+      console.error("[arborium] Host highlight failed:", e);
     }
   }
 
-  // Fallback to JS-only highlighting (no injection support)
-  // Use UTF-16 for JS string slicing in spansToHtml
-  const plugin = await loadGrammarPlugin(language, config);
-  if (!plugin) {
-    return escapeHtml(source);
-  }
-
-  const result = plugin.parseUtf16(source);
-  return spansToHtml(source, result.spans);
+  // Host not available - return escaped source
+  return escapeHtml(source);
 }
 
 /** Load a grammar for direct use */
@@ -404,8 +394,8 @@ export async function loadGrammar(
     languageId: () => plugin.languageId,
     injectionLanguages: () => plugin.injectionLanguages,
     highlight: async (source: string) => {
-      const result = plugin.parseUtf16(source);
-      return spansToHtml(source, result.spans);
+      // Use the Rust host for proper highlighting with injection support
+      return highlight(language, source, configOverrides);
     },
     // Public API returns UTF-16 offsets for JavaScript compatibility
     parse: (source: string) => plugin.parseUtf16(source),
