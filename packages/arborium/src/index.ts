@@ -4,15 +4,29 @@
  * ESM entry point for programmatic usage.
  */
 
-export { loadGrammar, highlight, getConfig, setConfig } from "./loader.js";
 export { detectLanguage, extractLanguageFromClass, normalizeLanguage } from "./detect.js";
-export { pluginVersion, availableLanguages, highlights } from "./plugins-manifest.js";
+export {
+  getConfig,
+  highlight,
+  loadGrammar,
+  setConfig,
+  getAvailableLanguages,
+  isLanguageAvailable,
+} from "./loader.js";
+export { availableLanguages, highlights, pluginVersion } from "./plugins-manifest.js";
 export type {
+  ArboriumConfig,
   Grammar,
-  Session,
-  Span,
+  Highlight,
   Injection,
   ParseResult,
-  Highlight,
-  ArboriumConfig,
+  ResolveArgs,
+  Session,
+  Span,
+  Utf8Injection,
+  Utf8ParseResult,
+  Utf8Span,
+  Utf16Injection,
+  Utf16ParseResult,
+  Utf16Span,
 } from "./types.js";
