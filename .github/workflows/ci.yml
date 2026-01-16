@@ -407,7 +407,7 @@ jobs:
           path: dist/plugins
           retention-days: "7"
   build-plugins-maple: 
-    name: "Plugins (maple): caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, ron, sql, ssh-config, toml, yaml"
+    name: "Plugins (maple): caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, ron, sql, ssh-config, styx, toml, yaml"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -425,10 +425,10 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, ron, sql, ssh-config, toml, yaml
+      - name: Build caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, ron, sql, ssh-config, styx, toml, yaml
         run: |-
           set -e
-          ./xtask/target/release/xtask build caddy cmake dockerfile dot graphql hcl ini jq meson nginx ninja nix query ron sql ssh-config toml yaml -o dist/plugins
+          ./xtask/target/release/xtask build caddy cmake dockerfile dot graphql hcl ini jq meson nginx ninja nix query ron sql ssh-config styx toml yaml -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4

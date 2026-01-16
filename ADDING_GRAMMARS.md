@@ -1427,7 +1427,8 @@ Adding a language to Arborium is straightforward:
 2. **Copy** grammar files to `langs/group-{name}/{language}/def/`
 3. **Write** `arborium.yaml` configuration
 4. **Run** `cargo xtask gen {language}`
-5. **Test** in the web demo
+5. **Run** `cargo xtask ci generate` (regenerates CI workflow for new language)
+6. **Test** in the web demo
 
 The build system handles all code generation automatically. You don't need to understand Rust, Tree-sitter internals, or write complex build scripts.
 
