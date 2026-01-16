@@ -12,9 +12,9 @@ grammars:
 
     inventor: Amos Wenger
     year: 2026
-    description: "A clean configuration language with schemas, tags, and heredocs. See <a href=\"https://styx.bearcove.eu\">styx.bearcove.eu</a>."
+    description: "Minimal configuration language designed to be friendly to humans and machines alike. Has first-class support for sum types, validation through schemas (which are themselves Styx documents), etc."
     link: https://styx.bearcove.eu
-    trivia: "Named after the River Styx from Greek mythology that separates the world of the living from the dead. Created by Amos Wenger (@fasterthanlime) in 2026 out of frustration with existing config languages."
+    trivia: "Named after the river separating the living from the dead in Greek mythology."
 
     samples:
       - path: samples/showcase.styx
