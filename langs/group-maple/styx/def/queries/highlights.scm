@@ -23,7 +23,7 @@
 ; Attributes - key in attribute syntax
 (attribute
   key: (bare_scalar) @property
-  "=" @operator)
+  ">" @operator)
 
 ; Keys in entries - bare scalars in the key position (overrides @string above)
 (entry
