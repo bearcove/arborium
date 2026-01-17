@@ -546,8 +546,8 @@ jobs:
           name: plugins-group-pine
           path: dist/plugins
           retention-days: "7"
-  build-plugins-sage: 
-    name: "Plugins (sage): c-sharp, cobol, elisp, fsharp, postscript, vb, vim"
+  build-plugins-rowan: 
+    name: "Plugins (rowan): cobol"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -565,10 +565,40 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build c-sharp, cobol, elisp, fsharp, postscript, vb, vim
+      - name: Build cobol
         run: |-
           set -e
-          ./xtask/target/release/xtask build c-sharp cobol elisp fsharp postscript vb vim -o dist/plugins
+          ./xtask/target/release/xtask build cobol -o dist/plugins
+        shell: bash
+      - name: Upload plugins artifact
+        uses: actions/upload-artifact@v4
+        with: 
+          name: plugins-group-rowan
+          path: dist/plugins
+          retention-days: "7"
+  build-plugins-sage: 
+    name: "Plugins (sage): c-sharp, elisp, fsharp, postscript, vb, vim"
+    runs-on: depot-ubuntu-24.04-32
+    container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
+    needs: 
+      - generate
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download generate output
+        uses: actions/download-artifact@v4
+        with: 
+          name: generate-output
+          path: .
+      - name: Extract generate output
+        run: |-
+          set -e
+          tar -xf generate-output.tar && rm generate-output.tar
+        shell: bash
+      - name: Build c-sharp, elisp, fsharp, postscript, vb, vim
+        run: |-
+          set -e
+          ./xtask/target/release/xtask build c-sharp elisp fsharp postscript vb vim -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
@@ -656,6 +686,7 @@ jobs:
       - build-plugins-maple
       - build-plugins-moss
       - build-plugins-pine
+      - build-plugins-rowan
       - build-plugins-sage
       - build-plugins-willow
     if: "needs.generate.outputs.is_release == 'true'"
@@ -719,6 +750,11 @@ jobs:
         uses: actions/download-artifact@v4
         with: 
           name: plugins-group-pine
+          path: dist/plugins
+      - name: Download plugins group rowan
+        uses: actions/download-artifact@v4
+        with: 
+          name: plugins-group-rowan
           path: dist/plugins
       - name: Download plugins group sage
         uses: actions/download-artifact@v4
