@@ -3,16 +3,36 @@
  *
  * Drop-in auto-highlighter that runs on page load.
  * Configuration via data attributes or window.Arborium object.
+ *
+ * ## Config Waterfall (highest to lowest priority)
+ *
+ * 1. Function-level configOverrides (passed to highlight(), highlightAll(), etc.)
+ * 2. globalConfig (set once at load, can be changed via setConfig())
+ * 3. data-* attributes on the script tag
+ * 4. window.Arborium object (set before script loads)
+ * 5. Auto-detected theme (rustdoc or system preference)
+ * 6. defaultConfig (built into loader.ts)
+ *
+ * The config is merged ONCE at script load time (levels 3-6), then stored in
+ * globalConfig. All functions use getConfig(overrides) to access it, allowing
+ * per-call overrides (level 1) to take precedence.
  */
 
-import { loadGrammar, highlight, getConfig, setConfig, defaultConfig } from "./loader.js";
+import { loadGrammar, highlight, getConfig, setConfig } from "./loader.js";
 import { detectLanguage, extractLanguageFromClass, normalizeLanguage } from "./detect.js";
 import type { ArboriumConfig } from "./types.js";
 
-// Capture current script immediately (before any async operations)
+// =============================================================================
+// SECTION 1: Script Tag Capture (must happen synchronously at load time)
+// =============================================================================
+
 const currentScript = document.currentScript as HTMLScriptElement | null;
 
-/** Parse query parameters from script src URL */
+// =============================================================================
+// SECTION 2: Config Source Readers (read from data-*, window.Arborium, env)
+// =============================================================================
+
+/** Parse query parameters from script src URL (for local testing) */
 function getQueryParams(): URLSearchParams {
   if (!currentScript?.src) return new URLSearchParams();
   try {
@@ -73,18 +93,12 @@ function mapRustdocTheme(value?: string): string | null {
     ayu: "rustdoc-ayu",
   };
 
-  if (themeMap[value]) {
-    return themeMap[value];
-  }
-
-  // Unknown theme value: return as-is or fallback to null
-  return null;
+  return themeMap[value] ?? null;
 }
 
-/** Detect the current theme from rustdoc or environment */
+/** Detect the current theme from rustdoc or system preference */
 function getAutoTheme(): string {
   if (isRustdocEnvironment()) {
-    // Try data-theme attribute (used by both docs.rs and local rustdoc)
     const rustdocTheme = mapRustdocTheme(document.documentElement.dataset.theme);
     if (rustdocTheme) {
       return rustdocTheme;
@@ -96,8 +110,15 @@ function getAutoTheme(): string {
   return isLight ? "github-light" : "one-dark";
 }
 
-/** Get merged configuration from all sources and apply to loader */
-function getMergedConfig(): Required<ArboriumConfig> {
+// =============================================================================
+// SECTION 3: Config Initialization (called ONCE at script load)
+// =============================================================================
+
+/**
+ * Merge configuration from all IIFE-specific sources into globalConfig.
+ * Called ONCE at script load time. After this, use getConfig(overrides).
+ */
+function initializeConfig(): void {
   // Priority: data attributes > window.Arborium > auto-detect > defaults
   const windowConfig = window.Arborium || {};
   const scriptConfig = getConfigFromScript();
@@ -108,12 +129,89 @@ function getMergedConfig(): Required<ArboriumConfig> {
     merged.theme = getAutoTheme();
   }
 
-  // Apply to loader so host loading uses correct URLs
+  // Apply to global config (this is the ONLY setConfig call during init)
   setConfig(merged);
-  return getConfig();
 }
 
-/** Find all code blocks that need highlighting */
+// =============================================================================
+// SECTION 4: CSS Injection
+// =============================================================================
+
+let currentThemeId: string | null = null;
+
+/** Get the CSS base URL for a given config */
+function getCssBaseUrl(config: Required<ArboriumConfig>): string {
+  if (config.hostUrl) {
+    return `${config.hostUrl}/themes`;
+  }
+
+  const cdn = config.cdn;
+  const version = config.version;
+
+  let baseUrl: string;
+  if (cdn === "jsdelivr") {
+    baseUrl = "https://cdn.jsdelivr.net/npm";
+  } else if (cdn === "unpkg") {
+    baseUrl = "https://unpkg.com";
+  } else {
+    baseUrl = cdn;
+  }
+
+  const versionSuffix = version === "latest" ? "" : `@${version}`;
+  return `${baseUrl}/@arborium/arborium${versionSuffix}/dist/themes`;
+}
+
+/** Inject base CSS (only once) */
+function injectBaseCSS(config: Required<ArboriumConfig>): void {
+  const baseId = "arborium-base";
+  if (document.getElementById(baseId)) return;
+
+  const cssUrl = `${getCssBaseUrl(config)}/base-rustdoc.css`;
+  console.debug(`[arborium] Loading base CSS: ${cssUrl}`);
+
+  const link = document.createElement("link");
+  link.id = baseId;
+  link.rel = "stylesheet";
+  link.href = cssUrl;
+  document.head.appendChild(link);
+}
+
+/** Inject theme CSS, removing any previously loaded theme */
+function injectThemeCSS(config: Required<ArboriumConfig>): void {
+  const theme = config.theme;
+
+  // Remove old theme if different
+  if (currentThemeId && currentThemeId !== theme) {
+    const oldLink = document.getElementById(`arborium-theme-${currentThemeId}`);
+    if (oldLink) {
+      oldLink.remove();
+      console.debug(`[arborium] Removed theme: ${currentThemeId}`);
+    }
+  }
+
+  const themeId = `arborium-theme-${theme}`;
+  if (document.getElementById(themeId)) {
+    currentThemeId = theme;
+    return;
+  }
+
+  const cssUrl = `${getCssBaseUrl(config)}/${theme}.css`;
+  console.debug(`[arborium] Loading theme: ${cssUrl}`);
+
+  const link = document.createElement("link");
+  link.id = themeId;
+  link.rel = "stylesheet";
+  link.href = cssUrl;
+  document.head.appendChild(link);
+
+  currentThemeId = theme;
+}
+
+// =============================================================================
+// SECTION 5: Code Block Detection
+// =============================================================================
+
+/** Find all code blocks matching the selector */
 function findCodeBlocks(selector: string): HTMLElement[] {
   return Array.from(document.querySelectorAll(selector));
 }
@@ -127,17 +225,13 @@ function hasExistingHighlighting(block: HTMLElement): boolean {
   }
 
   // Check if there are spans with syntax highlighting classes inside
-  // (highlight.js, prism, etc. use spans with classes)
   const spans = block.querySelectorAll("span[class]");
   if (spans.length > 0) {
-    // If there are multiple spans with classes, likely already highlighted
-    // Be conservative: even a few spans suggest existing highlighting
     const classedSpans = Array.from(spans).filter((s) => s.className && s.className.length > 0);
     if (classedSpans.length >= 3) return true;
   }
 
   // Check for semantic markup (e.g., docs.rs uses <a> tags for type/function links)
-  // If there are links inside the code, it has meaningful markup we shouldn't destroy
   const links = block.querySelectorAll("a");
   if (links.length >= 2) return true;
 
@@ -170,82 +264,15 @@ function getLanguageForBlock(block: HTMLElement): string | null {
   return detectLanguage(source);
 }
 
-/** Get the CSS base URL */
-function getCssBaseUrl(): string {
-  const config = getMergedConfig();
-
-  if (config.hostUrl) {
-    return `${config.hostUrl}/themes`;
-  }
-
-  const cdn = config.cdn;
-  const version = config.version;
-
-  let baseUrl: string;
-  if (cdn === "jsdelivr") {
-    baseUrl = "https://cdn.jsdelivr.net/npm";
-  } else if (cdn === "unpkg") {
-    baseUrl = "https://unpkg.com";
-  } else {
-    baseUrl = cdn;
-  }
-
-  const versionSuffix = version === "latest" ? "" : `@${version}`;
-  return `${baseUrl}/@arborium/arborium${versionSuffix}/dist/themes`;
-}
-
-/** Inject base CSS (only once) */
-function injectBaseCSS(): void {
-  const baseId = "arborium-base";
-  if (document.getElementById(baseId)) return;
-
-  const cssUrl = `${getCssBaseUrl()}/base-rustdoc.css`;
-  console.debug(`[arborium] Loading base CSS: ${cssUrl}`);
-
-  const link = document.createElement("link");
-  link.id = baseId;
-  link.rel = "stylesheet";
-  link.href = cssUrl;
-  document.head.appendChild(link);
-}
-
-// Track currently loaded theme
-let currentThemeId: string | null = null;
-
-/** Inject theme CSS, removing any previously loaded theme */
-function injectThemeCSS(theme: string): void {
-  // Remove old theme if different
-  if (currentThemeId && currentThemeId !== theme) {
-    const oldLink = document.getElementById(`arborium-theme-${currentThemeId}`);
-    if (oldLink) {
-      oldLink.remove();
-      console.debug(`[arborium] Removed theme: ${currentThemeId}`);
-    }
-  }
-
-  const themeId = `arborium-theme-${theme}`;
-  if (document.getElementById(themeId)) {
-    currentThemeId = theme;
-    return;
-  }
-
-  const cssUrl = `${getCssBaseUrl()}/${theme}.css`;
-  console.debug(`[arborium] Loading theme: ${cssUrl}`);
-
-  const link = document.createElement("link");
-  link.id = themeId;
-  link.rel = "stylesheet";
-  link.href = cssUrl;
-  document.head.appendChild(link);
-
-  currentThemeId = theme;
-}
+// =============================================================================
+// SECTION 6: Highlighting Logic
+// =============================================================================
 
 /** Highlight a single code block */
 async function highlightBlock(
   block: HTMLElement,
   language: string,
-  config: ArboriumConfig,
+  config: Partial<ArboriumConfig>,
 ): Promise<void> {
   const source = block.textContent || "";
   if (!source.trim()) return;
@@ -257,19 +284,16 @@ async function highlightBlock(
     block.setAttribute("data-lang", language);
   } catch (err) {
     console.warn(`[arborium] Failed to highlight ${language}:`, err);
-    // Don't modify the block on error
   }
 }
 
-/** Main auto-highlight function */
-async function autoHighlight(): Promise<void> {
-  const config = getMergedConfig();
+/** Auto-highlight all code blocks on the page */
+async function autoHighlight(configOverrides?: Partial<ArboriumConfig>): Promise<void> {
+  const config = getConfig(configOverrides);
 
-  // Inject base CSS (defines a-* selectors using variables)
-  injectBaseCSS();
-
-  // Inject theme CSS (defines the variables)
-  injectThemeCSS(config.theme);
+  // Inject CSS
+  injectBaseCSS(config);
+  injectThemeCSS(config);
 
   // Find all code blocks
   const blocks = findCodeBlocks(config.selector);
@@ -280,11 +304,7 @@ async function autoHighlight(): Promise<void> {
   const unknownBlocks: HTMLElement[] = [];
 
   for (const block of blocks) {
-    // Skip already highlighted blocks
     if (block.hasAttribute("data-highlighted")) continue;
-
-    // Skip blocks that appear to have existing syntax highlighting
-    // (e.g., docs.rs uses spans with classes for highlighting)
     if (hasExistingHighlighting(block)) continue;
 
     const language = getLanguageForBlock(block);
@@ -297,7 +317,7 @@ async function autoHighlight(): Promise<void> {
     }
   }
 
-  // Load grammars in parallel for all detected languages
+  // Load grammars in parallel
   const languages = Array.from(blocksByLanguage.keys());
   const loadPromises = languages.map((lang) =>
     loadGrammar(lang, config).catch((err) => {
@@ -306,12 +326,10 @@ async function autoHighlight(): Promise<void> {
     }),
   );
 
-  // Wait for all grammars to load
   const grammars = await Promise.all(loadPromises);
 
-  // Highlight blocks for each loaded grammar
+  // Highlight blocks
   const highlightPromises: Promise<void>[] = [];
-
   for (let i = 0; i < languages.length; i++) {
     const language = languages[i];
     const grammar = grammars[i];
@@ -323,7 +341,6 @@ async function autoHighlight(): Promise<void> {
     }
   }
 
-  // Wait for all highlighting to complete
   await Promise.all(highlightPromises);
 
   // Log summary
@@ -339,65 +356,27 @@ async function autoHighlight(): Promise<void> {
   }
 }
 
-/** Public API for manual highlighting */
-export async function highlightAll(config?: ArboriumConfig): Promise<void> {
-  const mergedConfig = getConfig({ ...getMergedConfig(), ...config });
-  await autoHighlight();
-}
+// =============================================================================
+// SECTION 7: Theme Change Watching
+// =============================================================================
 
-/** Public API for highlighting a specific element */
-export async function highlightElement(
-  element: HTMLElement,
-  language?: string,
-  config?: ArboriumConfig,
-): Promise<void> {
-  const mergedConfig = getConfig({ ...getMergedConfig(), ...config });
-  const lang = language || getLanguageForBlock(element);
-
-  if (!lang) {
-    console.warn("[arborium] Could not detect language for element");
-    return;
-  }
-
-  await highlightBlock(element, lang, mergedConfig);
-}
-
-// Expose public API on window
-(window as any).arborium = {
-  highlightAll,
-  highlightElement,
-  loadGrammar,
-  highlight,
-  detectLanguage,
-  config: getMergedConfig(),
-};
-
-/** Re-highlight all blocks when theme changes */
+/** Handle theme changes (rustdoc or system preference) */
 async function onThemeChange(): Promise<void> {
   const newTheme = getAutoTheme();
 
-  // Only update if theme actually changed
   if (currentThemeId !== newTheme) {
-    // Update config
     setConfig({ theme: newTheme });
-    (window as any).arborium.config = getMergedConfig();
-
-    // Inject new theme CSS
-    injectThemeCSS(newTheme);
-
-    // No need to re-highlight - CSS handles the colors
-    // The spans are already in place, just the theme CSS changes
+    injectThemeCSS(getConfig());
     console.debug(`[arborium] Theme changed to: ${newTheme}`);
   }
 }
 
-/** Set up theme change watchers */
+/** Set up watchers for theme changes */
 function watchThemeChanges(): void {
   // Watch for rustdoc theme attribute changes
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-      const attr = mutation.attributeName;
-      if (attr === "data-theme" && isRustdocEnvironment()) {
+      if (mutation.attributeName === "data-theme" && isRustdocEnvironment()) {
         onThemeChange();
         break;
       }
@@ -411,16 +390,68 @@ function watchThemeChanges(): void {
     .addEventListener("change", () => onThemeChange());
 }
 
-// Auto-highlight on DOMContentLoaded (unless manual mode)
-const config = getMergedConfig();
-if (!config.manual) {
+// =============================================================================
+// SECTION 8: Public API
+// =============================================================================
+
+/** Highlight all code blocks on the page */
+export async function highlightAll(configOverrides?: Partial<ArboriumConfig>): Promise<void> {
+  await autoHighlight(configOverrides);
+}
+
+/** Highlight a specific element */
+export async function highlightElement(
+  element: HTMLElement,
+  language?: string,
+  configOverrides?: Partial<ArboriumConfig>,
+): Promise<void> {
+  const config = getConfig(configOverrides);
+  const lang = language || getLanguageForBlock(element);
+
+  if (!lang) {
+    console.warn("[arborium] Could not detect language for element");
+    return;
+  }
+
+  await highlightBlock(element, lang, config);
+}
+
+// =============================================================================
+// SECTION 9: Initialization (runs at script load)
+// =============================================================================
+
+// Step 1: Merge config from all IIFE-specific sources ONCE
+initializeConfig();
+
+// Step 2: Expose public API on window
+(window as any).arborium = {
+  // Highlighting functions
+  highlightAll,
+  highlightElement,
+  loadGrammar,
+  highlight,
+  detectLanguage,
+
+  // Config access (getter returns current config, setter merges into it)
+  get config() {
+    return getConfig();
+  },
+  set config(overrides: Partial<ArboriumConfig>) {
+    setConfig(overrides);
+  },
+  getConfig,
+  setConfig,
+};
+
+// Step 3: Auto-highlight on DOMContentLoaded (unless manual mode)
+const initialConfig = getConfig();
+if (!initialConfig.manual) {
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       autoHighlight();
       watchThemeChanges();
     });
   } else {
-    // DOM already loaded
     autoHighlight();
     watchThemeChanges();
   }

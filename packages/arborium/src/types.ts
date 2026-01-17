@@ -187,7 +187,7 @@ export interface Highlight {
 
 type MaybePromise<T> = T | Promise<T>;
 
-interface ResolveArgs {
+export interface ResolveArgs {
   /** Language to load the grammar plugin for */
   language: string;
   /** Base URL derived from language, CDN and version */
