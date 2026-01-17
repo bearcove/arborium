@@ -23,6 +23,8 @@ module.exports = grammar({
     $._raw_string_end, // "# closing with matching count
     $._unit_at, // @ not followed by tag name char
     $._tag_start, // @tagname (@ immediately followed by tag name)
+    $._immediate_raw_string_start, // r#*" opening immediately after tag
+    $._immediate_unit_at, // @ immediately after tag (no whitespace skip)
   ],
 
   extras: ($) => [
@@ -35,8 +37,6 @@ module.exports = grammar({
     [$.attributes],
     // Object body can be newline or comma separated
     [$._newline_separated, $._comma_separated],
-    // Entry key path: can't tell if next expr is another key or the value
-    [$.entry],
   ],
 
   rules: {
@@ -45,19 +45,18 @@ module.exports = grammar({
     document: ($) =>
       seq(repeat($._newline), repeat(seq(optional($.doc_comment), $.entry, repeat($._newline)))),
 
-    // Entry: key path followed by optional value
+    // Entry: key followed by optional value
     // - key only = implicit unit value
     // - key + value = explicit value
-    // - key key ... value = nested key path (N-1 keys, 1 value)
     //
-    // Per r[entry.structure] and r[entry.keypath]:
-    // When an entry has N atoms (N > 2), the first N-1 atoms form keys
-    // and only the last atom is the value.
+    // Per r[entry.structure]:
+    // An entry has exactly one key and at most one value.
+    // Sequences in key position are paths (r[entry.path]).
     entry: ($) =>
       prec.right(
         choice(
-          // Key with value(s) - first N-1 are keys, last is value
-          seq(field("key", $.expr), repeat(field("key", $.expr)), field("value", $.expr)),
+          // Key with value
+          seq(field("key", $.expr), field("value", $.expr)),
           // Key only (implicit unit value)
           field("key", $.expr),
         ),
@@ -69,10 +68,16 @@ module.exports = grammar({
     //   @string       -> tag=@string, payload=none (unit)
     //   "hello"       -> tag=none, payload=scalar
     //   {a 1}         -> tag=none, payload=object
+    //
+    // IMPORTANT: Tag payloads must be IMMEDIATELY adjacent (no whitespace).
+    // @tag{...} is one expr, but @tag {...} is two exprs (tag key, object value).
     expr: ($) =>
       choice(
-        // Tagged expr: @name followed by optional payload
-        prec.right(seq(field("tag", $.tag), optional(field("payload", $._payload)))),
+        // Tagged expr with immediate payload (no whitespace between tag and payload)
+        // Uses higher precedence to prefer this when payload is adjacent
+        prec.right(2, seq(field("tag", $.tag), field("payload", $._immediate_payload))),
+        // Tagged expr with no payload (unit) - lower precedence
+        prec.right(1, field("tag", $.tag)),
         // Untagged expr: just a payload
         field("payload", $._payload),
         // Attributes are a special case
@@ -85,18 +90,51 @@ module.exports = grammar({
     // Payload: the actual content (without tag)
     _payload: ($) => choice($.scalar, $.sequence, $.object, $.unit),
 
+    // Immediate payload: must immediately follow a tag (no whitespace)
+    // This uses token.immediate to prevent extras from being skipped
+    _immediate_payload: ($) =>
+      choice(
+        alias($._immediate_quoted_scalar, $.scalar),
+        alias($._immediate_raw_scalar, $.scalar),
+        alias($.immediate_sequence, $.sequence),
+        alias($.immediate_object, $.object),
+        alias($.immediate_unit, $.unit),
+        // Note: bare_scalar cannot immediately follow a tag (they'd be part of the tag name)
+        // and heredocs cannot immediately follow a tag (they start with <<)
+      ),
+
+    // Immediate quoted scalar: "..." immediately following a tag
+    // Wraps content in quoted_scalar to match normal scalar structure
+    _immediate_quoted_scalar: ($) => alias($.immediate_quoted_scalar_inner, $.quoted_scalar),
+
+    // Inner rule for immediate quoted scalar (separate so we can alias the whole thing)
+    immediate_quoted_scalar_inner: ($) =>
+      seq(token.immediate('"'), repeat(choice($.escape_sequence, /[^"\\]+/)), '"'),
+
+    // Immediate raw scalar: r#"..."# immediately following a tag
+    // Wraps content in raw_scalar to match normal scalar structure
+    _immediate_raw_scalar: ($) =>
+      alias(
+        seq($._immediate_raw_string_start, optional($._raw_string_content), $._raw_string_end),
+        $.raw_scalar,
+      ),
+
+    immediate_sequence: ($) => seq(token.immediate("("), repeat(seq($.expr, optional($._ws))), ")"),
+    immediate_object: ($) => seq(token.immediate("{"), optional($._object_body), "}"),
+    immediate_unit: ($) => $._immediate_unit_at,
+
     // Scalars: four types
     scalar: ($) => choice($.bare_scalar, $.quoted_scalar, $.raw_scalar, $.heredoc),
 
-    // Bare scalar: unquoted text without special chars
-    // Can contain / anywhere (including start) - comments require //
-    bare_scalar: ($) => /[^{}\(\),"=@\s][^{}\(\),"=@\s]*/,
+    // Bare scalar: unquoted text without special chars at start
+    // @ and = are forbidden at the start but allowed in the middle
+    bare_scalar: ($) => /[^{}\(\),"=@>\s][^{}\(\),">\s]*/,
 
     // Quoted scalar: "..." with escape sequences
     quoted_scalar: ($) => seq('"', repeat(choice($.escape_sequence, /[^"\\]+/)), '"'),
 
     escape_sequence: ($) =>
-      token(choice(/\\[\\\"nrt0]/, /\\u[0-9A-Fa-f]{4}/, /\\u\{[0-9A-Fa-f]{1,6}\}/)),
+      token(choice(/\\[\\\"nrt]/, /\\u[0-9A-Fa-f]{4}/, /\\u\{[0-9A-Fa-f]{1,6}\}/)),
 
     // Raw scalar: r#"..."# - handled by external scanner
     raw_scalar: ($) => seq($._raw_string_start, optional($._raw_string_content), $._raw_string_end),
@@ -141,7 +179,7 @@ module.exports = grammar({
     // Attributes: key=value pairs that form an object expr
     attributes: ($) => repeat1($.attribute),
 
-    attribute: ($) => seq(field("key", $.bare_scalar), "=", field("value", $._attribute_value)),
+    attribute: ($) => seq(field("key", $.bare_scalar), ">", field("value", $._attribute_value)),
 
     _attribute_value: ($) => choice($.bare_scalar, $.quoted_scalar, $.sequence, $.object),
 
