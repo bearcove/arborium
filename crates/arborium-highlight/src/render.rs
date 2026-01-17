@@ -191,7 +191,13 @@ fn normalize_and_coalesce(spans: Vec<Span>) -> Vec<NormalizedSpan> {
 /// 3. Handling overlapping spans
 ///
 /// The `format` parameter controls the HTML output style.
+///
+/// Note: Trailing newlines are trimmed from the source to avoid extra whitespace
+/// when the output is embedded in `<pre><code>` tags.
 pub fn spans_to_html(source: &str, spans: Vec<Span>, format: &HtmlFormat) -> String {
+    // Trim trailing newlines from source to avoid extra whitespace in code blocks
+    let source = source.trim_end_matches('\n');
+
     if spans.is_empty() {
         return html_escape(source);
     }
@@ -1768,5 +1774,44 @@ mod html_tests {
             "Expected 'name' to be rendered as <a-s> (string), got: {}",
             html
         );
+    }
+
+    /// Test that trailing newlines are trimmed from HTML output.
+    /// This prevents extra whitespace at the bottom of code blocks
+    /// when embedded in `<pre><code>` tags.
+    #[test]
+    fn test_trailing_newlines_trimmed() {
+        let source = "fn main() {}\n";
+        let spans = vec![Span {
+            start: 0,
+            end: 2,
+            capture: "keyword".into(),
+            pattern_index: 0,
+        }];
+
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
+
+        assert!(
+            !html.ends_with('\n'),
+            "HTML output should not end with newline, got: {:?}",
+            html
+        );
+        assert_eq!(html, "<a-k>fn</a-k> main() {}");
+    }
+
+    /// Test that multiple trailing newlines are all trimmed.
+    #[test]
+    fn test_multiple_trailing_newlines_trimmed() {
+        let source = "let x = 1;\n\n\n";
+        let spans = vec![];
+
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
+
+        assert!(
+            !html.ends_with('\n'),
+            "HTML output should not end with newline, got: {:?}",
+            html
+        );
+        assert_eq!(html, "let x = 1;");
     }
 }
