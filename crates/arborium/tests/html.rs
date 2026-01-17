@@ -2,112 +2,35 @@
 //!
 //! Tests that verify CSS and JavaScript injections work correctly in HTML.
 
-#![cfg(feature = "lang-html")]
+#![cfg(all(
+    feature = "lang-html",
+    feature = "lang-css",
+    feature = "lang-javascript"
+))]
 
-use arborium::tree_sitter_highlight::{Highlight, HighlightEvent, Highlighter as TsHighlighter};
-use arborium::{HIGHLIGHT_NAMES, Highlighter};
+use arborium::Highlighter;
+use arborium_highlight::Span;
 use indoc::indoc;
+use std::collections::HashSet;
 
-/// A recorded highlight event for testing
-#[derive(Debug, Clone, PartialEq)]
-enum Event {
-    Source { text: String },
-    Start { name: String },
-    End,
+/// Get all unique capture names from spans
+fn get_captures(spans: &[Span]) -> HashSet<&str> {
+    spans.iter().map(|s| s.capture.as_str()).collect()
 }
 
-/// Record all highlight events for HTML source
-fn record_events(highlighter: &mut Highlighter, source: &str) -> Vec<Event> {
-    // Pre-load all needed languages before extracting config references
-    highlighter.get_config_mut("html");
-    highlighter.get_config_mut("css");
-    highlighter.get_config_mut("javascript");
+/// Check that a specific text range has a specific capture
+fn has_capture_at(spans: &[Span], source: &str, text: &str, capture: &str) -> bool {
+    // Find position of text in source
+    let Some(pos) = source.find(text) else {
+        return false;
+    };
+    let start = pos as u32;
+    let end = (pos + text.len()) as u32;
 
-    // Now we can safely get immutable references
-    let config = highlighter
-        .get_config("html")
-        .expect("HTML language not found");
-
-    let mut ts_highlighter = TsHighlighter::new();
-    let highlights = ts_highlighter
-        .highlight(config, source.as_bytes(), None, |lang| {
-            highlighter.get_config(lang)
-        })
-        .expect("Failed to highlight");
-
-    let mut events = Vec::new();
-    for event in highlights {
-        let event = event.expect("Highlight event error");
-        match event {
-            HighlightEvent::Source { start, end } => {
-                events.push(Event::Source {
-                    text: source[start..end].to_string(),
-                });
-            }
-            HighlightEvent::HighlightStart(Highlight(i)) => {
-                let name = if i < HIGHLIGHT_NAMES.len() {
-                    HIGHLIGHT_NAMES[i].to_string()
-                } else {
-                    format!("unknown_{}", i)
-                };
-                events.push(Event::Start { name });
-            }
-            HighlightEvent::HighlightEnd => {
-                events.push(Event::End);
-            }
-        }
-    }
-    events
-}
-
-/// Check that specific highlight names appear in the events
-fn assert_has_highlights(events: &[Event], expected_names: &[&str], context: &str) {
-    let found_names: std::collections::HashSet<_> = events
+    // Check if any span covers this range with the expected capture
+    spans
         .iter()
-        .filter_map(|e| match e {
-            Event::Start { name } => Some(name.as_str()),
-            _ => None,
-        })
-        .collect();
-
-    for expected in expected_names {
-        assert!(
-            found_names.contains(expected),
-            "{}: Expected highlight '{}' not found. Found: {:?}",
-            context,
-            expected,
-            found_names
-        );
-    }
-}
-
-/// Check that a specific text appears with a specific highlight
-fn assert_text_highlighted(events: &[Event], text: &str, highlight: &str, context: &str) {
-    let mut current_highlights: Vec<&str> = Vec::new();
-    let mut found = false;
-
-    for event in events {
-        match event {
-            Event::Start { name } => {
-                current_highlights.push(name);
-            }
-            Event::End => {
-                current_highlights.pop();
-            }
-            Event::Source { text: src } => {
-                if src.contains(text) && current_highlights.contains(&highlight) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    assert!(
-        found,
-        "{}: Text '{}' should be highlighted as '{}'. Events: {:?}",
-        context, text, highlight, events
-    );
+        .any(|s| s.start <= start && s.end >= end && s.capture == capture)
 }
 
 #[test]
@@ -118,9 +41,14 @@ fn test_isolated_style() {
             h1 { color: red; }
         </style>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("html", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["property"], "HTML style injection");
+    assert!(
+        captures.contains("property"),
+        "HTML style injection should have property highlight. Found: {:?}",
+        captures
+    );
 }
 
 #[test]
@@ -132,10 +60,18 @@ fn test_isolated_script() {
             const y = "hello";
         </script>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("html", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(&events, &["keyword"], "HTML script injection");
-    assert_text_highlighted(&events, "let", "keyword", "HTML script injection");
+    assert!(
+        captures.contains("keyword"),
+        "HTML script injection should have keyword highlight. Found: {:?}",
+        captures
+    );
+    assert!(
+        has_capture_at(&spans, source, "let", "keyword"),
+        "let should be highlighted as keyword"
+    );
 }
 
 #[test]
@@ -157,37 +93,42 @@ fn test_mixed_content() {
         </body>
         </html>
     "#};
-    let events = record_events(&mut highlighter, source);
+    let spans = highlighter.highlight_spans("html", source).unwrap();
+    let captures = get_captures(&spans);
 
-    assert_has_highlights(
-        &events,
-        &["tag", "property", "string"],
-        "HTML mixed content",
+    assert!(captures.contains("tag"), "Should have tag highlights");
+    assert!(
+        captures.contains("property"),
+        "Should have CSS property highlights"
     );
+    assert!(captures.contains("string"), "Should have string highlights");
 }
 
 #[test]
 fn test_empty_style_tag() {
     let mut highlighter = Highlighter::new();
     let source = "<style></style>";
-    let events = record_events(&mut highlighter, source);
-    assert!(!events.is_empty());
+    let spans = highlighter.highlight_spans("html", source).unwrap();
+    // Should not panic, may or may not have spans
+    let _ = spans;
 }
 
 #[test]
 fn test_empty_script_tag() {
     let mut highlighter = Highlighter::new();
     let source = "<script></script>";
-    let events = record_events(&mut highlighter, source);
-    assert!(!events.is_empty());
+    let spans = highlighter.highlight_spans("html", source).unwrap();
+    // Should not panic, may or may not have spans
+    let _ = spans;
 }
 
 #[test]
 fn test_inline_event_handler() {
     let mut highlighter = Highlighter::new();
     let source = r#"<button onclick="alert('hello')">Click</button>"#;
-    let events = record_events(&mut highlighter, source);
-    assert!(!events.is_empty());
+    let spans = highlighter.highlight_spans("html", source).unwrap();
+    // Should not panic
+    let _ = spans;
 }
 
 #[test]
@@ -202,7 +143,7 @@ fn test_highlighter_api() {
         </style>
     "#};
 
-    let html = highlighter.highlight_to_html("html", source).unwrap();
+    let html = highlighter.highlight("html", source).unwrap();
 
     assert!(
         html.contains("<a-k>const</a-k>"),

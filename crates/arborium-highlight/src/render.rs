@@ -46,7 +46,8 @@ pub fn spans_to_themed(spans: Vec<Span>) -> Vec<ThemedSpan> {
     let mut spans = spans;
     spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
 
-    // Deduplicate ranges - prefer spans that map to a theme slot
+    // Deduplicate ranges - prefer spans with higher pattern_index (later in highlights.scm wins)
+    // This matches tree-sitter convention: later patterns override earlier ones
     let mut deduped: HashMap<(u32, u32), Span> = HashMap::new();
     for span in spans {
         let key = (span.start, span.end);
@@ -55,7 +56,14 @@ pub fn spans_to_themed(spans: Vec<Span>) -> Vec<ThemedSpan> {
         if let Some(existing) = deduped.get(&key) {
             let existing_has_slot =
                 slot_to_highlight_index(capture_to_slot(&existing.capture)).is_some();
-            if new_has_slot || !existing_has_slot {
+            // Prefer spans with styling over unstyled spans
+            // Among equally-styled spans, prefer higher pattern_index (later in query)
+            let should_replace = match (new_has_slot, existing_has_slot) {
+                (true, false) => true,  // New has styling, existing doesn't
+                (false, true) => false, // Existing has styling, new doesn't
+                _ => span.pattern_index >= existing.pattern_index, // Both same styling status: higher pattern_index wins
+            };
+            if should_replace {
                 deduped.insert(key, span);
             }
         } else {
@@ -183,7 +191,13 @@ fn normalize_and_coalesce(spans: Vec<Span>) -> Vec<NormalizedSpan> {
 /// 3. Handling overlapping spans
 ///
 /// The `format` parameter controls the HTML output style.
+///
+/// Note: Trailing newlines are trimmed from the source to avoid extra whitespace
+/// when the output is embedded in `<pre><code>` tags.
 pub fn spans_to_html(source: &str, spans: Vec<Span>, format: &HtmlFormat) -> String {
+    // Trim trailing newlines from source to avoid extra whitespace in code blocks
+    let source = source.trim_end_matches('\n');
+
     if spans.is_empty() {
         return html_escape(source);
     }
@@ -192,9 +206,9 @@ pub fn spans_to_html(source: &str, spans: Vec<Span>, format: &HtmlFormat) -> Str
     let mut spans = spans;
     spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
 
-    // Deduplicate: for spans with the exact same (start, end), prefer spans with styling.
-    // This handles the case where @comment @spell produces two spans - we want @comment,
-    // not @spell (which maps to ThemeSlot::None and produces no HTML).
+    // Deduplicate: for spans with the exact same (start, end), prefer spans with higher pattern_index
+    // This matches tree-sitter convention: later patterns in highlights.scm override earlier ones.
+    // We also prefer styled spans over unstyled (e.g., @comment over @spell).
     let mut deduped: HashMap<(u32, u32), Span> = HashMap::new();
     for span in spans {
         let key = (span.start, span.end);
@@ -202,8 +216,14 @@ pub fn spans_to_html(source: &str, spans: Vec<Span>, format: &HtmlFormat) -> Str
 
         if let Some(existing) = deduped.get(&key) {
             let existing_has_styling = tag_for_capture(&existing.capture).is_some();
-            // Only overwrite if the new span has styling, or if neither has styling
-            if new_has_styling || !existing_has_styling {
+            // Prefer spans with styling over unstyled spans
+            // Among equally-styled spans, prefer higher pattern_index (later in query)
+            let should_replace = match (new_has_styling, existing_has_styling) {
+                (true, false) => true,  // New has styling, existing doesn't
+                (false, true) => false, // Existing has styling, new doesn't
+                _ => span.pattern_index >= existing.pattern_index, // Both same styling status: higher pattern_index wins
+            };
+            if should_replace {
                 deduped.insert(key, span);
             }
         } else {
@@ -619,8 +639,8 @@ pub fn spans_to_ansi_with_options(
     let mut spans = spans;
     spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
 
-    // Deduplicate ranges the same way as HTML, but based on whether the
-    // capture maps to a themed slot.
+    // Deduplicate ranges - prefer spans with higher pattern_index (later in highlights.scm wins)
+    // This matches tree-sitter convention: later patterns override earlier ones
     let mut deduped: HashMap<(u32, u32), Span> = HashMap::new();
     for span in spans {
         let key = (span.start, span.end);
@@ -629,7 +649,14 @@ pub fn spans_to_ansi_with_options(
         if let Some(existing) = deduped.get(&key) {
             let existing_has_slot =
                 slot_to_highlight_index(capture_to_slot(&existing.capture)).is_some();
-            if new_has_slot || !existing_has_slot {
+            // Prefer spans with styling over unstyled spans
+            // Among equally-styled spans, prefer higher pattern_index (later in query)
+            let should_replace = match (new_has_slot, existing_has_slot) {
+                (true, false) => true,  // New has styling, existing doesn't
+                (false, true) => false, // Existing has styling, new doesn't
+                _ => span.pattern_index >= existing.pattern_index, // Both same styling status: higher pattern_index wins
+            };
+            if should_replace {
                 deduped.insert(key, span);
             }
         } else {
@@ -1155,11 +1182,13 @@ mod tests {
                 start: 0,
                 end: 2,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "function".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
@@ -1175,16 +1204,19 @@ mod tests {
                 start: 0,
                 end: 4,
                 capture: "include".into(), // nvim-treesitter name
+                pattern_index: 0,
             },
             Span {
                 start: 5,
                 end: 8,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 9,
                 end: 15,
                 capture: "keyword.import".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
@@ -1203,11 +1235,13 @@ mod tests {
                 start: 0,
                 end: 3,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "keyword.function".into(), // Maps to same slot
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
@@ -1224,11 +1258,13 @@ mod tests {
                 start: 0,
                 end: 10,
                 capture: "property".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 0,
                 end: 10,
                 capture: "variable".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
@@ -1254,11 +1290,13 @@ mod tests {
                 start: 0,
                 end: 5,
                 capture: "spell".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 6,
                 end: 11,
                 capture: "nospell".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
@@ -1275,11 +1313,13 @@ mod tests {
                 start: 0,
                 end: 2,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "function".into(),
+                pattern_index: 0,
             },
         ];
 
@@ -1306,6 +1346,7 @@ mod tests {
             start: 0,
             end: 2,
             capture: "keyword".into(),
+            pattern_index: 0,
         }];
 
         let mut options = AnsiOptions::default();
@@ -1321,21 +1362,27 @@ mod tests {
     #[test]
     fn test_ansi_wrapping_inserts_newline() {
         let theme = arborium_theme::theme::builtin::dracula();
-        let source = "abcdefgh";
+        // Source must be longer than MIN_CONTENT_WIDTH (10) to trigger wrapping
+        let source = "abcdefghijklmnop";
         let spans = vec![Span {
             start: 0,
             end: source.len() as u32,
             capture: "string".into(),
+            pattern_index: 0,
         }];
 
         let mut options = AnsiOptions::default();
         options.use_theme_base_style = true;
-        options.width = Some(4);
+        options.width = Some(12); // Must be > MIN_CONTENT_WIDTH (10) for wrapping to occur
         options.pad_to_width = false;
 
         let ansi = spans_to_ansi_with_options(source, spans, &theme, &options);
 
-        assert!(ansi.contains('\n'));
+        assert!(
+            ansi.contains('\n'),
+            "Expected newline for wrapping, got: {:?}",
+            ansi
+        );
         assert!(ansi.ends_with(Theme::ANSI_RESET));
     }
 
@@ -1348,11 +1395,13 @@ mod tests {
                 start: 0,
                 end: 3,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "keyword.function".into(),
+                pattern_index: 0,
             },
         ];
 
@@ -1373,11 +1422,13 @@ mod tests {
                 start: 0,
                 end: 11,
                 capture: "comment".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 0,
                 end: 11,
                 capture: "spell".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
@@ -1393,11 +1444,13 @@ mod tests {
                 start: 0,
                 end: 2,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "function".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
@@ -1412,11 +1465,13 @@ mod tests {
                 start: 0,
                 end: 2,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "function".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(
@@ -1435,11 +1490,13 @@ mod tests {
                 start: 0,
                 end: 2,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "function".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(source, spans, &HtmlFormat::ClassNames);
@@ -1457,11 +1514,13 @@ mod tests {
                 start: 0,
                 end: 2,
                 capture: "keyword".into(),
+                pattern_index: 0,
             },
             Span {
                 start: 3,
                 end: 7,
                 capture: "function".into(),
+                pattern_index: 0,
             },
         ];
         let html = spans_to_html(
@@ -1511,6 +1570,7 @@ mod tests {
                 start: offset,
                 end: offset + len,
                 capture: capture_name.to_string(),
+                pattern_index: 0,
             });
             offset += len;
         }
@@ -1535,14 +1595,26 @@ mod html_tests {
 
     #[test]
     fn test_spans_to_html_cpp_sample() {
-        let sample = std::fs::read_to_string(
-            concat!(env!("CARGO_MANIFEST_DIR"), "/../../demo/samples/cpp.cc")
-        ).expect("Failed to read cpp sample");
+        let sample = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../demo/samples/cpp.cc"
+        ))
+        .expect("Failed to read cpp sample");
 
         // Create some fake spans that cover the whole file
         let spans = vec![
-            Span { start: 0, end: 10, capture: "comment".into() },
-            Span { start: 100, end: 110, capture: "keyword".into() },
+            Span {
+                start: 0,
+                end: 10,
+                capture: "comment".into(),
+                pattern_index: 0,
+            },
+            Span {
+                start: 100,
+                end: 110,
+                capture: "keyword".into(),
+                pattern_index: 0,
+            },
         ];
 
         // This should not panic
@@ -1554,9 +1626,11 @@ mod html_tests {
     fn test_spans_to_html_real_cpp_grammar() {
         use crate::{CompiledGrammar, GrammarConfig, ParseContext};
 
-        let sample = std::fs::read_to_string(
-            concat!(env!("CARGO_MANIFEST_DIR"), "/../../demo/samples/cpp.cc")
-        ).expect("Failed to read cpp sample");
+        let sample = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../demo/samples/cpp.cc"
+        ))
+        .expect("Failed to read cpp sample");
 
         // Load the actual cpp grammar
         let config = GrammarConfig {
@@ -1576,18 +1650,168 @@ mod html_tests {
 
         // Check some spans for validity
         for (i, span) in result.spans.iter().enumerate().take(20) {
-            println!("Span {}: {}..{} {:?}", i, span.start, span.end, span.capture);
+            println!(
+                "Span {}: {}..{} {:?}",
+                i, span.start, span.end, span.capture
+            );
             let start = span.start as usize;
             let end = span.end as usize;
-            assert!(start <= sample.len(), "Span {} start {} > len {}", i, start, sample.len());
-            assert!(end <= sample.len(), "Span {} end {} > len {}", i, end, sample.len());
-            assert!(sample.is_char_boundary(start), "Span {} start {} not char boundary", i, start);
-            assert!(sample.is_char_boundary(end), "Span {} end {} not char boundary", i, end);
+            assert!(
+                start <= sample.len(),
+                "Span {} start {} > len {}",
+                i,
+                start,
+                sample.len()
+            );
+            assert!(
+                end <= sample.len(),
+                "Span {} end {} > len {}",
+                i,
+                end,
+                sample.len()
+            );
+            assert!(
+                sample.is_char_boundary(start),
+                "Span {} start {} not char boundary",
+                i,
+                start
+            );
+            assert!(
+                sample.is_char_boundary(end),
+                "Span {} end {} not char boundary",
+                i,
+                end
+            );
         }
 
         // Now try to render - this should not panic
         let html = spans_to_html(&sample, result.spans, &HtmlFormat::default());
         assert!(!html.is_empty());
         println!("Generated {} bytes of HTML", html.len());
+    }
+
+    /// Test that pattern_index deduplication works correctly.
+    ///
+    /// This simulates what the plugin runtime returns: two spans covering the same
+    /// text ("name") with different captures (@string and @property) and different
+    /// pattern indices. The higher pattern_index should win.
+    #[test]
+    fn test_pattern_index_deduplication() {
+        let source = "name value";
+
+        // Simulate plugin runtime output: both @string and @property cover "name"
+        // @property has higher pattern_index (11) than @string (7)
+        let spans = vec![
+            Span {
+                start: 0,
+                end: 4,
+                capture: "string".into(),
+                pattern_index: 7,
+            },
+            Span {
+                start: 0,
+                end: 4,
+                capture: "property".into(),
+                pattern_index: 11,
+            },
+            Span {
+                start: 5,
+                end: 10,
+                capture: "string".into(),
+                pattern_index: 7,
+            },
+        ];
+
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
+
+        eprintln!("Generated HTML: {}", html);
+
+        // "name" should be rendered as property (a-pr), not string (a-s)
+        // because property has higher pattern_index
+        assert!(
+            html.contains("<a-pr>name</a-pr>"),
+            "Expected 'name' to be rendered as <a-pr> (property), got: {}",
+            html
+        );
+
+        // "value" should be rendered as string (a-s)
+        assert!(
+            html.contains("<a-s>value</a-s>"),
+            "Expected 'value' to be rendered as <a-s> (string), got: {}",
+            html
+        );
+    }
+
+    /// Test that pattern_index deduplication works when @string has higher index.
+    /// This is the opposite case - verifying the logic works both ways.
+    #[test]
+    fn test_pattern_index_deduplication_string_wins() {
+        let source = "name";
+
+        // @string has higher pattern_index (11) than @property (7)
+        let spans = vec![
+            Span {
+                start: 0,
+                end: 4,
+                capture: "property".into(),
+                pattern_index: 7,
+            },
+            Span {
+                start: 0,
+                end: 4,
+                capture: "string".into(),
+                pattern_index: 11,
+            },
+        ];
+
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
+
+        eprintln!("Generated HTML: {}", html);
+
+        // "name" should be rendered as string (a-s) because it has higher pattern_index
+        assert!(
+            html.contains("<a-s>name</a-s>"),
+            "Expected 'name' to be rendered as <a-s> (string), got: {}",
+            html
+        );
+    }
+
+    /// Test that trailing newlines are trimmed from HTML output.
+    /// This prevents extra whitespace at the bottom of code blocks
+    /// when embedded in `<pre><code>` tags.
+    #[test]
+    fn test_trailing_newlines_trimmed() {
+        let source = "fn main() {}\n";
+        let spans = vec![Span {
+            start: 0,
+            end: 2,
+            capture: "keyword".into(),
+            pattern_index: 0,
+        }];
+
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
+
+        assert!(
+            !html.ends_with('\n'),
+            "HTML output should not end with newline, got: {:?}",
+            html
+        );
+        assert_eq!(html, "<a-k>fn</a-k> main() {}");
+    }
+
+    /// Test that multiple trailing newlines are all trimmed.
+    #[test]
+    fn test_multiple_trailing_newlines_trimmed() {
+        let source = "let x = 1;\n\n\n";
+        let spans = vec![];
+
+        let html = spans_to_html(source, spans, &HtmlFormat::CustomElements);
+
+        assert!(
+            !html.ends_with('\n'),
+            "HTML output should not end with newline, got: {:?}",
+            html
+        );
+        assert_eq!(html, "let x = 1;");
     }
 }

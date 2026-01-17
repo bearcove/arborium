@@ -98,3 +98,4 @@ packages/arborium/dist/
 packages/arborium/node_modules/
 tests/visual/diffs
 .tracey/
+.playwright-mcp/

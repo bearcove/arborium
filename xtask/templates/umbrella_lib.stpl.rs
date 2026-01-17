@@ -205,3 +205,31 @@ pub fn detect_language(path: &str) -> Option<&'static str> {
 pub use <%= crate_name.replace('-', "_") %> as lang_<%= grammar_id.replace('-', "_") %>;
 
 <% } %>
+
+/// Returns the tree-sitter `Language` for the given language name.
+///
+/// This function only returns languages that are enabled via feature flags.
+/// If no grammar matches the provided language name, it returns `None`.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use arborium::get_language;
+///
+/// // Returns Some if the "lang-rust" feature is enabled
+/// if let Some(lang) = get_language("rust") {
+///     println!("Got Rust language: {:?}", lang);
+/// }
+///
+/// // Returns None for unknown languages
+/// assert!(get_language("unknown-language").is_none());
+/// ```
+pub fn get_language(name: &str) -> Option<tree_sitter::Language> {
+    match name {
+<% for (crate_name, grammar_id) in grammars { %>
+        #[cfg(feature = "lang-<%= grammar_id %>")]
+        "<%= grammar_id %>" => Some(<%= crate_name.replace('-', "_") %>::language().into()),
+<% } %>
+        _ => None,
+    }
+}

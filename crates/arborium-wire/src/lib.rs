@@ -4,6 +4,15 @@
 //! the arborium host and grammar plugins. All types use serde for
 //! serialization with wasm-bindgen.
 //!
+//! # Offset Encoding
+//!
+//! Tree-sitter natively produces UTF-8 byte offsets. However, JavaScript
+//! strings use UTF-16 encoding, so offsets need conversion for JS interop.
+//!
+//! This crate provides two sets of types:
+//! - `Utf8*` types use UTF-8 byte offsets (for Rust code, string slicing)
+//! - `Utf16*` types use UTF-16 code unit indices (for JavaScript `slice()`, editors)
+//!
 //! # Wire Version
 //!
 //! The `WIRE_VERSION` constant should be checked by both host and plugins
@@ -22,29 +31,37 @@ use serde::{Deserialize, Serialize};
 ///
 /// Bump this when making breaking changes to the protocol.
 /// Host and plugins must agree on this version.
-pub const WIRE_VERSION: u32 = 1;
+pub const WIRE_VERSION: u32 = 2;
 
-/// A span of highlighted text with a capture name.
+// ============================================================================
+// UTF-8 types (native tree-sitter offsets, for Rust string slicing)
+// ============================================================================
+
+/// A span of highlighted text with UTF-8 byte offsets.
+///
+/// Use this when working with Rust strings, as `&source[start..end]` requires
+/// UTF-8 byte boundaries.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Span {
-    /// UTF-16 code unit offset where the span starts.
-    ///
-    /// This is compatible with JavaScript string APIs like `slice()` and `Range`.
+pub struct Utf8Span {
+    /// UTF-8 byte offset where the span starts.
     pub start: u32,
-    /// UTF-16 code unit offset where the span ends (exclusive).
-    ///
-    /// This is compatible with JavaScript string APIs like `slice()` and `Range`.
+    /// UTF-8 byte offset where the span ends (exclusive).
     pub end: u32,
     /// The capture name (e.g., "keyword", "function", "string").
     pub capture: String,
+    /// Pattern index from the query (higher = later in highlights.scm = higher priority).
+    #[serde(default)]
+    pub pattern_index: u32,
 }
 
-/// An injection point where another language should be parsed.
+/// An injection point with UTF-8 byte offsets.
+///
+/// Use this when working with Rust strings.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Injection {
-    /// UTF-16 code unit offset where the injection starts.
+pub struct Utf8Injection {
+    /// UTF-8 byte offset where the injection starts.
     pub start: u32,
-    /// UTF-16 code unit offset where the injection ends (exclusive).
+    /// UTF-8 byte offset where the injection ends (exclusive).
     pub end: u32,
     /// The language ID to inject (e.g., "javascript", "css").
     pub language: String,
@@ -52,16 +69,19 @@ pub struct Injection {
     pub include_children: bool,
 }
 
-/// Result of parsing text.
+/// Result of parsing text, with UTF-8 byte offsets.
+///
+/// This is the native format from tree-sitter and is suitable for
+/// Rust code that needs to slice strings.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ParseResult {
+pub struct Utf8ParseResult {
     /// Highlighted spans from this parse.
-    pub spans: Vec<Span>,
+    pub spans: Vec<Utf8Span>,
     /// Injection points for other languages.
-    pub injections: Vec<Injection>,
+    pub injections: Vec<Utf8Injection>,
 }
 
-impl ParseResult {
+impl Utf8ParseResult {
     /// Create an empty parse result.
     pub fn empty() -> Self {
         Self {
@@ -70,6 +90,90 @@ impl ParseResult {
         }
     }
 }
+
+// ============================================================================
+// UTF-16 types (for JavaScript interop)
+// ============================================================================
+
+/// A span of highlighted text with UTF-16 code unit indices.
+///
+/// Use this when working with JavaScript, as `String.prototype.slice()`
+/// and DOM APIs use UTF-16 code unit indices.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Utf16Span {
+    /// UTF-16 code unit index where the span starts.
+    pub start: u32,
+    /// UTF-16 code unit index where the span ends (exclusive).
+    pub end: u32,
+    /// The capture name (e.g., "keyword", "function", "string").
+    pub capture: String,
+    /// Pattern index from the query (higher = later in highlights.scm = higher priority).
+    #[serde(default)]
+    pub pattern_index: u32,
+}
+
+/// An injection point with UTF-16 code unit indices.
+///
+/// Use this when working with JavaScript.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Utf16Injection {
+    /// UTF-16 code unit index where the injection starts.
+    pub start: u32,
+    /// UTF-16 code unit index where the injection ends (exclusive).
+    pub end: u32,
+    /// The language ID to inject (e.g., "javascript", "css").
+    pub language: String,
+    /// Whether to include the node children in the injection.
+    pub include_children: bool,
+}
+
+/// Result of parsing text, with UTF-16 code unit indices.
+///
+/// This format is suitable for JavaScript code that needs to use
+/// `String.prototype.slice()` or integrate with editors.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Utf16ParseResult {
+    /// Highlighted spans from this parse.
+    pub spans: Vec<Utf16Span>,
+    /// Injection points for other languages.
+    pub injections: Vec<Utf16Injection>,
+}
+
+impl Utf16ParseResult {
+    /// Create an empty parse result.
+    pub fn empty() -> Self {
+        Self {
+            spans: Vec::new(),
+            injections: Vec::new(),
+        }
+    }
+}
+
+// ============================================================================
+// Legacy type aliases (for backwards compatibility during transition)
+// ============================================================================
+
+/// Legacy alias for [`Utf8Span`].
+#[deprecated(since = "2.11.0", note = "Use Utf8Span or Utf16Span explicitly")]
+pub type Span = Utf8Span;
+
+/// Legacy alias for [`Utf8Injection`].
+#[deprecated(
+    since = "2.11.0",
+    note = "Use Utf8Injection or Utf16Injection explicitly"
+)]
+pub type Injection = Utf8Injection;
+
+/// Legacy alias for [`Utf8ParseResult`].
+#[deprecated(
+    since = "2.11.0",
+    note = "Use Utf8ParseResult or Utf16ParseResult explicitly"
+)]
+pub type ParseResult = Utf8ParseResult;
+
+// ============================================================================
+// Other types (not offset-dependent)
+// ============================================================================
 
 /// An edit to apply to the text (for incremental parsing).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -1,0 +1,23 @@
+repo: https://github.com/bearcove/styx
+commit: 5b09e6c815afe4a416ec07e569d3211b9c49e604
+license: MIT OR Apache-2.0
+
+grammars:
+  - id: styx
+    name: Styx
+    tag: config
+    tier: 2
+    has_scanner: true
+    icon: mdi:file-cog-outline
+
+    inventor: Amos Wenger
+    year: 2026
+    description: "Minimal configuration language designed to be friendly to humans and machines alike. Has first-class support for sum types, validation through schemas (which are themselves Styx documents), etc."
+    link: https://styx.bearcove.eu
+    trivia: "Named after the river separating the living from the dead in Greek mythology."
+
+    samples:
+      - path: samples/showcase.styx
+        description: Comprehensive example showcasing all Styx syntax features including objects, sequences, tags, heredocs, and nested structures.
+        link: https://github.com/bearcove/styx/blob/main/examples/showcase.styx
+        license: MIT OR Apache-2.0

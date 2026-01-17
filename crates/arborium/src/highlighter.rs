@@ -407,6 +407,8 @@ mod tests {
     #[test]
     #[cfg(feature = "lang-rust")]
     fn test_highlighter_fork() {
+        use crate::Highlighter;
+
         let hl = Highlighter::new();
 
         // Fork creates independent highlighters sharing the store
@@ -424,6 +426,8 @@ mod tests {
     #[test]
     #[cfg(feature = "lang-commonlisp")]
     fn test_commonlisp_highlighting() {
+        use crate::Highlighter;
+
         let mut highlighter = Highlighter::new();
         let html = highlighter
             .highlight("commonlisp", "(defun hello () (print \"Hello\"))")
@@ -434,6 +438,10 @@ mod tests {
     #[test]
     #[cfg(feature = "lang-rust")]
     fn test_ansi_highlighting() {
+        use arborium_theme::builtin;
+
+        use crate::AnsiHighlighter;
+
         let theme = builtin::catppuccin_mocha().clone();
         let mut highlighter = AnsiHighlighter::new(theme);
 
@@ -457,15 +465,22 @@ fn main() {
     #[test]
     #[cfg(feature = "lang-rust")]
     fn test_ansi_with_options() {
+        use arborium_highlight::AnsiOptions;
+        use arborium_theme::builtin;
+
+        use crate::AnsiHighlighter;
+
         let theme = builtin::catppuccin_mocha().clone();
         let config = crate::Config::default();
-        let mut options = AnsiOptions::default();
-        options.use_theme_base_style = true;
-        options.width = Some(60);
-        options.pad_to_width = true;
-        options.padding_x = 2;
-        options.padding_y = 1;
-        options.border = true;
+        let options = AnsiOptions {
+            use_theme_base_style: true,
+            width: Some(60),
+            pad_to_width: true,
+            padding_x: 2,
+            padding_y: 1,
+            border: true,
+            ..Default::default()
+        };
 
         let mut highlighter = AnsiHighlighter::with_options(theme, config, options);
 
@@ -487,6 +502,10 @@ fn main() {
     #[test]
     #[cfg(feature = "lang-rust")]
     fn test_theme_switching() {
+        use arborium_theme::builtin;
+
+        use crate::AnsiHighlighter;
+
         let theme1 = builtin::catppuccin_mocha().clone();
         let mut highlighter = AnsiHighlighter::new(theme1);
 
@@ -505,6 +524,10 @@ fn main() {
     #[cfg(feature = "lang-rust")]
     fn test_shared_store() {
         // Create a store
+
+        use std::sync::Arc;
+
+        use crate::{GrammarStore, Highlighter};
         let store = Arc::new(GrammarStore::new());
 
         // Multiple highlighters sharing the store
@@ -523,6 +546,8 @@ fn main() {
     #[cfg(feature = "lang-rust")]
     fn test_multithreaded_highlighting() {
         use std::thread;
+
+        use crate::Highlighter;
 
         // Create a highlighter and share its store across threads
         let hl = Highlighter::new();

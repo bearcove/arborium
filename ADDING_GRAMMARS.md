@@ -8,7 +8,7 @@ This guide explains how to add support for new programming languages to Arborium
 2. [Prerequisites](#prerequisites)
 3. [Step-by-Step Guide](#step-by-step-guide)
 4. [Directory Structure](#directory-structure)
-5. [The arborium.kdl File](#the-arboriumkdl-file)
+5. [The arborium.yaml File](#the-arboriumyaml-file)
 6. [Language Groups](#language-groups)
 7. [Grammar Files](#grammar-files)
 8. [Query Files](#query-files)
@@ -25,7 +25,7 @@ Arborium uses [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) grammars
 
 1. **Finding or creating** a Tree-sitter grammar for your language
 2. **Creating a language definition directory** with the required files
-3. **Writing an `arborium.kdl` configuration** file (single source of truth)
+3. **Writing an `arborium.yaml` configuration** file (single source of truth)
 4. **Running the build system** to generate Rust crate files
 5. **Testing** your language support
 
@@ -73,7 +73,7 @@ Create the following structure in your chosen group:
 
 ```
 langs/group-{name}/{language}/def/
-├── arborium.kdl           # Configuration file (REQUIRED)
+├── arborium.yaml          # Configuration file (REQUIRED)
 ├── grammar/               # Grammar source files
 │   ├── grammar.js         # Tree-sitter grammar definition (REQUIRED)
 │   └── scanner.c          # External scanner (if needed by grammar)
@@ -110,61 +110,54 @@ cp /tmp/tree-sitter-groovy/queries/injections.scm langs/group-cedar/groovy/def/q
 cp /tmp/tree-sitter-groovy/examples/* langs/group-cedar/groovy/def/samples/
 ```
 
-### 4. Create the `arborium.kdl` Configuration File
+### 4. Create the `arborium.yaml` Configuration File
 
 This is the **single source of truth** for your language. The build system reads this file to generate all Rust code automatically.
 
 **Template:**
 
-```kdl
-// Repository information (REQUIRED)
-repo "https://github.com/tree-sitter/tree-sitter-groovy"
-commit "abc123..."  // Full commit hash from the grammar repo
-license "MIT"       // License of the grammar repository
+```yaml
+repo: https://github.com/tree-sitter/tree-sitter-groovy
+commit: abc123...  # Full commit hash from the grammar repo
+license: MIT       # License of the grammar repository
 
-grammar {
-    // Basic identification (REQUIRED)
-    id "groovy"                  // Unique identifier (lowercase, no spaces)
-    name "Groovy"                // Display name
-    tag "code"                   // Category: "code", "data", "markup", "config"
-    tier 2                       // Quality tier: 1 (best) to 5 (experimental)
+grammars:
+  - id: groovy                    # Unique identifier (lowercase, no spaces)
+    name: Groovy                  # Display name
+    tag: code                     # Category: "code", "data", "markup", "config"
+    tier: 2                       # Quality tier: 1 (best) to 5 (experimental)
 
-    // Technical flags
-    has-scanner #true            // Set to #true if scanner.c exists
-    generate-component #true     // Set to #true to include in WASM builds
+    # Technical flags
+    has_scanner: true             # Set to true if scanner.c exists
+    generate_component: true      # Set to true to include in WASM builds
 
-    // Visual representation
-    icon "devicon-plain:groovy"  // Icon identifier (from iconify.design)
-    aliases "groovy" "gvy"       // File extensions (space-separated)
+    # Visual representation
+    icon: devicon-plain:groovy    # Icon identifier (from iconify.design)
 
-    // Metadata (REQUIRED for documentation)
-    inventor "James Strachan"
-    year 2003
-    description "Apache Groovy is a dynamic language for the JVM with syntax similar to Python and Ruby, featuring optional static typing and metaprogramming capabilities."
-    link "https://en.wikipedia.org/wiki/Apache_Groovy"
-    trivia "Groovy was created in 2003 by James Strachan and became an Apache project in 2015. It powers the Gradle build system and is widely used for DSLs."
+    # Metadata (REQUIRED for documentation)
+    inventor: James Strachan
+    year: 2003
+    description: "Apache Groovy is a dynamic language for the JVM with syntax similar to Python and Ruby, featuring optional static typing and metaprogramming capabilities."
+    link: https://en.wikipedia.org/wiki/Apache_Groovy
+    trivia: "Groovy was created in 2003 by James Strachan and became an Apache project in 2015. It powers the Gradle build system and is widely used for DSLs."
 
-    // Sample files (at least one REQUIRED)
-    sample {
-        path "samples/example.groovy"
-        description "Basic Groovy syntax demonstrating closures and dynamic typing"
-        link "https://github.com/tree-sitter/tree-sitter-groovy/blob/main/examples/example.groovy"
-        license "Apache-2.0"
-    }
+    # Sample files (at least one REQUIRED)
+    samples:
+      - path: samples/example.groovy
+        description: Basic Groovy syntax demonstrating closures and dynamic typing
+        link: https://github.com/tree-sitter/tree-sitter-groovy/blob/main/examples/example.groovy
+        license: Apache-2.0
 
-    // Additional samples (optional)
-    sample {
-        path "samples/DSL.groovy"
-        description "Groovy DSL example showing builder pattern"
-        link "https://github.com/tree-sitter/tree-sitter-groovy/blob/main/examples/DSL.groovy"
-        license "Apache-2.0"
-    }
-}
+      # Additional samples (optional)
+      - path: samples/DSL.groovy
+        description: Groovy DSL example showing builder pattern
+        link: https://github.com/tree-sitter/tree-sitter-groovy/blob/main/examples/DSL.groovy
+        license: Apache-2.0
 ```
 
-### 5. Field Reference for `arborium.kdl`
+### 5. Field Reference for `arborium.yaml`
 
-#### Top-Level Fields (Outside `grammar` block)
+#### Top-Level Fields
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -172,7 +165,7 @@ grammar {
 | `commit` | String | ✅ Yes | Full commit hash from the grammar repo (for reproducibility) |
 | `license` | String | ✅ Yes | SPDX license identifier (e.g., "MIT", "Apache-2.0") |
 
-#### Grammar Block Fields
+#### Grammar Fields (in `grammars` list)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -181,17 +174,16 @@ grammar {
 | `tag` | String | ✅ Yes | Category: `"code"`, `"data"`, `"markup"`, `"config"` |
 | `tier` | Integer | ✅ Yes | Quality tier (1-5): 1=production, 2=stable, 3=good, 4=usable, 5=experimental |
 | `icon` | String | ✅ Yes | Icon identifier from [Iconify](https://iconify.design) |
-| `aliases` | String | ✅ Yes | Space-separated file extensions |
 | `inventor` | String | ✅ Yes | Person or organization that created the language |
 | `year` | Integer | ✅ Yes | Year the language was created |
 | `description` | String | ✅ Yes | 1-2 sentence description of the language |
 | `link` | String | ✅ Yes | Wikipedia or official documentation URL |
 | `trivia` | String | ✅ Yes | Interesting fact about the language |
-| `has-scanner` | Boolean | No | Set to `#true` if `scanner.c` exists (default: `#false`) |
-| `generate-component` | Boolean | No | Set to `#true` to include in WASM plugin builds (default: `#false`) |
-| `grammar-path` | String | No | For multi-grammar crates (e.g., `"dtd"` for XML/DTD) |
+| `has_scanner` | Boolean | No | Set to `true` if `scanner.c` exists (default: `false`) |
+| `generate_component` | Boolean | No | Set to `true` to include in WASM plugin builds (default: `false`) |
+| `grammar_path` | String | No | For multi-grammar crates (e.g., `"dtd"` for XML/DTD) |
 
-#### Sample Block Fields (Nested in `grammar`)
+#### Sample Fields (in `samples` list)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -252,7 +244,7 @@ langs/group-cedar/groovy/crate/
         └── node-types.json
 ```
 
-**⚠️ Important:** Never manually edit files in the `crate/` directory! They are auto-generated from `arborium.kdl`.
+**⚠️ Important:** Never manually edit files in the `crate/` directory! They are auto-generated from `arborium.yaml`.
 
 ### 8. Validate Your Configuration
 
@@ -267,7 +259,7 @@ cargo xtask lint --strict
 ```
 
 Common validation checks:
-- ✅ All required fields present in `arborium.kdl`
+- ✅ All required fields present in `arborium.yaml`
 - ✅ Sample files actually exist
 - ✅ Tier is between 1 and 5
 - ✅ Icon identifier is valid
@@ -311,7 +303,7 @@ The demo server will be available at `http://localhost:8080` where you can test 
 ```
 langs/group-cedar/kotlin/
 ├── def/                                    # Source files (you edit these)
-│   ├── arborium.kdl                       # Configuration (EDIT THIS)
+│   ├── arborium.yaml                      # Configuration (EDIT THIS)
 │   ├── grammar/
 │   │   ├── grammar.js                     # From tree-sitter-kotlin
 │   │   └── scanner.c                      # From tree-sitter-kotlin
@@ -338,7 +330,7 @@ langs/group-cedar/kotlin/
 | Directory | Purpose | Edit? |
 |-----------|---------|-------|
 | `def/` | Source files you maintain | ✅ YES |
-| `def/arborium.kdl` | Single source of truth | ✅ YES |
+| `def/arborium.yaml` | Single source of truth | ✅ YES |
 | `def/grammar/` | Tree-sitter grammar files from upstream | ✅ YES (when updating) |
 | `def/queries/` | Syntax highlighting queries from upstream | ✅ YES (when updating) |
 | `def/samples/` | Example code for testing | ✅ YES |
@@ -346,40 +338,37 @@ langs/group-cedar/kotlin/
 
 ---
 
-## The arborium.kdl File
+## The arborium.yaml File
 
-The `arborium.kdl` file is the **single source of truth** for your language configuration. The build system reads this file and generates all Rust code automatically.
+The `arborium.yaml` file is the **single source of truth** for your language configuration. The build system reads this file and generates all Rust code automatically.
 
 ### Real-World Example: WIT Language
 
-```kdl
-repo "https://github.com/bytecodealliance/tree-sitter-wit"
-commit "a80c1f47baa5bfb13e2b5f49aa5304e3dab94948"
-license "Apache-2.0 WITH LLVM-exception"
+```yaml
+repo: https://github.com/bytecodealliance/tree-sitter-wit
+commit: a80c1f47baa5bfb13e2b5f49aa5304e3dab94948
+license: Apache-2.0 WITH LLVM-exception
 
-grammar {
-    id "wit"
-    name "WIT"
-    tag "data"
-    tier 3
-    has-scanner #true
-    generate-component #true
-    icon "simple-icons:webassembly"
-    aliases "wit" "wasm-interface"
+grammars:
+  - id: wit
+    name: WIT
+    tag: data
+    tier: 3
+    has_scanner: true
+    generate_component: true
+    icon: simple-icons:webassembly
 
-    inventor "Bytecode Alliance"
-    year 2021
-    description "WebAssembly Interface Types (WIT) is an IDL for defining component interfaces in the WebAssembly Component Model."
-    link "https://component-model.bytecodealliance.org/design/wit.html"
-    trivia "WIT is part of the WebAssembly Component Model initiative to enable language-agnostic component composition."
+    inventor: Bytecode Alliance
+    year: 2021
+    description: "WebAssembly Interface Types (WIT) is an IDL for defining component interfaces in the WebAssembly Component Model."
+    link: https://component-model.bytecodealliance.org/design/wit.html
+    trivia: "WIT is part of the WebAssembly Component Model initiative to enable language-agnostic component composition."
 
-    sample {
-        path "samples/example.wit"
-        description "WIT interface showing records, variants, enums, and functions"
-        link "https://github.com/bytecodealliance/tree-sitter-wit/blob/main/examples/example.wit"
-        license "Apache-2.0 WITH LLVM-exception"
-    }
-}
+    samples:
+      - path: samples/example.wit
+        description: WIT interface showing records, variants, enums, and functions
+        link: https://github.com/bytecodealliance/tree-sitter-wit/blob/main/examples/example.wit
+        license: Apache-2.0 WITH LLVM-exception
 ```
 
 ### Configuration Tips
@@ -513,7 +502,7 @@ Some grammars require a C scanner for complex tokenization that can't be express
 - **Context-sensitive parsing** (C++ templates)
 
 **When to include:**
-- ✅ Set `has-scanner #true` in `arborium.kdl` if `scanner.c` exists
+- ✅ Set `has_scanner: true` in `arborium.yaml` if `scanner.c` exists
 - ✅ Copy `scanner.c` from upstream repository
 - ❌ Don't try to write your own scanner (requires deep Tree-sitter knowledge)
 
@@ -668,7 +657,7 @@ Sample files demonstrate your language's syntax and are used for:
 - ✅ Include typical language idioms
 - ✅ Keep it readable (50-200 lines ideal)
 - ✅ Add a descriptive header comment
-- ✅ Document the source in `arborium.kdl`
+- ✅ Document the source in `arborium.yaml`
 
 **DON'T:**
 - ❌ Use massive files (>500 lines)
@@ -724,22 +713,19 @@ new EmailBuilder()
     .send()
 ```
 
-### Referencing Samples in arborium.kdl
+### Referencing Samples in arborium.yaml
 
-```kdl
-sample {
-    path "samples/example.groovy"
-    description "Basic Groovy syntax demonstrating classes, closures, and string interpolation"
-    link "https://github.com/tree-sitter/tree-sitter-groovy/blob/main/examples/basic.groovy"
-    license "Apache-2.0"
-}
+```yaml
+samples:
+  - path: samples/example.groovy
+    description: Basic Groovy syntax demonstrating classes, closures, and string interpolation
+    link: https://github.com/tree-sitter/tree-sitter-groovy/blob/main/examples/basic.groovy
+    license: Apache-2.0
 
-sample {
-    path "samples/DSL.groovy"
-    description "Groovy builder pattern showing DSL capabilities"
-    link "https://github.com/tree-sitter/tree-sitter-groovy/blob/main/examples/dsl.groovy"
-    license "Apache-2.0"
-}
+  - path: samples/DSL.groovy
+    description: Groovy builder pattern showing DSL capabilities
+    link: https://github.com/tree-sitter/tree-sitter-groovy/blob/main/examples/dsl.groovy
+    license: Apache-2.0
 ```
 
 ---
@@ -758,7 +744,7 @@ cargo xtask <command> [options]
 
 #### `cargo xtask gen [language]`
 
-Generates Rust crate files from `arborium.kdl` configuration.
+Generates Rust crate files from `arborium.yaml` configuration.
 
 ```bash
 # Generate a single language
@@ -777,7 +763,7 @@ cargo xtask gen groovy --version major   # 0.1.0 → 1.0.0
 ```
 
 **What it does:**
-1. Parses your `arborium.kdl` file
+1. Parses your `arborium.yaml` file
 2. Validates all fields and references
 3. Runs `tree-sitter generate` to create parser
 4. Generates `Cargo.toml`, `build.rs`, `src/lib.rs`
@@ -863,7 +849,7 @@ cargo xtask serve --dev
 # 1. Create language structure
 mkdir -p langs/group-cedar/groovy/def/{grammar,queries,samples}
 
-# 2. Add files (arborium.kdl, grammar files, samples)
+# 2. Add files (arborium.yaml, grammar files, samples)
 # ... (copy files from upstream repo)
 
 # 3. Generate crate
@@ -905,7 +891,7 @@ Error: grammar.js not found in langs/group-cedar/groovy/def/grammar/
 Error: Sample file samples/example.groovy does not exist
 ```
 
-**Fix:** Ensure sample files referenced in `arborium.kdl` actually exist.
+**Fix:** Ensure sample files referenced in `arborium.yaml` actually exist.
 
 #### "Tree-sitter generate failed"
 
@@ -926,7 +912,7 @@ tree-sitter test  # if tests exist
 Error: has-scanner is true but scanner.c not found
 ```
 
-**Fix:** Either set `has-scanner #false` or copy `scanner.c` from upstream.
+**Fix:** Either set `has_scanner: false` or copy `scanner.c` from upstream.
 
 ---
 
@@ -940,7 +926,7 @@ Error: has-scanner is true but scanner.c not found
 Error: Missing required field 'inventor' in groovy grammar
 ```
 
-**Fix:** Add all required fields to `arborium.kdl`:
+**Fix:** Add all required fields to `arborium.yaml`:
 - `id`, `name`, `tag`, `tier`, `icon`, `aliases`
 - `inventor`, `year`, `description`, `link`, `trivia`
 
@@ -963,7 +949,7 @@ Error: Tier must be between 1 and 5 (got 6)
 Error: Sample file samples/example.groovy does not exist
 ```
 
-**Fix:** Create the file or update the path in `arborium.kdl`.
+**Fix:** Create the file or update the path in `arborium.yaml`.
 
 ### Highlighting Issues
 
@@ -1036,7 +1022,7 @@ tree-sitter highlight ../samples/example.groovy \
 **Likely cause:** Language ID conflicts with existing language
 
 **Fix:**
-1. Choose a unique `id` in `arborium.kdl`
+1. Choose a unique `id` in `arborium.yaml`
 2. Regenerate: `cargo xtask gen groovy`
 3. Check `/crates/arborium/Cargo.toml` for conflicts
 
@@ -1096,35 +1082,32 @@ cp queries/injections.scm ~/arborium/langs/group-cedar/groovy/def/queries/  # if
 # 6. Copy sample files
 cp examples/*.groovy ~/arborium/langs/group-cedar/groovy/def/samples/
 
-# 7. Create arborium.kdl
+# 7. Create arborium.yaml
 cd ~/arborium/langs/group-cedar/groovy/def
-cat > arborium.kdl << 'EOF'
-repo "https://github.com/tree-sitter/tree-sitter-groovy"
-commit "PASTE_COMMIT_HASH_HERE"
-license "MIT"
+cat > arborium.yaml << 'EOF'
+repo: https://github.com/tree-sitter/tree-sitter-groovy
+commit: PASTE_COMMIT_HASH_HERE
+license: MIT
 
-grammar {
-    id "groovy"
-    name "Groovy"
-    tag "code"
-    tier 2
-    has-scanner #true
-    generate-component #true
-    icon "devicon-plain:groovy"
-    aliases "groovy" "gvy"
+grammars:
+  - id: groovy
+    name: Groovy
+    tag: code
+    tier: 2
+    has_scanner: true
+    generate_component: true
+    icon: devicon-plain:groovy
 
-    inventor "James Strachan"
-    year 2003
-    description "Apache Groovy is a dynamic language for the JVM with syntax similar to Python and Ruby, featuring optional static typing and metaprogramming capabilities."
-    link "https://en.wikipedia.org/wiki/Apache_Groovy"
-    trivia "Groovy was created in 2003 by James Strachan and became an Apache project in 2015. It powers the Gradle build system."
+    inventor: James Strachan
+    year: 2003
+    description: "Apache Groovy is a dynamic language for the JVM with syntax similar to Python and Ruby, featuring optional static typing and metaprogramming capabilities."
+    link: https://en.wikipedia.org/wiki/Apache_Groovy
+    trivia: "Groovy was created in 2003 by James Strachan and became an Apache project in 2015. It powers the Gradle build system."
 
-    sample {
-        path "samples/example.groovy"
-        description "Basic Groovy syntax with closures and dynamic typing"
-        license "Apache-2.0"
-    }
-}
+    samples:
+      - path: samples/example.groovy
+        description: Basic Groovy syntax with closures and dynamic typing
+        license: Apache-2.0
 EOF
 
 # 8. Edit and replace commit hash
@@ -1164,9 +1147,9 @@ cp grammar.js ~/arborium/langs/group-cedar/kotlin/def/grammar/
 cp src/scanner.c ~/arborium/langs/group-cedar/kotlin/def/grammar/
 cp queries/highlights.scm ~/arborium/langs/group-cedar/kotlin/def/queries/
 
-# 3. Update arborium.kdl
+# 3. Update arborium.yaml
 cd ~/arborium/langs/group-cedar/kotlin/def
-# Edit arborium.kdl: update the 'commit' field with $COMMIT
+# Edit arborium.yaml: update the 'commit' field with $COMMIT
 
 # 4. Regenerate with version bump
 cd ~/arborium
@@ -1182,39 +1165,36 @@ cargo xtask serve --dev
 
 **Scenario:** Add a simple language (e.g., TOML) without external scanner
 
-```kdl
-repo "https://github.com/tree-sitter/tree-sitter-toml"
-commit "abc123..."
-license "MIT"
+```yaml
+repo: https://github.com/tree-sitter/tree-sitter-toml
+commit: abc123...
+license: MIT
 
-grammar {
-    id "toml"
-    name "TOML"
-    tag "config"
-    tier 1
-    has-scanner #false              // ← No scanner
-    generate-component #true
-    icon "simple-icons:toml"
-    aliases "toml"
+grammars:
+  - id: toml
+    name: TOML
+    tag: config
+    tier: 1
+    has_scanner: false  # ← No scanner
+    generate_component: true
+    icon: simple-icons:toml
 
-    inventor "Tom Preston-Werner"
-    year 2013
-    description "TOML is a minimal configuration file format designed to be easy to read due to obvious semantics."
-    link "https://en.wikipedia.org/wiki/TOML"
-    trivia "TOML was created by Tom Preston-Werner, co-founder of GitHub, as a better alternative to INI and YAML for config files."
+    inventor: Tom Preston-Werner
+    year: 2013
+    description: "TOML is a minimal configuration file format designed to be easy to read due to obvious semantics."
+    link: https://en.wikipedia.org/wiki/TOML
+    trivia: "TOML was created by Tom Preston-Werner, co-founder of GitHub, as a better alternative to INI and YAML for config files."
 
-    sample {
-        path "samples/example.toml"
-        description "TOML configuration example"
-        license "MIT"
-    }
-}
+    samples:
+      - path: samples/example.toml
+        description: TOML configuration example
+        license: MIT
 ```
 
 **Directory structure** (note: no `scanner.c`):
 ```
 langs/group-maple/toml/def/
-├── arborium.kdl
+├── arborium.yaml
 ├── grammar/
 │   └── grammar.js              (no scanner.c)
 ├── queries/
@@ -1231,31 +1211,28 @@ langs/group-maple/toml/def/
 
 Some languages require multiple grammars in one crate. Example: XML + DTD
 
-```kdl
-// In group-willow/xml/def/arborium.kdl
-grammar {
-    id "xml"
-    name "XML"
-    // ... other fields
-}
+```yaml
+# In group-willow/xml/def/arborium.yaml
+grammars:
+  - id: xml
+    name: XML
+    # ... other fields
 
-grammar {
-    id "dtd"
-    name "DTD"
-    grammar-path "dtd"              // ← Specify subdirectory
-    // ... other fields
-}
+  - id: dtd
+    name: DTD
+    grammar_path: dtd  # ← Specify subdirectory
+    # ... other fields
 ```
 
 ### WASM Plugin Configuration
 
-Set `generate-component #true` to include in WASM builds:
+Set `generate_component: true` to include in WASM builds:
 
-```kdl
-grammar {
-    generate-component #true        // Build WASM plugin
-    // ...
-}
+```yaml
+grammars:
+  - id: groovy
+    generate_component: true  # Build WASM plugin
+    # ...
 ```
 
 **When to enable:**
@@ -1287,8 +1264,8 @@ Icons use [Iconify](https://iconify.design) format: `collection:icon-name`
 - Generic code: `vscode-icons:file-type-text`
 
 **Fallback:** If no icon exists, use a generic code icon:
-```kdl
-icon "vscode-icons:file-type-text"
+```yaml
+icon: vscode-icons:file-type-text
 ```
 
 ---
@@ -1314,8 +1291,8 @@ Use this checklist when adding a new language:
 - [ ] Added at least one sample file
 
 ### Configuration
-- [ ] Created `arborium.kdl` with all required fields
-- [ ] Set correct `has-scanner` value
+- [ ] Created `arborium.yaml` with all required fields
+- [ ] Set correct `has_scanner` value
 - [ ] Chose appropriate `tier` (1-5)
 - [ ] Found suitable icon from Iconify
 - [ ] Added `aliases` (file extensions)
@@ -1376,7 +1353,7 @@ A: You have two options:
 
 **Q: Can I use a grammar with a different license?**
 
-A: Yes, as long as it's compatible with Arborium's license (check with maintainers). Always document the grammar license in `arborium.kdl`.
+A: Yes, as long as it's compatible with Arborium's license (check with maintainers). Always document the grammar license in `arborium.yaml`.
 
 **Q: How do I choose between tier 2 and tier 3?**
 
@@ -1398,7 +1375,7 @@ A: You can:
 
 A: No! The build system generates all Rust code automatically. You only need to:
 - Copy grammar files
-- Write `arborium.kdl` configuration
+- Write `arborium.yaml` configuration
 - Run `cargo xtask gen {language}`
 
 ---
@@ -1448,14 +1425,15 @@ Adding a language to Arborium is straightforward:
 
 1. **Find** a Tree-sitter grammar
 2. **Copy** grammar files to `langs/group-{name}/{language}/def/`
-3. **Write** `arborium.kdl` configuration
+3. **Write** `arborium.yaml` configuration
 4. **Run** `cargo xtask gen {language}`
-5. **Test** in the web demo
+5. **Run** `cargo xtask ci generate` (regenerates CI workflow for new language)
+6. **Test** in the web demo
 
 The build system handles all code generation automatically. You don't need to understand Rust, Tree-sitter internals, or write complex build scripts.
 
 **Key principles:**
-- ✅ `arborium.kdl` is the single source of truth
+- ✅ `arborium.yaml` is the single source of truth
 - ✅ Never edit files in `crate/` (they're auto-generated)
 - ✅ Copy grammar files from upstream (don't reinvent)
 - ✅ Test thoroughly before submitting

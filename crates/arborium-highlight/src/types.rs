@@ -20,6 +20,13 @@ pub struct Span {
     /// Examples: "keyword", "function.builtin", "include", "storageclass"
     /// All are mapped to theme slots via `arborium_theme::tag_for_capture()`.
     pub capture: String,
+
+    /// Pattern index from the query (higher = later in highlights.scm = higher priority).
+    ///
+    /// When two spans have the exact same (start, end) range, the one with
+    /// higher pattern_index wins during deduplication. This matches the
+    /// tree-sitter convention where later patterns in a query override earlier ones.
+    pub pattern_index: u32,
 }
 
 /// An injection point for embedded languages.

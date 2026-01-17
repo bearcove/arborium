@@ -1,11 +1,70 @@
+// ============================================================================
+// UTF-8 types (internal, for Rust host)
+// ============================================================================
+
 /**
- * A span of highlighted text.
+ * A span of highlighted text with UTF-8 byte offsets.
  *
- * The `start` and `end` fields are UTF-16 code unit indices, compatible with
- * JavaScript string APIs like `String.prototype.slice()`, `substring()`, and
- * DOM `Range`.
+ * This is the native format from tree-sitter. Use this when working with
+ * Rust code that needs to slice strings with `&source[start..end]`.
+ *
+ * For JavaScript string operations, use {@link Utf16Span} instead.
+ *
+ * @internal
  */
-export interface Span {
+export interface Utf8Span {
+  /** UTF-8 byte offset where the span starts (inclusive) */
+  start: number;
+  /** UTF-8 byte offset where the span ends (exclusive) */
+  end: number;
+  /** The capture name (e.g., "keyword", "string", "comment") */
+  capture: string;
+}
+
+/**
+ * A language injection with UTF-8 byte offsets.
+ *
+ * @internal
+ */
+export interface Utf8Injection {
+  /** UTF-8 byte offset where the injection starts (inclusive) */
+  start: number;
+  /** UTF-8 byte offset where the injection ends (exclusive) */
+  end: number;
+  language: string;
+  includeChildren: boolean;
+}
+
+/**
+ * Result of parsing source code, with UTF-8 byte offsets.
+ *
+ * @internal
+ */
+export interface Utf8ParseResult {
+  spans: Utf8Span[];
+  injections: Utf8Injection[];
+}
+
+// ============================================================================
+// UTF-16 types (public API, for JavaScript)
+// ============================================================================
+
+/**
+ * A span of highlighted text with UTF-16 code unit indices.
+ *
+ * The `start` and `end` fields are compatible with JavaScript string APIs
+ * like `String.prototype.slice()`, `substring()`, and DOM `Range`.
+ *
+ * @example
+ * ```ts
+ * const result = grammar.parse(source);
+ * for (const span of result.spans) {
+ *   const text = source.slice(span.start, span.end);
+ *   console.log(`${span.capture}: ${text}`);
+ * }
+ * ```
+ */
+export interface Utf16Span {
   /** UTF-16 code unit index where the span starts (inclusive) */
   start: number;
   /** UTF-16 code unit index where the span ends (exclusive) */
@@ -15,9 +74,9 @@ export interface Span {
 }
 
 /**
- * A language injection (e.g., JS inside HTML).
+ * A language injection (e.g., JS inside HTML) with UTF-16 code unit indices.
  */
-export interface Injection {
+export interface Utf16Injection {
   /** UTF-16 code unit index where the injection starts (inclusive) */
   start: number;
   /** UTF-16 code unit index where the injection ends (exclusive) */
@@ -26,11 +85,39 @@ export interface Injection {
   includeChildren: boolean;
 }
 
-/** Result of parsing source code */
-export interface ParseResult {
-  spans: Span[];
-  injections: Injection[];
+/**
+ * Result of parsing source code, with UTF-16 code unit indices.
+ *
+ * This is the format returned by the public API (`grammar.parse()`,
+ * `session.parse()`). Offsets are compatible with JavaScript string operations.
+ */
+export interface Utf16ParseResult {
+  spans: Utf16Span[];
+  injections: Utf16Injection[];
 }
+
+// ============================================================================
+// Legacy type aliases (for backwards compatibility)
+// ============================================================================
+
+/**
+ * @deprecated Use {@link Utf16Span} for JavaScript or {@link Utf8Span} for Rust interop.
+ */
+export type Span = Utf16Span;
+
+/**
+ * @deprecated Use {@link Utf16Injection} for JavaScript or {@link Utf8Injection} for Rust interop.
+ */
+export type Injection = Utf16Injection;
+
+/**
+ * @deprecated Use {@link Utf16ParseResult} for JavaScript or {@link Utf8ParseResult} for Rust interop.
+ */
+export type ParseResult = Utf16ParseResult;
+
+// ============================================================================
+// Session and Grammar interfaces
+// ============================================================================
 
 /**
  * A parsing session for incremental highlighting.
@@ -57,8 +144,8 @@ export interface ParseResult {
 export interface Session {
   /** Set the text to parse */
   setText(text: string): void;
-  /** Parse the current text and return spans/injections */
-  parse(): ParseResult;
+  /** Parse the current text and return spans/injections with UTF-16 offsets */
+  parse(): Utf16ParseResult;
   /** Cancel any in-progress parsing */
   cancel(): void;
   /**
@@ -76,13 +163,17 @@ export interface Grammar {
   injectionLanguages(): string[];
   /** Highlight source code, returning HTML string */
   highlight(source: string): string | Promise<string>;
-  /** Parse source code, returning raw spans (creates a one-shot session internally) */
-  parse(source: string): ParseResult;
+  /** Parse source code, returning spans with UTF-16 offsets (creates a one-shot session internally) */
+  parse(source: string): Utf16ParseResult;
   /** Create a session for incremental parsing */
   createSession(): Session;
   /** Dispose of resources */
   dispose(): void;
 }
+
+// ============================================================================
+// Other types
+// ============================================================================
 
 /** A highlighting tag */
 export interface Highlight {

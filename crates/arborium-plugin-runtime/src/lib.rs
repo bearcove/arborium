@@ -9,6 +9,14 @@
 //! - Incremental parsing via edit application
 //! - Cancellation support
 //!
+//! # Offset Encoding
+//!
+//! Tree-sitter natively produces UTF-8 byte offsets. This runtime provides
+//! two parsing methods:
+//!
+//! - [`PluginRuntime::parse`] returns UTF-8 byte offsets (for Rust string slicing)
+//! - [`PluginRuntime::parse_utf16`] returns UTF-16 code unit indices (for JavaScript)
+//!
 //! # Example
 //!
 //! ```ignore
@@ -24,7 +32,12 @@
 //! let mut runtime = PluginRuntime::new(config);
 //! let session = runtime.create_session();
 //! runtime.set_text(session, "fn main() {}");
+//!
+//! // For Rust code (UTF-8 offsets):
 //! let result = runtime.parse(session).unwrap();
+//!
+//! // For JavaScript interop (UTF-16 offsets):
+//! let result = runtime.parse_utf16(session).unwrap();
 //! ```
 
 extern crate alloc;
@@ -41,7 +54,51 @@ use arborium_tree_sitter::{
     InputEdit, Language, LanguageFn, Parser, Point, Query, QueryCursor, QueryError,
     StreamingIterator, Tree,
 };
-use arborium_wire::{Edit, Injection, ParseError, ParseResult, Span};
+use arborium_wire::{
+    Edit, ParseError, Utf8Injection, Utf8ParseResult, Utf8Span, Utf16Injection, Utf16ParseResult,
+    Utf16Span,
+};
+
+/// Batch convert UTF-8 byte offsets to UTF-16 code unit indices in a single pass.
+///
+/// This is O(n + m) where n is string length and m is number of offsets,
+/// much better than O(n * m) for individual conversions.
+///
+/// The offsets slice must be sorted in ascending order.
+fn batch_utf8_to_utf16(text: &str, offsets: &[usize]) -> Vec<u32> {
+    let mut results = Vec::with_capacity(offsets.len());
+    if offsets.is_empty() {
+        return results;
+    }
+
+    let mut offset_idx = 0;
+    let mut utf16_index = 0u32;
+    let mut byte_index = 0usize;
+
+    for c in text.chars() {
+        // Emit results for all offsets at current byte position
+        while offset_idx < offsets.len() && byte_index >= offsets[offset_idx] {
+            results.push(utf16_index);
+            offset_idx += 1;
+        }
+
+        if offset_idx >= offsets.len() {
+            break;
+        }
+
+        byte_index += c.len_utf8();
+        // Code points >= 0x10000 use surrogate pairs (2 UTF-16 code units)
+        utf16_index += if c as u32 >= 0x10000 { 2 } else { 1 };
+    }
+
+    // Handle any remaining offsets at or past the end
+    while offset_idx < offsets.len() {
+        results.push(utf16_index);
+        offset_idx += 1;
+    }
+
+    results
+}
 
 /// Configuration for syntax highlighting.
 ///
@@ -153,6 +210,21 @@ impl Session {
     }
 }
 
+// Internal structs to hold raw byte offsets during parsing
+struct RawSpan {
+    start: usize,
+    end: usize,
+    capture: String,
+    pattern_index: usize,
+}
+
+struct RawInjection {
+    start: usize,
+    end: usize,
+    language: String,
+    include_children: bool,
+}
+
 /// Runtime for a grammar plugin.
 ///
 /// Manages parsing sessions and executes queries to produce
@@ -239,10 +311,11 @@ impl PluginRuntime {
         }
     }
 
-    /// Parse the current text and return spans and injections.
-    ///
-    /// If cancelled, returns an empty result.
-    pub fn parse(&mut self, session_id: u32) -> Result<ParseResult, ParseError> {
+    /// Internal: execute query and collect raw spans/injections with byte offsets.
+    fn parse_raw(
+        &mut self,
+        session_id: u32,
+    ) -> Result<(String, Vec<RawSpan>, Vec<RawInjection>), ParseError> {
         let session = self
             .sessions
             .get_mut(&session_id)
@@ -250,7 +323,7 @@ impl PluginRuntime {
 
         // Check for cancellation
         if session.cancelled.load(Ordering::Relaxed) {
-            return Ok(ParseResult::empty());
+            return Ok((String::new(), Vec::new(), Vec::new()));
         }
 
         let tree = session
@@ -258,23 +331,10 @@ impl PluginRuntime {
             .as_ref()
             .ok_or_else(|| ParseError::new("no text set for session"))?;
 
-        // Temporary structs to hold byte offsets before conversion
-        struct RawSpan {
-            start: usize,
-            end: usize,
-            capture: String,
-        }
-        struct RawInjection {
-            start: usize,
-            end: usize,
-            language: String,
-            include_children: bool,
-        }
-
         let mut raw_spans: Vec<RawSpan> = Vec::new();
         let mut raw_injections: Vec<RawInjection> = Vec::new();
 
-        let text = &session.text;
+        let text = session.text.clone();
         let source = text.as_bytes();
         let root = tree.root_node();
 
@@ -290,7 +350,7 @@ impl PluginRuntime {
             if check_count >= CANCELLATION_CHECK_INTERVAL {
                 check_count = 0;
                 if session.cancelled.load(Ordering::Relaxed) {
-                    return Ok(ParseResult::empty());
+                    return Ok((String::new(), Vec::new(), Vec::new()));
                 }
             }
 
@@ -366,29 +426,41 @@ impl PluginRuntime {
                     start: node.start_byte(),
                     end: node.end_byte(),
                     capture: String::from(capture_name),
+                    pattern_index: m.pattern_index,
                 });
             }
         }
 
-        // Output raw UTF-8 byte offsets (native to tree-sitter).
-        // The Rust host needs UTF-8 byte offsets for string slicing.
-        // The JS fallback path will convert to UTF-16 indices if needed.
-        let mut spans: Vec<Span> = raw_spans
+        Ok((text, raw_spans, raw_injections))
+    }
+
+    /// Parse the current text and return spans and injections with UTF-8 byte offsets.
+    ///
+    /// Use this when working with Rust strings, as `&source[start..end]` requires
+    /// UTF-8 byte boundaries.
+    ///
+    /// If cancelled, returns an empty result.
+    pub fn parse(&mut self, session_id: u32) -> Result<Utf8ParseResult, ParseError> {
+        let (_text, raw_spans, raw_injections) = self.parse_raw(session_id)?;
+
+        // Convert to UTF-8 spans (just cast the byte offsets)
+        let mut spans: Vec<Utf8Span> = raw_spans
             .into_iter()
-            .map(|s| Span {
+            .map(|s| Utf8Span {
                 start: s.start as u32,
                 end: s.end as u32,
                 capture: s.capture,
+                pattern_index: s.pattern_index as u32,
             })
             .collect();
 
         // Sort spans by start position for consistent output
         spans.sort_by_key(|s| (s.start, s.end));
 
-        // Convert injections (also UTF-8 byte offsets)
-        let injections: Vec<Injection> = raw_injections
+        // Convert injections
+        let injections: Vec<Utf8Injection> = raw_injections
             .into_iter()
-            .map(|i| Injection {
+            .map(|i| Utf8Injection {
                 start: i.start as u32,
                 end: i.end as u32,
                 language: i.language,
@@ -396,7 +468,72 @@ impl PluginRuntime {
             })
             .collect();
 
-        Ok(ParseResult { spans, injections })
+        Ok(Utf8ParseResult { spans, injections })
+    }
+
+    /// Parse the current text and return spans and injections with UTF-16 code unit indices.
+    ///
+    /// Use this when working with JavaScript, as `String.prototype.slice()` and
+    /// DOM APIs use UTF-16 code unit indices.
+    ///
+    /// If cancelled, returns an empty result.
+    pub fn parse_utf16(&mut self, session_id: u32) -> Result<Utf16ParseResult, ParseError> {
+        let (text, raw_spans, raw_injections) = self.parse_raw(session_id)?;
+
+        if raw_spans.is_empty() && raw_injections.is_empty() {
+            return Ok(Utf16ParseResult::empty());
+        }
+
+        // Collect all byte offsets and batch convert to UTF-16
+        let mut all_offsets: Vec<usize> =
+            Vec::with_capacity((raw_spans.len() + raw_injections.len()) * 2);
+        for span in &raw_spans {
+            all_offsets.push(span.start);
+            all_offsets.push(span.end);
+        }
+        for inj in &raw_injections {
+            all_offsets.push(inj.start);
+            all_offsets.push(inj.end);
+        }
+        all_offsets.sort_unstable();
+
+        let utf16_offsets = batch_utf8_to_utf16(&text, &all_offsets);
+
+        // Build a lookup from byte offset to UTF-16 offset
+        // (using binary search since offsets are sorted)
+        let lookup = |byte_offset: usize| -> u32 {
+            let idx = all_offsets
+                .binary_search(&byte_offset)
+                .unwrap_or_else(|x| x);
+            utf16_offsets.get(idx).copied().unwrap_or(0)
+        };
+
+        // Convert spans to UTF-16
+        let mut spans: Vec<Utf16Span> = raw_spans
+            .into_iter()
+            .map(|s| Utf16Span {
+                start: lookup(s.start),
+                end: lookup(s.end),
+                capture: s.capture,
+                pattern_index: s.pattern_index as u32,
+            })
+            .collect();
+
+        // Sort spans by start position for consistent output
+        spans.sort_by_key(|s| (s.start, s.end));
+
+        // Convert injections to UTF-16
+        let injections: Vec<Utf16Injection> = raw_injections
+            .into_iter()
+            .map(|i| Utf16Injection {
+                start: lookup(i.start),
+                end: lookup(i.end),
+                language: i.language,
+                include_children: i.include_children,
+            })
+            .collect();
+
+        Ok(Utf16ParseResult { spans, injections })
     }
 
     /// Get the language provided by this plugin.
@@ -407,6 +544,79 @@ impl PluginRuntime {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    #[test]
+    fn test_batch_utf8_to_utf16_ascii() {
+        // ASCII: 1 byte UTF-8 = 1 UTF-16 code unit
+        let text = "hello";
+        let offsets = [0, 1, 5];
+        let result = batch_utf8_to_utf16(text, &offsets);
+        assert_eq!(result, vec![0, 1, 5]);
+    }
+
+    #[test]
+    fn test_batch_utf8_to_utf16_two_byte() {
+        // é is 2 bytes in UTF-8, 1 UTF-16 code unit
+        let text = "café";
+        // c=0, a=1, f=2, é=3-4 (2 bytes)
+        let offsets = [0, 3, 5];
+        let result = batch_utf8_to_utf16(text, &offsets);
+        assert_eq!(result, vec![0, 3, 4]); // byte 5 = UTF-16 index 4
+    }
+
+    #[test]
+    fn test_batch_utf8_to_utf16_three_byte() {
+        // 中 is 3 bytes in UTF-8, 1 UTF-16 code unit
+        let text = "a中b";
+        // a=0 (1 byte), 中=1-3 (3 bytes), b=4 (1 byte)
+        let offsets = [0, 1, 4, 5];
+        let result = batch_utf8_to_utf16(text, &offsets);
+        assert_eq!(result, vec![0, 1, 2, 3]);
+    }
+
+    #[test]
+    fn test_batch_utf8_to_utf16_four_byte_emoji() {
+        // 🦀 is 4 bytes in UTF-8, 2 UTF-16 code units (surrogate pair)
+        let text = "a🦀b";
+        // a=0 (1 byte), 🦀=1-4 (4 bytes), b=5 (1 byte)
+        let offsets = [0, 1, 5, 6];
+        let result = batch_utf8_to_utf16(text, &offsets);
+        assert_eq!(result, vec![0, 1, 3, 4]); // emoji takes 2 UTF-16 units
+    }
+
+    #[test]
+    fn test_batch_utf8_to_utf16_mixed() {
+        // Mix of ASCII, 2-byte, 3-byte, and 4-byte characters
+        let text = "hi🌍世界";
+        // h=0, i=1, 🌍=2-5 (4 bytes), 世=6-8 (3 bytes), 界=9-11 (3 bytes)
+        let offsets = [0, 2, 6, 9, 12];
+        let result = batch_utf8_to_utf16(text, &offsets);
+        assert_eq!(result, vec![0, 2, 4, 5, 6]); // 🌍 = 2 UTF-16 units
+    }
+
+    #[test]
+    fn test_batch_utf8_to_utf16_works_with_js_slice() {
+        // This test verifies that the conversion produces indices
+        // that would work correctly with JavaScript's String.slice()
+        let text = "hello🌍world";
+
+        // In JS: "hello🌍world".slice(0, 5) === "hello"
+        // In JS: "hello🌍world".slice(5, 7) === "🌍" (emoji is 2 UTF-16 code units)
+        // In JS: "hello🌍world".slice(7, 12) === "world"
+        let offsets = [0, 5, 9, 14];
+        let result = batch_utf8_to_utf16(text, &offsets);
+        assert_eq!(result, vec![0, 5, 7, 12]);
+    }
+
+    #[test]
+    fn test_batch_utf8_to_utf16_empty() {
+        let text = "hello";
+        let offsets: [usize; 0] = [];
+        let result = batch_utf8_to_utf16(text, &offsets);
+        assert!(result.is_empty());
+    }
+
     // Integration tests that require a grammar - only available after grammar generation
     #[cfg(feature = "integration-tests")]
     mod integration {
@@ -504,6 +714,128 @@ mod tests {
 
             // Should return empty result due to cancellation
             assert!(result.spans.is_empty());
+
+            runtime.free_session(session);
+        }
+    }
+
+    /// Test Styx grammar - verifies pattern_index is correct for deduplication
+    mod styx_tests {
+        use super::super::*;
+
+        fn print_spans(spans: &[Utf8Span], source: &str) {
+            eprintln!("\n=== All spans ===");
+            for span in spans {
+                let text = &source[span.start as usize..span.end as usize];
+                eprintln!(
+                    "  [{:3}-{:3}] pattern={:2} capture={:20} text={:?}",
+                    span.start, span.end, span.pattern_index, span.capture, text
+                );
+            }
+            eprintln!();
+        }
+
+        #[test]
+        fn test_styx_doc_comment() {
+            let config = HighlightConfig::new(
+                arborium_styx::language(),
+                arborium_styx::HIGHLIGHTS_QUERY,
+                arborium_styx::INJECTIONS_QUERY,
+                arborium_styx::LOCALS_QUERY,
+            )
+            .expect("failed to create config");
+
+            let mut runtime = PluginRuntime::new(config);
+            let session = runtime.create_session();
+
+            let source = "/// this is a doc comment\n";
+            runtime.set_text(session, source);
+            let result = runtime.parse(session).expect("parse failed");
+
+            print_spans(&result.spans, source);
+
+            // Should have a comment span covering the whole doc comment
+            let comment_spans: Vec<_> = result
+                .spans
+                .iter()
+                .filter(|s| s.capture.contains("comment"))
+                .collect();
+
+            assert!(
+                !comment_spans.is_empty(),
+                "Should have at least one comment span, got: {:?}",
+                result.spans
+            );
+
+            // The comment span should cover "/// this is a doc comment"
+            let comment = &comment_spans[0];
+            let comment_text = &source[comment.start as usize..comment.end as usize];
+            assert!(
+                comment_text.contains("///") && comment_text.contains("this"),
+                "Comment span should cover both '///' and text, got: {:?}",
+                comment_text
+            );
+
+            runtime.free_session(session);
+        }
+
+        #[test]
+        fn test_styx_key_value_pattern_index() {
+            let config = HighlightConfig::new(
+                arborium_styx::language(),
+                arborium_styx::HIGHLIGHTS_QUERY,
+                arborium_styx::INJECTIONS_QUERY,
+                arborium_styx::LOCALS_QUERY,
+            )
+            .expect("failed to create config");
+
+            let mut runtime = PluginRuntime::new(config);
+            let session = runtime.create_session();
+
+            let source = "name value\n";
+            runtime.set_text(session, source);
+            let result = runtime.parse(session).expect("parse failed");
+
+            print_spans(&result.spans, source);
+
+            // Find spans for "name" (the key)
+            let name_spans: Vec<_> = result
+                .spans
+                .iter()
+                .filter(|s| {
+                    let text = &source[s.start as usize..s.end as usize];
+                    text == "name"
+                })
+                .collect();
+
+            eprintln!("Spans for 'name': {:?}", name_spans);
+
+            // Should have both @string and @property for "name"
+            let string_span = name_spans.iter().find(|s| s.capture == "string");
+            let property_span = name_spans.iter().find(|s| s.capture == "property");
+
+            assert!(string_span.is_some(), "Should have @string span for 'name'");
+            assert!(
+                property_span.is_some(),
+                "Should have @property span for 'name'"
+            );
+
+            let string_idx = string_span.unwrap().pattern_index;
+            let property_idx = property_span.unwrap().pattern_index;
+
+            eprintln!(
+                "@string pattern_index: {}, @property pattern_index: {}",
+                string_idx, property_idx
+            );
+
+            // @property should have HIGHER pattern_index than @string
+            // because it comes later in highlights.scm
+            assert!(
+                property_idx > string_idx,
+                "@property (pattern_index={}) should be > @string (pattern_index={}) for deduplication to work correctly",
+                property_idx,
+                string_idx
+            );
 
             runtime.free_session(session);
         }

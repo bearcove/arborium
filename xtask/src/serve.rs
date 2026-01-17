@@ -224,10 +224,7 @@ impl RegistryGrammar {
             year: grammar.year,
             link: grammar.link.clone(),
             trivia: grammar.trivia.clone(),
-            aliases: grammar
-                .aliases
-                .clone()
-                .unwrap_or_default(),
+            aliases: grammar.aliases.clone().unwrap_or_default(),
             grammar_repo,
             grammar_license: Some(config.license.to_string()),
             samples,
@@ -1355,6 +1352,9 @@ fn serve_files(server: tiny_http::Server, demo_dir: &Path) {
         } else if url_path.starts_with("langs/") {
             // Serve from repo root for langs/ paths
             (repo_root.join(url_path), repo_root.join("langs"))
+        } else if url_path.starts_with("dist/") {
+            // Serve from repo root for dist/ paths (WASM plugins)
+            (repo_root.join(url_path), repo_root.join("dist"))
         } else {
             (demo_dir.join(url_path), demo_dir.to_path_buf())
         };
