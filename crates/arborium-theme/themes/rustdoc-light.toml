@@ -5,8 +5,8 @@
 name = "Rustdoc Light"
 variant = "light"
 source = "https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/light.css"
-background = "#f5f5f5"
-foreground = "#24292e"
+background = "#ffffff"
+foreground = "#000000"
 
 "attribute" = { fg = "attribute" }
 "constant" = { fg = "literal" }
@@ -45,7 +45,7 @@ foreground = "#24292e"
 
 [palette]
 # Core docs.rs light theme colors
-foreground = "#24292e"
+foreground = "#000000"
 keyword = "#8959a8"        # --code-highlight-kw-color
 keyword2 = "#4271ae"       # --code-highlight-kw-2-color
 lifetime = "#b76514"       # --code-highlight-lifetime-color

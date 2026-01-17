@@ -5,7 +5,7 @@
 name = "Rustdoc Ayu"
 variant = "dark"
 source = "https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/ayu.css"
-background = "#191f26"
+background = "#0f1419"
 foreground = "#c5c5c5"
 
 "attribute" = { fg = "attribute" }

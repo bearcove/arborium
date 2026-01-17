@@ -5,7 +5,7 @@ name = "GitHub Light"
 variant = "light"
 source = "https://github.com/primer/github-vscode-theme"
 background = "#ffffff"
-foreground = "#24292f"
+foreground = "#1f2328"
 
 "attribute" = { fg = "blue" }
 "constant" = { fg = "blue" }
@@ -44,7 +44,7 @@ foreground = "#24292f"
 
 [palette]
 bg = "#ffffff"
-fg = "#24292f"
+fg = "#1f2328"
 comment = "#6e7781"
 red = "#cf222e"
 orange = "#953800"

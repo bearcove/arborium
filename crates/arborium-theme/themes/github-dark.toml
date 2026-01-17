@@ -5,7 +5,7 @@ name = "GitHub Dark"
 variant = "dark"
 source = "https://github.com/primer/github-vscode-theme"
 background = "#0d1117"
-foreground = "#c9d1d9"
+foreground = "#e6edf3"
 
 "attribute" = { fg = "blue" }
 "constant" = { fg = "blue" }
@@ -44,7 +44,7 @@ foreground = "#c9d1d9"
 
 [palette]
 bg = "#0d1117"
-fg = "#c9d1d9"
+fg = "#e6edf3"
 comment = "#8b949e"
 red = "#ff7b72"
 orange = "#ffa657"

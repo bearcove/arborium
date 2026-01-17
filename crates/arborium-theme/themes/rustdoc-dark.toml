@@ -5,7 +5,7 @@
 name = "Rustdoc Dark"
 variant = "dark"
 source = "https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/static/css/themes/dark.css"
-background = "#2a2a2a"
+background = "#353535"
 foreground = "#dddddd"
 
 "attribute" = { fg = "attribute" }

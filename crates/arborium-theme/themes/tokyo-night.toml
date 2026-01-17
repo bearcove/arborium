@@ -5,7 +5,7 @@ name = "Tokyo Night"
 variant = "dark"
 source = "https://github.com/enkia/tokyo-night-vscode-theme"
 background = "#1a1b26"
-foreground = "#c0caf5"
+foreground = "#a9b1d6"
 
 "attribute" = { fg = "yellow" }
 "constant" = { fg = "orange" }
