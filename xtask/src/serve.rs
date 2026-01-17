@@ -1497,6 +1497,14 @@ pub fn generate_npm_theme_css(crates_dir: &Utf8Path) -> Result<(), String> {
 
         writeln!(css, ":root {{").unwrap();
 
+        // Include background and foreground base colors if present
+        if let Some(bg) = &theme.background {
+            writeln!(css, "  --arb-bg-{}: {};", variant, bg.to_hex()).unwrap();
+        }
+        if let Some(fg) = &theme.foreground {
+            writeln!(css, "  --arb-fg-{}: {};", variant, fg.to_hex()).unwrap();
+        }
+
         // Generate CSS variables for each unique tag with fallback resolution
         for def in highlights.unique_tags() {
             // Resolve style with fallback
