@@ -175,6 +175,29 @@ export interface Grammar {
 // Other types
 // ============================================================================
 
+/**
+ * Logger interface for customizing log output.
+ *
+ * By default, arborium uses the global `console` object. You can provide
+ * a custom logger to silence logs or redirect them to your logging system.
+ *
+ * @example
+ * ```ts
+ * // Silence all logs
+ * const silentLogger = { debug: () => {}, info: () => {}, warn: () => {} };
+ * arborium.setConfig({ logger: silentLogger });
+ *
+ * // Use a custom logging library
+ * import { myLogger } from './my-logger';
+ * arborium.setConfig({ logger: myLogger });
+ * ```
+ */
+export interface Logger {
+  debug(...data: unknown[]): void;
+  info(...data: unknown[]): void;
+  warn(...data: unknown[]): void;
+}
+
 /** A highlighting tag */
 export interface Highlight {
   /** Long name, used in `Span` */
@@ -216,6 +239,8 @@ export interface ArboriumConfig {
   resolveJs?(args: ResolveArgs): MaybePromise<unknown>;
   /** Custom grammar resolution for WASM */
   resolveWasm?(args: ResolveArgs): MaybePromise<Response | BufferSource | WebAssembly.Module>;
+  /** Custom logger for debug/info/warn output (defaults to console) */
+  logger?: Logger;
 }
 
 /** Global config set before script loads */

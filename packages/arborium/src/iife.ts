@@ -167,7 +167,7 @@ function injectBaseCSS(config: Required<ArboriumConfig>): void {
   if (document.getElementById(baseId)) return;
 
   const cssUrl = `${getCssBaseUrl(config)}/base-rustdoc.css`;
-  console.debug(`[arborium] Loading base CSS: ${cssUrl}`);
+  config.logger.debug(`[arborium] Loading base CSS: ${cssUrl}`);
 
   const link = document.createElement("link");
   link.id = baseId;
@@ -185,7 +185,7 @@ function injectThemeCSS(config: Required<ArboriumConfig>): void {
     const oldLink = document.getElementById(`arborium-theme-${currentThemeId}`);
     if (oldLink) {
       oldLink.remove();
-      console.debug(`[arborium] Removed theme: ${currentThemeId}`);
+      config.logger.debug(`[arborium] Removed theme: ${currentThemeId}`);
     }
   }
 
@@ -196,7 +196,7 @@ function injectThemeCSS(config: Required<ArboriumConfig>): void {
   }
 
   const cssUrl = `${getCssBaseUrl(config)}/${theme}.css`;
-  console.debug(`[arborium] Loading theme: ${cssUrl}`);
+  config.logger.debug(`[arborium] Loading theme: ${cssUrl}`);
 
   const link = document.createElement("link");
   link.id = themeId;
@@ -272,7 +272,7 @@ function getLanguageForBlock(block: HTMLElement): string | null {
 async function highlightBlock(
   block: HTMLElement,
   language: string,
-  config: Partial<ArboriumConfig>,
+  config: Required<ArboriumConfig>,
 ): Promise<void> {
   const source = block.textContent || "";
   if (!source.trim()) return;
@@ -283,7 +283,7 @@ async function highlightBlock(
     block.setAttribute("data-highlighted", "true");
     block.setAttribute("data-lang", language);
   } catch (err) {
-    console.warn(`[arborium] Failed to highlight ${language}:`, err);
+    config.logger.warn(`[arborium] Failed to highlight ${language}:`, err);
   }
 }
 
@@ -321,7 +321,7 @@ async function autoHighlight(configOverrides?: Partial<ArboriumConfig>): Promise
   const languages = Array.from(blocksByLanguage.keys());
   const loadPromises = languages.map((lang) =>
     loadGrammar(lang, config).catch((err) => {
-      console.warn(`[arborium] Failed to load grammar for ${lang}:`, err);
+      config.logger.warn(`[arborium] Failed to load grammar for ${lang}:`, err);
       return null;
     }),
   );
@@ -349,7 +349,7 @@ async function autoHighlight(configOverrides?: Partial<ArboriumConfig>): Promise
   const skipped = unknownBlocks.length;
 
   if (highlighted > 0 || skipped > 0) {
-    console.debug(
+    config.logger.debug(
       `[arborium] Highlighted ${highlighted}/${total} blocks` +
         (skipped > 0 ? ` (${skipped} unknown language)` : ""),
     );
@@ -366,8 +366,9 @@ async function onThemeChange(): Promise<void> {
 
   if (currentThemeId !== newTheme) {
     setConfig({ theme: newTheme });
-    injectThemeCSS(getConfig());
-    console.debug(`[arborium] Theme changed to: ${newTheme}`);
+    const config = getConfig();
+    injectThemeCSS(config);
+    config.logger.debug(`[arborium] Theme changed to: ${newTheme}`);
   }
 }
 
@@ -409,7 +410,7 @@ export async function highlightElement(
   const lang = language || getLanguageForBlock(element);
 
   if (!lang) {
-    console.warn("[arborium] Could not detect language for element");
+    config.logger.warn("[arborium] Could not detect language for element");
     return;
   }
 

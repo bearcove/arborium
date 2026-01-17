@@ -14,9 +14,17 @@ import type {
   ArboriumConfig,
   Grammar,
   Session,
+  Logger,
 } from "./types.js";
 import { availableLanguages, pluginVersion } from "./plugins-manifest.js";
 import { escapeHtml } from "./utils.js";
+
+// Default logger using console
+const defaultLogger: Logger = {
+  debug: (...args) => console.debug(...args),
+  info: (...args) => console.info(...args),
+  warn: (...args) => console.warn(...args),
+};
 
 // Default config
 export const defaultConfig: Required<ArboriumConfig> = {
@@ -29,6 +37,7 @@ export const defaultConfig: Required<ArboriumConfig> = {
   hostUrl: "", // Empty means use CDN based on version
   resolveJs: ({ baseUrl, path }) => import(/* @vite-ignore */ `${baseUrl}/${path}`),
   resolveWasm: ({ baseUrl, path }) => fetch(`${baseUrl}/${path}`),
+  logger: defaultLogger,
 };
 
 // Rust host module (loaded on demand)
@@ -73,13 +82,13 @@ async function ensureLocalManifest(config: Required<ArboriumConfig>): Promise<vo
   }
 
   localManifestPromise = (async () => {
-    console.debug(`[arborium] Loading local plugins manifest from: ${config.pluginsUrl}`);
+    config.logger.debug(`[arborium] Loading local plugins manifest from: ${config.pluginsUrl}`);
     const response = await fetch(config.pluginsUrl);
     if (!response.ok) {
       throw new Error(`Failed to load plugins.json: ${response.status}`);
     }
     localManifest = await response.json();
-    console.debug(`[arborium] Loaded local manifest with ${localManifest?.entries.length} entries`);
+    config.logger.debug(`[arborium] Loaded local manifest with ${localManifest?.entries.length} entries`);
   })();
 
   return localManifestPromise;
@@ -153,14 +162,14 @@ async function loadGrammarPlugin(
   // Check cache first
   const cached = grammarCache.get(language);
   if (cached) {
-    console.debug(`[arborium] Grammar '${language}' found in cache`);
+    config.logger.debug(`[arborium] Grammar '${language}' found in cache`);
     return cached;
   }
 
   // Check if there's already an in-flight load for this language
   const inFlight = grammarLoadPromises.get(language);
   if (inFlight) {
-    console.debug(`[arborium] Grammar '${language}' already loading, waiting...`);
+    config.logger.debug(`[arborium] Grammar '${language}' already loading, waiting...`);
     return inFlight;
   }
 
@@ -189,7 +198,7 @@ async function loadGrammarPluginInner(
     !knownLanguages.has(language) &&
     !localManifest?.entries.some((e) => e.language === language)
   ) {
-    console.debug(`[arborium] Grammar '${language}' not available`);
+    config.logger.debug(`[arborium] Grammar '${language}' not available`);
     return null;
   }
 
@@ -197,7 +206,7 @@ async function loadGrammarPluginInner(
     const baseUrl = getGrammarBaseUrl(language, config);
     const detail =
       config.resolveJs === defaultConfig.resolveJs ? ` from ${baseUrl}/grammar.js` : "";
-    console.debug(`[arborium] Loading grammar '${language}'${detail}`);
+    config.logger.debug(`[arborium] Loading grammar '${language}'${detail}`);
 
     const module = (await config.resolveJs({
       language,
@@ -212,13 +221,15 @@ async function loadGrammarPluginInner(
     // Verify it loaded correctly
     const loadedId = module.language_id();
     if (loadedId !== language) {
-      console.warn(`[arborium] Language ID mismatch: expected '${language}', got '${loadedId}'`);
+      config.logger.warn(`[arborium] Language ID mismatch: expected '${language}', got '${loadedId}'`);
     }
 
     // Get injection languages
     const injectionLanguages = module.injection_languages();
 
     // Wrap as GrammarPlugin with session-based parsing
+    // Capture logger reference for use in closures
+    const { logger } = config;
     const plugin: GrammarPlugin = {
       languageId: language,
       injectionLanguages,
@@ -234,7 +245,7 @@ async function loadGrammarPluginInner(
             injections: result.injections || [],
           };
         } catch (e) {
-          console.error(`[arborium] Parse error:`, e);
+          logger.warn(`[arborium] Parse error:`, e);
           return { spans: [], injections: [] };
         } finally {
           module.free_session(session);
@@ -251,7 +262,7 @@ async function loadGrammarPluginInner(
             injections: result.injections || [],
           };
         } catch (e) {
-          console.error(`[arborium] Parse error:`, e);
+          logger.warn(`[arborium] Parse error:`, e);
           return { spans: [], injections: [] };
         } finally {
           module.free_session(session);
@@ -260,10 +271,10 @@ async function loadGrammarPluginInner(
     };
 
     grammarCache.set(language, plugin);
-    console.debug(`[arborium] Grammar '${language}' loaded successfully`);
+    config.logger.debug(`[arborium] Grammar '${language}' loaded successfully`);
     return plugin;
   } catch (e) {
-    console.error(`[arborium] Failed to load grammar '${language}':`, e);
+    config.logger.warn(`[arborium] Failed to load grammar '${language}':`, e);
     return null;
   }
 }
@@ -338,7 +349,7 @@ async function loadHost(config: Required<ArboriumConfig>): Promise<HostModule | 
     const jsUrl = `${hostUrl}/arborium_host.js`;
     const wasmUrl = `${hostUrl}/arborium_host_bg.wasm`;
 
-    console.debug(`[arborium] Loading host from ${jsUrl}`);
+    config.logger.debug(`[arborium] Loading host from ${jsUrl}`);
     try {
       const module = await import(/* @vite-ignore */ jsUrl);
       await module.default(wasmUrl);
@@ -347,10 +358,10 @@ async function loadHost(config: Required<ArboriumConfig>): Promise<HostModule | 
         highlight: module.highlight,
         isLanguageAvailable: module.isLanguageAvailable,
       };
-      console.debug(`[arborium] Host loaded successfully`);
+      config.logger.debug(`[arborium] Host loaded successfully`);
       return hostModule;
     } catch (e) {
-      console.error("[arborium] Failed to load host:", e);
+      config.logger.warn("[arborium] Failed to load host:", e);
       return null;
     }
   })();
@@ -371,7 +382,7 @@ export async function highlight(
     try {
       return host.highlight(language, source);
     } catch (e) {
-      console.error("[arborium] Host highlight failed:", e);
+      config.logger.warn("[arborium] Host highlight failed:", e);
     }
   }
 
@@ -389,6 +400,8 @@ export async function loadGrammar(
   if (!plugin) return null;
 
   const { module } = plugin;
+  // Capture logger reference for use in closures
+  const { logger } = config;
 
   return {
     languageId: () => plugin.languageId,
@@ -412,7 +425,7 @@ export async function loadGrammar(
               injections: result.injections || [],
             };
           } catch (e) {
-            console.error(`[arborium] Session parse error:`, e);
+            logger.warn(`[arborium] Session parse error:`, e);
             return { spans: [], injections: [] };
           }
         },
