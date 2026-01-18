@@ -21,14 +21,20 @@
 (tag) @label
 
 ; Attributes - key in attribute syntax
+; Use @keyword or @punctuation.special to make > stand out
 (attribute
   key: (bare_scalar) @property
-  ">" @operator)
+  ">" @keyword)
 
-; Keys in entries - bare scalars in the key position (overrides @string above)
+; Keys in entries - any scalar in the key position (overrides @string above)
 (entry
   key: (expr
-    payload: (scalar (bare_scalar) @property)))
+    payload: (scalar (_) @property)))
+
+; Sequence items are values, not keys (must come AFTER entry key rule to override)
+(sequence
+  (expr
+    payload: (scalar (_) @string)))
 
 ; Punctuation
 "{" @punctuation.bracket
