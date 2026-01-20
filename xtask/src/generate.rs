@@ -670,9 +670,7 @@ fn generate_cargo_toml(
 
     let grammar_name = grammar.map(|g| g.name.as_ref()).unwrap_or(grammar_id);
 
-    let tag = grammar
-        .map(|g| g.tag.as_str())
-        .unwrap_or("programming");
+    let tag = grammar.map(|g| g.tag.as_str()).unwrap_or("programming");
 
     // Use license from arborium.yaml, fallback to MIT if empty
     let license: &str = {
@@ -811,9 +809,7 @@ fn generate_readme(crate_name: &str, config: &crate::types::CrateConfig) -> Stri
         .map(|i| i.as_str())
         .unwrap_or("");
 
-    let year = grammar
-        .and_then(|g| g.year)
-        .unwrap_or(0);
+    let year = grammar.and_then(|g| g.year).unwrap_or(0);
 
     let language_link = grammar
         .and_then(|g| g.link.as_ref())
@@ -1930,16 +1926,8 @@ fn plan_plugin_crate_files(
         .as_ref()
         .map(|d| d.as_str())
         .unwrap_or("");
-    let language_link = grammar
-        .link
-        .as_ref()
-        .map(|l| l.as_str())
-        .unwrap_or("");
-    let inventor = grammar
-        .inventor
-        .as_ref()
-        .map(|i| i.as_str())
-        .unwrap_or("");
+    let language_link = grammar.link.as_ref().map(|l| l.as_str()).unwrap_or("");
+    let inventor = grammar.inventor.as_ref().map(|i| i.as_str()).unwrap_or("");
     let year = grammar.year.unwrap_or(0);
 
     // Generate npm/package.json
@@ -2714,14 +2702,14 @@ command = "arborium-mdbook"
 
 Part of the [arborium](https://github.com/bearcove/arborium) project.
 
-See the [main documentation](https://arborium.dev) for more information.
+See the [main documentation](https://arborium.bearcove.eu) for more information.
 "#
             );
         }
     };
 
     format!(
-        "{}\n---\n\nPart of the [arborium](https://github.com/bearcove/arborium) project. See [arborium.dev](https://arborium.dev) for more information.\n",
+        "{}\n---\n\nPart of the [arborium](https://github.com/bearcove/arborium) project. See [arborium.bearcove.eu](https://arborium.bearcove.eu) for more information.\n",
         content.trim()
     )
 }

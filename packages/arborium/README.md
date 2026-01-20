@@ -103,7 +103,7 @@ All themes are adaptations of color schemes from their original projects. We are
 ## Links
 
 - [GitHub Repository](https://github.com/bearcove/arborium)
-- [Documentation](https://arborium.dev)
+- [Documentation](https://arborium.bearcove.eu)
 - [Rust Crate (arborium)](https://crates.io/crates/arborium)
 
 ## License
