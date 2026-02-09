@@ -273,9 +273,9 @@ async function loadGrammarPluginInner(
 const handleToPlugin = new Map<number, GrammarPlugin>();
 let nextHandle = 1;
 
-/** Setup window.arboriumHost for the Rust host to call into */
+/** Setup globalThis.arboriumHost for the Rust host to call into */
 function setupHostInterface(config: Required<ArboriumConfig>): void {
-  (window as any).arboriumHost = {
+  (globalThis as any).arboriumHost = {
     /** Check if a language is available (sync) */
     isLanguageAvailable(language: string): boolean {
       return knownLanguages.has(language) || grammarCache.has(language);

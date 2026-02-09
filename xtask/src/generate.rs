@@ -2542,10 +2542,10 @@ Uses wasm-bindgen for JavaScript interop.
 
 ## How It Works
 
-The host expects these functions on `window.arboriumHost`:
+The host expects these functions on `globalThis.arboriumHost`:
 
 ```javascript
-window.arboriumHost = {
+globalThis.arboriumHost = {
     // Check if a language is available (sync)
     isLanguageAvailable(language) { ... },
 

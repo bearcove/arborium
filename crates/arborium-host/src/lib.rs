@@ -9,10 +9,10 @@
 //!
 //! ## JS Interface
 //!
-//! The host expects these functions to be available on `window.arboriumHost`:
+//! The host expects these functions to be available on `globalThis.arboriumHost`:
 //!
 //! ```javascript
-//! window.arboriumHost = {
+//! globalThis.arboriumHost = {
 //!     // Check if a language is available (sync, for fast rejection).
 //!     isLanguageAvailable(language) { ... },
 //!
