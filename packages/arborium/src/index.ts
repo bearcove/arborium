@@ -9,6 +9,7 @@ export {
   getConfig,
   highlight,
   loadGrammar,
+  registerGrammar,
   setConfig,
   getAvailableLanguages,
   isLanguageAvailable,

@@ -427,6 +427,82 @@ export async function loadGrammar(
   };
 }
 
+/**
+ * Register a pre-loaded grammar module, bypassing CDN resolution.
+ *
+ * Use this in Node.js, Deno, or other non-browser environments where
+ * dynamic `import()` of CDN URLs isn't available.
+ *
+ * @example
+ * ```ts
+ * // Deno
+ * import * as pythonGrammar from "npm:@arborium/python";
+ * import { readFile } from "node:fs/promises";
+ * const wasm = await readFile("node_modules/@arborium/python/grammar_bg.wasm");
+ * const grammar = await registerGrammar(pythonGrammar, wasm);
+ * const html = await grammar.highlight("print('hello')");
+ * ```
+ */
+export async function registerGrammar(
+  jsModule: unknown,
+  wasmSource: Response | BufferSource | WebAssembly.Module,
+  configOverrides?: ArboriumConfig,
+): Promise<Grammar> {
+  const config = getConfig(configOverrides);
+  const module = jsModule as WasmBindgenPlugin;
+
+  await module.default({ module_or_path: wasmSource });
+
+  const language = module.language_id();
+  const injectionLanguages = module.injection_languages();
+
+  const plugin: GrammarPlugin = {
+    languageId: language,
+    injectionLanguages,
+    module,
+    parseUtf8: (text: string) => {
+      const session = module.create_session();
+      try {
+        module.set_text(session, text);
+        const result = module.parse(session);
+        return {
+          spans: result.spans || [],
+          injections: result.injections || [],
+        };
+      } catch (e) {
+        config.logger.error(`[arborium] Parse error:`, e);
+        return { spans: [], injections: [] };
+      } finally {
+        module.free_session(session);
+      }
+    },
+    parseUtf16: (text: string) => {
+      const session = module.create_session();
+      try {
+        module.set_text(session, text);
+        const result = module.parse_utf16(session);
+        return {
+          spans: result.spans || [],
+          injections: result.injections || [],
+        };
+      } catch (e) {
+        config.logger.error(`[arborium] Parse error:`, e);
+        return { spans: [], injections: [] };
+      } finally {
+        module.free_session(session);
+      }
+    },
+  };
+
+  grammarCache.set(language, plugin);
+  knownLanguages.add(language);
+  config.logger.debug(`[arborium] Grammar '${language}' registered`);
+
+  // loadGrammar will find it in the cache and wrap it as a public Grammar
+  const grammar = await loadGrammar(language, configOverrides);
+  return grammar!;
+}
+
 /** Get current config, optionally merging with overrides */
 export function getConfig(overrides?: Partial<ArboriumConfig>): Required<ArboriumConfig> {
   if (overrides) {
