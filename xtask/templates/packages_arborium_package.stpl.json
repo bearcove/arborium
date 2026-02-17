@@ -18,6 +18,13 @@
     "./iife": {
       "import": "./dist/arborium.iife.js"
     },
+    "./arborium_host.js": {
+      "import": "./dist/arborium_host.js",
+      "types": "./dist/arborium_host.d.ts"
+    },
+    "./arborium_host_bg.wasm": {
+      "import": "./dist/arborium_host_bg.wasm"
+    },
     "./themes/alabaster.css": "./dist/themes/alabaster.css",
     "./themes/ayu-dark.css": "./dist/themes/ayu-dark.css",
     "./themes/ayu-light.css": "./dist/themes/ayu-light.css",
@@ -78,7 +85,7 @@
     "build": "vite build && vite build --config vite.config.iife.ts && npm run copy:host",
     "build:esm": "vite build",
     "build:iife": "vite build --config vite.config.iife.ts",
-    "copy:host": "cp ../../demo/pkg/arborium_host.js ../../demo/pkg/arborium_host*.wasm dist/",
+    "copy:host": "cp ../../demo/pkg/arborium_host.js ../../demo/pkg/arborium_host.d.ts ../../demo/pkg/arborium_host*.wasm dist/",
     "dev": "vite",
     "gen:manifest": "cd ../.. && cargo xtask gen-manifest",
     "prepublishOnly": "npm run gen:manifest && npm run build && test -f dist/arborium.iife.js || (echo 'ERROR: dist/arborium.iife.js missing!' && exit 1)",
