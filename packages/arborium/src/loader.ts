@@ -28,13 +28,15 @@ export const defaultConfig: Required<ArboriumConfig> = {
   pluginsUrl: "", // Empty means use bundled manifest
   hostUrl: "", // Empty means use CDN based on version
   logger: console,
+  resolveHostJs: ({ baseUrl, path }) => import(/* @vite-ignore */ `${baseUrl}/${path}`),
+  resolveHostWasm: ({ baseUrl, path }) => fetch(`${baseUrl}/${path}`),
   resolveJs: ({ baseUrl, path }) => import(/* @vite-ignore */ `${baseUrl}/${path}`),
   resolveWasm: ({ baseUrl, path }) => fetch(`${baseUrl}/${path}`),
 };
 
 // Rust host module (loaded on demand)
 interface HostModule {
-  highlight: (language: string, source: string) => string;
+  highlight: (language: string, source: string) => Promise<string>;
   isLanguageAvailable: (language: string) => boolean;
 }
 let hostModule: HostModule | null = null;
@@ -326,6 +328,15 @@ function getHostUrl(config: Required<ArboriumConfig>): string {
   return `${baseUrl}/@arborium/arborium${versionSuffix}/dist`;
 }
 
+interface WasmBindgenHost {
+  default: (
+    module_or_path?: { module_or_path: MaybePromise<WbgInitInput> } | undefined,
+    // deprecated: | MaybePromise<WbgInitInput>,
+  ) => Promise<void>;
+  highlight(language: string, source: string): Promise<string>;
+  isLanguageAvailable(language: string): boolean;
+}
+
 /** Load the Rust host module */
 async function loadHost(config: Required<ArboriumConfig>): Promise<HostModule | null> {
   if (hostModule) return hostModule;
@@ -336,13 +347,14 @@ async function loadHost(config: Required<ArboriumConfig>): Promise<HostModule | 
     setupHostInterface(config);
 
     const hostUrl = getHostUrl(config);
-    const jsUrl = `${hostUrl}/arborium_host.js`;
-    const wasmUrl = `${hostUrl}/arborium_host_bg.wasm`;
+    const detail = config.resolveHostJs === defaultConfig.resolveHostJs ? ` from ${hostUrl}/arborium_host.js` : "";
+    config.logger.debug(`[arborium] Loading host${detail}`);
 
-    config.logger.debug(`[arborium] Loading host from ${jsUrl}`);
     try {
-      const module = await import(/* @vite-ignore */ jsUrl);
-      await module.default(wasmUrl);
+      const module = (await config.resolveHostJs({ baseUrl: hostUrl, path: "arborium_host.js" })) as WasmBindgenHost;
+      const wasm = await config.resolveHostWasm({ baseUrl: hostUrl, path: "arborium_host_bg.wasm" });
+
+      await module.default({ module_or_path: wasm });
 
       hostModule = {
         highlight: module.highlight,

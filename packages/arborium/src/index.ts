@@ -20,6 +20,7 @@ export type {
   Grammar,
   Highlight,
   Injection,
+  LanguageResolveArgs,
   ParseResult,
   ResolveArgs,
   Session,

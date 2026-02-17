@@ -188,12 +188,15 @@ export interface Highlight {
 type MaybePromise<T> = T | Promise<T>;
 
 export interface ResolveArgs {
-  /** Language to load the grammar plugin for */
-  language: string;
   /** Base URL derived from language, CDN and version */
   baseUrl: string;
   /** Relative path in the module to load */
   path: string;
+}
+
+export interface LanguageResolveArgs extends ResolveArgs {
+  /** Language to load the grammar plugin for */
+  language: string;
 }
 
 /** Configuration for the arborium runtime */
@@ -214,10 +217,14 @@ export interface ArboriumConfig {
   hostUrl?: string;
   /** Object to use for logging (default: global.console) */
   logger?: Pick<Console, "debug" | "error" | "warn">;
+  /** Custom host resolution for JS */
+  resolveHostJs?(args: ResolveArgs): MaybePromise<unknown>;
+  /** Custom host resolution for WASM */
+  resolveHostWasm?(args: ResolveArgs): MaybePromise<Response | BufferSource | WebAssembly.Module>;
   /** Custom grammar resolution for JS */
-  resolveJs?(args: ResolveArgs): MaybePromise<unknown>;
+  resolveJs?(args: LanguageResolveArgs): MaybePromise<unknown>;
   /** Custom grammar resolution for WASM */
-  resolveWasm?(args: ResolveArgs): MaybePromise<Response | BufferSource | WebAssembly.Module>;
+  resolveWasm?(args: LanguageResolveArgs): MaybePromise<Response | BufferSource | WebAssembly.Module>;
 }
 
 /** Global config set before script loads */
