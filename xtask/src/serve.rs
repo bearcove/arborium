@@ -675,7 +675,7 @@ fn copy_plugins_json(crates_dir: &Utf8Path, demo_dir: &Path, dev: bool) -> Resul
 
         let entries: Vec<String> = crate_registry
             .all_grammars()
-            .filter(|(_, _, g)| g.generate_component())
+            .filter(|(_, _, g)| g.generate_plugin())
             .map(|(_, _, g)| {
                 format!(
                     r#"    {{"language": "{}", "js": "/pkg/{}.js", "wasm": "/pkg/{}_bg.wasm"}}"#,

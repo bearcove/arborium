@@ -1492,7 +1492,7 @@ fn generate_all_crates(
         )?;
         final_plan.add(crate_plan);
 
-        // Generate plugin crate files for grammars that have generate-component enabled
+        // Generate plugin crate files for grammars that have generate-plugin enabled
         let plugin_plan = plan_plugin_crate_files(
             crate_state,
             config,
@@ -1826,7 +1826,7 @@ fn plan_crate_files_only(
 }
 
 /// Generate plugin crate files (npm/Cargo.toml, npm/src/lib.rs, npm/package.json)
-/// Only generates for grammars that have generate-component enabled (default: true).
+/// Only generates for grammars that have generate-plugin enabled (default: true).
 fn plan_plugin_crate_files(
     crate_state: &CrateState,
     config: &crate::types::CrateConfig,
@@ -1835,9 +1835,9 @@ fn plan_plugin_crate_files(
 ) -> Result<Plan, Report> {
     let mut plan = Plan::for_crate(format!("{}-plugin", crate_state.name));
 
-    // Check if any grammar has generate-component enabled
+    // Check if any grammar has generate-plugin enabled
     let grammar = config.grammars.first();
-    let should_generate = grammar.map(|g| g.generate_component()).unwrap_or(true);
+    let should_generate = grammar.map(|g| g.generate_plugin()).unwrap_or(true);
 
     if !should_generate {
         return Ok(plan);
@@ -2554,7 +2554,7 @@ globalThis.arboriumHost = {
 };
 ```
 
-Grammar plugins are WIT components loaded on-demand from a CDN.
+Grammar plugins are WASM plugins loaded on-demand from a CDN.
 
 This crate implements `GrammarProvider` to integrate with `arborium-highlight`,
 ensuring browser and native Rust use the same highlighting logic.
@@ -2568,7 +2568,7 @@ Runtime library for arborium grammar plugins.
 ## Purpose
 
 Provides the core functionality for implementing a tree-sitter grammar as a
-WASM component plugin. This is linked into each grammar plugin.
+WASM plugin. This is linked into each grammar plugin.
 
 ## Features
 

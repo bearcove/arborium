@@ -100,7 +100,7 @@ enum Command {
         dev: bool,
     },
 
-    /// Build WASM component plugins and demo assets
+    /// Build WASM plugins and demo assets
     Build {
         /// Specific grammars to build (build all if omitted)
         #[facet(args::positional, default)]
@@ -338,7 +338,7 @@ fn main() {
                 std::process::exit(1);
             }
 
-            // Build the host component first
+            // Build the host runtime first
             if let Err(e) = build::build_host(&repo_root) {
                 eprintln!("{:?}", e);
                 std::process::exit(1);

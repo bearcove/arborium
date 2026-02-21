@@ -8,7 +8,7 @@ grammars:
     tag: code
     tier: 2
     has_scanner: false
-    generate_component: true
+    generate_plugin: true
     icon: devicon-plain:groovy
     aliases:
       - gvy

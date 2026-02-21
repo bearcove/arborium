@@ -38,7 +38,7 @@ cargo xtask serve --dev      # Fast dev build (skip wasm-opt)
 cargo xtask serve -p 3000    # Serve on specific port
 ```
 
-### `cargo xtask build [grammars...] [--no-transpile] [--profile]`
+### `cargo xtask build [grammars...] [--profile]`
 
 Build WASM grammar plugins into the standard layout (`langs/*/*/npm`).
 
@@ -46,7 +46,6 @@ Build WASM grammar plugins into the standard layout (`langs/*/*/npm`).
 cargo xtask build                    # Build all plugins
 cargo xtask build rust javascript    # Build specific plugins
 cargo xtask build --profile          # Record build times to plugin-timings.json
-cargo xtask build --no-transpile     # Skip jco transpile step
 ```
 
 ### `cargo xtask clean`
@@ -110,7 +109,7 @@ grammar {
     aliases "rs"
 
     has_scanner #true
-    generate-component #true  // Build as WASM plugin
+    generate-plugin #true  // Build as WASM plugin
 
     sample {
         path "samples/example.rs"
@@ -120,7 +119,7 @@ grammar {
 ```
 
 **Key fields:**
-- `generate-component #true` - Include in WASM plugin builds
+- `generate-plugin #true` - Include in WASM plugin builds
 - `has_scanner #true` - Grammar has external scanner (scanner.c)
 - `tier` - 1-5, affects default feature inclusion
 - `aliases` - File extensions/alternative names

@@ -7,7 +7,7 @@ grammars:
     name: Kotlin
     tag: code
     tier: 1
-    generate_component: true
+    generate_plugin: true
     has_scanner: true
     icon: devicon-plain:kotlin
     aliases:

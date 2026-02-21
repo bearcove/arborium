@@ -17,10 +17,6 @@ pub enum Tool {
     TreeSitter,
     /// git for cloning repositories
     Git,
-    /// cargo-component for building WASM components
-    CargoComponent,
-    /// jco for transpiling WASM components to JS
-    Jco,
     /// wasm-opt for optimizing WASM files (optional, for future use)
     WasmOpt,
     /// curl for HTTP requests
@@ -46,8 +42,6 @@ impl Tool {
         match self {
             Tool::TreeSitter => "tree-sitter",
             Tool::Git => "git",
-            Tool::CargoComponent => "cargo-component",
-            Tool::Jco => "jco",
             Tool::WasmOpt => "wasm-opt",
             Tool::Curl => "curl",
             Tool::WasmPack => "wasm-pack",
@@ -60,8 +54,6 @@ impl Tool {
         match self {
             Tool::TreeSitter => "tree-sitter",
             Tool::Git => "Git",
-            Tool::CargoComponent => "cargo-component",
-            Tool::Jco => "jco",
             Tool::WasmOpt => "wasm-opt",
             Tool::Curl => "curl",
             Tool::WasmPack => "wasm-pack",
@@ -74,8 +66,6 @@ impl Tool {
         match self {
             Tool::TreeSitter => Some("tree-sitter"),
             Tool::Git => Some("git"),
-            Tool::CargoComponent => None,
-            Tool::Jco => None,
             Tool::WasmOpt => Some("binaryen"),
             Tool::Curl => Some("curl"),
             Tool::WasmPack => None,    // cargo install
@@ -102,8 +92,6 @@ impl Tool {
                     "https://git-scm.com/"
                 }
             }
-            Tool::CargoComponent => "cargo binstall -y cargo-component",
-            Tool::Jco => "pnpm add -g @bytecodealliance/jco",
             Tool::WasmOpt => {
                 if cfg!(target_os = "macos") {
                     "brew install binaryen"
@@ -130,8 +118,6 @@ impl Tool {
         match self {
             Tool::TreeSitter => None, // not available via binstall
             Tool::Git => None,
-            Tool::CargoComponent => Some("cargo-component"),
-            Tool::Jco => None,     // npm package, not cargo
             Tool::WasmOpt => None, // binary release, not cargo
             Tool::Curl => None,    // system tool, not cargo
             Tool::WasmPack => Some("wasm-pack"),
@@ -156,8 +142,6 @@ impl Tool {
         let version_arg = match self {
             Tool::TreeSitter => "--version",
             Tool::Git => "--version",
-            Tool::CargoComponent => "--version",
-            Tool::Jco => "--version",
             Tool::WasmOpt => "--version",
             Tool::Curl => "--version",
             Tool::WasmPack => "--version",
@@ -296,7 +280,6 @@ mod tests {
     fn test_tool_names() {
         assert_eq!(Tool::TreeSitter.executable_name(), "tree-sitter");
         assert_eq!(Tool::Git.executable_name(), "git");
-        assert_eq!(Tool::CargoComponent.executable_name(), "cargo-component");
-        assert_eq!(Tool::Jco.executable_name(), "jco");
+        assert_eq!(Tool::WasmBindgen.executable_name(), "wasm-bindgen");
     }
 }

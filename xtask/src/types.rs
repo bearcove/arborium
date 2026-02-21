@@ -175,9 +175,9 @@ pub struct GrammarConfig {
     #[facet(default)]
     pub tests_cursed: Option<bool>,
 
-    /// Generate a WASM component plugin for this grammar.
+    /// Generate a WASM plugin for this grammar.
     #[facet(default)]
-    pub generate_component: Option<bool>,
+    pub generate_plugin: Option<bool>,
 
     /// Whether this grammar has a scanner.c file.
     #[facet(default)]
@@ -256,10 +256,10 @@ impl GrammarConfig {
         self.tests_cursed.unwrap_or(false)
     }
 
-    /// Whether to generate a WASM component plugin for this grammar.
+    /// Whether to generate a WASM plugin for this grammar.
     /// Defaults to true.
-    pub fn generate_component(&self) -> bool {
-        self.generate_component.unwrap_or(true)
+    pub fn generate_plugin(&self) -> bool {
+        self.generate_plugin.unwrap_or(true)
     }
 }
 

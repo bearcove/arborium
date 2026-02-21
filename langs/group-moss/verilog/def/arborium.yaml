@@ -7,7 +7,7 @@ grammars:
     name: Verilog
     tag: code
     tier: 5
-    generate_component: true
+    generate_plugin: true
     icon: mdi:chip
     aliases:
       - v

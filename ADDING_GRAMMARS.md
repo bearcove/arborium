@@ -129,7 +129,7 @@ grammars:
 
     # Technical flags
     has_scanner: true             # Set to true if scanner.c exists
-    generate_component: true      # Set to true to include in WASM builds
+    generate_plugin: true      # Set to true to include in WASM builds
 
     # Visual representation
     icon: devicon-plain:groovy    # Icon identifier (from iconify.design)
@@ -180,7 +180,7 @@ grammars:
 | `link` | String | ✅ Yes | Wikipedia or official documentation URL |
 | `trivia` | String | ✅ Yes | Interesting fact about the language |
 | `has_scanner` | Boolean | No | Set to `true` if `scanner.c` exists (default: `false`) |
-| `generate_component` | Boolean | No | Set to `true` to include in WASM plugin builds (default: `false`) |
+| `generate_plugin` | Boolean | No | Set to `true` to include in WASM plugin builds (default: `false`) |
 | `grammar_path` | String | No | For multi-grammar crates (e.g., `"dtd"` for XML/DTD) |
 
 #### Sample Fields (in `samples` list)
@@ -355,7 +355,7 @@ grammars:
     tag: data
     tier: 3
     has_scanner: true
-    generate_component: true
+    generate_plugin: true
     icon: simple-icons:webassembly
 
     inventor: Bytecode Alliance
@@ -804,7 +804,7 @@ cargo xtask lint --strict
 
 #### `cargo xtask build [languages...]`
 
-Builds language crates into WASM plugins (if `generate-component #true`).
+Builds language crates into WASM plugins (if `generate-plugin #true`).
 
 ```bash
 # Build a specific language
@@ -858,7 +858,7 @@ cargo xtask gen groovy
 # 4. Validate configuration
 cargo xtask lint
 
-# 5. Build (if generate-component is enabled)
+# 5. Build (if generate-plugin is enabled)
 cargo xtask build groovy
 
 # 6. Start dev server
@@ -1048,7 +1048,7 @@ tree-sitter highlight ../samples/example.groovy \
 
 **Fix:**
 - Ensure release mode: `cargo xtask build --release`
-- Consider setting `generate-component #false` for rarely-used languages
+- Consider setting `generate-plugin #false` for rarely-used languages
 - Report to upstream if grammar seems bloated
 
 ---
@@ -1095,7 +1095,7 @@ grammars:
     tag: code
     tier: 2
     has_scanner: true
-    generate_component: true
+    generate_plugin: true
     icon: devicon-plain:groovy
 
     inventor: James Strachan
@@ -1176,7 +1176,7 @@ grammars:
     tag: config
     tier: 1
     has_scanner: false  # ← No scanner
-    generate_component: true
+    generate_plugin: true
     icon: simple-icons:toml
 
     inventor: Tom Preston-Werner
@@ -1226,12 +1226,12 @@ grammars:
 
 ### WASM Plugin Configuration
 
-Set `generate_component: true` to include in WASM builds:
+Set `generate_plugin: true` to include in WASM builds:
 
 ```yaml
 grammars:
   - id: groovy
-    generate_component: true  # Build WASM plugin
+    generate_plugin: true  # Build WASM plugin
     # ...
 ```
 

@@ -7,7 +7,7 @@ grammars:
     name: D
     tag: code
     tier: 4
-    generate_component: true
+    generate_plugin: true
     has_scanner: true
     icon: mdi:alpha-d-box-outline
     aliases:

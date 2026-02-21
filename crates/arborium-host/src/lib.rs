@@ -1,7 +1,7 @@
 //! Arborium WASM host for browser.
 //!
 //! Uses wasm-bindgen for JS interop and wasm-bindgen-futures for async.
-//! Grammar plugins (WIT components) are loaded on demand via JS.
+//! Grammar plugins (WASM plugins) are loaded on demand via JS.
 //!
 //! This crate implements `GrammarProvider` to use the shared highlighting
 //! engine from `arborium_highlight`, ensuring Rust and browser use the

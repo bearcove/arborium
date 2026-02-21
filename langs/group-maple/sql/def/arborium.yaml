@@ -7,7 +7,7 @@ grammars:
     name: SQL
     tag: query
     tier: 2
-    generate_component: true
+    generate_plugin: true
     has_scanner: true
     icon: mdi:database-outline
     aliases:

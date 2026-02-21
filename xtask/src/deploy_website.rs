@@ -194,7 +194,7 @@ fn generate_plugins_json(
 
     // Get all grammars from registry that have component generation enabled
     for (state, _config, grammar) in registry.all_grammars() {
-        if !grammar.generate_component() {
+        if !grammar.generate_plugin() {
             continue;
         }
 

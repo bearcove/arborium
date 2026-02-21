@@ -63,10 +63,9 @@ The `v0.3.0` tag triggers the CI workflow in `.github/workflows/ci.yml` which:
 
 ### 2. WASM Plugins → npm
 
-- All grammars with `generate-component: true` in
+- All grammars with `generate-plugin: true` in
   `langs/group-{animal}/{lang}/def/arborium.kdl`
-- Built via `cargo-component` for `wasm32-wasip2` from the same group directory
-- Transpiled via `jco` for browser compatibility
+- Built via `cargo xtask build` for `wasm32-unknown-unknown` from the same group directory
 - Published as per-language packages under the `@arborium` scope, e.g.
   `@arborium/rust`, `@arborium/javascript`, etc.
 - **Published together with crates.io** in the same per-group CI job for version sync
@@ -162,7 +161,7 @@ langs/group-{animal}/{lang}/crate/
         └── ...
 
 langs/group-{animal}/{lang}/npm/
-├── Cargo.toml            ← GENERATED for cargo-component
+├── Cargo.toml            ← GENERATED for cargo xtask build
 ├── src/
 │   └── bindings.rs      ← GENERATED bindings
 └── package.json          ← GENERATED npm package
@@ -195,7 +194,7 @@ These crates don't have `arborium.kdl` and are fully hand-written:
    - Runs tree-sitter generate into `grammar/src/*`
 
 4. **Generates WASM plugin packages:**
-   - Writes `langs/group-{animal}/{lang}/npm/Cargo.toml` for cargo-component build
+   - Writes `langs/group-{animal}/{lang}/npm/Cargo.toml` for plugin builds
    - Writes `langs/group-{animal}/{lang}/npm/package.json` for npm publishing
    - Writes `langs/group-{animal}/{lang}/npm/src/bindings.rs` generated bindings
 
@@ -259,10 +258,9 @@ These projects use arborium for syntax highlighting:
 
 ### In Progress
 
-- [ ] WASM component plugin system
-  - [x] WIT interfaces defined (`grammar.wit`, `host.wit`)
+- [ ] WASM plugin system
   - [x] Plugin runtime crate (`arborium-plugin-runtime`)
-  - [x] Host component (`arborium-host`)
+  - [x] Host runtime crate (`arborium-host`)
   - [x] Injection dependency resolution in browser
   - [ ] Dynamic grammar loading from bytes (currently loads from CDN)
 

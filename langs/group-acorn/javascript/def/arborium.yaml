@@ -8,7 +8,7 @@ grammars:
     tag: code
     tier: 1
     has_scanner: true
-    generate_component: true
+    generate_plugin: true
     icon: devicon-plain:javascript
     aliases:
       - js

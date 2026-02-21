@@ -7,7 +7,7 @@ grammars:
     name: "F#"
     tag: code
     tier: 2
-    generate_component: true
+    generate_plugin: true
     has_scanner: true
     icon: devicon-plain:fsharp
     aliases:

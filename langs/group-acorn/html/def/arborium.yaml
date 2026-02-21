@@ -8,7 +8,7 @@ grammars:
     tag: markup
     tier: 2
     has_scanner: true
-    generate_component: true
+    generate_plugin: true
     icon: devicon-plain:html5
     aliases:
       - htm

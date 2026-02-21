@@ -7,7 +7,7 @@ grammars:
     name: TLA+
     tag: code
     tier: 4
-    generate_component: true
+    generate_plugin: true
     has_scanner: true
     icon: mdi:math-integral
     aliases:

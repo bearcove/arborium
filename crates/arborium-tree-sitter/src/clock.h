@@ -9,7 +9,7 @@ typedef uint64_t TSDuration;
 #if defined(__wasm__) && !defined(__EMSCRIPTEN__)
 
 // WASM (non-Emscripten): stub out clock functions
-// In WASM component mode, we don't have access to clock() or clock_gettime(),
+// In WASM mode, we don't have access to clock() or clock_gettime(),
 // so we provide stub implementations that disable timeout functionality.
 typedef uint64_t TSClock;
 

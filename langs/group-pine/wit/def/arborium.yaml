@@ -8,7 +8,7 @@ grammars:
     tag: data
     tier: 3
     has_scanner: true
-    generate_component: true
+    generate_plugin: true
     icon: simple-icons:webassembly
     aliases:
       - wasm-interface

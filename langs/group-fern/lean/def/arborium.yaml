@@ -7,7 +7,7 @@ grammars:
     name: Lean
     tag: code
     tier: 4
-    generate_component: true
+    generate_plugin: true
     has_scanner: true
     icon: mdi:alpha-l-box-outline
 

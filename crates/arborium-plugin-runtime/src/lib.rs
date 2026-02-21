@@ -1,7 +1,7 @@
 //! Runtime library for arborium grammar plugins.
 //!
 //! This crate provides the core functionality needed to implement
-//! a tree-sitter grammar as a WASM component plugin. It handles:
+//! a tree-sitter grammar as a WASM plugin. It handles:
 //!
 //! - Session management (create/free)
 //! - Parser state and tree storage

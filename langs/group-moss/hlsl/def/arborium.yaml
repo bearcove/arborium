@@ -7,7 +7,7 @@ grammars:
     name: HLSL
     tag: code
     tier: 3
-    generate_component: true
+    generate_plugin: true
     has_scanner: true
     icon: mdi:cube-outline
 

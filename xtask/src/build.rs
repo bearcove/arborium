@@ -523,14 +523,14 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
         registry
             .all_grammars()
             .filter(|(state, _, grammar)| {
-                grammar.generate_component() && state.crate_path.as_str().contains(&group_prefix)
+                grammar.generate_plugin() && state.crate_path.as_str().contains(&group_prefix)
             })
             .map(|(_, _, grammar)| grammar.id().to_string())
             .collect()
     } else {
         registry
             .all_grammars()
-            .filter(|(_, _, grammar)| grammar.generate_component())
+            .filter(|(_, _, grammar)| grammar.generate_plugin())
             .map(|(_, _, grammar)| grammar.id().to_string())
             .collect()
     };
@@ -540,7 +540,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
 
     if grammars.is_empty() {
         println!(
-            "{} No grammars have generate-component enabled",
+            "{} No grammars have generate-plugin enabled",
             "○".dimmed()
         );
         return Ok(());
@@ -785,7 +785,7 @@ pub fn clean_plugins(repo_root: &Utf8Path, _output_dir: &str) -> Result<()> {
 
 /// Generate demo assets (registry.json, samples, HTML, JS).
 ///
-/// The demo loads grammar WASM components on demand - it doesn't need
+/// The demo loads grammar WASM plugins on demand - it doesn't need
 /// a monolithic WASM build. This just generates the static assets.
 pub fn build_demo(repo_root: &Utf8Path, crates_dir: &Utf8Path, dev: bool) -> Result<()> {
     let demo_dir = repo_root.join("demo");
@@ -1101,7 +1101,7 @@ struct PluginsManifestTsTemplate<'a> {
 }
 
 /// Generate the plugins-manifest.ts file for the npm package.
-/// This uses ALL grammars with generate_component enabled, not just locally built ones.
+/// This uses ALL grammars with generate_plugin enabled, not just locally built ones.
 /// The manifest is simplified: just a list of language names plus the version.
 /// CDN URLs are derived at runtime: `https://cdn.jsdelivr.net/npm/@arborium/{lang}@{version}/grammar.js`
 pub fn generate_plugins_manifest(repo_root: &Utf8Path, crates_dir: &Utf8Path) -> Result<()> {
@@ -1111,10 +1111,10 @@ pub fn generate_plugins_manifest(repo_root: &Utf8Path, crates_dir: &Utf8Path) ->
     let registry = CrateRegistry::load(crates_dir)
         .map_err(|e| report(format!("failed to load crate registry: {}", e)))?;
 
-    // Get ALL grammars that have generate_component enabled
+    // Get ALL grammars that have generate_plugin enabled
     let mut languages: Vec<String> = registry
         .all_grammars()
-        .filter(|(_, _, grammar)| grammar.generate_component())
+        .filter(|(_, _, grammar)| grammar.generate_plugin())
         .map(|(_, _, grammar)| grammar.id().to_string())
         .collect();
 
@@ -1122,7 +1122,7 @@ pub fn generate_plugins_manifest(repo_root: &Utf8Path, crates_dir: &Utf8Path) ->
     languages.sort();
 
     if languages.is_empty() {
-        return Err(report("No grammars have generate-component enabled"));
+        return Err(report("No grammars have generate-plugin enabled"));
     }
 
     println!(

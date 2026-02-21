@@ -234,7 +234,7 @@ grammar {
     icon "devicon-plain:rust"
     aliases "rs"
     has-scanner #true
-    generate-component #true
+    generate-plugin #true
 
     sample {
         path "samples/example.rs"
@@ -246,6 +246,6 @@ grammar {
 
 **Key fields:**
 - `license` - SPDX license for the grammar (used in generated Cargo.toml)
-- `generate-component #true` - Include in WASM plugin builds
+- `generate-plugin #true` - Include in WASM plugin builds
 - `has-scanner #true` - Grammar has external scanner (scanner.c)
 - `tier` - 1-5, affects default feature inclusion
