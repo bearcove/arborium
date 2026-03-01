@@ -1,11 +1,6 @@
-#![doc = include_str!("./README.md")]
+#![cfg_attr(not(any(test, doctest)), doc = include_str!("./README.md"))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-// Allow warnings in vendored tree-sitter code
-#![allow(clippy::all)]
-#![allow(mismatched_lifetime_syntaxes)]
-#![allow(rustdoc::broken_intra_doc_links)]
-#![allow(rustdoc::private_intra_doc_links)]
 
 pub mod ffi;
 mod util;
@@ -15,16 +10,15 @@ extern crate alloc;
 #[cfg(not(feature = "std"))]
 use alloc::{boxed::Box, format, string::String, string::ToString, vec::Vec};
 use core::{
-    ffi::{CStr, c_char, c_void},
+    ffi::{c_char, c_void, CStr},
     fmt::{self, Write},
     hash, iter,
     marker::PhantomData,
     mem::MaybeUninit,
     num::NonZeroU16,
-    ops::{self, Deref},
+    ops::{self, ControlFlow, Deref},
     ptr::{self, NonNull},
     slice, str,
-    sync::atomic::AtomicUsize,
 };
 #[cfg(feature = "std")]
 use std::error;
@@ -34,7 +28,13 @@ use std::os::fd::AsRawFd;
 use std::os::windows::io::AsRawHandle;
 
 pub use streaming_iterator::{StreamingIterator, StreamingIteratorMut};
-pub use tree_sitter_language::LanguageFn;
+use tree_sitter_language::LanguageFn;
+
+#[cfg(feature = "wasm")]
+mod wasm_language;
+#[cfg(feature = "wasm")]
+#[cfg_attr(docsrs, doc(cfg(feature = "wasm")))]
+pub use wasm_language::*;
 
 /// The latest ABI version that is supported by the current version of the
 /// library.
@@ -120,6 +120,48 @@ pub struct InputEdit {
     pub new_end_position: Point,
 }
 
+impl InputEdit {
+    /// Edit a point to keep it in-sync with source code that has been edited.
+    ///
+    /// This function updates a single point's byte offset and row/column position
+    /// based on this edit operation. This is useful for editing points without
+    /// requiring a tree or node instance.
+    #[doc(alias = "ts_point_edit")]
+    pub fn edit_point(&self, point: &mut Point, byte: &mut usize) {
+        let edit = self.into();
+        let mut ts_point = (*point).into();
+        let mut ts_byte = *byte as u32;
+
+        unsafe {
+            ffi::ts_point_edit(
+                core::ptr::addr_of_mut!(ts_point),
+                core::ptr::addr_of_mut!(ts_byte),
+                &edit,
+            );
+        }
+
+        *point = ts_point.into();
+        *byte = ts_byte as usize;
+    }
+
+    /// Edit a range to keep it in-sync with source code that has been edited.
+    ///
+    /// This function updates a range's start and end positions based on this edit
+    /// operation. This is useful for editing ranges without requiring a tree
+    /// or node instance.
+    #[doc(alias = "ts_range_edit")]
+    pub fn edit_range(&self, range: &mut Range) {
+        let edit = self.into();
+        let mut ts_range = (*range).into();
+
+        unsafe {
+            ffi::ts_range_edit(core::ptr::addr_of_mut!(ts_range), &edit);
+        }
+
+        *range = ts_range.into();
+    }
+}
+
 /// A single node within a syntax [`Tree`].
 #[doc(alias = "TSNode")]
 #[derive(Clone, Copy)]
@@ -176,9 +218,26 @@ impl<'a> ParseOptions<'a> {
     }
 
     #[must_use]
-    pub fn progress_callback<F: FnMut(&ParseState) -> bool>(mut self, callback: &'a mut F) -> Self {
+    pub fn progress_callback<F: FnMut(&ParseState) -> ControlFlow<()>>(
+        mut self,
+        callback: &'a mut F,
+    ) -> Self {
         self.progress_callback = Some(callback);
         self
+    }
+
+    /// Create a new `ParseOptions` with a shorter lifetime, borrowing from this one.
+    ///
+    /// This is useful when you need to reuse parse options multiple times, e.g., calling
+    /// [`Parser::parse_with_options`] multiple times with the same options.
+    #[must_use]
+    pub fn reborrow(&mut self) -> ParseOptions {
+        ParseOptions {
+            progress_callback: match &mut self.progress_callback {
+                Some(cb) => Some(*cb),
+                None => None,
+            },
+        }
     }
 }
 
@@ -194,12 +253,26 @@ impl<'a> QueryCursorOptions<'a> {
     }
 
     #[must_use]
-    pub fn progress_callback<F: FnMut(&QueryCursorState) -> bool>(
+    pub fn progress_callback<F: FnMut(&QueryCursorState) -> ControlFlow<()>>(
         mut self,
         callback: &'a mut F,
     ) -> Self {
         self.progress_callback = Some(callback);
         self
+    }
+
+    /// Create a new `QueryCursorOptions` with a shorter lifetime, borrowing from this one.
+    ///
+    /// This is useful when you need to reuse query cursor options multiple times, e.g., calling
+    /// [`QueryCursor::matches`] multiple times with the same options.
+    #[must_use]
+    pub fn reborrow(&mut self) -> QueryCursorOptions {
+        QueryCursorOptions {
+            progress_callback: match &mut self.progress_callback {
+                Some(cb) => Some(*cb),
+                None => None,
+            },
+        }
     }
 }
 
@@ -231,10 +304,10 @@ type FieldId = NonZeroU16;
 type Logger<'a> = Box<dyn FnMut(LogType, &str) + 'a>;
 
 /// A callback that receives the parse state during parsing.
-type ParseProgressCallback<'a> = &'a mut dyn FnMut(&ParseState) -> bool;
+type ParseProgressCallback<'a> = &'a mut dyn FnMut(&ParseState) -> ControlFlow<()>;
 
 /// A callback that receives the query state during query execution.
-type QueryProgressCallback<'a> = &'a mut dyn FnMut(&QueryCursorState) -> bool;
+type QueryProgressCallback<'a> = &'a mut dyn FnMut(&QueryCursorState) -> ControlFlow<()>;
 
 pub trait Decode {
     /// A callback that decodes the next code point from the input slice. It should return the code
@@ -278,7 +351,7 @@ impl From<ffi::TSQuantifier> for CaptureQuantifier {
             ffi::TSQuantifierZeroOrMore => Self::ZeroOrMore,
             ffi::TSQuantifierOne => Self::One,
             ffi::TSQuantifierOneOrMore => Self::OneOrMore,
-            _ => panic!("Unrecognized quantifier: {value}"),
+            _ => unreachable!(),
         }
     }
 }
@@ -363,10 +436,13 @@ pub struct QueryCapture<'tree> {
 }
 
 /// An error that occurred when trying to assign an incompatible [`Language`] to
-/// a [`Parser`].
+/// a [`Parser`]. If the `wasm` feature is enabled, this can also indicate a failure
+/// to load the Wasm store.
 #[derive(Debug, PartialEq, Eq)]
-pub struct LanguageError {
-    version: usize,
+pub enum LanguageError {
+    Version(usize),
+    #[cfg(feature = "wasm")]
+    Wasm,
 }
 
 /// An error that occurred in [`Parser::set_included_ranges`].
@@ -426,15 +502,6 @@ impl Language {
     pub fn name(&self) -> Option<&'static str> {
         let ptr = unsafe { ffi::ts_language_name(self.0) };
         (!ptr.is_null()).then(|| unsafe { CStr::from_ptr(ptr) }.to_str().unwrap())
-    }
-
-    /// Get the ABI version number that indicates which version of the
-    /// Tree-sitter CLI that was used to generate this [`Language`].
-    #[doc(alias = "ts_language_version")]
-    #[deprecated(since = "0.25.0", note = "Use abi_version instead")]
-    #[must_use]
-    pub fn version(&self) -> usize {
-        unsafe { ffi::ts_language_version(self.0) as usize }
     }
 
     /// Get the ABI version number that indicates which version of the
@@ -665,12 +732,15 @@ impl Parser {
     pub fn set_language(&mut self, language: &Language) -> Result<(), LanguageError> {
         let version = language.abi_version();
         if (MIN_COMPATIBLE_LANGUAGE_VERSION..=LANGUAGE_VERSION).contains(&version) {
-            unsafe {
-                ffi::ts_parser_set_language(self.0.as_ptr(), language.0);
+            #[allow(unused_variables)]
+            let success = unsafe { ffi::ts_parser_set_language(self.0.as_ptr(), language.0) };
+            #[cfg(feature = "wasm")]
+            if !success {
+                return Err(LanguageError::Wasm);
             }
             Ok(())
         } else {
-            Err(LanguageError { version })
+            Err(LanguageError::Version(version))
         }
     }
 
@@ -782,8 +852,6 @@ impl Parser {
     ///
     /// Returns a [`Tree`] if parsing succeeded, or `None` if:
     ///  * The parser has not yet had a language assigned with [`Parser::set_language`]
-    ///  * The timeout set with [`Parser::set_timeout_micros`] expired (deprecated)
-    ///  * The cancellation flag set with [`Parser::set_cancellation_flag`] was flipped (deprecated)
     #[doc(alias = "ts_parser_parse")]
     pub fn parse(&mut self, text: impl AsRef<[u8]>, old_tree: Option<&Tree>) -> Option<Tree> {
         let bytes = text.as_ref();
@@ -793,47 +861,6 @@ impl Parser {
             old_tree,
             None,
         )
-    }
-
-    /// Parse a slice of UTF16 text.
-    ///
-    /// # Arguments:
-    /// * `text` The UTF16-encoded text to parse.
-    /// * `old_tree` A previous syntax tree parsed from the same document. If the text of the
-    ///   document has changed since `old_tree` was created, then you must edit `old_tree` to match
-    ///   the new text using [`Tree::edit`].
-    #[deprecated(since = "0.25.0", note = "Prefer parse_utf16_le instead")]
-    pub fn parse_utf16(
-        &mut self,
-        input: impl AsRef<[u16]>,
-        old_tree: Option<&Tree>,
-    ) -> Option<Tree> {
-        let code_points = input.as_ref();
-        let len = code_points.len();
-        self.parse_utf16_le_with_options(
-            &mut |i, _| (i < len).then(|| &code_points[i..]).unwrap_or_default(),
-            old_tree,
-            None,
-        )
-    }
-
-    /// Parse UTF8 text provided in chunks by a callback.
-    ///
-    /// # Arguments:
-    /// * `callback` A function that takes a byte offset and position and returns a slice of
-    ///   UTF8-encoded text starting at that byte offset and position. The slices can be of any
-    ///   length. If the given position is at the end of the text, the callback should return an
-    ///   empty slice.
-    /// * `old_tree` A previous syntax tree parsed from the same document. If the text of the
-    ///   document has changed since `old_tree` was created, then you must edit `old_tree` to match
-    ///   the new text using [`Tree::edit`].
-    #[deprecated(since = "0.25.0", note = "Prefer `parse_with_options` instead")]
-    pub fn parse_with<T: AsRef<[u8]>, F: FnMut(usize, Point) -> T>(
-        &mut self,
-        callback: &mut F,
-        old_tree: Option<&Tree>,
-    ) -> Option<Tree> {
-        self.parse_with_options(callback, old_tree, None)
     }
 
     /// Parse text provided in chunks by a callback.
@@ -862,7 +889,10 @@ impl Parser {
                 .cast::<ParseProgressCallback>()
                 .as_mut()
                 .unwrap();
-            callback(&ParseState::from_raw(state))
+            match callback(&ParseState::from_raw(state)) {
+                ControlFlow::Continue(()) => false,
+                ControlFlow::Break(()) => true,
+            }
         }
 
         // This C function is passed to Tree-sitter as the input callback.
@@ -926,28 +956,6 @@ impl Parser {
         }
     }
 
-    /// Parse UTF16 text provided in chunks by a callback.
-    ///
-    /// # Arguments:
-    /// * `callback` A function that takes a code point offset and position and returns a slice of
-    ///   UTF16-encoded text starting at that byte offset and position. The slices can be of any
-    ///   length. If the given position is at the end of the text, the callback should return an
-    ///   empty slice.
-    /// * `old_tree` A previous syntax tree parsed from the same document. If the text of the
-    ///   document has changed since `old_tree` was created, then you must edit `old_tree` to match
-    ///   the new text using [`Tree::edit`].
-    #[deprecated(
-        since = "0.25.0",
-        note = "Prefer `parse_utf16_le_with_options` instead"
-    )]
-    pub fn parse_utf16_with<T: AsRef<[u16]>, F: FnMut(usize, Point) -> T>(
-        &mut self,
-        callback: &mut F,
-        old_tree: Option<&Tree>,
-    ) -> Option<Tree> {
-        self.parse_utf16_le_with_options(callback, old_tree, None)
-    }
-
     /// Parse a slice of UTF16 little-endian text.
     ///
     /// # Arguments:
@@ -994,7 +1002,10 @@ impl Parser {
                 .cast::<ParseProgressCallback>()
                 .as_mut()
                 .unwrap();
-            callback(&ParseState::from_raw(state))
+            match callback(&ParseState::from_raw(state)) {
+                ControlFlow::Continue(()) => false,
+                ControlFlow::Break(()) => true,
+            }
         }
 
         // This C function is passed to Tree-sitter as the input callback.
@@ -1111,7 +1122,10 @@ impl Parser {
                 .cast::<ParseProgressCallback>()
                 .as_mut()
                 .unwrap();
-            callback(&ParseState::from_raw(state))
+            match callback(&ParseState::from_raw(state)) {
+                ControlFlow::Continue(()) => false,
+                ControlFlow::Break(()) => true,
+            }
         }
 
         // This C function is passed to Tree-sitter as the input callback.
@@ -1211,7 +1225,10 @@ impl Parser {
                 .cast::<ParseProgressCallback>()
                 .as_mut()
                 .unwrap();
-            callback(&ParseState::from_raw(state))
+            match callback(&ParseState::from_raw(state)) {
+                ControlFlow::Continue(()) => false,
+                ControlFlow::Break(()) => true,
+            }
         }
 
         // At compile time, create a C-compatible callback that calls the custom `decode` method.
@@ -1291,41 +1308,13 @@ impl Parser {
 
     /// Instruct the parser to start the next parse from the beginning.
     ///
-    /// If the parser previously failed because of a timeout, cancellation,
-    /// or callback, then by default, it will resume where it left off on the
-    /// next call to [`parse`](Parser::parse) or other parsing functions.
-    /// If you don't want to resume, and instead intend to use this parser to
-    /// parse some other document, you must call `reset` first.
+    /// If the parser previously failed because of a callback, then by default,
+    /// it will resume where it left off on the next call to [`parse`](Parser::parse)
+    /// or other parsing functions. If you don't want to resume, and instead intend to use
+    /// this parser to parse some other document, you must call `reset` first.
     #[doc(alias = "ts_parser_reset")]
     pub fn reset(&mut self) {
         unsafe { ffi::ts_parser_reset(self.0.as_ptr()) }
-    }
-
-    /// Get the duration in microseconds that parsing is allowed to take.
-    ///
-    /// This is set via [`set_timeout_micros`](Parser::set_timeout_micros).
-    #[doc(alias = "ts_parser_timeout_micros")]
-    #[deprecated(
-        since = "0.25.0",
-        note = "Prefer using `parse_with_options` and using a callback"
-    )]
-    #[must_use]
-    pub fn timeout_micros(&self) -> u64 {
-        unsafe { ffi::ts_parser_timeout_micros(self.0.as_ptr()) }
-    }
-
-    /// Set the maximum duration in microseconds that parsing should be allowed
-    /// to take before halting.
-    ///
-    /// If parsing takes longer than this, it will halt early, returning `None`.
-    /// See [`parse`](Parser::parse) for more information.
-    #[doc(alias = "ts_parser_set_timeout_micros")]
-    #[deprecated(
-        since = "0.25.0",
-        note = "Prefer using `parse_with_options` and using a callback"
-    )]
-    pub fn set_timeout_micros(&mut self, timeout_micros: u64) {
-        unsafe { ffi::ts_parser_set_timeout_micros(self.0.as_ptr(), timeout_micros) }
     }
 
     /// Set the ranges of text that the parser should include when parsing.
@@ -1381,49 +1370,6 @@ impl Parser {
             let ranges = slice::from_raw_parts(ptr, count as usize);
             let result = ranges.iter().copied().map(Into::into).collect();
             result
-        }
-    }
-
-    /// Get the parser's current cancellation flag pointer.
-    ///
-    /// # Safety
-    ///
-    /// It uses FFI
-    #[doc(alias = "ts_parser_cancellation_flag")]
-    #[deprecated(
-        since = "0.25.0",
-        note = "Prefer using `parse_with_options` and using a callback"
-    )]
-    #[must_use]
-    pub unsafe fn cancellation_flag(&self) -> Option<&AtomicUsize> {
-        ffi::ts_parser_cancellation_flag(self.0.as_ptr())
-            .cast::<AtomicUsize>()
-            .as_ref()
-    }
-
-    /// Set the parser's current cancellation flag pointer.
-    ///
-    /// If a pointer is assigned, then the parser will periodically read from
-    /// this pointer during parsing. If it reads a non-zero value, it will halt
-    /// early, returning `None`. See [`parse`](Parser::parse) for more
-    /// information.
-    ///
-    /// # Safety
-    ///
-    /// It uses FFI
-    #[doc(alias = "ts_parser_set_cancellation_flag")]
-    #[deprecated(
-        since = "0.25.0",
-        note = "Prefer using `parse_with_options` and using a callback"
-    )]
-    pub unsafe fn set_cancellation_flag(&mut self, flag: Option<&AtomicUsize>) {
-        if let Some(flag) = flag {
-            ffi::ts_parser_set_cancellation_flag(
-                self.0.as_ptr(),
-                core::ptr::from_ref::<AtomicUsize>(flag).cast::<usize>(),
-            );
-        } else {
-            ffi::ts_parser_set_cancellation_flag(self.0.as_ptr(), ptr::null());
         }
     }
 }
@@ -1764,8 +1710,8 @@ impl<'tree> Node<'tree> {
     /// [`Node::children`] instead.
     #[doc(alias = "ts_node_child")]
     #[must_use]
-    pub fn child(&self, i: usize) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_child(self.0, i as u32) })
+    pub fn child(&self, i: u32) -> Option<Self> {
+        Self::new(unsafe { ffi::ts_node_child(self.0, i) })
     }
 
     /// Get this node's number of children.
@@ -1783,8 +1729,8 @@ impl<'tree> Node<'tree> {
     /// [`Node::named_children`] instead.
     #[doc(alias = "ts_node_named_child")]
     #[must_use]
-    pub fn named_child(&self, i: usize) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_named_child(self.0, i as u32) })
+    pub fn named_child(&self, i: u32) -> Option<Self> {
+        Self::new(unsafe { ffi::ts_node_named_child(self.0, i) })
     }
 
     /// Get this node's number of *named* children.
@@ -2367,7 +2313,7 @@ impl Iterator for LookaheadNamesIterator<'_> {
 
     #[doc(alias = "ts_lookahead_iterator_next")]
     fn next(&mut self) -> Option<Self::Item> {
-        unsafe { ffi::ts_lookahead_iterator_next(self.0.0.as_ptr()) }
+        unsafe { ffi::ts_lookahead_iterator_next(self.0 .0.as_ptr()) }
             .then(|| self.0.current_symbol_name())
     }
 }
@@ -2397,6 +2343,16 @@ impl Query {
     /// on syntax nodes parsed with that language. References to Queries can be
     /// shared between multiple threads.
     pub fn new(language: &Language, source: &str) -> Result<Self, QueryError> {
+        let ptr = Self::new_raw(language, source)?;
+        unsafe { Self::from_raw_parts(ptr, source) }
+    }
+
+    /// Constructs a raw [`TSQuery`](ffi::TSQuery) pointer without performing extra checks specific to the rust
+    /// bindings, such as predicate validation. A [`Query`] object can be constructed from the
+    /// returned pointer using [`from_raw_parts`](Query::from_raw_parts). The caller is
+    /// responsible for ensuring that the returned pointer is eventually freed by calling
+    /// [`ts_query_delete`](ffi::ts_query_delete).
+    pub fn new_raw(language: &Language, source: &str) -> Result<*mut ffi::TSQuery, QueryError> {
         let mut error_offset = 0u32;
         let mut error_type: ffi::TSQueryError = 0;
         let bytes = source.as_bytes();
@@ -2412,93 +2368,90 @@ impl Query {
             )
         };
 
+        if !ptr.is_null() {
+            return Ok(ptr);
+        }
+
         // On failure, build an error based on the error code and offset.
-        if ptr.is_null() {
-            if error_type == ffi::TSQueryErrorLanguage {
-                return Err(QueryError {
-                    row: 0,
-                    column: 0,
-                    offset: 0,
-                    message: LanguageError {
-                        version: language.abi_version(),
-                    }
-                    .to_string(),
-                    kind: QueryErrorKind::Language,
-                });
-            }
-
-            let offset = error_offset as usize;
-            let mut line_start = 0;
-            let mut row = 0;
-            let mut line_containing_error = None;
-            for line in source.lines() {
-                let line_end = line_start + line.len() + 1;
-                if line_end > offset {
-                    line_containing_error = Some(line);
-                    break;
-                }
-                line_start = line_end;
-                row += 1;
-            }
-            let column = offset - line_start;
-
-            let kind;
-            let message;
-            match error_type {
-                // Error types that report names
-                ffi::TSQueryErrorNodeType | ffi::TSQueryErrorField | ffi::TSQueryErrorCapture => {
-                    let suffix = source.split_at(offset).1;
-                    let in_quotes = offset > 0 && source.as_bytes()[offset - 1] == b'"';
-                    let mut backslashes = 0;
-                    let end_offset = suffix
-                        .find(|c| {
-                            if in_quotes {
-                                if c == '"' && backslashes % 2 == 0 {
-                                    true
-                                } else if c == '\\' {
-                                    backslashes += 1;
-                                    false
-                                } else {
-                                    backslashes = 0;
-                                    false
-                                }
-                            } else {
-                                !char::is_alphanumeric(c) && c != '_' && c != '-'
-                            }
-                        })
-                        .unwrap_or(suffix.len());
-                    message = suffix.split_at(end_offset).0.to_string();
-                    kind = match error_type {
-                        ffi::TSQueryErrorNodeType => QueryErrorKind::NodeType,
-                        ffi::TSQueryErrorField => QueryErrorKind::Field,
-                        ffi::TSQueryErrorCapture => QueryErrorKind::Capture,
-                        _ => unreachable!(),
-                    };
-                }
-
-                // Error types that report positions
-                _ => {
-                    message = line_containing_error.map_or_else(
-                        || "Unexpected EOF".to_string(),
-                        |line| line.to_string() + "\n" + &" ".repeat(offset - line_start) + "^",
-                    );
-                    kind = match error_type {
-                        ffi::TSQueryErrorStructure => QueryErrorKind::Structure,
-                        _ => QueryErrorKind::Syntax,
-                    };
-                }
-            }
-
+        if error_type == ffi::TSQueryErrorLanguage {
             return Err(QueryError {
-                row,
-                column,
-                offset,
-                message,
-                kind,
+                row: 0,
+                column: 0,
+                offset: 0,
+                message: LanguageError::Version(language.abi_version()).to_string(),
+                kind: QueryErrorKind::Language,
             });
         }
 
-        unsafe { Self::from_raw_parts(ptr, source) }
+        let offset = error_offset as usize;
+        let mut line_start = 0;
+        let mut row = 0;
+        let mut line_containing_error = None;
+        for line in source.lines() {
+            let line_end = line_start + line.len() + 1;
+            if line_end > offset {
+                line_containing_error = Some(line);
+                break;
+            }
+            line_start = line_end;
+            row += 1;
+        }
+        let column = offset - line_start;
+
+        let kind;
+        let message;
+        match error_type {
+            // Error types that report names
+            ffi::TSQueryErrorNodeType | ffi::TSQueryErrorField | ffi::TSQueryErrorCapture => {
+                let suffix = source.split_at(offset).1;
+                let in_quotes = offset > 0 && source.as_bytes()[offset - 1] == b'"';
+                let mut backslashes = 0;
+                let end_offset = suffix
+                    .find(|c| {
+                        if in_quotes {
+                            if c == '"' && backslashes % 2 == 0 {
+                                true
+                            } else if c == '\\' {
+                                backslashes += 1;
+                                false
+                            } else {
+                                backslashes = 0;
+                                false
+                            }
+                        } else {
+                            !char::is_alphanumeric(c) && c != '_' && c != '-'
+                        }
+                    })
+                    .unwrap_or(suffix.len());
+                message = format!("\"{}\"", suffix.split_at(end_offset).0);
+                kind = match error_type {
+                    ffi::TSQueryErrorNodeType => QueryErrorKind::NodeType,
+                    ffi::TSQueryErrorField => QueryErrorKind::Field,
+                    ffi::TSQueryErrorCapture => QueryErrorKind::Capture,
+                    _ => unreachable!(),
+                };
+            }
+
+            // Error types that report positions
+            _ => {
+                message = line_containing_error.map_or_else(
+                    || "Unexpected EOF".to_string(),
+                    |line| line.to_string() + "\n" + &" ".repeat(offset - line_start) + "^",
+                );
+                kind = match error_type {
+                    ffi::TSQueryErrorStructure => QueryErrorKind::Structure,
+                    _ => QueryErrorKind::Syntax,
+                };
+            }
+        }
+
+        Err(QueryError {
+            row,
+            column,
+            offset,
+            message,
+            kind,
+        })
     }
 
     #[doc(hidden)]
@@ -2615,19 +2568,16 @@ impl Query {
                             return Err(predicate_error(
                                 row,
                                 format!(
-                                    "Wrong number of arguments to #eq? predicate. Expected 2, got {}.",
-                                    p.len() - 1
-                                ),
+                                "Wrong number of arguments to #eq? predicate. Expected 2, got {}.",
+                                p.len() - 1
+                            ),
                             ));
                         }
                         if p[1].type_ != TYPE_CAPTURE {
-                            return Err(predicate_error(
-                                row,
-                                format!(
-                                    "First argument to #eq? predicate must be a capture name. Got literal \"{}\".",
-                                    string_values[p[1].value_id as usize],
-                                ),
-                            ));
+                            return Err(predicate_error(row, format!(
+                                "First argument to #eq? predicate must be a capture name. Got literal \"{}\".",
+                                string_values[p[1].value_id as usize],
+                            )));
                         }
 
                         let is_positive = operator_name == "eq?" || operator_name == "any-eq?";
@@ -2655,31 +2605,22 @@ impl Query {
 
                     "match?" | "not-match?" | "any-match?" | "any-not-match?" => {
                         if p.len() != 3 {
-                            return Err(predicate_error(
-                                row,
-                                format!(
-                                    "Wrong number of arguments to #match? predicate. Expected 2, got {}.",
-                                    p.len() - 1
-                                ),
-                            ));
+                            return Err(predicate_error(row, format!(
+                                "Wrong number of arguments to #match? predicate. Expected 2, got {}.",
+                                p.len() - 1
+                            )));
                         }
                         if p[1].type_ != TYPE_CAPTURE {
-                            return Err(predicate_error(
-                                row,
-                                format!(
-                                    "First argument to #match? predicate must be a capture name. Got literal \"{}\".",
-                                    string_values[p[1].value_id as usize],
-                                ),
-                            ));
+                            return Err(predicate_error(row, format!(
+                                "First argument to #match? predicate must be a capture name. Got literal \"{}\".",
+                                string_values[p[1].value_id as usize],
+                            )));
                         }
                         if p[2].type_ == TYPE_CAPTURE {
-                            return Err(predicate_error(
-                                row,
-                                format!(
-                                    "Second argument to #match? predicate must be a literal. Got capture @{}.",
-                                    capture_names[p[2].value_id as usize],
-                                ),
-                            ));
+                            return Err(predicate_error(row, format!(
+                                "Second argument to #match? predicate must be a literal. Got capture @{}.",
+                                capture_names[p[2].value_id as usize],
+                            )));
                         }
 
                         let is_positive =
@@ -2721,35 +2662,26 @@ impl Query {
 
                     "any-of?" | "not-any-of?" => {
                         if p.len() < 2 {
-                            return Err(predicate_error(
-                                row,
-                                format!(
-                                    "Wrong number of arguments to #any-of? predicate. Expected at least 1, got {}.",
-                                    p.len() - 1
-                                ),
-                            ));
+                            return Err(predicate_error(row, format!(
+                                "Wrong number of arguments to #any-of? predicate. Expected at least 1, got {}.",
+                                p.len() - 1
+                            )));
                         }
                         if p[1].type_ != TYPE_CAPTURE {
-                            return Err(predicate_error(
-                                row,
-                                format!(
-                                    "First argument to #any-of? predicate must be a capture name. Got literal \"{}\".",
-                                    string_values[p[1].value_id as usize],
-                                ),
-                            ));
+                            return Err(predicate_error(row, format!(
+                                "First argument to #any-of? predicate must be a capture name. Got literal \"{}\".",
+                                string_values[p[1].value_id as usize],
+                            )));
                         }
 
                         let is_positive = operator_name == "any-of?";
                         let mut values = Vec::new();
                         for arg in &p[2..] {
                             if arg.type_ == TYPE_CAPTURE {
-                                return Err(predicate_error(
-                                    row,
-                                    format!(
-                                        "Arguments to #any-of? predicate must be literals. Got capture @{}.",
-                                        capture_names[arg.value_id as usize],
-                                    ),
-                                ));
+                                return Err(predicate_error(row, format!(
+                                    "Arguments to #any-of? predicate must be literals. Got capture @{}.",
+                                    capture_names[arg.value_id as usize],
+                                )));
                             }
                             values.push(string_values[arg.value_id as usize]);
                         }
@@ -3033,34 +2965,6 @@ impl QueryCursor {
         }
     }
 
-    /// Set the maximum duration in microseconds that query execution should be allowed to
-    /// take before halting.
-    ///
-    /// If query execution takes longer than this, it will halt early, returning None.
-    #[doc(alias = "ts_query_cursor_set_timeout_micros")]
-    #[deprecated(
-        since = "0.25.0",
-        note = "Prefer using `matches_with_options` or `captures_with_options` and using a callback"
-    )]
-    pub fn set_timeout_micros(&mut self, timeout: u64) {
-        unsafe {
-            ffi::ts_query_cursor_set_timeout_micros(self.ptr.as_ptr(), timeout);
-        }
-    }
-
-    /// Get the duration in microseconds that query execution is allowed to take.
-    ///
-    /// This is set via [`set_timeout_micros`](QueryCursor::set_timeout_micros).
-    #[doc(alias = "ts_query_cursor_timeout_micros")]
-    #[deprecated(
-        since = "0.25.0",
-        note = "Prefer using `matches_with_options` or `captures_with_options` and using a callback"
-    )]
-    #[must_use]
-    pub fn timeout_micros(&self) -> u64 {
-        unsafe { ffi::ts_query_cursor_timeout_micros(self.ptr.as_ptr()) }
-    }
-
     /// Check if, on its last execution, this cursor exceeded its maximum number
     /// of in-progress matches.
     #[doc(alias = "ts_query_cursor_did_exceed_match_limit")]
@@ -3126,7 +3030,10 @@ impl QueryCursor {
                 .cast::<QueryProgressCallback>()
                 .as_mut()
                 .unwrap();
-            (callback)(&QueryCursorState::from_raw(state))
+            match callback(&QueryCursorState::from_raw(state)) {
+                ControlFlow::Continue(()) => false,
+                ControlFlow::Break(()) => true,
+            }
         }
 
         let query_options = options.progress_callback.map(|cb| {
@@ -3212,7 +3119,10 @@ impl QueryCursor {
                 .cast::<QueryProgressCallback>()
                 .as_mut()
                 .unwrap();
-            (callback)(&QueryCursorState::from_raw(state))
+            match callback(&QueryCursorState::from_raw(state)) {
+                ControlFlow::Continue(()) => false,
+                ControlFlow::Break(()) => true,
+            }
         }
 
         let query_options = options.progress_callback.map(|cb| {
@@ -3271,6 +3181,44 @@ impl QueryCursor {
         self
     }
 
+    /// Set the byte range within which all matches must be fully contained.
+    ///
+    /// Set the range of bytes in which matches will be searched for. In contrast to
+    /// `ts_query_cursor_set_byte_range`, this will restrict the query cursor to only return
+    /// matches where _all_ nodes are _fully_ contained within the given range. Both functions
+    /// can be used together, e.g. to search for any matches that intersect line 5000, as
+    /// long as they are fully contained within lines 4500-5500
+    #[doc(alias = "ts_query_cursor_set_containing_byte_range")]
+    pub fn set_containing_byte_range(&mut self, range: ops::Range<usize>) -> &mut Self {
+        unsafe {
+            ffi::ts_query_cursor_set_containing_byte_range(
+                self.ptr.as_ptr(),
+                range.start as u32,
+                range.end as u32,
+            );
+        }
+        self
+    }
+
+    /// Set the point range within which all matches must be fully contained.
+    ///
+    /// Set the range of bytes in which matches will be searched for. In contrast to
+    /// `ts_query_cursor_set_point_range`, this will restrict the query cursor to only return
+    /// matches where _all_ nodes are _fully_ contained within the given range. Both functions
+    /// can be used together, e.g. to search for any matches that intersect line 5000, as
+    /// long as they are fully contained within lines 4500-5500
+    #[doc(alias = "ts_query_cursor_set_containing_point_range")]
+    pub fn set_containing_point_range(&mut self, range: ops::Range<Point>) -> &mut Self {
+        unsafe {
+            ffi::ts_query_cursor_set_containing_point_range(
+                self.ptr.as_ptr(),
+                range.start.into(),
+                range.end.into(),
+            );
+        }
+        self
+    }
+
     /// Set the maximum start depth for a query cursor.
     ///
     /// This prevents cursors from exploring children nodes at a certain depth.
@@ -3280,9 +3228,9 @@ impl QueryCursor {
     /// The zero max start depth value can be used as a special behavior and
     /// it helps to destructure a subtree by staying on a node and using
     /// captures for interested parts. Note that the zero max start depth
-    /// only limit a search depth for a pattern's root node but other nodes
-    /// that are parts of the pattern may be searched at any depth what
-    /// defined by the pattern structure.
+    /// only limits a search depth for a pattern's root node but other nodes
+    /// that are parts of the pattern may be searched at any depth depending on
+    /// what is defined by the pattern structure.
     ///
     /// Set to `None` to remove the maximum start depth.
     #[doc(alias = "ts_query_cursor_set_max_start_depth")]
@@ -3753,11 +3701,18 @@ impl fmt::Display for IncludedRangesError {
 
 impl fmt::Display for LanguageError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "Incompatible language version {}. Expected minimum {}, maximum {}",
-            self.version, MIN_COMPATIBLE_LANGUAGE_VERSION, LANGUAGE_VERSION,
-        )
+        match self {
+            Self::Version(version) => {
+                write!(
+                    f,
+                    "Incompatible language version {version}. Expected minimum {MIN_COMPATIBLE_LANGUAGE_VERSION}, maximum {LANGUAGE_VERSION}",
+                )
+            }
+            #[cfg(feature = "wasm")]
+            Self::Wasm => {
+                write!(f, "Failed to load the Wasm store.")
+            }
+        }
     }
 }
 

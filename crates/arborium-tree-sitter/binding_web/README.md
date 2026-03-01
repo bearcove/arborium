@@ -9,11 +9,11 @@ WebAssembly bindings to the [Tree-sitter](https://github.com/tree-sitter/tree-si
 
 ## Setup
 
-You can download the `tree-sitter.js` and `tree-sitter.wasm` files from [the latest GitHub release][gh release] and load
+You can download the `web-tree-sitter.js` and `web-tree-sitter.wasm` files from [the latest GitHub release][gh release] and load
 them using a standalone script:
 
 ```html
-<script src="/the/path/to/tree-sitter.js"></script>
+<script src="/the/path/to/web-tree-sitter.js"></script>
 
 <script>
   const { Parser } = window.TreeSitter;
@@ -46,7 +46,7 @@ file to your `public` directory. You can do this automatically with a `postinsta
 You can also use this module with [deno](https://deno.land/):
 
 ```js
-import Parser from "npm:web-tree-sitter";
+import { Parser } from "npm:web-tree-sitter";
 await Parser.init();
 // the library is ready
 ```
@@ -62,11 +62,8 @@ Parser.init().then(() => { /* the library is ready */ });
 This will load the debug version of the `.js` and `.wasm` file, which includes debug symbols and assertions.
 
 > [!NOTE]
-> The `tree-sitter.js` file on GH releases is an ES6 module. If you are interested in using a pure CommonJS library, such
-> as for Electron, you should note that on our NPM package, we use [conditional exports][cond export] to provide both the
-> ES6 and CommonJS modules. If you've set up your project correctly, and need to use CommonJS, your package manager will
-> automatically handle this for you. As of writing, we do not host a CommonJS version of the library on GH releases, and
-> if you do not use the NPM registry, you'll have to build the library yourself.
+> The `web-tree-sitter.js` file on GH releases is an ES6 module. If you are interested in using a pure CommonJS library, such
+> as for Electron, you should use the `web-tree-sitter.cjs` file instead.
 
 ### Basic Usage
 
@@ -220,10 +217,10 @@ const Parser = require('web-tree-sitter');
 
 `web-tree-sitter` needs to load the `tree-sitter.wasm` file. By default, it assumes that this file is available in the
 same path as the JavaScript code. Therefore, if the code is being served from `http://localhost:3000/bundle.js`, then
-the wasm file should be at `http://localhost:3000/tree-sitter.wasm`.
+the Wasm file should be at `http://localhost:3000/tree-sitter.wasm`.
 
 For server side frameworks like NextJS, this can be tricky as pages are often served from a path such as
-`http://localhost:3000/_next/static/chunks/pages/index.js`. The loader will therefore look for the wasm file at
+`http://localhost:3000/_next/static/chunks/pages/index.js`. The loader will therefore look for the Wasm file at
 `http://localhost:3000/_next/static/chunks/pages/tree-sitter.wasm`. The solution is to pass a `locateFile` function in
 the `moduleOptions` argument to `Parser.init()`:
 
@@ -235,8 +232,8 @@ await Parser.init({
 });
 ```
 
-`locateFile` takes in two parameters, `scriptName`, i.e. the wasm file name, and `scriptDirectory`, i.e. the directory
-where the loader expects the script to be. It returns the path where the loader will look for the wasm file. In the NextJS
+`locateFile` takes in two parameters, `scriptName`, i.e. the Wasm file name, and `scriptDirectory`, i.e. the directory
+where the loader expects the script to be. It returns the path where the loader will look for the Wasm file. In the NextJS
 case, we want to return just the `scriptName` so that the loader will look at `http://localhost:3000/tree-sitter.wasm`
 and not `http://localhost:3000/_next/static/chunks/pages/tree-sitter.wasm`.
 
@@ -244,7 +241,7 @@ For more information on the module options you can pass in, see the [emscripten 
 
 #### "Can't resolve 'fs' in 'node_modules/web-tree-sitter"
 
-Most bundlers will notice that the `tree-sitter.js` file is attempting to import `fs`, i.e. node's file system library.
+Most bundlers will notice that the `web-tree-sitter.js` file is attempting to import `fs`, i.e. node's file system library.
 Since this doesn't exist in the browser, the bundlers will get confused. For Webpack, you can fix this by adding the
 following to your webpack config:
 
@@ -258,7 +255,6 @@ following to your webpack config:
 }
 ```
 
-[cond export]: https://nodejs.org/api/packages.html#conditional-exports
 [docker]: https://www.docker.com
 [emscripten]: https://emscripten.org
 [emscripten-module-options]: https://emscripten.org/docs/api_reference/module.html#affecting-execution

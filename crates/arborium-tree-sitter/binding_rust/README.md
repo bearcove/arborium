@@ -11,17 +11,10 @@ Rust bindings to the [Tree-sitter][] parsing library.
 
 First, create a parser:
 
-```rust,ignore
+```rust
 use tree_sitter::{InputEdit, Language, Parser, Point};
 
 let mut parser = Parser::new();
-```
-
-Add the `cc` crate to your `Cargo.toml` under `[build-dependencies]`:
-
-```toml
-[build-dependencies]
-cc="*"
 ```
 
 Then, add a language as a dependency:
@@ -32,15 +25,15 @@ tree-sitter = "0.24"
 tree-sitter-rust = "0.23"
 ```
 
-To then use a language, you assign them to the parser.
+To use a language, you assign them to the parser.
 
-```rust,ignore
+```rust
 parser.set_language(&tree_sitter_rust::LANGUAGE.into()).expect("Error loading Rust grammar");
 ```
 
 Now you can parse source code:
 
-```rust,ignore
+```rust
 let source_code = "fn test() {}";
 let mut tree = parser.parse(source_code, None).unwrap();
 let root_node = tree.root_node();
@@ -55,7 +48,7 @@ assert_eq!(root_node.end_position().column, 12);
 Once you have a syntax tree, you can update it when your source code changes.
 Passing in the previous edited tree makes `parse` run much more quickly:
 
-```rust,ignore
+```rust
 let new_source_code = "fn test(a: u32) {}";
 
 tree.edit(&InputEdit {
@@ -75,7 +68,7 @@ let new_tree = parser.parse(new_source_code, Some(&tree));
 The source code to parse can be provided either as a string, a slice, a vector,
 or as a function that returns a slice. The text can be encoded as either UTF8 or UTF16:
 
-```rust,ignore
+```rust
 // Store some source code in an array of lines.
 let lines = &[
     "pub fn foo() {",
@@ -102,6 +95,49 @@ let tree = parser.parse_with(&mut |_byte: usize, position: Point| -> &[u8] {
 assert_eq!(
   tree.root_node().to_sexp(),
   "(source_file (function_item (visibility_modifier) (identifier) (parameters) (block (number_literal))))"
+);
+```
+
+## Using Wasm Grammar Files
+
+> Requires the feature **wasm** to be enabled.
+
+First, create a parser with a Wasm store:
+
+```rust
+use tree_sitter::{wasmtime::Engine, Parser, WasmStore};
+
+let engine = Engine::default();
+let store = WasmStore::new(&engine).unwrap();
+
+let mut parser = Parser::new();
+parser.set_wasm_store(store).unwrap();
+```
+
+Then, load the language from a Wasm file:
+
+```rust
+const JAVASCRIPT_GRAMMAR: &[u8] = include_bytes!("path/to/tree-sitter-javascript.wasm");
+
+let mut store = WasmStore::new(&engine).unwrap();
+let javascript = store
+    .load_language("javascript", JAVASCRIPT_GRAMMAR)
+    .unwrap();
+
+// The language may be loaded from a different WasmStore than the one set on
+// the parser but it must use the same underlying WasmEngine.
+parser.set_language(&javascript).unwrap();
+```
+
+Now you can parse source code:
+
+```rust
+let source_code = "let x = 1;";
+let tree = parser.parse(source_code, None).unwrap();
+
+assert_eq!(
+    tree.root_node().to_sexp(),
+    "(program (lexical_declaration (variable_declarator name: (identifier) value: (number))))"
 );
 ```
 

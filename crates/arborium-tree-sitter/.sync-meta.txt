@@ -1,0 +1,5 @@
+# This file is patched by scripts/sync_tree_sitter_fork.py
+# Do not edit generated sync sections manually unless you also update the script.
+upstream_tag=v0.26.6
+upstream_rev=534c4a07
+synced_at_utc=2026-03-01T17:57:43Z

@@ -2,6 +2,10 @@ use std::{env, fs, path::PathBuf};
 
 fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let target = env::var("TARGET").unwrap();
+
+    #[cfg(feature = "bindgen")]
+    generate_bindings(&out_dir);
 
     fs::copy(
         "src/wasm/stdlib-symbols.txt",
@@ -23,26 +27,28 @@ fn main() {
     let include_path = manifest_path.join("include");
     let src_path = manifest_path.join("src");
     let wasm_path = src_path.join("wasm");
-    for entry in fs::read_dir(&src_path).unwrap() {
-        let entry = entry.unwrap();
-        let path = src_path.join(entry.file_name());
-        println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
+
+    if target.starts_with("wasm32-unknown") {
+        configure_wasm_build(&mut config);
     }
 
-    // For wasm32 targets, add the wasm-sysroot stub headers.
-    // Implementations are provided by the `arborium-sysroot` crate, which is linked
-    // into final WASM binaries (e.g. plugins) to avoid generating `env.*` imports.
-    let target = env::var("TARGET").unwrap_or_default();
+    
+    // Arborium patch: for wasm targets, add wasm-sysroot stub headers.
+    // Implementations are provided by the `arborium-sysroot` crate (links = "arborium_sysroot").
     if target.contains("wasm") {
-        // wasm-sysroot is provided by arborium-sysroot via links = "arborium_sysroot"
         if let Ok(sysroot) = env::var("DEP_ARBORIUM_SYSROOT_PATH") {
             let wasm_sysroot = PathBuf::from(&sysroot);
             config.include(&wasm_sysroot);
             println!("cargo:rerun-if-changed={}", wasm_sysroot.display());
         }
-        // Suppress format warnings on wasm32 where uint32_t is unsigned long
-        // but tree-sitter's C code uses %u format specifiers
+        // Suppress format warnings on wasm32 where uint32_t may be unsigned long
         config.flag_if_supported("-Wno-format");
+    }
+
+for entry in fs::read_dir(&src_path).unwrap() {
+        let entry = entry.unwrap();
+        let path = src_path.join(entry.file_name());
+        println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
     }
 
     config
@@ -56,10 +62,76 @@ fn main() {
         .include(&include_path)
         .define("_POSIX_C_SOURCE", "200112L")
         .define("_DEFAULT_SOURCE", None)
+        .define("_BSD_SOURCE", None)
         .define("_DARWIN_C_SOURCE", None)
         .warnings(false)
         .file(src_path.join("lib.c"))
         .compile("tree-sitter");
 
     println!("cargo:include={}", include_path.display());
+}
+
+fn configure_wasm_build(config: &mut cc::Build) {
+    let Ok(wasm_headers) = env::var("DEP_TREE_SITTER_LANGUAGE_WASM_HEADERS") else {
+        panic!("Environment variable DEP_TREE_SITTER_LANGUAGE_WASM_HEADERS must be set by the language crate");
+    };
+    let Ok(wasm_src) = env::var("DEP_TREE_SITTER_LANGUAGE_WASM_SRC").map(PathBuf::from) else {
+        panic!("Environment variable DEP_TREE_SITTER_LANGUAGE_WASM_SRC must be set by the language crate");
+    };
+
+    config.include(&wasm_headers);
+    config.files([
+        wasm_src.join("stdio.c"),
+        wasm_src.join("stdlib.c"),
+        wasm_src.join("string.c"),
+    ]);
+}
+
+#[cfg(feature = "bindgen")]
+fn generate_bindings(out_dir: &std::path::Path) {
+    use std::str::FromStr;
+
+    use bindgen::RustTarget;
+
+    const HEADER_PATH: &str = "include/tree_sitter/api.h";
+
+    println!("cargo:rerun-if-changed={HEADER_PATH}");
+
+    let no_copy = [
+        "TSInput",
+        "TSLanguage",
+        "TSLogger",
+        "TSLookaheadIterator",
+        "TSParser",
+        "TSTree",
+        "TSQuery",
+        "TSQueryCursor",
+        "TSQueryCapture",
+        "TSQueryMatch",
+        "TSQueryPredicateStep",
+    ];
+
+    let rust_version = env!("CARGO_PKG_RUST_VERSION");
+
+    let bindings = bindgen::Builder::default()
+        .header(HEADER_PATH)
+        .layout_tests(false)
+        .allowlist_type("^TS.*")
+        .allowlist_function("^ts_.*")
+        .allowlist_var("^TREE_SITTER.*")
+        .no_copy(no_copy.join("|"))
+        .prepend_enum_name(false)
+        .use_core()
+        .clang_arg("-D TREE_SITTER_FEATURE_WASM")
+        .rust_target(RustTarget::from_str(rust_version).unwrap())
+        .generate()
+        .expect("Failed to generate bindings");
+
+    let bindings_rs = out_dir.join("bindings.rs");
+    bindings.write_to_file(&bindings_rs).unwrap_or_else(|_| {
+        panic!(
+            "Failed to write bindings into path: {}",
+            bindings_rs.display()
+        )
+    });
 }

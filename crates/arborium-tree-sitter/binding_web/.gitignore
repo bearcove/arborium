@@ -1,11 +1,10 @@
 debug/
 dist/
-tree-sitter*
-lib/tree-sitter*
+web-tree-sitter*
 lib/*.c
 lib/*.h
 !lib/tree-sitter.c
-!lib/tree-sitter.d.ts
+!lib/web-tree-sitter.d.ts
 node_modules
 *.tgz
 LICENSE

@@ -3,7 +3,10 @@
 #![allow(non_camel_case_types)]
 #![allow(clippy::missing_const_for_fn)]
 
-// Pre-generated bindings (bindgen is not used in this vendored version)
+#[cfg(feature = "bindgen")]
+include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+
+#[cfg(not(feature = "bindgen"))]
 include!("./bindings.rs");
 
 #[cfg(unix)]

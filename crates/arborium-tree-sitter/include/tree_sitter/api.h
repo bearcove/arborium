@@ -51,11 +51,14 @@ typedef struct TSLookaheadIterator TSLookaheadIterator;
 // This function signature reads one code point from the given string,
 // returning the number of bytes consumed. It should write the code point
 // to the `code_point` pointer, or write -1 if the input is invalid.
-typedef uint32_t (*DecodeFunction)(
+typedef uint32_t (*TSDecodeFunction)(
   const uint8_t *string,
   uint32_t length,
   int32_t *code_point
 );
+
+// Deprecated alias to be removed in ABI 16
+typedef TSDecodeFunction DecodeFunction;
 
 typedef enum TSInputEncoding {
   TSInputEncodingUTF8,
@@ -87,7 +90,7 @@ typedef struct TSInput {
   void *payload;
   const char *(*read)(void *payload, uint32_t byte_index, TSPoint position, uint32_t *bytes_read);
   TSInputEncoding encoding;
-  DecodeFunction decode;
+  TSDecodeFunction decode;
 } TSInput;
 
 typedef struct TSParseState {
@@ -296,16 +299,7 @@ const TSRange *ts_parser_included_ranges(
  * are four possible reasons for failure:
  * 1. The parser does not have a language assigned. Check for this using the
       [`ts_parser_language`] function.
- * 2. Parsing was cancelled due to a timeout that was set by an earlier call to
- *    the [`ts_parser_set_timeout_micros`] function. You can resume parsing from
- *    where the parser left out by calling [`ts_parser_parse`] again with the
- *    same arguments. Or you can start parsing from scratch by first calling
- *    [`ts_parser_reset`].
- * 3. Parsing was cancelled using a cancellation flag that was set by an
- *    earlier call to [`ts_parser_set_cancellation_flag`]. You can resume parsing
- *    from where the parser left out by calling [`ts_parser_parse`] again with
- *    the same arguments.
- * 4. Parsing was cancelled due to the progress callback returning true. This callback
+ * 2. Parsing was cancelled due to the progress callback returning true. This callback
  *    is passed in [`ts_parser_parse_with_options`] inside the [`TSParseOptions`] struct.
  *
  * [`read`]: TSInput::read
@@ -363,49 +357,13 @@ TSTree *ts_parser_parse_string_encoding(
 /**
  * Instruct the parser to start the next parse from the beginning.
  *
- * If the parser previously failed because of a timeout or a cancellation, then
+ * If the parser previously failed because of the progress callback, then
  * by default, it will resume where it left off on the next call to
  * [`ts_parser_parse`] or other parsing functions. If you don't want to resume,
  * and instead intend to use this parser to parse some other document, you must
  * call [`ts_parser_reset`] first.
  */
 void ts_parser_reset(TSParser *self);
-
-/**
- * @deprecated use [`ts_parser_parse_with_options`] and pass in a callback instead, this will be removed in 0.26.
- *
- * Set the maximum duration in microseconds that parsing should be allowed to
- * take before halting.
- *
- * If parsing takes longer than this, it will halt early, returning NULL.
- * See [`ts_parser_parse`] for more information.
- */
-void ts_parser_set_timeout_micros(TSParser *self, uint64_t timeout_micros);
-
-/**
- * @deprecated use [`ts_parser_parse_with_options`] and pass in a callback instead, this will be removed in 0.26.
- *
- * Get the duration in microseconds that parsing is allowed to take.
- */
-uint64_t ts_parser_timeout_micros(const TSParser *self);
-
-/**
- * @deprecated use [`ts_parser_parse_with_options`] and pass in a callback instead, this will be removed in 0.26.
- *
- * Set the parser's current cancellation flag pointer.
- *
- * If a non-null pointer is assigned, then the parser will periodically read
- * from this pointer during parsing. If it reads a non-zero value, it will
- * halt early, returning NULL. See [`ts_parser_parse`] for more information.
- */
-void ts_parser_set_cancellation_flag(TSParser *self, const size_t *flag);
-
-/**
- * @deprecated use [`ts_parser_parse_with_options`] and pass in a callback instead, this will be removed in 0.26.
- *
- * Get the parser's current cancellation flag pointer.
- */
-const size_t *ts_parser_cancellation_flag(const TSParser *self);
 
 /**
  * Set the logger that a parser should use during parsing.
@@ -750,6 +708,24 @@ void ts_node_edit(TSNode *self, const TSInputEdit *edit);
  */
 bool ts_node_eq(TSNode self, TSNode other);
 
+/**
+ * Edit a point to keep it in-sync with source code that has been edited.
+ *
+ * This function updates a single point's byte offset and row/column position
+ * based on an edit operation. This is useful for editing points without
+ * requiring a tree or node instance.
+ */
+void ts_point_edit(TSPoint *point, uint32_t *point_byte, const TSInputEdit *edit);
+
+/**
+ * Edit a range to keep it in-sync with source code that has been edited.
+ *
+ * This function updates a range's start and end positions based on an edit
+ * operation. This is useful for editing ranges without requiring a tree
+ * or node instance.
+ */
+void ts_range_edit(TSRange *range, const TSInputEdit *edit);
+
 /************************/
 /* Section - TreeCursor */
 /************************/
@@ -1092,26 +1068,6 @@ uint32_t ts_query_cursor_match_limit(const TSQueryCursor *self);
 void ts_query_cursor_set_match_limit(TSQueryCursor *self, uint32_t limit);
 
 /**
- * @deprecated use [`ts_query_cursor_exec_with_options`] and pass in a callback instead, this will be removed in 0.26.
- *
- * Set the maximum duration in microseconds that query execution should be allowed to
- * take before halting.
- *
- * If query execution takes longer than this, it will halt early, returning NULL.
- * See [`ts_query_cursor_next_match`] or [`ts_query_cursor_next_capture`] for more information.
- */
-void ts_query_cursor_set_timeout_micros(TSQueryCursor *self, uint64_t timeout_micros);
-
-/**
- * @deprecated use [`ts_query_cursor_exec_with_options`] and pass in a callback instead, this will be removed in 0.26.
- *
- * Get the duration in microseconds that query execution is allowed to take.
- *
- * This is set via [`ts_query_cursor_set_timeout_micros`].
- */
-uint64_t ts_query_cursor_timeout_micros(const TSQueryCursor *self);
-
-/**
  * Set the range of bytes in which the query will be executed.
  *
  * The query cursor will return matches that intersect with the given point range.
@@ -1144,6 +1100,28 @@ bool ts_query_cursor_set_byte_range(TSQueryCursor *self, uint32_t start_byte, ui
  * it will return `true`.
  */
 bool ts_query_cursor_set_point_range(TSQueryCursor *self, TSPoint start_point, TSPoint end_point);
+
+/**
+ * Set the byte range within which all matches must be fully contained.
+ *
+ * Set the range of bytes in which matches will be searched for. In contrast to
+ * `ts_query_cursor_set_byte_range`, this will restrict the query cursor to only return
+ * matches where _all_ nodes are _fully_ contained within the given range. Both functions
+ * can be used together, e.g. to search for any matches that intersect line 5000, as
+ * long as they are fully contained within lines 4500-5500
+ */
+bool ts_query_cursor_set_containing_byte_range(TSQueryCursor *self, uint32_t start_byte, uint32_t end_byte);
+
+/**
+ * Set the point range within which all matches must be fully contained.
+ *
+ * Set the range of bytes in which matches will be searched for. In contrast to
+ * `ts_query_cursor_set_point_range`, this will restrict the query cursor to only return
+ * matches where _all_ nodes are _fully_ contained within the given range. Both functions
+ * can be used together, e.g. to search for any matches that intersect line 5000, as
+ * long as they are fully contained within lines 4500-5500
+ */
+bool ts_query_cursor_set_containing_point_range(TSQueryCursor *self, TSPoint start_point, TSPoint end_point);
 
 /**
  * Advance to the next match of the currently running query.
@@ -1260,17 +1238,6 @@ const char *ts_language_symbol_name(const TSLanguage *self, TSSymbol symbol);
  * See also [`ts_node_is_named`]. Hidden nodes are never returned from the API.
  */
 TSSymbolType ts_language_symbol_type(const TSLanguage *self, TSSymbol symbol);
-
-/**
- * @deprecated use [`ts_language_abi_version`] instead, this will be removed in 0.26.
- *
- * Get the ABI version number for this language. This version number is used
- * to ensure that languages were generated by a compatible version of
- * Tree-sitter.
- *
- * See also [`ts_parser_set_language`].
- */
-uint32_t ts_language_version(const TSLanguage *self);
 
 /**
  * Get the ABI version number for this language. This version number is used
@@ -1416,7 +1383,7 @@ const TSLanguage *ts_wasm_store_load_language(
 );
 
 /**
- * Get the number of languages instantiated in the given wasm store.
+ * Get the number of languages instantiated in the given Wasm store.
  */
 size_t ts_wasm_store_language_count(const TSWasmStore *);
 

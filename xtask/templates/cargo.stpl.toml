@@ -34,7 +34,7 @@ ignored = ["arborium-sysroot"]
 path = "src/lib.rs"
 
 [dependencies]
-tree-sitter-language = { version = "0.1", path = "<%= shared_rel %>/arborium-tree-sitter/language" }
+tree-sitter-language = { version = "0.1" }
 <% for dep in highlights_prepend_deps { %>
 <%= dep.crate_name %> = { version = "<%= dep_version %>", path = "<%= dep.rel_path %>" }
 <% } %>
