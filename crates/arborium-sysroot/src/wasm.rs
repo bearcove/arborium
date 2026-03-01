@@ -193,6 +193,39 @@ pub unsafe extern "C" fn free(ptr: *mut u8) {
     }
 }
 
+/// abort implementation - terminates the program.
+#[unsafe(no_mangle)]
+pub extern "C" fn abort() -> ! {
+    std::process::abort()
+}
+
+/// strncmp implementation - compare two strings up to n bytes.
+///
+/// # Safety
+///
+/// Both s1 and s2 must be valid pointers to null-terminated strings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn strncmp(s1: *const u8, s2: *const u8, n: usize) -> c_int {
+    if n == 0 {
+        return 0;
+    }
+
+    for i in 0..n {
+        let c1 = unsafe { *s1.add(i) };
+        let c2 = unsafe { *s2.add(i) };
+
+        if c1 != c2 {
+            return (c1 as c_int) - (c2 as c_int);
+        }
+
+        if c1 == 0 {
+            return 0;
+        }
+    }
+
+    0
+}
+
 /// clock stub - returns 0 for WASM.
 #[unsafe(no_mangle)]
 pub extern "C" fn clock() -> usize {
@@ -333,6 +366,8 @@ static _FORCE_INCLUDE: () = {
     let _ = free as *const ();
     let _ = calloc as *const ();
     let _ = realloc as *const ();
+    let _ = abort as *const ();
+    let _ = strncmp as *const ();
     let _ = clock as *const ();
     let _ = iswalnum as *const ();
     let _ = iswalpha as *const ();
