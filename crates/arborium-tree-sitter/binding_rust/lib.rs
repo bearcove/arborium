@@ -28,7 +28,7 @@ use std::os::fd::AsRawFd;
 use std::os::windows::io::AsRawHandle;
 
 pub use streaming_iterator::{StreamingIterator, StreamingIteratorMut};
-use tree_sitter_language::LanguageFn;
+pub use tree_sitter_language::LanguageFn;
 
 #[cfg(feature = "wasm")]
 mod wasm_language;

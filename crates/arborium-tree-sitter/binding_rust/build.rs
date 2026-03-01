@@ -33,15 +33,30 @@ fn main() {
     }
 
     
-    // Arborium patch: for wasm targets, add wasm-sysroot stub headers.
-    // Implementations are provided by the `arborium-sysroot` crate (links = "arborium_sysroot").
+    // Arborium patch: for wasm targets, prefer arborium-sysroot and disable
+    // upstream wasm stdlib sources to avoid duplicate symbols (malloc/free/...).
+    //
+    // Implementations are provided by the `arborium-sysroot` crate
+    // (links = "arborium_sysroot").
     if target.contains("wasm") {
         if let Ok(sysroot) = env::var("DEP_ARBORIUM_SYSROOT_PATH") {
             let wasm_sysroot = PathBuf::from(&sysroot);
             config.include(&wasm_sysroot);
             println!("cargo:rerun-if-changed={}", wasm_sysroot.display());
+
+            // Prevent upstream tree-sitter wasm stdlib C objects from being compiled
+            // when Arborium sysroot is available.
+            //
+            // Upstream call shape:
+            //   if target.starts_with("wasm32-unknown") {
+            //       configure_wasm_build(&mut config);
+            //   }
+            //
+            // By rewriting `target`, this condition won't match.
+            target = "__arborium_sysroot_wasm_override__".to_string();
         }
-        // Suppress format warnings on wasm32 where uint32_t may be unsigned long
+
+        // Suppress format warnings on wasm32 where uint32_t may be unsigned long.
         config.flag_if_supported("-Wno-format");
     }
 
