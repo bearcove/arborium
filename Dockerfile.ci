@@ -2,7 +2,7 @@
 # Build: docker build -t ghcr.io/bearcove/arborium-plugin-builder:latest -f Dockerfile.ci .
 # Push:  docker push ghcr.io/bearcove/arborium-plugin-builder:latest
 
-FROM rust:1.91.1-trixie
+FROM rust:1.93.1-trixie
 
 # Install build dependencies: clang, binaryen (wasm-opt), Node.js 24.x
 RUN apt-get update \
@@ -19,22 +19,22 @@ RUN rustup target add wasm32-unknown-unknown \
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
 
 # Install wild linker (binstall)
-RUN cargo binstall -y --locked wild-linker
+RUN cargo binstall -y --locked wild-linker@0.8.0
 
 # Configure Rust to use wild linker
 RUN mkdir -p /root/.cargo && printf '[target.x86_64-unknown-linux-gnu]\nlinker = "clang"\nrustflags = ["-C", "link-arg=--ld-path=/usr/local/cargo/bin/wild"]\n' > /root/.cargo/config.toml
 
 # Install tree-sitter-cli (binstall)
-RUN cargo binstall -y --locked tree-sitter-cli
+RUN cargo binstall -y --locked tree-sitter-cli@0.26.6
 
 # Install cargo-nextest (binstall)
-RUN cargo binstall -y --locked cargo-nextest
+RUN cargo binstall -y --locked cargo-nextest@0.9.129
 
 # Install wasm-pack (binstall)
-RUN cargo binstall -y --locked wasm-pack
+RUN cargo binstall -y --locked wasm-pack@0.14.0
 
 # Install wasm-bindgen-cli (binstall)
-RUN cargo binstall -y --locked wasm-bindgen-cli
+RUN cargo binstall -y --locked wasm-bindgen-cli@0.2.108
 
 # Verify installations
 RUN cargo --version \
