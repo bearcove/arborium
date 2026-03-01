@@ -15,7 +15,7 @@ wasm-opt = false
 
 [dependencies]
 arborium-highlight = { version = "<%= version %>", path = "../arborium-highlight" }
-wasm-bindgen = "=0.2.106"
+wasm-bindgen = "=0.2.108"
 wasm-bindgen-futures = "=0.4.56"
 js-sys = "=0.3.83"
 
