@@ -226,6 +226,81 @@ pub unsafe extern "C" fn strncmp(s1: *const u8, s2: *const u8, n: usize) -> c_in
     0
 }
 
+/// strncpy implementation - copy up to n bytes from src to dest.
+///
+/// # Safety
+///
+/// Both dest and src must be valid pointers. dest must have space for at least n bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn strncpy(dest: *mut u8, src: *const u8, n: usize) -> *mut u8 {
+    if n == 0 {
+        return dest;
+    }
+
+    let mut i = 0;
+    while i < n {
+        let c = unsafe { *src.add(i) };
+        unsafe { *dest.add(i) = c };
+
+        if c == 0 {
+            // Null terminator found, pad the rest with zeros
+            i += 1;
+            while i < n {
+                unsafe { *dest.add(i) = 0 };
+                i += 1;
+            }
+            break;
+        }
+
+        i += 1;
+    }
+
+    dest
+}
+
+/// strcmp implementation - compare two null-terminated strings.
+///
+/// # Safety
+///
+/// Both s1 and s2 must be valid pointers to null-terminated strings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn strcmp(s1: *const u8, s2: *const u8) -> c_int {
+    let mut i = 0;
+    loop {
+        let c1 = unsafe { *s1.add(i) };
+        let c2 = unsafe { *s2.add(i) };
+
+        if c1 != c2 {
+            return (c1 as c_int) - (c2 as c_int);
+        }
+
+        if c1 == 0 {
+            return 0;
+        }
+
+        i += 1;
+    }
+}
+
+/// memchr implementation - locate byte in memory.
+///
+/// # Safety
+///
+/// s must be a valid pointer to at least n bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn memchr(s: *const c_void, c: c_int, n: usize) -> *mut c_void {
+    let s = s as *const u8;
+    let c = c as u8;
+
+    for i in 0..n {
+        if unsafe { *s.add(i) } == c {
+            return unsafe { s.add(i) as *mut c_void };
+        }
+    }
+
+    ptr::null_mut()
+}
+
 /// clock stub - returns 0 for WASM.
 #[unsafe(no_mangle)]
 pub extern "C" fn clock() -> usize {
@@ -368,6 +443,9 @@ static _FORCE_INCLUDE: () = {
     let _ = realloc as *const ();
     let _ = abort as *const ();
     let _ = strncmp as *const ();
+    let _ = strcmp as *const ();
+    let _ = strncpy as *const ();
+    let _ = memchr as *const ();
     let _ = clock as *const ();
     let _ = iswalnum as *const ();
     let _ = iswalpha as *const ();
