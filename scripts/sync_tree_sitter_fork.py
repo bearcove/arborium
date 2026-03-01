@@ -239,6 +239,36 @@ def patch_binding_rust_build_rs(target: Path) -> None:
     path.write_text(patched)
 
 
+def patch_binding_rust_lib_rs_languagefn_reexport(target: Path) -> None:
+    """
+    Ensure `binding_rust/lib.rs` publicly re-exports `LanguageFn` so downstream
+    crates can import it via `arborium_tree_sitter::LanguageFn`.
+    """
+    path = target / "binding_rust" / "lib.rs"
+    if not path.exists():
+        warn(f"Missing {path}, skipping LanguageFn re-export patch.")
+        return
+
+    src = path.read_text()
+
+    if "pub use tree_sitter_language::LanguageFn;" in src:
+        info("binding_rust/lib.rs already has LanguageFn public re-export.")
+        return
+
+    old = "use tree_sitter_language::LanguageFn;"
+    new = "pub use tree_sitter_language::LanguageFn;"
+
+    if old in src:
+        path.write_text(src.replace(old, new, 1))
+        info("Patched binding_rust/lib.rs to publicly re-export LanguageFn.")
+        return
+
+    warn(
+        "Could not find `use tree_sitter_language::LanguageFn;` in binding_rust/lib.rs; "
+        "skipping LanguageFn re-export patch."
+    )
+
+
 def patch_clock_h_if_needed(target: Path) -> None:
     """
     Ensure src/clock.h contains Arborium wasm stub branch if the file exists.
@@ -401,6 +431,7 @@ def main() -> None:
         else:
             restore_preserved(target, backup_dir)
             patch_binding_rust_build_rs(target)
+            patch_binding_rust_lib_rs_languagefn_reexport(target)
             patch_clock_h_if_needed(target)
             write_sync_metadata(target, args.tag, upstream_rev_short)
 

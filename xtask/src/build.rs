@@ -51,15 +51,14 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
     // Check if nightly toolchain is installed
     let mut cmd = Command::new("rustup");
     cmd.args(["toolchain", "list"]);
-    let output = run_cmd_output(cmd)
-        ?;
+    let output = run_cmd_output(cmd)?;
 
     let toolchains = String::from_utf8_lossy(&output.stdout);
     let has_nightly = toolchains.lines().any(|line| line.contains("nightly"));
 
     if !has_nightly {
         return Err(report(
-            "nightly toolchain not found. Install with: rustup toolchain install nightly"
+            "nightly toolchain not found. Install with: rustup toolchain install nightly",
         ));
     }
 
@@ -75,22 +74,21 @@ fn ensure_rust_nightly_with_wasm_target() -> Result<()> {
 
     if !has_wasm_target {
         return Err(report(
-            "wasm32-unknown-unknown target not found for nightly. Install with: rustup target add wasm32-unknown-unknown --toolchain nightly"
+            "wasm32-unknown-unknown target not found for nightly. Install with: rustup target add wasm32-unknown-unknown --toolchain nightly",
         ));
     }
 
     // Check if rust-src component is installed for nightly (needed for -Zbuild-std)
     let mut cmd = Command::new("rustup");
     cmd.args(["+nightly", "component", "list", "--installed"]);
-    let output = run_cmd_output(cmd)
-        ?;
+    let output = run_cmd_output(cmd)?;
 
     let components = String::from_utf8_lossy(&output.stdout);
     let has_rust_src = components.lines().any(|line| line.starts_with("rust-src"));
 
     if !has_rust_src {
         return Err(report(
-            "rust-src component not found for nightly. Install with: rustup component add rust-src --toolchain nightly"
+            "rust-src component not found for nightly. Install with: rustup component add rust-src --toolchain nightly",
         ));
     }
 
@@ -539,10 +537,7 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
     grammars.shuffle(&mut rand::rng());
 
     if grammars.is_empty() {
-        println!(
-            "{} No grammars have generate-plugin enabled",
-            "○".dimmed()
-        );
+        println!("{} No grammars have generate-plugin enabled", "○".dimmed());
         return Ok(());
     }
 
@@ -637,7 +632,10 @@ pub fn build_plugins(repo_root: &Utf8Path, options: &BuildOptions) -> Result<()>
     // Write JSON manifest to langs/plugins.json (for dev server)
     let manifest_path = repo_root.join("langs").join("plugins.json");
     fs_err::create_dir_all(manifest_path.parent().unwrap())?;
-    fs_err::write(&manifest_path, facet_json::to_string_pretty(&manifest).expect("manifest serialization failed"))?;
+    fs_err::write(
+        &manifest_path,
+        facet_json::to_string_pretty(&manifest).expect("manifest serialization failed"),
+    )?;
     println!(
         "{} Wrote plugin manifest {}",
         "✓".green(),
@@ -721,7 +719,10 @@ pub fn build_host(repo_root: &Utf8Path) -> Result<()> {
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         let stdout = String::from_utf8_lossy(&output.stdout);
-        return Err(report(format!("wasm-pack build failed:\n{}\n{}", stdout, stderr)));
+        return Err(report(format!(
+            "wasm-pack build failed:\n{}\n{}",
+            stdout, stderr
+        )));
     }
 
     // wasm-pack generates files with _bg suffix for the wasm file
@@ -909,7 +910,7 @@ fn build_single_plugin(
         .env("XROS_DEPLOYMENT_TARGET", "")
         .env(
             "RUSTFLAGS",
-            "-Zunstable-options -Cpanic=immediate-abort -Copt-level=s -Cembed-bitcode=yes -Clto=fat -Ccodegen-units=1 -Cstrip=symbols",
+            "-Zunstable-options -Cpanic=immediate-abort -Copt-level=s -Cembed-bitcode=yes -Clto=fat -Ccodegen-units=1 -Cstrip=symbols -Aunexpected_cfgs -Amismatched_lifetime_syntaxes",
         )
         .current_dir(&plugin_source);
 

@@ -51,13 +51,13 @@ use alloc::vec::Vec;
 use core::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
 use arborium_tree_sitter::{
-    InputEdit, Language, LanguageFn, Parser, Point, Query, QueryCursor, QueryError,
-    StreamingIterator, Tree,
+    InputEdit, Language, Parser, Point, Query, QueryCursor, QueryError, StreamingIterator, Tree,
 };
 use arborium_wire::{
     Edit, ParseError, Utf8Injection, Utf8ParseResult, Utf8Span, Utf16Injection, Utf16ParseResult,
     Utf16Span,
 };
+use tree_sitter_language::LanguageFn;
 
 /// Batch convert UTF-8 byte offsets to UTF-16 code unit indices in a single pass.
 ///
