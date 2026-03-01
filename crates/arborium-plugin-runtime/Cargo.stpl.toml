@@ -12,6 +12,7 @@ readme = "README.md"
 default = []
 
 [dependencies]
+tree-sitter-language = { version = "0.1" }
 arborium-tree-sitter = { version = "<%= version %>", path = "../arborium-tree-sitter" }
 arborium-wire = { version = "<%= version %>", path = "../arborium-wire" }
 arborium-sysroot = { version = "<%= version %>", path = "../arborium-sysroot" }

@@ -1502,6 +1502,11 @@ fn generate_all_crates(
         final_plan.add(plugin_plan);
     }
 
+    // Always update shared prerequisite crates to use the workspace version,
+    // even when generating a single grammar.
+    let shared_plan = plan_shared_crates(prepared, mode)?;
+    final_plan.add(shared_plan);
+
     if prepared.process_all {
         // Generate umbrella crate (crates/arborium/Cargo.toml)
         let umbrella_plan = plan_umbrella_crate(prepared)?;
@@ -1510,10 +1515,6 @@ fn generate_all_crates(
         // Generate CLI crate (crates/arborium-cli/Cargo.toml)
         let cli_plan = plan_cli_crate(prepared)?;
         final_plan.add(cli_plan);
-
-        // Update shared crates to use the workspace version
-        let shared_plan = plan_shared_crates(prepared, mode)?;
-        final_plan.add(shared_plan);
 
         // Generate main npm package (packages/arborium/package.json)
         let package_plan = plan_main_package_json(prepared, mode)?;
