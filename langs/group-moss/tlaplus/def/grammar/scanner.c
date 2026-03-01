@@ -284,7 +284,7 @@
           }
         }
       }
-      array_delete(raw_level);
+
       return id;
     }
 
