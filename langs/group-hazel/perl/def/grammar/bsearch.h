@@ -53,6 +53,12 @@ is respectively less than, matching, or greater than the array member.
 #include <stdio.h>
 #include <sys/types.h> /* size_t */
 
+#ifdef bsearch
+#undef bsearch
+#endif
+
+#define bsearch tsp_bsearch
+
 /*
  * Perform a binary search.
  *
@@ -69,8 +75,9 @@ is respectively less than, matching, or greater than the array member.
  * have to make lim 3, then halve, obtaining 1, so that we will only
  * look at item 3.
  */
-void *bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
-              int (*compar)(const void *, const void *)) {
+static inline void *tsp_bsearch(
+    const void *key, const void *base0, size_t nmemb, size_t size,
+    int (*compar)(const void *, const void *)) {
   const char *base = (const char *)base0;
   int lim, cmp;
   const void *p;
