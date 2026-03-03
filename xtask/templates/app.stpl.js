@@ -991,20 +991,9 @@ async function initialize() {
         }
         registry = await pluginsResponse.json();
 
-        // Get list of available languages from registry
-        allLanguages = registry.entries.map(e => e.language);
-
-        // Sort by tier (lower is better), then by name
-        allLanguages.sort((a, b) => {
-            const infoA = languageInfo[a] || { name: a };
-            const infoB = languageInfo[b] || { name: b };
-            const tierA = infoA.tier ?? 99;
-            const tierB = infoB.tier ?? 99;
-            if (tierA !== tierB) {
-                return tierA - tierB;
-            }
-            return (infoA.name || a).localeCompare(infoB.name || b);
-        });
+        // Build available language list from registry entries (single source of truth)
+        const availableLanguages = getAvailableLanguagesFromRegistry();
+        allLanguages = availableLanguages.map((lang) => lang.id);
 
         wasmLoaded = true;
 
@@ -1020,6 +1009,8 @@ async function initialize() {
 
         // Initialize size comparison table
         initSizeTable();
+        populateLangMarquee(availableLanguages);
+        populateLanguageDirectory(availableLanguages);
 
     } catch (error) {
         console.error('Failed to initialize:', error);
@@ -1073,6 +1064,34 @@ async function doHighlight() {
 function updateStatus(message, success) {
     // Status is now used for attribution, not messages
     // This function is kept for backwards compatibility but does nothing
+}
+
+function getAvailableLanguagesFromRegistry() {
+    if (!registry?.entries) return [];
+
+    const seen = new Set();
+    const languages = [];
+
+    for (const entry of registry.entries) {
+        const id = entry.language;
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        const info = languageInfo[id] || {};
+        languages.push({
+            id,
+            name: info.name || id,
+            tier: info.tier ?? 99,
+        });
+    }
+
+    languages.sort((a, b) => {
+        if (a.tier !== b.tier) {
+            return a.tier - b.tier;
+        }
+        return a.name.localeCompare(b.name);
+    });
+
+    return languages;
 }
 
 function updateAttribution() {
@@ -1184,17 +1203,17 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Populate language marquee
-function populateLangMarquee() {
+function populateLangMarquee(languages) {
     const marquee = document.getElementById('lang-marquee');
-    if (!marquee) return;
-
-    // Get all language names sorted alphabetically
-    const langNames = Object.entries(languageInfo)
-        .map(([id, info]) => ({ id, name: info.name || id, icon: info.icon }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+    if (!marquee) return [];
+    const languageList = languages || getAvailableLanguagesFromRegistry();
+    if (languageList.length === 0) {
+        marquee.innerHTML = '';
+        return [];
+    }
 
     // Create items - duplicate the list for seamless scrolling
-    const createItems = () => langNames.map(lang => {
+    const createItems = () => languageList.map(lang => {
         const iconSvg = getIconSvg(lang.id);
         return `<span class="lang-marquee-item">${iconSvg}${lang.name}</span>`;
     }).join('');
@@ -1205,7 +1224,7 @@ function populateLangMarquee() {
     // Update lang count
     const langCount = document.getElementById('lang-count');
     if (langCount) {
-        langCount.textContent = langNames.length;
+        langCount.textContent = languageList.length;
     }
 
     // Update tagline
@@ -1213,6 +1232,23 @@ function populateLangMarquee() {
     if (tagline) {
         tagline.textContent = `— regex hater club`;
     }
+
+    return languageList;
+}
+
+function populateLanguageDirectory(languages) {
+    const list = document.getElementById('language-directory');
+    if (!list) return;
+
+    if (!languages || languages.length === 0) {
+        list.innerHTML = '';
+        return;
+    }
+
+    list.innerHTML = languages.map((lang) => {
+        const iconSvg = getIconSvg(lang.id);
+        return `<li class="language-directory-item"><span class="lang-icon">${iconSvg}</span><span>${lang.name}</span><code>${lang.id}</code></li>`;
+    }).join('');
 }
 
 // Random button - randomize language and theme together
@@ -1401,4 +1437,3 @@ function initSizeTable() {
 }
 
 initialize();
-populateLangMarquee();

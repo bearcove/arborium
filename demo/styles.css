@@ -2795,6 +2795,54 @@ footer a:hover {
     fill: currentColor;
 }
 
+.language-directory-label {
+    margin: 1rem 0 0.5rem 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.language-directory {
+    list-style: none;
+    margin: 0 0 1rem 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 0.4rem 0.75rem;
+}
+
+.language-directory-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+    font-size: 0.82rem;
+    color: color-mix(in srgb, var(--fg) 88%, var(--muted));
+}
+
+.language-directory-item .lang-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+}
+
+.language-directory-item code {
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.35rem;
+}
+
+@media (max-width: 42rem) {
+    .language-directory {
+        grid-template-columns: 1fr;
+    }
+}
+
 @keyframes marquee-scroll {
     0% {
         transform: translateX(0);
