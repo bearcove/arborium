@@ -1,5 +1,5 @@
 repo: https://github.com/tree-sitter-grammars/tree-sitter-xml
-commit: 863dbc381f44f6c136a399e684383b977bb2beaa
+commit: 5000ae8f22d11fbe93939b05c1e37cf21117162d
 license: MIT
 
 grammars:

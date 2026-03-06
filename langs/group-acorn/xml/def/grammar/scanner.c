@@ -48,7 +48,8 @@ static bool scan_end_tag_name(Vector *tags, TSLexer *lexer) {
     }
 
     if (tags->size > 0 && string_eq(array_back(tags), &tag_name)) {
-        array_delete(&array_pop(tags));
+        String last_tag = array_pop(tags);
+        array_delete(&last_tag);
         lexer->result_symbol = END_TAG_NAME;
     } else {
         lexer->result_symbol = ERRONEOUS_END_NAME;
@@ -61,7 +62,8 @@ static bool scan_self_closing_tag_delimiter(Vector *tags, TSLexer *lexer) {
     advance(lexer);
     advance_if_eq(lexer, '>');
     if (tags->size > 0) {
-        array_delete(&array_pop(tags));
+        String last_tag = array_pop(tags);
+        array_delete(&last_tag);
         lexer->result_symbol = SELF_CLOSING_TAG_DELIMITER;
     }
     return true;
