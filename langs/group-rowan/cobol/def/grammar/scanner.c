@@ -19,7 +19,8 @@ static bool is_white_space(int c) {
     return iswspace(c) || c == ';' || c == ',';
 }
 
-const int number_of_comment_entry_keywords = 9;
+#define MAX_KEYWORDS 9
+const int number_of_comment_entry_keywords = MAX_KEYWORDS;
 char* any_content_keyword[] = {
     "author",
     "installation",
@@ -37,8 +38,8 @@ static bool start_with_word( TSLexer *lexer, char *words[], int number_of_words)
         lexer->advance(lexer, true);
     }
 
-    char *keyword_pointer[number_of_words];
-    bool continue_check[number_of_words];
+    char *keyword_pointer[MAX_KEYWORDS];
+    bool continue_check[MAX_KEYWORDS];
     for(int i=0; i<number_of_words; ++i) {
         keyword_pointer[i] = words[i];
         continue_check[i] = true;
