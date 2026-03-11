@@ -20,6 +20,10 @@ use arborium_highlight::tree_sitter::{CompiledGrammar, GrammarConfig};
 /// Grammars are compiled on first access and cached. The store can be shared
 /// across threads via `Arc<GrammarStore>`.
 ///
+/// Third-party grammars can be registered with [`insert`](Self::insert).
+/// Registered grammars participate in the same lookup path as built-ins, so
+/// [`crate::Highlighter::with_store`] and related APIs pick them up automatically.
+///
 /// # Example
 ///
 /// ```rust,ignore
@@ -51,6 +55,25 @@ impl GrammarStore {
         Self {
             grammars: RwLock::new(HashMap::new()),
         }
+    }
+
+    /// Register a compiled grammar under a language name.
+    ///
+    /// The name is normalized with the same alias rules used by [`get`](Self::get).
+    /// Unknown names are stored exactly as provided. Built-in aliases map to their
+    /// canonical slot, so `insert("js", grammar)` registers the grammar for
+    /// `"javascript"`.
+    ///
+    /// If a grammar was already registered or cached for that normalized name, it is
+    /// replaced and returned.
+    pub fn insert(
+        &self,
+        language: impl Into<String>,
+        grammar: Arc<CompiledGrammar>,
+    ) -> Option<Arc<CompiledGrammar>> {
+        let language = language.into();
+        let normalized = Self::normalize_language(&language).into_owned();
+        self.grammars.write().unwrap().insert(normalized, grammar)
     }
 
     /// Get a grammar by language name, compiling and caching it if needed.

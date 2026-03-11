@@ -23,6 +23,8 @@ This guide explains how to add support for new programming languages to Arborium
 
 Arborium uses [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) grammars to provide syntax highlighting and language support. Adding a new language involves:
 
+If you want to package a grammar crate that works with Arborium without adding it to Arborium's built-in registry, use [EXTERNAL_GRAMMAR_CRATES.md](EXTERNAL_GRAMMAR_CRATES.md) instead.
+
 1. **Finding or creating** a Tree-sitter grammar for your language
 2. **Creating a language definition directory** with the required files
 3. **Writing an `arborium.yaml` configuration** file (single source of truth)
