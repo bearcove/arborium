@@ -108,6 +108,8 @@ impl Highlighter {
     /// Create a new highlighter with a shared grammar store.
     ///
     /// Use this when you want multiple highlighters to share compiled grammars.
+    /// Custom grammars registered with [`GrammarStore::insert`] are available
+    /// through the same lookup path as built-ins.
     pub fn with_store(store: Arc<GrammarStore>) -> Self {
         Self {
             store,
@@ -404,6 +406,79 @@ impl AnsiHighlighter {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "lang-rust")]
+    use std::sync::Arc;
+
+    #[cfg(feature = "lang-rust")]
+    use arborium_highlight::tree_sitter::{CompiledGrammar, GrammarConfig};
+
+    #[cfg(feature = "lang-rust")]
+    use crate::GrammarStore;
+
+    #[cfg(feature = "lang-rust")]
+    fn compiled_rust_grammar() -> Arc<CompiledGrammar> {
+        Arc::new(
+            CompiledGrammar::new(GrammarConfig {
+                language: crate::lang_rust::language().into(),
+                highlights_query: &crate::lang_rust::HIGHLIGHTS_QUERY,
+                injections_query: crate::lang_rust::INJECTIONS_QUERY,
+                locals_query: crate::lang_rust::LOCALS_QUERY,
+            })
+            .unwrap(),
+        )
+    }
+
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_custom_grammar_can_be_used_with_shared_store() {
+        use crate::Highlighter;
+
+        let store = Arc::new(GrammarStore::new());
+        let grammar = compiled_rust_grammar();
+        assert!(store.insert("vx", grammar.clone()).is_none());
+
+        let mut highlighter = Highlighter::with_store(store.clone());
+        let html = highlighter.highlight("vx", "fn main() {}").unwrap();
+
+        assert!(Arc::ptr_eq(&store.get("vx").unwrap(), &grammar));
+        assert!(html.contains("<a-"));
+    }
+
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_custom_grammars_coexist_with_builtins() {
+        use crate::Highlighter;
+
+        let store = Arc::new(GrammarStore::new());
+        let custom = compiled_rust_grammar();
+        store.insert("vx", custom.clone());
+
+        let mut highlighter = Highlighter::with_store(store.clone());
+        let custom_html = highlighter.highlight("vx", "fn custom() {}").unwrap();
+        let builtin_html = highlighter.highlight("rust", "fn builtin() {}").unwrap();
+
+        assert!(Arc::ptr_eq(&store.get("vx").unwrap(), &custom));
+        assert!(store.get("rust").is_some());
+        assert!(custom_html.contains("<a-"));
+        assert!(builtin_html.contains("<a-"));
+    }
+
+    #[test]
+    #[cfg(feature = "lang-rust")]
+    fn test_insert_normalizes_and_overrides_existing_entry() {
+        let store = GrammarStore::new();
+        let first = compiled_rust_grammar();
+        let second = compiled_rust_grammar();
+
+        assert!(store.insert("rs", first.clone()).is_none());
+        assert!(Arc::ptr_eq(&store.get("rust").unwrap(), &first));
+
+        let replaced = store.insert("rust", second.clone()).unwrap();
+        assert!(Arc::ptr_eq(&replaced, &first));
+        assert!(Arc::ptr_eq(&store.get("rs").unwrap(), &second));
+        assert!(Arc::ptr_eq(&store.get("rust").unwrap(), &second));
+    }
+
     #[test]
     #[cfg(feature = "lang-rust")]
     fn test_highlighter_fork() {

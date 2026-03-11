@@ -27,6 +27,12 @@ By default, all permissively-licensed grammars are included. To select specific 
 arborium = { version = "<%= version %>", default-features = false, features = ["lang-rust", "lang-javascript"] }
 ```
 
+## External Grammar Crates
+
+You can ship Arborium-compatible grammar crates outside this repository. Arborium only needs a `language()` export plus highlight or injection query constants, which you can compile into a `CompiledGrammar` and register in a `GrammarStore`.
+
+See the in-repo guide: [EXTERNAL_GRAMMAR_CRATES.md](https://github.com/bearcove/arborium/blob/main/EXTERNAL_GRAMMAR_CRATES.md)
+
 ## Browser Usage
 
 Arborium can be used in the browser in two ways:

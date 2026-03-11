@@ -1,0 +1,16 @@
+[package]
+name = "arborium-example-json"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+arborium = { path = "../../crates/arborium", default-features = false }
+tree-sitter-language = "0.1"
+
+[build-dependencies]
+cc = "1"
