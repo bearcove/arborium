@@ -406,10 +406,13 @@ impl AnsiHighlighter {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "lang-rust")]
     use std::sync::Arc;
 
+    #[cfg(feature = "lang-rust")]
     use arborium_highlight::tree_sitter::{CompiledGrammar, GrammarConfig};
 
+    #[cfg(feature = "lang-rust")]
     use crate::GrammarStore;
 
     #[cfg(feature = "lang-rust")]
