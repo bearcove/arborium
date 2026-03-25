@@ -53,7 +53,7 @@ const html = await highlight('rust', code);
 
 ## Themes
 
-This package includes 32 built-in themes. Import them individually:
+This package includes 33 built-in themes. Import them individually:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@arborium/arborium/dist/themes/tokyo-night.css">
@@ -67,7 +67,7 @@ import '@arborium/arborium/themes/tokyo-night.css';
 
 ### Available Themes
 
-**Dark themes:** catppuccin-mocha, catppuccin-macchiato, catppuccin-frappe, dracula, tokyo-night, nord, one-dark, github-dark, gruvbox-dark, monokai, kanagawa-dragon, rose-pine-moon, ayu-dark, solarized-dark, ef-melissa-dark, melange-dark, cobalt2, zenburn, desert256, rustdoc-dark, rustdoc-ayu
+**Dark themes:** catppuccin-mocha, catppuccin-macchiato, catppuccin-frappe, dracula, evergarden-fall, tokyo-night, nord, one-dark, github-dark, gruvbox-dark, monokai, kanagawa-dragon, rose-pine-moon, ayu-dark, solarized-dark, ef-melissa-dark, melange-dark, cobalt2, zenburn, desert256, rustdoc-dark, rustdoc-ayu
 
 **Light themes:** catppuccin-latte, github-light, gruvbox-light, ayu-light, solarized-light, melange-light, light-owl, lucius-light, dayfox, alabaster, rustdoc-light
 
