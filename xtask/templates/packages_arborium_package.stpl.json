@@ -39,6 +39,7 @@
     "./themes/desert256.css": "./dist/themes/desert256.css",
     "./themes/dracula.css": "./dist/themes/dracula.css",
     "./themes/ef-melissa-dark.css": "./dist/themes/ef-melissa-dark.css",
+    "./themes/evergarden-fall.css": "./dist/themes/evergarden-fall.css",
     "./themes/github-dark.css": "./dist/themes/github-dark.css",
     "./themes/github-light.css": "./dist/themes/github-light.css",
     "./themes/gruvbox-dark.css": "./dist/themes/gruvbox-dark.css",

@@ -121,9 +121,9 @@ This embeds selected grammars directly in your WASM binary - no CDN required at 
 
 ### Themes
 
-Arborium includes 32 built-in themes from popular color schemes.
+Arborium includes 33 built-in themes from popular color schemes.
 
-**Dark themes:** `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `dracula`, `tokyo-night`, `nord`, `one-dark`, `github-dark`, `gruvbox-dark`, `monokai`, `kanagawa-dragon`, `rose-pine-moon`, `ayu-dark`, `solarized-dark`, `ef-melissa-dark`, `melange-dark`, `cobalt2`, `zenburn`, `desert256`, `rustdoc-dark`, `rustdoc-ayu`
+**Dark themes:** `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `dracula`, `evergarden-fall`, `tokyo-night`, `nord`, `one-dark`, `github-dark`, `gruvbox-dark`, `monokai`, `kanagawa-dragon`, `rose-pine-moon`, `ayu-dark`, `solarized-dark`, `ef-melissa-dark`, `melange-dark`, `cobalt2`, `zenburn`, `desert256`, `rustdoc-dark`, `rustdoc-ayu`
 
 **Light themes:** `catppuccin-latte`, `github-light`, `gruvbox-light`, `ayu-light`, `solarized-light`, `melange-light`, `light-owl`, `lucius-light`, `dayfox`, `alabaster`, `rustdoc-light`
 
