@@ -1,5 +1,5 @@
 repo: https://git.gay/yuri/tree-sitter-yuri
-commit: local
+commit: c6cd96f42bfea62fdb034f50e7805b43e58b0b85
 license: Apache-2.0
 
 grammars:
@@ -7,16 +7,17 @@ grammars:
     name: Yuri
     tag: code
     tier: 5
+    # Yuri doesn't have an icon on iconify.design, this should be updated when it does
     icon: mdi:palette
 
-    inventor: Yuri contributors
-    year: 2024
-    description: Yuri shader language; see repository README for current design status.
+    inventor: addie.sh
+    year: 2025
+    description: "Yuri is a work-in-progress GPU shader language targeting Vulkan and SPIR-V."
     link: https://git.gay/yuri/yuri
-    trivia: "Yuri is an in-progress shader language and compiler; the design is not finalized and is released under Apache-2.0."
+    trivia: 'The name "Yuri" is derived from the OpenGL Shader Language, as "yuri" can be a synonym for "GL" in certain contexts.'
 
     samples:
       - path: samples/example.yuri
-        description: Example Yuri shader demonstrating language syntax.
-        link: https://git.gay/yuri/yuri/src/branch/main/example.yuri
+        description: Basic vertex and fragment shaders in one file, demonstrating some basic syntax.
+        link: https://git.gay/yuri/yuri/src/commit/c6cd96f42bfea62fdb034f50e7805b43e58b0b85/example.yuri
         license: Apache-2.0
