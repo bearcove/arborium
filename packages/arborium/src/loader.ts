@@ -197,17 +197,14 @@ async function loadGrammarPluginInner(
   }
 
   try {
+    const version = config.version;
     const baseUrl = getGrammarBaseUrl(language, config);
     const detail =
       config.resolveJs === defaultConfig.resolveJs ? ` from ${baseUrl}/grammar.js` : "";
     config.logger.debug(`[arborium] Loading grammar '${language}'${detail}`);
 
-    const module = (await config.resolveJs({
-      language,
-      baseUrl,
-      path: "grammar.js",
-    })) as WasmBindgenPlugin;
-    const wasm = await config.resolveWasm({ language, baseUrl, path: "grammar_bg.wasm" });
+    const module = (await config.resolveJs({ language, baseUrl, version, path: "grammar.js", })) as WasmBindgenPlugin;
+    const wasm = await config.resolveWasm({ language, baseUrl, version, path: "grammar_bg.wasm" });
 
     // Initialize the WASM module
     await module.default({ module_or_path: wasm });
