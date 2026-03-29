@@ -18,7 +18,7 @@
  * per-call overrides (level 1) to take precedence.
  */
 
-import { loadGrammar, highlight, getConfig, setConfig } from "./loader.js";
+import { loadGrammar, highlight, getConfig, setConfig, getAvailableLanguages } from "./loader.js";
 import { detectLanguage, extractLanguageFromClass, normalizeLanguage } from "./detect.js";
 import type { ArboriumConfig } from "./types.js";
 
@@ -433,6 +433,7 @@ initializeConfig();
   loadGrammar,
   highlight,
   detectLanguage,
+  getAvailableLanguages,
 
   // Config access (getter returns current config, setter merges into it)
   get config() {
