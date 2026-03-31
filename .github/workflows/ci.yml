@@ -277,7 +277,7 @@ jobs:
         env: 
           RUSTDOCFLAGS: "-D warnings"
   build-plugins-acorn: 
-    name: "Plugins (acorn): css, html, javascript, json, scss, tsx, typescript, xml"
+    name: "Plugins (acorn): css, html, javascript, jsdoc, json, scss, tsx, typescript, xml"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -295,10 +295,10 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build css, html, javascript, json, scss, tsx, typescript, xml
+      - name: Build css, html, javascript, jsdoc, json, scss, tsx, typescript, xml
         run: |-
           set -e
-          ./xtask/target/release/xtask build css html javascript json scss tsx typescript xml -o dist/plugins
+          ./xtask/target/release/xtask build css html javascript jsdoc json scss tsx typescript xml -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4
