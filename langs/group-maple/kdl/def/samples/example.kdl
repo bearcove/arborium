@@ -1,0 +1,114 @@
+/- kdl-version 2
+
+document {
+    info {
+        title "KDL Schema" lang=en
+        description "KDL Schema KDL schema in KDL" lang=en
+        author "Kat Marchán" {
+            link "https://github.com/zkat" rel=self
+        }
+        contributor "Lars Willighagen" {
+            link "https://github.com/larsgw" rel=self
+        }
+        link "https://github.com/zkat/kdl" rel=documentation
+        license "Creative Commons Attribution-ShareAlike 4.0 International License" spdx=CC-BY-SA-4.0 {
+            link "https://creativecommons.org/licenses/by-sa/4.0/" lang=en
+        }
+        published "2021-08-31"
+        modified "2021-09-01"
+    }
+    node document {
+        min 1
+        max 1
+        children id=node-children {
+            node node-names id=node-names-node description="Validations to apply specifically to arbitrary node names" {
+                children ref=#"[id="validations"]"#
+            }
+            node kdl2-preview description="Examples of KDL 2.0 syntax in use" {
+                node directives id=slashed {
+                    /- hash-values #true #-inf #nan #null
+                }
+                node hashed-raw {
+                    value ##"""
+Line one
+""" literal triple quote
+Line two
+"""##
+                }
+            }
+            node other-nodes-allowed id=other-nodes-allowed-node description="Whether to allow child nodes other than the ones explicitly listed. Defaults to '#false'." {
+                max 1
+                value {
+                    min 1
+                    max 1
+                    type boolean
+                }
+            }
+            node tag-names description="Validations to apply specifically to arbitrary type tag names" {
+                children ref=#"[id="validations"]"#
+            }
+            node other-tags-allowed description="Whether to allow child node tags other than the ones explicitly listed. Defaults to '#false'." {
+                max 1
+                value {
+                    min 1
+                    max 1
+                    type boolean
+                }
+            }
+            node info description="A child node that describes the schema itself." {
+                children {
+                    node title description="The title of the schema or the format it describes" {
+                        value description="The title text" {
+                            type string
+                            min 1
+                            max 1
+                        }
+                        prop lang id=info-lang description="The language of the text" {
+                            type string
+                        }
+                    }
+                    node description description="A description of the schema or the format it describes" {
+                        value description="The description text" {
+                            type string
+                            min 1
+                            max 1
+                        }
+                        prop ref=#"[id="info-lang"]"#
+                    }
+                    node author description="Author of the schema" {
+                        value id=info-person-name description="Person name" {
+                            type string
+                            min 1
+                            max 1
+                        }
+                        prop orcid id=info-orcid description="The ORCID of the person" {
+                            type string
+                            pattern #"\d{4}-\d{4}-\d{4}-\d{4}"#
+                        }
+                        children {
+                            node ref=#"[id="info-link"]"#
+                        }
+                    }
+                    node contributor description="Contributor to the schema" {
+                        value ref=#"[id="info-person-name"]"#
+                        prop ref=#"[id="info-orcid"]"#
+                        children {
+                            node ref=#"[id="info-link"]"#
+                        }
+                    }
+                    node link id=info-link description="Links to itself, and to sources describing it" {
+                        value description="A URL that the link points to" {
+                            type string
+                            format url irl
+                            min 1
+                            max 1
+                        }
+                        prop rel description="The relation between the current entity and the URL" {
+                            type string
+                            enum self documentation
+                        }
+                        prop ref=#"[id="info-lang"]"#
+                    }
+                    node license description="The license(s) that the schema is licensed under" {
+                        value description="Name of the used license" {
+                            type string
