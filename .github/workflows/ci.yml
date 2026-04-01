@@ -337,7 +337,7 @@ jobs:
           path: dist/plugins
           retention-days: "7"
   build-plugins-birch: 
-    name: "Plugins (birch): asm, c, cpp, d, go, objc, rust, x86asm, zig"
+    name: "Plugins (birch): asm, c, cpp, d, go, objc, odin, rust, x86asm, zig"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -355,10 +355,10 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build asm, c, cpp, d, go, objc, rust, x86asm, zig
+      - name: Build asm, c, cpp, d, go, objc, odin, rust, x86asm, zig
         run: |-
           set -e
-          ./xtask/target/release/xtask build asm c cpp d go objc rust x86asm zig -o dist/plugins
+          ./xtask/target/release/xtask build asm c cpp d go objc odin rust x86asm zig -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4

@@ -1,0 +1,20 @@
+repo: https://github.com/tree-sitter-grammars/tree-sitter-odin
+commit: d2ca8efb4487e156a60d5bd6db2598b872629403
+license: MIT
+
+grammars:
+  - id: odin
+    name: Odin
+    tag: code
+    tier: 2
+    has_scanner: true
+
+    inventor: Bill Hall
+    year: 2016
+    description: An open source systems programming language designed for the modern computer and programmer.
+    link: https://odin-lang.org/
+
+    samples:
+      - path: samples/example.odin
+        link: https://github.com/odin-lang/Odin/blob/72c1a9420b5875ee8af33c0d03f66cb2f4ab8af1/examples/demo/demo.odin
+        license: Zlib
