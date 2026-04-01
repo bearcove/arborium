@@ -9,10 +9,6 @@ grammars:
     tier: 1
     has_scanner: true
 
-    injections:
-      - regex
-      - jsdoc
-
     inventor: Michael Mathews
     year: 1999
     description: "An API documentation generator for JavaScript."
