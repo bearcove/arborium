@@ -397,7 +397,7 @@ jobs:
           path: dist/plugins
           retention-days: "7"
   build-plugins-fern: 
-    name: "Plugins (fern): agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme"
+    name: "Plugins (fern): agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, regex, scheme"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -415,10 +415,10 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme
+      - name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, regex, scheme
         run: |-
           set -e
-          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml scheme -o dist/plugins
+          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml regex scheme -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v4

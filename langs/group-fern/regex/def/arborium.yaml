@@ -1,0 +1,20 @@
+repo: https://github.com/tree-sitter/tree-sitter-regex
+commit: b2ac15e27fce703d2f37a79ccd94a5c0cbe9720b
+license: MIT
+
+grammars:
+  - id: regex
+    name: Regular Expression
+    tag: code
+    tier: 2
+    has_scanner: false
+
+    inventor: Stephen Cole Kleene
+    year: 1951
+    description: A regular expression is a sequence of characters that specifies a match pattern in text.
+    link: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
+
+    samples:
+      - path: samples/example.regex
+        link: https://en.wikipedia.org/wiki/Regular_expression
+        license: CC-BY-SA-4.0
