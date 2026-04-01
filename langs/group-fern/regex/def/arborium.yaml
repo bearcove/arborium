@@ -6,7 +6,7 @@ grammars:
   - id: regex
     name: Regular Expression
     tag: code
-    tier: 2
+    tier: 1
     has_scanner: false
 
     inventor: Stephen Cole Kleene
