@@ -1,0 +1,20 @@
+repo: https://github.com/tree-sitter-grammars/tree-sitter-make
+commit: 70613f3d812cbabbd7f38d104d60a409c4008b43
+license: MIT
+
+grammars:
+  - id: make
+    name: Make
+    tag: build
+    tier: 2
+    has_scanner: false
+
+    inventor: Stuart Feldman
+    year: 1976
+    description: Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files.
+    link: https://en.wikipedia.org/wiki/Make_(software)
+
+    samples:
+      - path: samples/Makefile
+        link: https://github.com/tree-sitter/tree-sitter/blob/e7389ccc2a6c37ebf298073a72d4a2b2b83f6a11/Makefile
+        license: MIT
