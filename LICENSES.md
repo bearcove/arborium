@@ -22,6 +22,7 @@ You may choose either license at your option.
 | tree-sitter-diff | MIT | Copyright (c) 2021 Michael Davis |
 | tree-sitter-dockerfile | MIT | Copyright (c) 2021 Camden Cheek |
 | tree-sitter-ini | Apache-2.0 | Copyright Justin M. Keyes |
+| tree-sitter-make | MIT | Copyright (c) 2021 Alexandre A. Muller |
 | tree-sitter-meson | MIT | Copyright (c) 2023 Decodertalkers |
 | tree-sitter-nix | MIT | Copyright (c) 2019 Charles Strahan |
 | tree-sitter-scss | MIT | Copyright (c) 2024 Amaan Qureshi |
