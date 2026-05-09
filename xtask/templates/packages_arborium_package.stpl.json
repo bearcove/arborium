@@ -77,6 +77,12 @@
   "main": "./dist/arborium.js",
   "module": "./dist/arborium.js",
   "name": "@arborium/arborium",
+  "packageManager": "pnpm@11.0.9",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
   "repository": {
     "directory": "packages/arborium",
     "type": "git",
