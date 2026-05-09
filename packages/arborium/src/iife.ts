@@ -164,7 +164,13 @@ function getCssBaseUrl(config: Required<ArboriumConfig>): string {
 /** Inject base CSS (only once) */
 function injectBaseCSS(config: Required<ArboriumConfig>): void {
   const baseId = "arborium-base";
-  if (document.getElementById(baseId)) return;
+  const existing = document.getElementById(baseId);
+  const theme = config.theme;
+  if (theme === "none") {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
 
   const cssUrl = `${getCssBaseUrl(config)}/base-rustdoc.css`;
   config.logger.debug(`[arborium] Loading base CSS: ${cssUrl}`);
@@ -187,7 +193,10 @@ function injectThemeCSS(config: Required<ArboriumConfig>): void {
       oldLink.remove();
       config.logger.debug(`[arborium] Removed theme: ${currentThemeId}`);
     }
+    currentThemeId = null;
   }
+
+  if (theme === "none") return;
 
   const themeId = `arborium-theme-${theme}`;
   if (document.getElementById(themeId)) {

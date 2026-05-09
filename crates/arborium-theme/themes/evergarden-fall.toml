@@ -1,0 +1,53 @@
+# Evergarden Fall
+
+name = "Evergarden Fall"
+variant = "dark"
+background = "#232a2e"
+foreground = "#dbe6af"
+
+"attribute" = { fg = "green" }
+"constant" = { fg = "purple" }
+"function.builtin" = { fg = "green" }
+"function" = { fg = "green" }
+"keyword" = { fg = "red" }
+"operator" = { fg = "red" }
+"property" = { fg = "aqua" }
+"punctuation" = { fg = "fg" }
+"punctuation.bracket" = { fg = "fg" }
+"punctuation.delimiter" = { fg = "fg" }
+"string" = { fg = "yellow" }
+"string.special" = { fg = "red" }
+"tag" = { fg = "red" }
+"type" = { fg = "orange" }
+"type.builtin" = { fg = "orange" }
+"variable" = { fg = "fg" }
+"variable.builtin" = { fg = "purple" }
+"variable.parameter" = { fg = "aqua" }
+"comment" = { fg = "muted" }
+"macro" = { fg = "aqua" }
+"label" = { fg = "aqua" }
+"diff.plus" = { fg = "green" }
+"diff.minus" = { fg = "red" }
+"number" = { fg = "purple" }
+"text.literal" = { fg = "fg" }
+"text.emphasis" = { modifiers = ["italic"] }
+"text.strong" = { modifiers = ["bold"] }
+"text.uri" = { fg = "aqua", modifiers = ["underlined"] }
+"text.reference" = { fg = "aqua" }
+"string.escape" = { fg = "red" }
+"text.title" = { fg = "orange", modifiers = ["bold"] }
+"punctuation.special" = { fg = "red" }
+"text.strikethrough" = { modifiers = ["crossed_out"] }
+"spell" = { fg = "fg" }
+
+[palette]
+bg = "#232a2e"
+fg = "#dbe6af"
+surface = "#2b3338"
+muted = "#8b9b92"
+red = "#f57f82"
+green = "#cbe3b3"
+yellow = "#dbe6af"
+orange = "#f5d098"
+purple = "#f3c0e5"
+aqua = "#b3e3ca"

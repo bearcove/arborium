@@ -27,7 +27,7 @@ jobs:
       is_release: ${{ steps.version.outputs.is_release }}
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Parse version
         run: |-
           set -e
@@ -53,7 +53,7 @@ jobs:
         shell: bash
         id: version
       - name: Restore xtask cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with: 
           path: xtask/target
           key: "xtask-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}"
@@ -69,7 +69,7 @@ jobs:
         shell: bash
         id: grammar-cache-key
       - name: Restore grammar generation cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with: 
           path: .cache/arborium
           key: "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-${{ steps.grammar-cache-key.outputs.key }}"
@@ -85,7 +85,7 @@ jobs:
           tar --exclude='node_modules' --exclude='dist' -cf generate-output.tar crates/ langs/ packages/ xtask/target/release/xtask version.json
         shell: bash
       - name: Upload generate output
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: generate-output
           path: generate-output.tar
@@ -98,9 +98,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -170,9 +170,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -229,9 +229,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -258,9 +258,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -277,16 +277,16 @@ jobs:
         env: 
           RUSTDOCFLAGS: "-D warnings"
   build-plugins-acorn: 
-    name: "Plugins (acorn): css, html, javascript, json, scss, tsx, typescript, xml"
+    name: "Plugins (acorn): css, html, javascript, jsdoc, json, scss, tsx, typescript, xml"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -295,13 +295,13 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build css, html, javascript, json, scss, tsx, typescript, xml
+      - name: Build css, html, javascript, jsdoc, json, scss, tsx, typescript, xml
         run: |-
           set -e
-          ./xtask/target/release/xtask build css html javascript json scss tsx typescript xml -o dist/plugins
+          ./xtask/target/release/xtask build css html javascript jsdoc json scss tsx typescript xml -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-acorn
           path: dist/plugins
@@ -314,9 +314,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -331,22 +331,22 @@ jobs:
           ./xtask/target/release/xtask build clojure groovy java kotlin scala -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-bark
           path: dist/plugins
           retention-days: "7"
   build-plugins-birch: 
-    name: "Plugins (birch): asm, c, cpp, d, go, objc, rust, x86asm, zig"
+    name: "Plugins (birch): asm, c, cpp, d, go, objc, odin, rust, x86asm, zig"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -355,13 +355,13 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build asm, c, cpp, d, go, objc, rust, x86asm, zig
+      - name: Build asm, c, cpp, d, go, objc, odin, rust, x86asm, zig
         run: |-
           set -e
-          ./xtask/target/release/xtask build asm c cpp d go objc rust x86asm zig -o dist/plugins
+          ./xtask/target/release/xtask build asm c cpp d go objc odin rust x86asm zig -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-birch
           path: dist/plugins
@@ -374,9 +374,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -391,22 +391,22 @@ jobs:
           ./xtask/target/release/xtask build cedar cedarschema -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-cedar
           path: dist/plugins
           retention-days: "7"
   build-plugins-fern: 
-    name: "Plugins (fern): agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme"
+    name: "Plugins (fern): agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, regex, scheme"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -415,13 +415,13 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, scheme
+      - name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, regex, scheme
         run: |-
           set -e
-          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml scheme -o dist/plugins
+          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml regex scheme -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-fern
           path: dist/plugins
@@ -434,9 +434,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -451,22 +451,22 @@ jobs:
           ./xtask/target/release/xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-hazel
           path: dist/plugins
           retention-days: "7"
   build-plugins-maple: 
-    name: "Plugins (maple): caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, rego, ron, sql, ssh-config, styx, toml, yaml"
+    name: "Plugins (maple): caddy, cmake, dockerfile, dot, gitattributes, graphql, hcl, ini, jq, just, kconfig, kdl, make, meson, nginx, ninja, nix, query, rego, ron, sql, ssh-config, styx, toml, yaml"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -475,13 +475,13 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build caddy, cmake, dockerfile, dot, graphql, hcl, ini, jq, meson, nginx, ninja, nix, query, rego, ron, sql, ssh-config, styx, toml, yaml
+      - name: Build caddy, cmake, dockerfile, dot, gitattributes, graphql, hcl, ini, jq, just, kconfig, kdl, make, meson, nginx, ninja, nix, query, rego, ron, sql, ssh-config, styx, toml, yaml
         run: |-
           set -e
-          ./xtask/target/release/xtask build caddy cmake dockerfile dot graphql hcl ini jq meson nginx ninja nix query rego ron sql ssh-config styx toml yaml -o dist/plugins
+          ./xtask/target/release/xtask build caddy cmake dockerfile dot gitattributes graphql hcl ini jq just kconfig kdl make meson nginx ninja nix query rego ron sql ssh-config styx toml yaml -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-maple
           path: dist/plugins
@@ -494,9 +494,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -511,22 +511,22 @@ jobs:
           ./xtask/target/release/xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-moss
           path: dist/plugins
           retention-days: "7"
   build-plugins-pine: 
-    name: "Plugins (pine): capnp, dart, devicetree, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri"
+    name: "Plugins (pine): capnp, dart, devicetree, proto, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -535,13 +535,13 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build capnp, dart, devicetree, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri
+      - name: Build capnp, dart, devicetree, proto, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri
         run: |-
           set -e
-          ./xtask/target/release/xtask build capnp dart devicetree rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins
+          ./xtask/target/release/xtask build capnp dart devicetree proto rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-pine
           path: dist/plugins
@@ -554,9 +554,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -571,7 +571,7 @@ jobs:
           ./xtask/target/release/xtask build cobol -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-rowan
           path: dist/plugins
@@ -584,9 +584,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -601,7 +601,7 @@ jobs:
           ./xtask/target/release/xtask build c-sharp elisp fsharp postscript vb vim -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-sage
           path: dist/plugins
@@ -614,9 +614,9 @@ jobs:
       - generate
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -631,7 +631,7 @@ jobs:
           ./xtask/target/release/xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with: 
           name: plugins-group-willow
           path: dist/plugins
@@ -650,9 +650,9 @@ jobs:
       contents: read
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -695,9 +695,9 @@ jobs:
       contents: read
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download generate output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: generate-output
           path: .
@@ -707,62 +707,62 @@ jobs:
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
       - name: Download plugins group acorn
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-acorn
           path: dist/plugins
       - name: Download plugins group bark
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-bark
           path: dist/plugins
       - name: Download plugins group birch
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-birch
           path: dist/plugins
       - name: Download plugins group cedar
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-cedar
           path: dist/plugins
       - name: Download plugins group fern
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-fern
           path: dist/plugins
       - name: Download plugins group hazel
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-hazel
           path: dist/plugins
       - name: Download plugins group maple
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-maple
           path: dist/plugins
       - name: Download plugins group moss
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-moss
           path: dist/plugins
       - name: Download plugins group pine
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-pine
           path: dist/plugins
       - name: Download plugins group rowan
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-rowan
           path: dist/plugins
       - name: Download plugins group sage
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-sage
           path: dist/plugins
       - name: Download plugins group willow
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with: 
           name: plugins-group-willow
           path: dist/plugins

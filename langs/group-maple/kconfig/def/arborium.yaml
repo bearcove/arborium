@@ -1,0 +1,20 @@
+repo: https://github.com/tree-sitter-grammars/tree-sitter-kconfig
+commit: 9ac99fe4c0c27a35dc6f757cef534c646e944881
+license: MIT
+
+grammars:
+  - id: kconfig
+    name: Kconfig
+    tag: config
+    tier: 2
+    has_scanner: true
+
+    inventor: Linus Torvalds
+    year: 2005
+    description: A tree-based configuration language originally designed for the kernel, now used by many projects.
+    link: https://docs.kernel.org/kbuild/kconfig-language.html
+
+    samples:
+      - path: samples/Kconfig
+        link: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/init/Kconfig
+        license: GPL-2.0-only

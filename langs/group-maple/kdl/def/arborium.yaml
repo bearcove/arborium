@@ -1,0 +1,20 @@
+repo: https://github.com/tree-sitter-grammars/tree-sitter-kdl
+commit: b37e3d58e5c5cf8d739b315d6114e02d42e66664
+license: MIT
+
+grammars:
+  - id: kdl
+    name: KDL
+    tag: config
+    tier: 2
+    has_scanner: true
+
+    inventor: Kat Marchán
+    year: 2020
+    description: "A modern document language with the flexibility of XML and the simplicity of JSON and YAML. Your new favorite configuration language."
+    link: https://kdl.dev/
+    trivia: "KDL was originally an initialism for Kat's Document Language"
+
+    samples:
+      - path: samples/example.kdl
+        license: MIT OR Apache-2.0

@@ -180,6 +180,7 @@ export function normalizeLanguage(lang: string): string {
     sh: 'bash',
     shell: 'bash',
     yml: 'yaml',
+    bat: 'batch',
     cs: 'c-sharp',
     csharp: 'c-sharp',
     'c++': 'cpp',

@@ -1,0 +1,19 @@
+repo: https://github.com/casey/tree-sitter-just
+commit: 5685543a6e64f66335e25518c9ae8ffa1dae3d01
+license: MIT
+
+grammars:
+  - id: just
+    name: Just
+    tag: build
+    tier: 1
+    has_scanner: true
+
+    inventor: Casey Rodarmor
+    year: 2016
+    description: Just a command runner.
+    link: https://just.systems/
+
+    samples:
+      - path: samples/Justfile
+        license: MIT OR Apache-2.0

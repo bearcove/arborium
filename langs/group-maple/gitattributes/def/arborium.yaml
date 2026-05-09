@@ -1,0 +1,20 @@
+repo: https://github.com/tree-sitter-grammars/tree-sitter-gitattributes
+commit: 1b7af09d45b579f9f288453b95ad555f1f431645
+license: MIT
+
+grammars:
+  - id: gitattributes
+    name: .gitattributes
+    tag: config
+    tier: 2
+    has_scanner: false
+
+    inventor: Linus Torvalds
+    year: 2005
+    description: Defining attributes per path for Git.
+    link: https://git-scm.com/docs/gitattributes
+
+    samples:
+      - path: samples/.gitattributes
+        link: https://github.com/gitattributes/gitattributes/blob/1dcb1ff5890b3997642b295fee6934204b4f79ac/.gitattributes
+        license: MIT

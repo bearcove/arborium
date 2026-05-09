@@ -3,7 +3,7 @@ name = "arborium-<%= grammar_id %>-plugin"
 version = "0.1.0"
 edition = "2024"
 description = "<%= grammar_id %> grammar plugin for arborium"
-license = "MIT"
+license = "<%= license %>"
 repository = "https://github.com/bearcove/arborium"
 
 [lib]

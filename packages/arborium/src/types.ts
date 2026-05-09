@@ -197,6 +197,8 @@ export interface ResolveArgs {
 export interface LanguageResolveArgs extends ResolveArgs {
   /** Language to load the grammar plugin for */
   language: string;
+  /** Package version used when building the default CDN URL */
+  version: string;
 }
 
 /** Configuration for the arborium runtime */

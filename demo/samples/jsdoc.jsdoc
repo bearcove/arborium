@@ -1,0 +1,28 @@
+/**
+ * Get the node's child at the given index, where zero represents the first child.
+ *
+ * This method is fairly fast, but its cost is technically log(n), so if
+ * you might be iterating over a long list of children, you should use
+ * {@link Node#children} instead.
+ */
+
+/**
+ * Move this cursor to the last child of its current node.
+ *
+ * This returns `true` if the cursor successfully moved, and returns
+ * `false` if there were no children.
+ *
+ * Note that this function may be slower than
+ * {@link TreeCursor#gotoFirstChild} because it needs to
+ * iterate through all the children to compute the child's position.
+ */
+
+/**
+ * Set the language that the parser should use for parsing.
+ *
+ * If the language was not successfully assigned, an error will be thrown.
+ * This happens if the language was generated with an incompatible
+ * version of the Tree-sitter CLI. Check the language's version using
+ * {@link Language#version} and compare it to this library's
+ * {@link LANGUAGE_VERSION} and {@link MIN_COMPATIBLE_VERSION} constants.
+ */

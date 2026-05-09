@@ -321,7 +321,7 @@ pub mod common {
 
     /// Checkout the repository.
     pub fn checkout() -> Step {
-        Step::uses("Checkout", "actions/checkout@v4")
+        Step::uses("Checkout", "actions/checkout@v5")
     }
 
     /// Install Rust toolchain.
@@ -347,7 +347,7 @@ pub mod common {
     /// use zip which doesn't preserve Unix file permissions.
     pub fn download_generate_output() -> Vec<Step> {
         vec![
-            Step::uses("Download generate output", "actions/download-artifact@v4")
+            Step::uses("Download generate output", "actions/download-artifact@v5")
                 .with_inputs([("name", "generate-output"), ("path", ".")]),
             Step::run(
                 "Extract generate output",
@@ -431,7 +431,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                 )
                 .with_id("version"),
                 // Layer 1: Cache xtask build (keyed on source code)
-                Step::uses("Restore xtask cache", "actions/cache@v4")
+                Step::uses("Restore xtask cache", "actions/cache@v5")
                     .with_inputs([
                         ("path", "xtask/target"),
                         (
@@ -451,7 +451,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                     "echo \"key=$(./xtask/target/release/xtask cache-key)\" >> $GITHUB_OUTPUT",
                 )
                 .with_id("grammar-cache-key"),
-                Step::uses("Restore grammar generation cache", "actions/cache@v4")
+                Step::uses("Restore grammar generation cache", "actions/cache@v5")
                     .with_inputs([
                         ("path", ".cache/arborium"),
                         (
@@ -480,7 +480,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                     // Exclude node_modules and dist to avoid bloat - only generated source files needed
                     "tar --exclude='node_modules' --exclude='dist' -cf generate-output.tar crates/ langs/ packages/ xtask/target/release/xtask version.json",
                 ),
-                Step::uses("Upload generate output", "actions/upload-artifact@v4")
+                Step::uses("Upload generate output", "actions/upload-artifact@v5")
                     .with_inputs([
                         ("name", "generate-output"),
                         ("path", "generate-output.tar"),
@@ -620,7 +620,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                                         grammars_list
                                     ),
                                 ),
-                                Step::uses("Upload plugins artifact", "actions/upload-artifact@v4")
+                                Step::uses("Upload plugins artifact", "actions/upload-artifact@v5")
                                     .with_inputs([
                                         ("name", format!("plugins-group-{}", group.name)),
                                         ("path", "dist/plugins".to_string()),
@@ -681,7 +681,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
             npm_steps.push(
                 Step::uses(
                     format!("Download plugins group {}", group_name),
-                    "actions/download-artifact@v4",
+                    "actions/download-artifact@v5",
                 )
                 .with_inputs([
                     ("name", format!("plugins-group-{}", group_name)),
