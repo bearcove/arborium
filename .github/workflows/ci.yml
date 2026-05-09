@@ -156,7 +156,7 @@ jobs:
       - name: Install npm dependencies
         run: |-
           set -e
-          cd packages/arborium && pnpm install --frozen-lockfile
+          cd packages/arborium && pnpm install --frozen-lockfile --config.dangerously-allow-all-builds=true
         shell: bash
       - name: Run TypeScript tests
         run: |-
@@ -779,7 +779,7 @@ jobs:
       - name: Install main package dependencies
         run: |-
           set -e
-          cd packages/arborium && pnpm install --frozen-lockfile
+          cd packages/arborium && pnpm install --frozen-lockfile --config.dangerously-allow-all-builds=true
         shell: bash
       - name: Publish to npm
         run: |-
