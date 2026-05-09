@@ -1,0 +1,27 @@
+repo: https://github.com/tree-sitter-grammars/tree-sitter-make
+commit: 70613f3d812cbabbd7f38d104d60a409c4008b43
+license: MIT
+
+grammars:
+  - id: makefile
+    name: Makefile
+    tag: config
+    tier: 3
+    has_scanner: false
+    generate_plugin: true
+    c_symbol: make
+    icon: simple-icons:gnu
+    aliases:
+      - make
+      - mk
+
+    inventor: Stuart Feldman
+    year: 1976
+    description: 'Build automation language used by GNU make and BSD make to describe how to derive targets from sources via shell rules; see the <a href="https://www.gnu.org/software/make/manual/make.html">GNU make manual</a>.'
+    trivia: "Stuart Feldman wrote make at Bell Labs in 1976; the tab-indented recipe rule was reportedly preserved decades later because too many existing makefiles depended on it."
+    link: https://en.wikipedia.org/wiki/Make_(software)
+
+    samples:
+      - path: samples/example.mk
+        description: Makefile with variables, pattern rules, conditionals, automatic variables, and the shell function.
+        license: MIT
