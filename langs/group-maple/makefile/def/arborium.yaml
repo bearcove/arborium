@@ -12,7 +12,6 @@ grammars:
     c_symbol: make
     icon: simple-icons:gnu
     aliases:
-      - make
       - mk
 
     inventor: Stuart Feldman
