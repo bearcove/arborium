@@ -126,6 +126,7 @@ struct ReadmeTemplate<'a> {
 struct PluginCargoTomlTemplate<'a> {
     grammar_id: &'a str,
     grammar_crate_name: &'a str,
+    license: &'a str,
     crate_rel: &'a str,
     shared_rel: &'a str,
 }
@@ -142,6 +143,7 @@ struct PluginLibRsTemplate<'a> {
 struct PluginPackageJsonTemplate<'a> {
     grammar_id: &'a str,
     grammar_name: &'a str,
+    license: &'a str,
     version: &'a str,
 }
 
@@ -838,7 +840,7 @@ fn generate_readme(crate_name: &str, config: &crate::types::CrateConfig) -> Stri
 }
 
 /// Generate plugin Cargo.toml content.
-fn generate_plugin_cargo_toml(grammar_id: &str, grammar_crate_name: &str) -> String {
+fn generate_plugin_cargo_toml(grammar_id: &str, grammar_crate_name: &str, license: &str) -> String {
     // Paths relative to npm/:
     // npm/ is at langs/group-*/lang/npm/
     // crate/ is at langs/group-*/lang/crate/ (sibling)
@@ -850,6 +852,7 @@ fn generate_plugin_cargo_toml(grammar_id: &str, grammar_crate_name: &str) -> Str
     let template = PluginCargoTomlTemplate {
         grammar_id,
         grammar_crate_name,
+        license,
         crate_rel,
         shared_rel,
     };
@@ -872,10 +875,16 @@ fn generate_plugin_lib_rs(grammar_id: &str, grammar_crate_name: &str) -> String 
 }
 
 /// Generate plugin package.json content.
-fn generate_plugin_package_json(grammar_id: &str, grammar_name: &str, version: &str) -> String {
+fn generate_plugin_package_json(
+    grammar_id: &str,
+    grammar_name: &str,
+    license: &str,
+    version: &str,
+) -> String {
     let template = PluginPackageJsonTemplate {
         grammar_id,
         grammar_name,
+        license,
         version,
     };
     template
@@ -1851,6 +1860,10 @@ fn plan_plugin_crate_files(
 
     let grammar_id = grammar.id();
     let crate_name = &crate_state.name;
+    let license: &str = {
+        let l: &str = config.license.as_ref();
+        if l.is_empty() { "MIT" } else { l }
+    };
 
     // Plugin crate lives in npm/ sibling to crate/
     // Structure: langs/group-*/lang/npm/
@@ -1870,7 +1883,7 @@ fn plan_plugin_crate_files(
 
     // Generate npm/Cargo.toml
     let cargo_toml_path = npm_path.join("Cargo.toml");
-    let new_cargo_toml = generate_plugin_cargo_toml(grammar_id, crate_name);
+    let new_cargo_toml = generate_plugin_cargo_toml(grammar_id, crate_name, license);
 
     if cargo_toml_path.exists() {
         let old_content = fs::read_to_string(&cargo_toml_path)?;
@@ -1934,7 +1947,7 @@ fn plan_plugin_crate_files(
     // Generate npm/package.json
     let package_json_path = npm_path.join("package.json");
     let new_package_json =
-        generate_plugin_package_json(grammar_id, grammar_name, workspace_version);
+        generate_plugin_package_json(grammar_id, grammar_name, license, workspace_version);
 
     if package_json_path.exists() {
         let old_content = fs::read_to_string(&package_json_path)?;

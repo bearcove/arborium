@@ -24,7 +24,7 @@ You may choose either license at your option.
 | tree-sitter-gitattributes | MIT | Copyright (c) 2022 ObserverOfTime |
 | tree-sitter-ini | Apache-2.0 | Copyright Justin M. Keyes |
 | tree-sitter-jsdoc | MIT | Copyright (c) 2018 Max Brunsfeld |
-| tree-sitter-just | Apache-2.0 | See upstream LICENSE |
+| tree-sitter-just | MIT | See upstream package metadata |
 | tree-sitter-kconfig | MIT | Copyright (c) 2023 Amaan Qureshi |
 | tree-sitter-kdl | MIT | Copyright (c) 2023 Amaan Qureshi, Andrew Hlynskyi |
 | tree-sitter-make | MIT | Copyright (c) 2021 Alexandre A. Muller |
