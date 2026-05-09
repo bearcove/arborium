@@ -21,12 +21,21 @@ You may choose either license at your option.
 | tree-sitter-css | MIT | Copyright (c) 2018 Max Brunsfeld |
 | tree-sitter-diff | MIT | Copyright (c) 2021 Michael Davis |
 | tree-sitter-dockerfile | MIT | Copyright (c) 2021 Camden Cheek |
+| tree-sitter-gitattributes | MIT | Copyright (c) 2022 ObserverOfTime |
 | tree-sitter-ini | Apache-2.0 | Copyright Justin M. Keyes |
+| tree-sitter-jsdoc | MIT | Copyright (c) 2018 Max Brunsfeld |
+| tree-sitter-just | Apache-2.0 | See upstream LICENSE |
+| tree-sitter-kconfig | MIT | Copyright (c) 2023 Amaan Qureshi |
+| tree-sitter-kdl | MIT | Copyright (c) 2023 Amaan Qureshi, Andrew Hlynskyi |
 | tree-sitter-make | MIT | Copyright (c) 2021 Alexandre A. Muller |
 | tree-sitter-meson | MIT | Copyright (c) 2023 Decodertalkers |
 | tree-sitter-nix | MIT | Copyright (c) 2019 Charles Strahan |
+| tree-sitter-odin | MIT | Copyright (c) 2023 Amaan Qureshi |
+| tree-sitter-proto | MIT | Copyright (c) 2024-2025 Mohammad Ashar Khan |
+| tree-sitter-regex | MIT | Copyright (c) 2014 Max Brunsfeld |
 | tree-sitter-scss | MIT | Copyright (c) 2024 Amaan Qureshi |
 | tree-sitter-toml | MIT | Copyright (c) Ika |
+| tree-sitter-yuri | Apache-2.0 | See upstream LICENSE |
 | tree-sitter-zig | MIT | Copyright (c) 2022 maxxnino |
 | tree-sitter-jinja2 | Apache-2.0 | Copyright dbt Labs |
 
