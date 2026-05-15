@@ -22,6 +22,10 @@
 (displayed_equation) @markup.raw
 (inline_formula) @markup.raw
 
+;; Math sub/superscript — $x_i^2$
+(subscript) @markup.raw
+(superscript) @markup.raw
+
 (math_environment
   (begin
     command: _ @function.builtin
@@ -216,6 +220,19 @@
   (brack_group)
   (brack_group_argc)
 ] @variable.parameter
+
+;; Verbatim and code environments
+(verbatim_environment) @markup.raw
+
+[
+  (listing_environment)
+  (minted_environment)
+] @markup.raw
+
+;; TODO notes (\todo{...}) — command in comment colour, message as string
+(todo
+  command: (todo_command_name) @comment
+  arg: (curly_group (_) @string))
 
 ;; Operators and punctuation
 [(operator) "="] @operator
