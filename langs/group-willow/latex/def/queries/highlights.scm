@@ -181,6 +181,11 @@
   command: _ @keyword.control.import
   paths: (curly_group_path_list) @string)
 
+;; Hyperlinks (\url{...} and \href{...}{...})
+(hyperlink
+  command: _ @function.macro
+  uri: (curly_group_uri) @markup.link)
+
 ;; Text formatting
 ((generic_command
   command: (command_name) @_name
