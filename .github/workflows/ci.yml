@@ -607,7 +607,7 @@ jobs:
           path: dist/plugins
           retention-days: "7"
   build-plugins-willow: 
-    name: "Plugins (willow): asciidoc, diff, jinja2, markdown, svelte, typst, vue"
+    name: "Plugins (willow): asciidoc, diff, jinja2, latex, markdown, svelte, typst, vue"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -625,10 +625,10 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build asciidoc, diff, jinja2, markdown, svelte, typst, vue
+      - name: Build asciidoc, diff, jinja2, latex, markdown, svelte, typst, vue
         run: |-
           set -e
-          ./xtask/target/release/xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins
+          ./xtask/target/release/xtask build asciidoc diff jinja2 latex markdown svelte typst vue -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
