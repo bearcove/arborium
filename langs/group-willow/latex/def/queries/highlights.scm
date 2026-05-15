@@ -85,6 +85,9 @@
 (new_command_definition
   command: _ @function.macro
   declaration: (curly_group_command_name (command_name) @function))
+(new_command_definition
+  command: _ @function.macro
+  declaration: (command_name) @function)
 (old_command_definition
   command: _ @function.macro
   declaration: (_) @function)
@@ -202,8 +205,7 @@
 
 ;; Key-value parameters
 (key_value_pair
-  key: (_) @variable.parameter
-  value: (_))
+  key: (_) @variable.parameter)
 
 [
   (brack_group)
@@ -215,8 +217,7 @@
 
 "\\item" @punctuation.special
 
-((word) @punctuation.delimiter
-  (#eq? @punctuation.delimiter "&"))
+(delimiter) @punctuation.delimiter
 
 ["[" "]" "{" "}"] @punctuation.bracket
 
