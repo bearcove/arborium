@@ -120,6 +120,23 @@ export type ParseResult = Utf16ParseResult;
 // ============================================================================
 
 /**
+ * An incremental edit, in the shape tree-sitter needs: UTF-8 byte offsets plus
+ * row/column points, for both the old and new end of the changed range. Field
+ * names are snake_case to match the plugin's wire format.
+ */
+export interface Edit {
+  start_byte: number;
+  old_end_byte: number;
+  new_end_byte: number;
+  start_row: number;
+  start_col: number;
+  old_end_row: number;
+  old_end_col: number;
+  new_end_row: number;
+  new_end_col: number;
+}
+
+/**
  * A parsing session for incremental highlighting.
  *
  * Sessions allow you to reuse the parser state between parses, which is more
@@ -142,8 +159,17 @@ export type ParseResult = Utf16ParseResult;
  * ```
  */
 export interface Session {
-  /** Set the text to parse */
+  /** Set the text to parse (full replace; resets the parse tree). */
   setText(text: string): void;
+  /**
+   * Apply an incremental edit and re-parse, reusing the unchanged parts of the
+   * previous tree. This is what makes editor highlighting fast — prefer it over
+   * `setText` for keystroke-sized changes.
+   *
+   * `newText` is the full document text *after* the edit; `edit` locates the
+   * change. Returns the updated spans/injections (UTF-16 offsets).
+   */
+  applyEdit(newText: string, edit: Edit): Utf16ParseResult;
   /** Parse the current text and return spans/injections with UTF-16 offsets */
   parse(): Utf16ParseResult;
   /** Cancel any in-progress parsing */

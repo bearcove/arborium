@@ -12,6 +12,7 @@ import type {
   Utf8ParseResult,
   Utf16ParseResult,
   ArboriumConfig,
+  Edit,
   Grammar,
   Session,
 } from "./types.js";
@@ -130,6 +131,8 @@ interface WasmBindgenPlugin {
   create_session: () => number;
   free_session: (session: number) => void;
   set_text: (session: number, text: string) => void;
+  /** Apply an incremental edit, re-parsing the session's tree in place. */
+  apply_edit: (session: number, new_text: string, edit: Edit) => void;
   /** Parse and return UTF-8 byte offsets (for Rust host) */
   parse: (session: number) => Utf8ParseResult;
   /** Parse and return UTF-16 code unit indices (for JavaScript) */
@@ -411,21 +414,26 @@ export async function loadGrammar(
     parse: (source: string) => plugin.parseUtf16(source),
     createSession: (): Session => {
       const handle = module.create_session();
+      const parseUtf16 = (): Utf16ParseResult => {
+        try {
+          const result = module.parse_utf16(handle);
+          return {
+            spans: result.spans || [],
+            injections: result.injections || [],
+          };
+        } catch (e) {
+          config.logger.error(`[arborium] Session parse error:`, e);
+          return { spans: [], injections: [] };
+        }
+      };
       return {
         setText: (text: string) => module.set_text(handle, text),
-        // Session.parse() returns UTF-16 offsets for JavaScript compatibility
-        parse: () => {
-          try {
-            const result = module.parse_utf16(handle);
-            return {
-              spans: result.spans || [],
-              injections: result.injections || [],
-            };
-          } catch (e) {
-            config.logger.error(`[arborium] Session parse error:`, e);
-            return { spans: [], injections: [] };
-          }
+        applyEdit: (text: string, edit: Edit) => {
+          module.apply_edit(handle, text, edit);
+          return parseUtf16();
         },
+        // Session.parse() returns UTF-16 offsets for JavaScript compatibility
+        parse: parseUtf16,
         cancel: () => module.cancel(handle),
         free: () => module.free_session(handle),
       };

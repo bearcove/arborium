@@ -17,6 +17,7 @@ export {
 export { availableLanguages, highlights, pluginVersion } from "./plugins-manifest.js";
 export type {
   ArboriumConfig,
+  Edit,
   Grammar,
   Highlight,
   Injection,
