@@ -183,6 +183,111 @@ fn normalize_and_coalesce(spans: Vec<Span>) -> Vec<NormalizedSpan> {
     coalesced
 }
 
+/// Dedupe exact-range spans (preferring styled / higher pattern_index), map
+/// captures to theme tags, coalesce same-tag runs, and sort. Shared by the HTML
+/// and flat-token renderers so both see the same resolved spans.
+fn prepared_normalized_spans(spans: Vec<Span>) -> Vec<NormalizedSpan> {
+    // Sort by (start, -end) so longer spans come first at the same start.
+    let mut spans = spans;
+    spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
+
+    // Deduplicate exact (start, end) ranges: prefer styled over unstyled, then
+    // higher pattern_index (later in highlights.scm wins, per tree-sitter).
+    let mut deduped: HashMap<(u32, u32), Span> = HashMap::new();
+    for span in spans {
+        let key = (span.start, span.end);
+        let new_has_styling = tag_for_capture(&span.capture).is_some();
+        if let Some(existing) = deduped.get(&key) {
+            let existing_has_styling = tag_for_capture(&existing.capture).is_some();
+            let should_replace = match (new_has_styling, existing_has_styling) {
+                (true, false) => true,
+                (false, true) => false,
+                _ => span.pattern_index >= existing.pattern_index,
+            };
+            if should_replace {
+                deduped.insert(key, span);
+            }
+        } else {
+            deduped.insert(key, span);
+        }
+    }
+
+    let spans: Vec<Span> = deduped.into_values().collect();
+    let mut spans = normalize_and_coalesce(spans);
+    spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
+    spans
+}
+
+/// A flat, non-overlapping highlighted token: a byte range and its theme tag.
+///
+/// Unlike raw [`Span`]s (which nest and overlap), flat tokens are what an editor
+/// wants — exactly one tag per byte. They come from the same event-stack walk
+/// the HTML renderer uses, so the tag at each byte matches the rendered output.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FlatToken {
+    /// Byte offset where the token starts (inclusive).
+    pub start: u32,
+    /// Byte offset where the token ends (exclusive).
+    pub end: u32,
+    /// Resolved theme tag (e.g. "keyword", "string", "comment").
+    pub tag: &'static str,
+}
+
+/// Flatten spans into a non-overlapping token stream (innermost tag wins),
+/// mirroring [`spans_to_html`]'s stack walk. Untagged gaps produce no token.
+pub fn spans_to_flat_tokens(source: &str, spans: Vec<Span>) -> Vec<FlatToken> {
+    let source = source.trim_end_matches('\n');
+    let spans = prepared_normalized_spans(spans);
+    if spans.is_empty() {
+        return vec![];
+    }
+
+    let mut events: Vec<(u32, bool, usize)> = Vec::with_capacity(spans.len() * 2);
+    for (i, span) in spans.iter().enumerate() {
+        events.push((span.start, true, i));
+        events.push((span.end, false, i));
+    }
+    // By position, then ends before starts at the same position.
+    events.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
+
+    let mut tokens: Vec<FlatToken> = Vec::new();
+    let mut last_pos: usize = 0;
+    let mut stack: Vec<usize> = Vec::new();
+    for (pos, is_start, span_idx) in events {
+        let pos = pos as usize;
+        if pos > last_pos && pos <= source.len() {
+            if let Some(&top) = stack.last() {
+                let tag = spans[top].tag;
+                // Coalesce with the previous token if it's the same tag and adjacent.
+                if let Some(prev) = tokens.last_mut() {
+                    if prev.tag == tag && prev.end as usize == last_pos {
+                        prev.end = pos as u32;
+                        last_pos = pos;
+                        if is_start {
+                            stack.push(span_idx);
+                        } else if let Some(p) = stack.iter().rposition(|&x| x == span_idx) {
+                            stack.remove(p);
+                        }
+                        continue;
+                    }
+                }
+                tokens.push(FlatToken {
+                    start: last_pos as u32,
+                    end: pos as u32,
+                    tag,
+                });
+            }
+            last_pos = pos;
+        }
+        if is_start {
+            stack.push(span_idx);
+        } else if let Some(p) = stack.iter().rposition(|&x| x == span_idx) {
+            stack.remove(p);
+        }
+    }
+    tokens
+}
+
 /// Deduplicate spans and convert to HTML.
 ///
 /// This handles:
@@ -202,48 +307,10 @@ pub fn spans_to_html(source: &str, spans: Vec<Span>, format: &HtmlFormat) -> Str
         return html_escape(source);
     }
 
-    // Sort spans by (start, -end) so longer spans come first at same start
-    let mut spans = spans;
-    spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
-
-    // Deduplicate: for spans with the exact same (start, end), prefer spans with higher pattern_index
-    // This matches tree-sitter convention: later patterns in highlights.scm override earlier ones.
-    // We also prefer styled spans over unstyled (e.g., @comment over @spell).
-    let mut deduped: HashMap<(u32, u32), Span> = HashMap::new();
-    for span in spans {
-        let key = (span.start, span.end);
-        let new_has_styling = tag_for_capture(&span.capture).is_some();
-
-        if let Some(existing) = deduped.get(&key) {
-            let existing_has_styling = tag_for_capture(&existing.capture).is_some();
-            // Prefer spans with styling over unstyled spans
-            // Among equally-styled spans, prefer higher pattern_index (later in query)
-            let should_replace = match (new_has_styling, existing_has_styling) {
-                (true, false) => true,  // New has styling, existing doesn't
-                (false, true) => false, // Existing has styling, new doesn't
-                _ => span.pattern_index >= existing.pattern_index, // Both same styling status: higher pattern_index wins
-            };
-            if should_replace {
-                deduped.insert(key, span);
-            }
-        } else {
-            deduped.insert(key, span);
-        }
-    }
-
-    // Convert back to vec
-    let spans: Vec<Span> = deduped.into_values().collect();
-
-    // Normalize to theme slots and coalesce adjacent same-tag spans
-    let spans = normalize_and_coalesce(spans);
-
+    let spans = prepared_normalized_spans(spans);
     if spans.is_empty() {
         return html_escape(source);
     }
-
-    // Re-sort after coalescing
-    let mut spans = spans;
-    spans.sort_by(|a, b| a.start.cmp(&b.start).then_with(|| b.end.cmp(&a.end)));
 
     // Build events from spans
     let mut events: Vec<(u32, bool, usize)> = Vec::new(); // (pos, is_start, span_index)

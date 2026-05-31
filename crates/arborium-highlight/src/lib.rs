@@ -106,8 +106,8 @@ mod types;
 pub mod tree_sitter;
 
 pub use render::{
-    AnsiOptions, ThemedSpan, html_escape, spans_to_ansi, spans_to_ansi_with_options, spans_to_html,
-    spans_to_themed, write_spans_as_ansi, write_spans_as_html,
+    AnsiOptions, FlatToken, ThemedSpan, html_escape, spans_to_ansi, spans_to_ansi_with_options,
+    spans_to_flat_tokens, spans_to_html, spans_to_themed, write_spans_as_ansi, write_spans_as_html,
 };
 pub use types::{HighlightError, Injection, ParseResult, Span};
 
@@ -322,6 +322,17 @@ impl<P: GrammarProvider> HighlighterCore<P> {
         Ok(spans_to_html(source, spans, &self.config.html_format))
     }
 
+    /// Like [`highlight`](Self::highlight) but returns flat, non-overlapping
+    /// tokens (byte range + theme tag) instead of HTML — for editor integrations.
+    async fn highlight_flat(
+        &mut self,
+        language: &str,
+        source: &str,
+    ) -> Result<Vec<FlatToken>, HighlightError> {
+        let spans = self.highlight_spans(language, source).await?;
+        Ok(spans_to_flat_tokens(source, spans))
+    }
+
     /// Process injections recursively.
     async fn process_injections(
         &mut self,
@@ -524,6 +535,16 @@ impl<P: GrammarProvider> AsyncHighlighter<P> {
         source: &str,
     ) -> Result<String, HighlightError> {
         self.core.highlight(language, source).await
+    }
+
+    /// Highlight source code asynchronously into flat tokens (byte range + theme
+    /// tag), for editors that apply highlighting as token ranges rather than HTML.
+    pub async fn highlight_flat(
+        &mut self,
+        language: &str,
+        source: &str,
+    ) -> Result<Vec<FlatToken>, HighlightError> {
+        self.core.highlight_flat(language, source).await
     }
 }
 

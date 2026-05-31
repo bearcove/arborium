@@ -308,6 +308,34 @@ pub async fn highlight_with_config(
         .map_err(|e| JsValue::from_str(&format!("{}", e)))
 }
 
+/// Highlight into flat, non-overlapping tokens for editor integrations.
+///
+/// Returns a JS array of `{ start, end, tag }` where `start`/`end` are byte
+/// offsets into `source` and `tag` is the resolved theme tag (e.g. "keyword").
+/// Unlike `highlight`, this returns token ranges rather than HTML, so editors
+/// (Monaco, CodeMirror) can apply highlighting as semantic tokens/decorations.
+#[wasm_bindgen(js_name = highlightSpans)]
+pub async fn highlight_spans(language: &str, source: &str) -> Result<JsValue, JsValue> {
+    use js_sys::{Array, Object, Reflect};
+
+    let provider = JsGrammarProvider::new();
+    let mut highlighter = AsyncHighlighter::new(provider);
+    let tokens = highlighter
+        .highlight_flat(language, source)
+        .await
+        .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
+
+    let arr = Array::new();
+    for t in tokens {
+        let obj = Object::new();
+        Reflect::set(&obj, &JsValue::from_str("start"), &JsValue::from_f64(t.start as f64))?;
+        Reflect::set(&obj, &JsValue::from_str("end"), &JsValue::from_f64(t.end as f64))?;
+        Reflect::set(&obj, &JsValue::from_str("tag"), &JsValue::from_str(t.tag))?;
+        arr.push(&obj);
+    }
+    Ok(arr.into())
+}
+
 /// Check if a language is available for highlighting.
 #[wasm_bindgen(js_name = isLanguageAvailable)]
 pub fn is_language_available(language: &str) -> bool {
