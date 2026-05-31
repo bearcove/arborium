@@ -1,0 +1,11 @@
+// Simple voltage divider — the "hello world" of circuit simulation.
+
+circuit voltage_divider {
+    param vdd = 5
+
+    V1: vsource(in -> gnd, dc: vdd)
+    R1: resistor(in -> mid, 1k)
+    R2: resistor(mid -> gnd, 2k)
+
+    analysis op {}
+}

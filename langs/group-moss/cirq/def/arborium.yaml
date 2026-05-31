@@ -1,0 +1,46 @@
+repo: https://github.com/cramt/thevenin
+commit: 1de9537c7d0d599f0f1f056deb73aab8a62201e4
+license: BSD-3-Clause
+
+grammars:
+  - id: cirq
+    name: Cirq
+    tag: code
+    tier: 5
+    has_scanner: true
+    generate_plugin: true
+    icon: mdi:chip
+    aliases:
+      - cirq
+
+    inventor: Alexandra Østermark
+    year: 2025
+    description: "Cirq is a circuit description language for the Thevenin SPICE simulator, with circuits, reusable modules, parameters, device models, and analysis declarations."
+    link: https://github.com/cramt/thevenin
+    trivia: "Cirq is the native source language of Thevenin, a from-scratch Rust rewrite of ngspice. SPICE netlists are imported into Cirq's IR, which is the canonical input to the simulator's analyses. Its `code \"lang\" { ... }` blocks embed other languages, parsed by a hand-written brace-counting scanner."
+
+    samples:
+      - path: samples/voltage_divider.cirq
+        description: The "hello world" of circuit simulation — a voltage divider with a DC operating-point analysis.
+        link: https://github.com/cramt/thevenin/blob/main/examples/cirq/voltage_divider.cirq
+        license: BSD-3-Clause
+
+      - path: samples/fourier.cirq
+        description: Native Fourier / FFT post-processing over a transient analysis.
+        link: https://github.com/cramt/thevenin/blob/main/examples/cirq/fourier.cirq
+        license: BSD-3-Clause
+
+      - path: samples/cmos_inverter.cirq
+        description: CMOS inverter with NMOS/PMOS model declarations, a PULSE source, and transient analysis.
+        link: https://github.com/cramt/thevenin/blob/main/examples/cirq/cmos_inverter.cirq
+        license: BSD-3-Clause
+
+      - path: samples/hierarchical.cirq
+        description: Hierarchical design with reusable modules and instance wiring.
+        link: https://github.com/cramt/thevenin/blob/main/examples/cirq/hierarchical.cirq
+        license: BSD-3-Clause
+
+      - path: samples/conditional.cirq
+        description: Compile-time if/elseif/else for conditional parameters, elements, and analyses.
+        link: https://github.com/cramt/thevenin/blob/main/examples/cirq/conditional.cirq
+        license: BSD-3-Clause

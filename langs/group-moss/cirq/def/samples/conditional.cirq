@@ -1,0 +1,45 @@
+// Compile-time `if / elseif / else`.
+//
+// These blocks are resolved at lowering time — the condition is a constant
+// expression over params/literals, and only the taken branch's declarations
+// reach the simulator. This is the native counterpart of SPICE's
+// `.if/.elseif/.else/.endif`, and is distinct from the runtime ternary
+// (`cond ? a : b`) and from `.control` script `if`.
+
+circuit amp {
+    param corner = "tt"        // process corner: ff | tt | ss
+    param vdd = 1.8
+    param fast = true
+
+    // Conditional parameter selection — string equality folds at compile time.
+    if corner == "ff" {
+        param vto = 0.35
+    } elseif corner == "ss" {
+        param vto = 0.55
+    } else {
+        param vto = 0.45
+    }
+
+    // Conditional element inclusion: the protection resistor only exists when
+    // the supply is high enough to need it.
+    if vdd > 1.5 {
+        Rprot: resistor(in -> gate, 10k)
+    }
+
+    V1: vsource(in -> gnd, dc: vdd)
+    R1: resistor(in -> out, 1k)
+    C1: capacitor(out -> gnd, 1p)
+
+    // Branch bodies hold any circuit item, including whole analyses.
+    if fast {
+        analysis tran {
+            step: 10p
+            stop: 5n
+        }
+    } else {
+        analysis tran {
+            step: 100p
+            stop: 50n
+        }
+    }
+}

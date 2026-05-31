@@ -427,7 +427,7 @@ jobs:
           path: dist/plugins
           retention-days: "7"
   build-plugins-hazel: 
-    name: "Plugins (hazel): awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh"
+    name: "Plugins (hazel): awk, bash, batch, cirq-control, fish, lua, perl, php, powershell, python, ruby, zsh"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -445,10 +445,10 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh
+      - name: Build awk, bash, batch, cirq-control, fish, lua, perl, php, powershell, python, ruby, zsh
         run: |-
           set -e
-          ./xtask/target/release/xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins
+          ./xtask/target/release/xtask build awk bash batch cirq-control fish lua perl php powershell python ruby zsh -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -487,7 +487,7 @@ jobs:
           path: dist/plugins
           retention-days: "7"
   build-plugins-moss: 
-    name: "Plugins (moss): ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl"
+    name: "Plugins (moss): ada, cirq, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl"
     runs-on: depot-ubuntu-24.04-32
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
@@ -505,10 +505,10 @@ jobs:
           set -e
           tar -xf generate-output.tar && rm generate-output.tar
         shell: bash
-      - name: Build ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl
+      - name: Build ada, cirq, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl
         run: |-
           set -e
-          ./xtask/target/release/xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins
+          ./xtask/target/release/xtask build ada cirq glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5

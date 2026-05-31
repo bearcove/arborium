@@ -1,0 +1,33 @@
+// Native Fourier / FFT post-processing.
+//
+// `analysis four` and `analysis fft` are spelled as analysis kinds, just like
+// `tran` and `ac`. Both post-process the preceding `analysis tran`, so a
+// transient is declared alongside them. They are the native counterparts of
+// SPICE `.four` and `.fft`.
+
+circuit sine_rc {
+    // 1 kHz sine into an RC low-pass.
+    V1: vsource(in -> gnd, sin: { v0: 0, va: 1, freq: 1k })
+    R1: resistor(in -> out, 1k)
+    C1: capacitor(out -> gnd, 100n)
+
+    analysis tran {
+        step: 5u
+        stop: 5m
+    }
+
+    // Harmonic table of the final fundamental period → `fourier1` plot.
+    analysis four {
+        fundamental: 1k
+        output: v(out)
+        harmonics: 9
+    }
+
+    // Windowed FFT over the transient → `fft1` plot. `output` accepts a list.
+    analysis fft {
+        output: [v(out), v(in)]
+        npoints: 1024
+        window: hann
+        format: magnitude
+    }
+}
