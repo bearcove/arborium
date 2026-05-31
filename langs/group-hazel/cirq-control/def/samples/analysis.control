@@ -1,0 +1,38 @@
+* ngspice .control script: sweep the supply, measure gain, and report.
+* Line comments start with `*`; an inline `$ ` also begins a comment.
+
+set noaskquit          $ don't prompt on quit
+
+let vstart = 1.0
+let vstop  = 5.0
+
+* Run a DC operating point, then a transient analysis.
+op
+tran 1n 100n
+
+* Compute a derived vector and a scalar measurement.
+let gain = v(out) / v(in)
+measure tran vpp PP v(out)
+
+print col gain v(out) > results.txt
+
+* Block statements terminate on a bare `end` line.
+foreach corner ff tt ss
+  echo "corner =" $corner "gain =" $&gain
+end
+
+repeat 3
+  let vstart = vstart + 0.5
+end
+
+while vstart < vstop
+  let vstart = vstart + 1.0
+end
+
+if gain > 10
+  echo "high gain"
+else
+  echo "low gain"
+end
+
+quit 0

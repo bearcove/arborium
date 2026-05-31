@@ -1,0 +1,26 @@
+repo: https://github.com/cramt/thevenin
+commit: 1de9537c7d0d599f0f1f056deb73aab8a62201e4
+license: BSD-3-Clause
+
+grammars:
+  - id: cirq-control
+    name: Cirq Control
+    tag: code
+    tier: 5
+    has_scanner: false
+    generate_plugin: true
+    c_symbol: control
+    icon: mdi:console-line
+    aliases:
+      - control
+
+    inventor: Alexandra Østermark
+    year: 2025
+    description: "The ngspice .control scripting language as implemented by the Thevenin simulator — a line-oriented language with let/print/run/measure statements, if/while/repeat/foreach blocks, and a shared vector-expression sublanguage."
+    link: https://github.com/cramt/thevenin
+    trivia: "Control scripts drive simulation runs in Thevenin's `.control` blocks. The grammar models the editor-facing surface syntax; the interpreter does its own string-based parse for execution, with corpus tests keeping the two in sync."
+
+    samples:
+      - path: samples/analysis.control
+        description: A control script that runs op/transient analyses, measures a derived vector, and uses foreach/repeat/while/if blocks.
+        license: BSD-3-Clause

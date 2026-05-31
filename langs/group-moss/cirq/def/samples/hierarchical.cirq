@@ -1,0 +1,51 @@
+// Hierarchical design: a buffer made of two inverters.
+
+module inverter {
+    port in: in
+    port out: out
+    port vdd: inout
+    port vss: inout
+
+    param wp = 2u
+    param wn = 1u
+    param l = 180n
+
+    M1: pmos(drain: out, gate: in, source: vdd, bulk: vdd, model: pch, w: wp, l: l)
+    M2: nmos(drain: out, gate: in, source: vss, bulk: vss, model: nch, w: wn, l: l)
+}
+
+module buffer {
+    port a: in
+    port z: out
+    port vdd: inout
+    port vss: inout
+
+    inv1: inverter(in: a, out: mid, vdd: vdd, vss: vss)
+    inv2: inverter(in: mid, out: z, vdd: vdd, vss: vss)
+}
+
+circuit buffer_test {
+    model nch: nmos {
+        level = 1
+        vto = 0.7
+        kp = 110u
+    }
+
+    model pch: pmos {
+        level = 1
+        vto = -0.7
+        kp = 55u
+    }
+
+    Vdd: vsource(vdd -> gnd, dc: 1.8)
+    Vin: vsource(in -> gnd,
+        pulse: { v1: 0, v2: 1.8, td: 0, tr: 100p, tf: 100p, pw: 5n, per: 10n }
+    )
+
+    buf1: buffer(a: in, z: out, vdd: vdd, vss: gnd)
+
+    analysis tran {
+        step: 50p
+        stop: 30n
+    }
+}
