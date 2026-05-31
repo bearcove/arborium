@@ -363,8 +363,8 @@ pub mod common {
 
 /// Depot runner sizes.
 pub mod runners {
-    pub const UBUNTU_32: &str = "depot-ubuntu-24.04-32";
-    pub const MACOS: &str = "depot-macos-latest";
+    pub const UBUNTU_32: &str = "jamie-ubuntu-24.04";
+    pub const MACOS: &str = "macos-latest";
     /// GitHub-hosted runner (required for OIDC trusted publishing)
     pub const UBUNTU_GITHUB: &str = "ubuntu-latest";
 }
