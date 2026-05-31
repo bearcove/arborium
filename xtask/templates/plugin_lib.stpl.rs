@@ -2,7 +2,7 @@
 
 use wasm_bindgen::prelude::*;
 use arborium_plugin_runtime::{HighlightConfig, PluginRuntime};
-use arborium_wire::{Utf8ParseResult, Utf16ParseResult};
+use arborium_wire::{Edit, Utf8ParseResult, Utf16ParseResult};
 use std::cell::RefCell;
 
 thread_local! {
@@ -56,6 +56,20 @@ pub fn free_session(session: u32) {
 #[wasm_bindgen]
 pub fn set_text(session: u32, text: &str) {
     with_runtime(|runtime| runtime.set_text(session, text));
+}
+
+/// Applies an incremental edit to a session and re-parses its tree incrementally.
+///
+/// `new_text` is the full text after the edit; `edit` is an `arborium_wire::Edit`
+/// (UTF-8 byte offsets + row/col points). Call `parse` / `parse_utf16` afterwards
+/// to read the updated spans — this is what makes editor highlighting fast, since
+/// tree-sitter reuses the unchanged parts of the previous tree.
+#[wasm_bindgen]
+pub fn apply_edit(session: u32, new_text: &str, edit: JsValue) -> Result<(), JsValue> {
+    let edit: Edit = serde_wasm_bindgen::from_value(edit)
+        .map_err(|e| JsValue::from_str(&format!("invalid edit: {}", e)))?;
+    with_runtime(|runtime| runtime.apply_edit(session, new_text, &edit));
+    Ok(())
 }
 
 /// Parses the text in a session and returns spans with UTF-8 byte offsets.
