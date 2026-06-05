@@ -1,0 +1,24 @@
+repo: https://github.com/latex-lsp/tree-sitter-latex
+commit: "7e0ecdc02926c7b9b2e0c76003d4fe7b0944f957"
+license: MIT
+
+grammars:
+  - id: latex
+    name: LaTeX
+    tag: markup
+    tier: 3
+    has_scanner: true
+    icon: simple-icons:latex
+    aliases:
+      - tex
+
+    inventor: Leslie Lamport
+    year: 1983
+    description: "A document preparation system built on Donald Knuth's TeX typesetting engine, widely used in academia for scientific, mathematical, and technical documents."
+    link: https://www.latex-project.org
+    trivia: "LaTeX is used for typesetting over 90% of mathematics and physics research papers. Its macro system is so expressive that it is technically Turing-complete."
+
+    samples:
+      - path: samples/sample.tex
+        description: A representative LaTeX document covering document structure, math, sectioning, environments, and formatting commands.
+        license: MIT

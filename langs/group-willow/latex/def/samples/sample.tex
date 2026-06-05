@@ -1,0 +1,173 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\title{A Sample \LaTeX{} Document}
+\author{Jane Doe \and John Smith}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% Table of contents
+\tableofcontents
+\newpage
+
+%% Introduction
+\section{Introduction}
+\label{sec:intro}
+
+This document demonstrates the syntax of \LaTeX{}, a document preparation system
+based on Donald Knuth's \TeX{} typesetting engine. It is widely used in academia
+for \textbf{scientific}, \textit{mathematical}, and \emph{technical} writing.
+
+See Section~\ref{sec:math} for examples of mathematical typesetting.
+
+\subsection{Background}
+\label{sec:background}
+
+\LaTeX{} was developed by Leslie Lamport in 1983 as a higher-level interface to
+\TeX{}. It provides macros for document structuring, cross-referencing, and
+bibliography management~\cite{lamport1994latex}.
+
+\subsubsection{Why Use \LaTeX{}?}
+\begin{itemize}
+  \item Superior mathematical typesetting
+  \item Automatic numbering and cross-references
+  \item Consistent, professional output
+  \item Free and open source
+\end{itemize}
+
+\section{Mathematics}
+\label{sec:math}
+
+\subsection{Inline and Display Math}
+
+Inline math uses dollar signs: $E = mc^2$ and $\sum_{i=1}^{n} i = \frac{n(n+1)}{2}$.
+
+Display math uses the \texttt{equation} environment:
+
+\begin{equation}
+  \label{eq:euler}
+  e^{i\pi} + 1 = 0
+\end{equation}
+
+Unnumbered display equations use \verb|\[...\]|:
+
+\[
+  \int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
+\]
+
+\subsection{Aligned Equations}
+
+\begin{align}
+  f(x) &= x^2 + 2x + 1 \\
+       &= (x + 1)^2
+\end{align}
+
+\subsection{Theorem Environments}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\begin{theorem}[Pythagorean Theorem]
+  For a right triangle with legs $a$ and $b$ and hypotenuse $c$:
+  \[
+    a^2 + b^2 = c^2
+  \]
+\end{theorem}
+
+\section{Environments}
+\label{sec:environments}
+
+\subsection{Tables}
+
+\begin{table}[ht]
+  \centering
+  \caption{Comparison of typesetting systems}
+  \label{tab:comparison}
+  \begin{tabular}{lcc}
+    \toprule
+    System    & Math support & Free \\
+    \midrule
+    \LaTeX{}  & Excellent    & Yes  \\
+    Typst     & Good         & Yes  \\
+    Word      & Limited      & No   \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Figures}
+
+\begin{figure}[ht]
+  \centering
+  % \includegraphics[width=0.5\textwidth]{example-image}
+  \caption{An example figure.}
+  \label{fig:example}
+\end{figure}
+
+\subsection{Verbatim}
+
+\begin{verbatim}
+#include <stdio.h>
+int main() {
+    printf("Hello, World!\n");
+    return 0;
+}
+\end{verbatim}
+
+\subsection{Code Listings}
+
+\begin{lstlisting}[language=Python]
+def greet(name):
+    print(f"Hello, {name}!")
+\end{lstlisting}
+
+\subsection{Math Sub and Superscripts}
+
+The quadratic formula: $x_{1,2} = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+
+Einstein's mass-energy: $E = mc^2$
+
+\subsection{TODO Notes}
+
+\todo{Add more examples here.}
+
+\section{Cross-References and URLs}
+\label{sec:refs}
+
+Refer to Equation~\ref{eq:euler}, Table~\ref{tab:comparison},
+and Figure~\ref{fig:example}.
+
+Visit \url{https://www.latex-project.org} or use
+\href{https://ctan.org}{CTAN} for packages.
+
+% Define a custom command
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+
+The set of real numbers is $\R$ and a norm is $\norm{x}$.
+
+% Bibliography
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+  \bibitem{lamport1994latex}
+    Leslie Lamport,
+    \textit{\LaTeX: A Document Preparation System},
+    Addison-Wesley, 1994.
+
+  \bibitem{knuth1984tex}
+    Donald E. Knuth,
+    \textit{The \TeX book},
+    Addison-Wesley, 1984.
+\end{thebibliography}
+
+\end{document}
