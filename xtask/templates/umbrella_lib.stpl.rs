@@ -146,11 +146,6 @@ impl From<Config> for arborium_highlight::HighlightConfig {
 // Tree-sitter re-export for advanced users
 pub use arborium_tree_sitter as tree_sitter;
 
-// WASM allocator (automatically enabled on WASM targets)
-// Provides malloc/calloc/realloc/free symbols for tree-sitter's C code
-#[cfg(target_family = "wasm")]
-mod wasm;
-
 // Highlight names constant
 use arborium_theme::highlights;
 
