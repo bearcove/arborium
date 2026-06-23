@@ -361,9 +361,12 @@ pub mod common {
 // Workflow builders
 // =============================================================================
 
-/// Depot runner sizes.
+/// CI runners.
 pub mod runners {
-    pub const UBUNTU_32: &str = "tails-ubuntu-24.04";
+    /// Linux jobs: the shared bearcove runner (same one facet/dodeca use). The
+    /// previous `tails-ubuntu-24.04` runners were unavailable, leaving releases
+    /// stuck queued. macOS uses a GitHub-hosted runner.
+    pub const UBUNTU_32: &str = "bearcove-ubuntu-24.04";
     pub const MACOS: &str = "macos-latest";
     /// GitHub-hosted runner (required for OIDC trusted publishing)
     pub const UBUNTU_GITHUB: &str = "ubuntu-latest";
