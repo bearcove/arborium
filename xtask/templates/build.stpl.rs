@@ -34,12 +34,25 @@ fn main() {
         .flag_if_supported("-Wno-unused-but-set-variable")
         .flag_if_supported("-Wno-trigraphs");
 
-    // For WASM builds, use our custom sysroot (provided by arborium crate via links = "arborium")
     let target = std::env::var("TARGET").unwrap_or_default();
-    if target.contains("wasm")
-        && let Ok(sysroot) = std::env::var("DEP_ARBORIUM_SYSROOT_PATH")
-    {
-        build.include(&sysroot);
+    if target.contains("wasm") {
+        // For WASM builds, use our custom sysroot (provided by arborium crate
+        // via links = "arborium").
+        if let Ok(sysroot) = std::env::var("DEP_ARBORIUM_SYSROOT_PATH") {
+            build.include(&sysroot);
+        }
+
+        // macOS's BSD `ar` can't archive wasm objects — it warns "not a mach-o
+        // file" and silently drops the member, leaving an empty archive and
+        // undefined symbols at link time. Linux's GNU `ar` handles wasm fine, so
+        // cc's default is only wrong on BSD-`ar` hosts. Point cc at an `llvm-ar`
+        // unless the user already chose one via `AR` / `AR_<target>`.
+        let ar_var = format!("AR_{}", target.replace('-', "_"));
+        if std::env::var(&ar_var).is_err() && std::env::var("AR").is_err() {
+            if let Some(llvm_ar) = find_llvm_ar() {
+                build.archiver(llvm_ar);
+            }
+        }
     }
 
     build.file(src_dir.join("parser.c"));
@@ -48,4 +61,39 @@ fn main() {
 <% } %>
 
     build.compile("tree_sitter_<%= c_symbol %>");
+}
+
+/// Locate an `llvm-ar` that understands wasm object files. Prefer the one
+/// bundled with the active Rust toolchain (`<sysroot>/lib/rustlib/<host>/bin`),
+/// then fall back to `llvm-ar` on `PATH`. Returns `None` if neither is usable,
+/// leaving cc's default archiver in place.
+fn find_llvm_ar() -> Option<std::path::PathBuf> {
+    use std::process::Command;
+
+    let exe = if cfg!(windows) { "llvm-ar.exe" } else { "llvm-ar" };
+
+    let rustc = std::env::var("RUSTC").unwrap_or_else(|_| "rustc".into());
+    if let Ok(out) = Command::new(&rustc).args(["--print", "sysroot"]).output() {
+        if out.status.success() {
+            let sysroot =
+                std::path::PathBuf::from(String::from_utf8_lossy(&out.stdout).trim().to_string());
+            if let Ok(host) = std::env::var("HOST") {
+                let candidate = sysroot
+                    .join("lib/rustlib")
+                    .join(&host)
+                    .join("bin")
+                    .join(exe);
+                if candidate.is_file() {
+                    return Some(candidate);
+                }
+            }
+        }
+    }
+
+    let on_path = Command::new(exe)
+        .arg("--version")
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+    on_path.then(|| std::path::PathBuf::from(exe))
 }
