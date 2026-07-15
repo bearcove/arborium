@@ -1604,7 +1604,7 @@ mod tests {
     #[test]
     fn test_html_format_all_tags() {
         // Test a variety of different tags to ensure mapping works
-        let source = "kfsctvcopprattgmlnscrttstemdadder";
+        let source = "kfsctvvpcopprattgmlnscrttstemdadder";
         let mut offset = 0;
         let mut spans = vec![];
         let tags = [
@@ -1614,6 +1614,7 @@ mod tests {
             ("c", "comment", "comment"),
             ("t", "type", "type"),
             ("v", "variable", "variable"),
+            ("vp", "variable.parameter", "parameter"),
             ("co", "constant", "constant"),
             ("p", "punctuation", "punctuation"),
             ("pr", "property", "property"),

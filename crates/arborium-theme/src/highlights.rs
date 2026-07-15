@@ -32,6 +32,7 @@ pub enum ThemeSlot {
     Comment,
     Type,
     Variable,
+    Parameter,
     Constant,
     Number,
     Operator,
@@ -78,6 +79,7 @@ impl ThemeSlot {
             ThemeSlot::Comment => Some("c"),
             ThemeSlot::Type => Some("t"),
             ThemeSlot::Variable => Some("v"),
+            ThemeSlot::Parameter => Some("vp"),
             ThemeSlot::Constant => Some("co"),
             ThemeSlot::Number => Some("n"),
             ThemeSlot::Operator => Some("o"),
@@ -124,6 +126,7 @@ impl ThemeSlot {
             ThemeSlot::Comment => Some("comment"),
             ThemeSlot::Type => Some("type"),
             ThemeSlot::Variable => Some("variable"),
+            ThemeSlot::Parameter => Some("parameter"),
             ThemeSlot::Constant => Some("constant"),
             ThemeSlot::Number => Some("number"),
             ThemeSlot::Operator => Some("operator"),
@@ -162,6 +165,9 @@ pub fn slot_to_highlight_index(slot: ThemeSlot) -> Option<usize> {
         ThemeSlot::Comment => HIGHLIGHTS.iter().position(|h| h.name == "comment"),
         ThemeSlot::Type => HIGHLIGHTS.iter().position(|h| h.name == "type"),
         ThemeSlot::Variable => HIGHLIGHTS.iter().position(|h| h.name == "variable"),
+        ThemeSlot::Parameter => HIGHLIGHTS
+            .iter()
+            .position(|h| h.name == "variable.parameter"),
         ThemeSlot::Constant => HIGHLIGHTS.iter().position(|h| h.name == "constant"),
         ThemeSlot::Number => HIGHLIGHTS.iter().position(|h| h.name == "number"),
         ThemeSlot::Operator => HIGHLIGHTS.iter().position(|h| h.name == "operator"),
@@ -242,8 +248,10 @@ pub fn capture_to_slot(capture: &str) -> ThemeSlot {
         | "type.enum.variant" | "type.parameter" => ThemeSlot::Type,
 
         // Variables
-        "variable" | "variable.builtin" | "variable.parameter" | "variable.member"
-        | "variable.other" | "variable.other.member" | "parameter" | "field" => {
+        "variable.parameter" | "parameter" => ThemeSlot::Parameter,
+
+        "variable" | "variable.builtin" | "variable.member" | "variable.other"
+        | "variable.other.member" | "field" => {
             ThemeSlot::Variable
         }
 
@@ -338,7 +346,11 @@ pub fn capture_to_slot(capture: &str) -> ThemeSlot {
                 ThemeSlot::Comment
             } else if other.starts_with("type") {
                 ThemeSlot::Type
-            } else if other.starts_with("variable") || other.starts_with("parameter") {
+            } else if other.starts_with("variable.parameter")
+                || other.starts_with("parameter")
+            {
+                ThemeSlot::Parameter
+            } else if other.starts_with("variable") {
                 ThemeSlot::Variable
             } else if other.starts_with("constant") {
                 ThemeSlot::Constant
@@ -935,6 +947,7 @@ pub fn tag_to_name(tag: &str) -> Option<&'static str> {
         "c" => Some("comment"),
         "t" => Some("type"),
         "v" => Some("variable"),
+        "vp" => Some("parameter"),
         "co" => Some("constant"),
         "n" => Some("number"),
         "o" => Some("operator"),
@@ -1190,6 +1203,12 @@ mod tests {
     }
 
     #[test]
+    fn test_capture_to_slot_parameters() {
+        assert_eq!(capture_to_slot("parameter"), ThemeSlot::Parameter);
+        assert_eq!(capture_to_slot("variable.parameter"), ThemeSlot::Parameter);
+    }
+
+    #[test]
     fn test_capture_to_slot_markup() {
         assert_eq!(capture_to_slot("markup.heading"), ThemeSlot::Title);
         assert_eq!(capture_to_slot("markup.heading.1"), ThemeSlot::Title);
@@ -1232,6 +1251,7 @@ mod tests {
         assert_eq!(ThemeSlot::Function.tag(), Some("f"));
         assert_eq!(ThemeSlot::String.tag(), Some("s"));
         assert_eq!(ThemeSlot::Comment.tag(), Some("c"));
+        assert_eq!(ThemeSlot::Parameter.tag(), Some("vp"));
         assert_eq!(ThemeSlot::None.tag(), None);
     }
 
