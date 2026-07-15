@@ -31,6 +31,7 @@ pub enum ThemeSlot {
     String,
     Comment,
     Type,
+    EnumVariant,
     Variable,
     Parameter,
     Constant,
@@ -78,6 +79,7 @@ impl ThemeSlot {
             ThemeSlot::String => Some("s"),
             ThemeSlot::Comment => Some("c"),
             ThemeSlot::Type => Some("t"),
+            ThemeSlot::EnumVariant => Some("ev"),
             ThemeSlot::Variable => Some("v"),
             ThemeSlot::Parameter => Some("vp"),
             ThemeSlot::Constant => Some("co"),
@@ -125,6 +127,7 @@ impl ThemeSlot {
             ThemeSlot::String => Some("string"),
             ThemeSlot::Comment => Some("comment"),
             ThemeSlot::Type => Some("type"),
+            ThemeSlot::EnumVariant => Some("enum-variant"),
             ThemeSlot::Variable => Some("variable"),
             ThemeSlot::Parameter => Some("parameter"),
             ThemeSlot::Constant => Some("constant"),
@@ -164,6 +167,7 @@ pub fn slot_to_highlight_index(slot: ThemeSlot) -> Option<usize> {
         ThemeSlot::String => HIGHLIGHTS.iter().position(|h| h.name == "string"),
         ThemeSlot::Comment => HIGHLIGHTS.iter().position(|h| h.name == "comment"),
         ThemeSlot::Type => HIGHLIGHTS.iter().position(|h| h.name == "type"),
+        ThemeSlot::EnumVariant => HIGHLIGHTS.iter().position(|h| h.name == "enum-variant"),
         ThemeSlot::Variable => HIGHLIGHTS.iter().position(|h| h.name == "variable"),
         ThemeSlot::Parameter => HIGHLIGHTS
             .iter()
@@ -245,7 +249,9 @@ pub fn capture_to_slot(capture: &str) -> ThemeSlot {
 
         // Types
         "type" | "type.builtin" | "type.qualifier" | "type.definition" | "type.enum"
-        | "type.enum.variant" | "type.parameter" => ThemeSlot::Type,
+        | "type.parameter" => ThemeSlot::Type,
+
+        "type.enum.variant" => ThemeSlot::EnumVariant,
 
         // Variables
         "variable.parameter" | "parameter" => ThemeSlot::Parameter,
@@ -346,6 +352,8 @@ pub fn capture_to_slot(capture: &str) -> ThemeSlot {
                 ThemeSlot::Comment
             } else if other.starts_with("type") {
                 ThemeSlot::Type
+            } else if other.starts_with("type.enum.variant") {
+                ThemeSlot::EnumVariant
             } else if other.starts_with("variable.parameter")
                 || other.starts_with("parameter")
             {
@@ -831,6 +839,12 @@ pub const HIGHLIGHTS: &[HighlightDef] = &[
         parent_tag: "",
         aliases: &[],
     }, // Same as constant.builtin
+    HighlightDef {
+        name: "type.enum.variant",
+        tag: "ev",
+        parent_tag: "t",
+        aliases: &[],
+    },
 ];
 
 /// Get the highlight names array for tree-sitter configuration.
@@ -946,6 +960,7 @@ pub fn tag_to_name(tag: &str) -> Option<&'static str> {
         "s" => Some("string"),
         "c" => Some("comment"),
         "t" => Some("type"),
+        "ev" => Some("type.enum.variant"),
         "v" => Some("variable"),
         "vp" => Some("parameter"),
         "co" => Some("constant"),
@@ -1222,6 +1237,11 @@ mod tests {
         assert_eq!(capture_to_slot("none"), ThemeSlot::None);
         assert_eq!(capture_to_slot("spell"), ThemeSlot::None);
         assert_eq!(capture_to_slot("nospell"), ThemeSlot::None);
+    }
+
+    #[test]
+    fn test_capture_to_slot_variant() {
+        assert_eq!(capture_to_slot("type.enum.variant"), ThemeSlot::EnumVariant);
     }
 
     #[test]

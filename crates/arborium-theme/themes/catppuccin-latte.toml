@@ -22,6 +22,7 @@ foreground = "#4c4f69"
 "tag" = { fg = "blue" }
 "type" = { fg = "yellow" }
 "type.builtin" = { fg = "yellow" }
+"type.enum.variant" = { fg = "teal" }
 "variable" = { fg = "text" }
 "variable.builtin" = { fg = "red" }
 "variable.parameter" = { fg = "maroon" }

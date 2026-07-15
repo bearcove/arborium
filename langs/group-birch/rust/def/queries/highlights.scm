@@ -37,6 +37,9 @@
   type: (scoped_type_identifier
     name: (type_identifier) @constructor))
 
+(enum_variant
+  name: (identifier) @type.enum.variant)
+
 ; Function calls
 
 (call_expression
