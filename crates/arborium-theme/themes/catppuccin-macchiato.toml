@@ -18,6 +18,8 @@ foreground = "#cad3f5"
 "punctuation.bracket" = { fg = "overlay2" }
 "punctuation.delimiter" = { fg = "overlay2" }
 "string" = { fg = "green" }
+"character" = { fg = "teal" }
+"string.regexp" = { fg = "pink" }
 "string.special" = { fg = "red" }
 "tag" = { fg = "blue" }
 "type" = { fg = "yellow" }
@@ -37,7 +39,7 @@ foreground = "#cad3f5"
 "text.strong" = { modifiers = ["bold"] }
 "text.uri" = { fg = "blue", modifiers = ["underlined"] }
 "text.reference" = { fg = "sky" }
-"string.escape" = { fg = "peach" }
+"string.escape" = { fg = "pink" }
 "text.title" = { fg = "mauve", modifiers = ["bold"] }
 "punctuation.special" = { fg = "pink" }
 "text.strikethrough" = { modifiers = ["crossed_out"] }

@@ -152,7 +152,7 @@
 
 (self) @variable.builtin
 
-(char_literal) @string
+(char_literal) @character
 (string_literal) @string
 (raw_string_literal) @string
 

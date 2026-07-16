@@ -1604,13 +1604,16 @@ mod tests {
     #[test]
     fn test_html_format_all_tags() {
         // Test a variety of different tags to ensure mapping works
-        let source = "kfsctevvvpcopprattgmlnscrttstemdadder";
+        let source = "kfschrxsectevvvpcopprattgmlnscrttstemdadder";
         let mut offset = 0;
         let mut spans = vec![];
         let tags = [
             ("k", "keyword", "keyword"),
             ("f", "function", "function"),
             ("s", "string", "string"),
+            ("ch", "character", "character"),
+            ("rx", "string.regexp", "regexp"),
+            ("se", "string.escape", "escape"),
             ("c", "comment", "comment"),
             ("t", "type", "type"),
             ("ev", "type.enum.variant", "enum-variant"),
