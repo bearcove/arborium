@@ -35,6 +35,55 @@
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
 
+; Parameters
+
+((parameters
+  (identifier) @variable.parameter))
+((parameters
+  (typed_parameter
+    (identifier) @variable.parameter)))
+((parameters
+  (default_parameter
+    name: (identifier) @variable.parameter)))
+((parameters
+  (typed_default_parameter
+    name: (identifier) @variable.parameter)))
+((parameters
+  (list_splat_pattern
+    (identifier) @variable.parameter)))
+((parameters
+  (typed_parameter
+    (list_splat_pattern
+      (identifier) @variable.parameter))))
+((parameters
+  (typed_parameter
+    (list_splat_pattern
+      (identifier) @variable.parameter))))
+((parameters
+  (dictionary_splat_pattern
+    (identifier) @variable.parameter)))
+((parameters
+  (typed_parameter
+    (dictionary_splat_pattern
+      (identifier) @variable.parameter))))
+
+((lambda_parameters
+  (identifier) @variable.parameter))
+((lambda_parameters
+  (default_parameter
+    name: (identifier) @variable.parameter)))
+((lambda_parameters
+  (list_splat_pattern
+    (identifier) @variable.parameter)))
+((lambda_parameters
+  (dictionary_splat_pattern
+    (identifier) @variable.parameter)))
+
+(keyword_argument
+  name: (identifier) @variable.parameter)
+(keyword_pattern
+  (identifier) @variable.parameter)
+
 ; Literals
 
 [
