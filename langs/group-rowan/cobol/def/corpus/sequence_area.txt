@@ -1,0 +1,23 @@
+=== sequence area truncated at end of file
+--- input
+aaaaaa identification division.
+aaaaaa program-id. a.
+aaa
+--- contains
+program_definition
+identification_division
+program_name
+--- sexp
+(start (program_definition (identification_division (IDENTIFICATION) (DIVISION) (program_name))))
+
+=== sequence area is the whole final line
+--- input
+aaaaaa identification division.
+aaaaaa program-id. a.
+aaaaaa
+--- contains
+program_definition
+identification_division
+program_name
+--- sexp
+(start (program_definition (identification_division (IDENTIFICATION) (DIVISION) (program_name))))
