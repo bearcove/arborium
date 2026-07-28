@@ -13,7 +13,7 @@ foreground = "#cdd6f4"
 "function" = { fg = "blue" }
 "keyword" = { fg = "mauve" }
 "operator" = { fg = "teal" }
-"property" = { fg = "blue" }
+"property" = { fg = "lavender" }
 "punctuation" = { fg = "overlay2" }
 "punctuation.bracket" = { fg = "overlay2" }
 "punctuation.delimiter" = { fg = "overlay2" }
@@ -44,6 +44,7 @@ foreground = "#cdd6f4"
 "punctuation.special" = { fg = "pink" }
 "text.strikethrough" = { modifiers = ["crossed_out"] }
 "spell" = { fg = "text" }
+"namespace" = { fg = "yellow" }
 
 [palette]
 rosewater = "#f5e0dc"
