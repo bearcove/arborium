@@ -10,10 +10,10 @@ grammars:
     has_scanner: true
     icon: devicon-plain:lua
 
-    inventor: CppCXY
+    inventor: tangzx
     year: 2025
-    description: "LuaCATS / EmmyLua are type annotations embedded in Lua doc comments."
-    link: https://github.com/EmmyLuaLs/tree-sitter-emmyluadoc
+    description: "Lua Comment and Typs System where EmmyLuaDoc/LuaCATS annotations are embedded in Lua comments."
+    link: https://luals.github.io/wiki/annotations/
     trivia: "LuaCATS is a cuter name that EmmyLuaDoc"
 
     samples:
