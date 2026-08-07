@@ -10,6 +10,9 @@ grammars:
     has_scanner: true
     icon: devicon-plain:lua
 
+    injections:
+      - emmyluadoc
+
     inventor: Roberto Ierusalimschy, Waldemar Celes, Luiz Henrique de Figueiredo
     year: 1993
     description: "Lightweight embeddable scripting language from PUC-Rio; <a href=\"https://www.lua.org/manual/5.4/\">official reference manual</a>."

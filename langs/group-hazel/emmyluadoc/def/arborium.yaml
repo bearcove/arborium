@@ -1,0 +1,23 @@
+repo: https://github.com/EmmyLuaLs/tree-sitter-emmyluadoc
+commit: ea755c0fd34c07e16597bd62a404d6eba2a3891e
+license: MIT
+
+grammars:
+  - id: emmyluadoc
+    name: EmmyLuaDoc
+    tag: code
+    tier: 3
+    has_scanner: true
+    icon: devicon-plain:lua
+
+    inventor: CppCXY
+    year: 2025
+    description: "LuaCATS / EmmyLua are type annotations embedded in Lua doc comments."
+    link: https://github.com/EmmyLuaLs/tree-sitter-emmyluadoc
+    trivia: "LuaCATS is a cuter name that EmmyLuaDoc"
+
+    samples:
+      - path: samples/luadoc.lua
+        description: Lua script demonstrating type info in comments
+        link: https://github.com/EmmyLuaLs/tree-sitter-emmyluadoc/blob/main/README.md
+        license: MIT
