@@ -21,14 +21,16 @@ fn main() {
 <% if has_scanner { %>
     println!("cargo:rerun-if-changed={}", grammar_dir.join("scanner.c").display());
 <% } %>
+    println!("cargo:rerun-if-env-changed=ARBORIUM_C_OPT_LEVEL");
 
     let mut build = cc::Build::new();
+    let opt_level = std::env::var("ARBORIUM_C_OPT_LEVEL").unwrap_or_else(|_| "z".into());
 
     build
         .include(&src_dir)
         .include(&grammar_dir) // for common/ includes like "../common/scanner.h"
         .include(src_dir.join("tree_sitter"))
-        .opt_level_str("z") // optimize aggressively for size
+        .opt_level_str(&opt_level)
         .warnings(false)
         .flag_if_supported("-Wno-unused-parameter")
         .flag_if_supported("-Wno-unused-but-set-variable")

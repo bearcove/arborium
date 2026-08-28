@@ -902,6 +902,10 @@ fn build_single_plugin(
         .env("CFLAGS_wasm32-unknown-unknown", "")
         .env("CXXFLAGS_wasm32_unknown_unknown", "")
         .env("CXXFLAGS_wasm32-unknown-unknown", "")
+        // Some generated parsers require several GiB for clang's optimizer.
+        // wasm-opt handles final size optimization after linking, so keep the
+        // C compilation itself cheap and memory-bounded.
+        .env("ARBORIUM_C_OPT_LEVEL", "0")
         // Prevent cc-rs from inheriting Apple SDK flags (like -fembed-bitcode=all for iOS)
         .env("SDKROOT", "")
         .env("IPHONEOS_DEPLOYMENT_TARGET", "")
