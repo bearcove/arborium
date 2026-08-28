@@ -1,5 +1,5 @@
-repo: https://github.com/tree-sitter/tree-sitter-haskell
-commit: 0975ef72fc3c47b530309ca93937d7d143523628
+repo: https://github.com/tree-sitter-grammars/tree-sitter-haskell
+commit: 98aedbd2d6947a168ba3ba3755d70b0cb6b78395
 license: MIT
 
 grammars:

@@ -127,7 +127,7 @@ module.exports = {
    */
   declaration: $ => choice(
     $.decl,
-    $.type_synomym,
+    $.type_synonym,
     $.kind_signature,
     $.type_family,
     $.type_instance,

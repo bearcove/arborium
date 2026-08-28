@@ -357,7 +357,7 @@ module.exports = {
   // type decl
   // ------------------------------------------------------------------------
 
-  type_synomym: $ => seq(
+  type_synonym: $ => seq(
     'type',
     $._type_head,
     '=',
