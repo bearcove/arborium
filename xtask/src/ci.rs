@@ -363,10 +363,8 @@ pub mod common {
 
 /// CI runners.
 pub mod runners {
-    /// Linux jobs: the shared bearcove runner (same one facet/dodeca use). The
-    /// previous `tails-ubuntu-24.04` runners were unavailable, leaving releases
-    /// stuck queued. macOS uses a GitHub-hosted runner.
-    pub const UBUNTU_32: &str = "bearcove-ubuntu-24.04";
+    /// Large Blacksmith runner required by the generated parser workload.
+    pub const UBUNTU_32: &str = "blacksmith-32vcpu-ubuntu-2404";
     pub const MACOS: &str = "macos-latest";
     /// GitHub-hosted runner (required for OIDC trusted publishing)
     pub const UBUNTU_GITHUB: &str = "ubuntu-latest";
