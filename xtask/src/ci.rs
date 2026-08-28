@@ -363,8 +363,8 @@ pub mod common {
 
 /// CI runners.
 pub mod runners {
-    /// GitHub-hosted Linux runner.
-    pub const UBUNTU_32: &str = "ubuntu-24.04";
+    /// Large Blacksmith runner required by the generated parser workload.
+    pub const UBUNTU_32: &str = "blacksmith-32vcpu-ubuntu-2404";
     pub const MACOS: &str = "macos-latest";
     /// GitHub-hosted runner (required for OIDC trusted publishing)
     pub const UBUNTU_GITHUB: &str = "ubuntu-latest";
@@ -464,11 +464,10 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                             "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-",
                         ),
                     ]),
-                // Tree-sitter generation is memory-heavy enough that multiple child
-                // processes exceed a standard GitHub-hosted runner's memory limit.
+                // Generate with version (from tag or 0.0.0 for non-release)
                 Step::run(
                     "Generate grammar sources",
-                    "./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet --jobs 1",
+                    "./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet",
                 ),
                 // Upload generated files for downstream jobs
                 // Note: no root Cargo.toml/lock - each crate is standalone
@@ -618,7 +617,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                                 Step::run(
                                     format!("Build {}", display_grammars),
                                     format!(
-                                        "./xtask/target/release/xtask build {} -o dist/plugins --jobs 1",
+                                        "./xtask/target/release/xtask build {} -o dist/plugins",
                                         grammars_list
                                     ),
                                 ),

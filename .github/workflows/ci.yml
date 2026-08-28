@@ -20,7 +20,7 @@ env:
 jobs: 
   generate: 
     name: Generate
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     outputs: 
       version: ${{ steps.version.outputs.version }}
@@ -77,7 +77,7 @@ jobs:
       - name: Generate grammar sources
         run: |-
           set -e
-          ./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet --jobs 1
+          ./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet
         shell: bash
       - name: Create generate output tarball
         run: |-
@@ -92,7 +92,7 @@ jobs:
           retention-days: "1"
   test-linux: 
     name: Test (Linux)
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -223,7 +223,7 @@ jobs:
         shell: bash
   clippy: 
     name: Clippy
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -252,7 +252,7 @@ jobs:
         shell: bash
   docs: 
     name: Documentation
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -278,7 +278,7 @@ jobs:
           RUSTDOCFLAGS: "-D warnings"
   build-plugins-acorn: 
     name: "Plugins (acorn): css, html, javascript, jsdoc, json, scss, tsx, typescript, xml"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -298,7 +298,7 @@ jobs:
       - name: Build css, html, javascript, jsdoc, json, scss, tsx, typescript, xml
         run: |-
           set -e
-          ./xtask/target/release/xtask build css html javascript jsdoc json scss tsx typescript xml -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build css html javascript jsdoc json scss tsx typescript xml -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -308,7 +308,7 @@ jobs:
           retention-days: "7"
   build-plugins-bark: 
     name: "Plugins (bark): clojure, groovy, java, kotlin, scala"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -328,7 +328,7 @@ jobs:
       - name: Build clojure, groovy, java, kotlin, scala
         run: |-
           set -e
-          ./xtask/target/release/xtask build clojure groovy java kotlin scala -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build clojure groovy java kotlin scala -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -338,7 +338,7 @@ jobs:
           retention-days: "7"
   build-plugins-birch: 
     name: "Plugins (birch): asm, c, cpp, d, go, objc, odin, rust, x86asm, zig"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -358,7 +358,7 @@ jobs:
       - name: Build asm, c, cpp, d, go, objc, odin, rust, x86asm, zig
         run: |-
           set -e
-          ./xtask/target/release/xtask build asm c cpp d go objc odin rust x86asm zig -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build asm c cpp d go objc odin rust x86asm zig -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -368,7 +368,7 @@ jobs:
           retention-days: "7"
   build-plugins-cedar: 
     name: "Plugins (cedar): cedar, cedarschema"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -388,7 +388,7 @@ jobs:
       - name: Build cedar, cedarschema
         run: |-
           set -e
-          ./xtask/target/release/xtask build cedar cedarschema -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build cedar cedarschema -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -398,7 +398,7 @@ jobs:
           retention-days: "7"
   build-plugins-fern: 
     name: "Plugins (fern): agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, regex, scheme"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -418,7 +418,7 @@ jobs:
       - name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, regex, scheme
         run: |-
           set -e
-          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml regex scheme -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml regex scheme -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -428,7 +428,7 @@ jobs:
           retention-days: "7"
   build-plugins-hazel: 
     name: "Plugins (hazel): awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -448,7 +448,7 @@ jobs:
       - name: Build awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh
         run: |-
           set -e
-          ./xtask/target/release/xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -458,7 +458,7 @@ jobs:
           retention-days: "7"
   build-plugins-maple: 
     name: "Plugins (maple): caddy, cmake, dockerfile, dot, gitattributes, graphql, hcl, ini, jq, just, kconfig, kdl, make, meson, nginx, ninja, nix, query, rego, ron, sql, ssh-config, styx, toml, yaml"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -478,7 +478,7 @@ jobs:
       - name: Build caddy, cmake, dockerfile, dot, gitattributes, graphql, hcl, ini, jq, just, kconfig, kdl, make, meson, nginx, ninja, nix, query, rego, ron, sql, ssh-config, styx, toml, yaml
         run: |-
           set -e
-          ./xtask/target/release/xtask build caddy cmake dockerfile dot gitattributes graphql hcl ini jq just kconfig kdl make meson nginx ninja nix query rego ron sql ssh-config styx toml yaml -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build caddy cmake dockerfile dot gitattributes graphql hcl ini jq just kconfig kdl make meson nginx ninja nix query rego ron sql ssh-config styx toml yaml -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -488,7 +488,7 @@ jobs:
           retention-days: "7"
   build-plugins-moss: 
     name: "Plugins (moss): ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -508,7 +508,7 @@ jobs:
       - name: Build ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl
         run: |-
           set -e
-          ./xtask/target/release/xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -518,7 +518,7 @@ jobs:
           retention-days: "7"
   build-plugins-pine: 
     name: "Plugins (pine): capnp, dart, devicetree, proto, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -538,7 +538,7 @@ jobs:
       - name: Build capnp, dart, devicetree, proto, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri
         run: |-
           set -e
-          ./xtask/target/release/xtask build capnp dart devicetree proto rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build capnp dart devicetree proto rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -548,7 +548,7 @@ jobs:
           retention-days: "7"
   build-plugins-rowan: 
     name: "Plugins (rowan): cobol"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -568,7 +568,7 @@ jobs:
       - name: Build cobol
         run: |-
           set -e
-          ./xtask/target/release/xtask build cobol -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build cobol -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -578,7 +578,7 @@ jobs:
           retention-days: "7"
   build-plugins-sage: 
     name: "Plugins (sage): c-sharp, elisp, fsharp, postscript, vb, vim"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -598,7 +598,7 @@ jobs:
       - name: Build c-sharp, elisp, fsharp, postscript, vb, vim
         run: |-
           set -e
-          ./xtask/target/release/xtask build c-sharp elisp fsharp postscript vb vim -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build c-sharp elisp fsharp postscript vb vim -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -608,7 +608,7 @@ jobs:
           retention-days: "7"
   build-plugins-willow: 
     name: "Plugins (willow): asciidoc, diff, jinja2, markdown, svelte, typst, vue"
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -628,7 +628,7 @@ jobs:
       - name: Build asciidoc, diff, jinja2, markdown, svelte, typst, vue
         run: |-
           set -e
-          ./xtask/target/release/xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins --jobs 1
+          ./xtask/target/release/xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -638,7 +638,7 @@ jobs:
           retention-days: "7"
   publish-crates: 
     name: Publish crates.io
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate

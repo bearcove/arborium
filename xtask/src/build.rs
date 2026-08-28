@@ -902,9 +902,6 @@ fn build_single_plugin(
         .env("CFLAGS_wasm32-unknown-unknown", "")
         .env("CXXFLAGS_wasm32_unknown_unknown", "")
         .env("CXXFLAGS_wasm32-unknown-unknown", "")
-        // Keep clang memory-bounded for very large generated parsers. Binaryen
-        // performs the necessary control-flow cleanup after linking.
-        .env("ARBORIUM_C_OPT_LEVEL", "0")
         // Prevent cc-rs from inheriting Apple SDK flags (like -fembed-bitcode=all for iOS)
         .env("SDKROOT", "")
         .env("IPHONEOS_DEPLOYMENT_TARGET", "")
@@ -935,31 +932,8 @@ fn build_single_plugin(
         )));
     }
 
-    // Step 3: Normalize the linked module before wasm-bindgen. Unoptimized
-    // generated parsers can contain more locals than wasm-bindgen accepts;
-    // Binaryen removes those without clang's multi-GiB optimization cost.
-    let normalized_wasm = artifact_dir.join(format!("{}.normalized.wasm", wasm_name));
-    let mut normalize_cmd = wasm_opt.command();
-    normalize_cmd
-        .args([
-            "-O1",
-            "--enable-bulk-memory",
-            "--enable-mutable-globals",
-            "--enable-nontrapping-float-to-int",
-            "--enable-sign-ext",
-            "--enable-simd",
-            "-o",
-            normalized_wasm.as_str(),
-            wasm_file.as_str(),
-        ])
-        .current_dir(&plugin_source);
-
-    let result = run_streaming(normalize_cmd, grammar, printer)?;
-    if !result.status.success() {
-        return Err(report(format!("pre-bindgen wasm-opt failed:\n{}", result.stderr)));
-    }
-
-    // Step 4: Run wasm-bindgen to generate JS bindings.
+    // Step 3: Run wasm-bindgen to generate JS bindings
+    // Create a temporary output directory for wasm-bindgen
     let bindgen_out = plugin_source.join("pkg");
     fs_err::create_dir_all(&bindgen_out)?;
 
@@ -972,7 +946,7 @@ fn build_single_plugin(
             bindgen_out.as_str(),
             "--out-name",
             &wasm_name,
-            normalized_wasm.as_str(),
+            wasm_file.as_str(),
         ])
         .current_dir(&plugin_source);
 
@@ -982,7 +956,7 @@ fn build_single_plugin(
         return Err(report(format!("wasm-bindgen failed:\n{}", result.stderr)));
     }
 
-    // Step 5: Optimize WASM with wasm-opt
+    // Step 4: Optimize WASM with wasm-opt
     let src_wasm = bindgen_out.join(format!("{}_bg.wasm", wasm_name));
     let optimized_wasm = bindgen_out.join(format!("{}_bg.opt.wasm", wasm_name));
 
@@ -1007,7 +981,7 @@ fn build_single_plugin(
         return Err(report(format!("wasm-opt failed:\n{}", result.stderr)));
     }
 
-    // Step 6: Copy and rename output files
+    // Step 5: Copy and rename output files
     fs_err::create_dir_all(&plugin_output)?;
 
     // Use optimized WASM and generated JS
