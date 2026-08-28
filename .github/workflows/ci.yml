@@ -77,7 +77,7 @@ jobs:
       - name: Generate grammar sources
         run: |-
           set -e
-          ./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet
+          ./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet --jobs 4
         shell: bash
       - name: Create generate output tarball
         run: |-
@@ -298,7 +298,7 @@ jobs:
       - name: Build css, html, javascript, jsdoc, json, scss, tsx, typescript, xml
         run: |-
           set -e
-          ./xtask/target/release/xtask build css html javascript jsdoc json scss tsx typescript xml -o dist/plugins
+          ./xtask/target/release/xtask build css html javascript jsdoc json scss tsx typescript xml -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -328,7 +328,7 @@ jobs:
       - name: Build clojure, groovy, java, kotlin, scala
         run: |-
           set -e
-          ./xtask/target/release/xtask build clojure groovy java kotlin scala -o dist/plugins
+          ./xtask/target/release/xtask build clojure groovy java kotlin scala -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -358,7 +358,7 @@ jobs:
       - name: Build asm, c, cpp, d, go, objc, odin, rust, x86asm, zig
         run: |-
           set -e
-          ./xtask/target/release/xtask build asm c cpp d go objc odin rust x86asm zig -o dist/plugins
+          ./xtask/target/release/xtask build asm c cpp d go objc odin rust x86asm zig -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -388,7 +388,7 @@ jobs:
       - name: Build cedar, cedarschema
         run: |-
           set -e
-          ./xtask/target/release/xtask build cedar cedarschema -o dist/plugins
+          ./xtask/target/release/xtask build cedar cedarschema -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -418,7 +418,7 @@ jobs:
       - name: Build agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, regex, scheme
         run: |-
           set -e
-          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml regex scheme -o dist/plugins
+          ./xtask/target/release/xtask build agda commonlisp elixir elm erlang gleam haskell idris lean ocaml regex scheme -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -448,7 +448,7 @@ jobs:
       - name: Build awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh
         run: |-
           set -e
-          ./xtask/target/release/xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins
+          ./xtask/target/release/xtask build awk bash batch fish lua perl php powershell python ruby zsh -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -478,7 +478,7 @@ jobs:
       - name: Build caddy, cmake, dockerfile, dot, gitattributes, graphql, hcl, ini, jq, just, kconfig, kdl, make, meson, nginx, ninja, nix, query, rego, ron, sql, ssh-config, styx, toml, yaml
         run: |-
           set -e
-          ./xtask/target/release/xtask build caddy cmake dockerfile dot gitattributes graphql hcl ini jq just kconfig kdl make meson nginx ninja nix query rego ron sql ssh-config styx toml yaml -o dist/plugins
+          ./xtask/target/release/xtask build caddy cmake dockerfile dot gitattributes graphql hcl ini jq just kconfig kdl make meson nginx ninja nix query rego ron sql ssh-config styx toml yaml -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -508,7 +508,7 @@ jobs:
       - name: Build ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl
         run: |-
           set -e
-          ./xtask/target/release/xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins
+          ./xtask/target/release/xtask build ada glsl hlsl julia matlab prolog r sparql tlaplus verilog vhdl -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -538,7 +538,7 @@ jobs:
       - name: Build capnp, dart, devicetree, proto, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri
         run: |-
           set -e
-          ./xtask/target/release/xtask build capnp dart devicetree proto rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins
+          ./xtask/target/release/xtask build capnp dart devicetree proto rescript solidity starlark swift textproto thrift uiua wit yuri -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -568,7 +568,7 @@ jobs:
       - name: Build cobol
         run: |-
           set -e
-          ./xtask/target/release/xtask build cobol -o dist/plugins
+          ./xtask/target/release/xtask build cobol -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -598,7 +598,7 @@ jobs:
       - name: Build c-sharp, elisp, fsharp, postscript, vb, vim
         run: |-
           set -e
-          ./xtask/target/release/xtask build c-sharp elisp fsharp postscript vb vim -o dist/plugins
+          ./xtask/target/release/xtask build c-sharp elisp fsharp postscript vb vim -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
@@ -628,7 +628,7 @@ jobs:
       - name: Build asciidoc, diff, jinja2, markdown, svelte, typst, vue
         run: |-
           set -e
-          ./xtask/target/release/xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins
+          ./xtask/target/release/xtask build asciidoc diff jinja2 markdown svelte typst vue -o dist/plugins --jobs 4
         shell: bash
       - name: Upload plugins artifact
         uses: actions/upload-artifact@v5
