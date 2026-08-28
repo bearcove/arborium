@@ -20,7 +20,7 @@ env:
 jobs: 
   generate: 
     name: Generate
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     outputs: 
       version: ${{ steps.version.outputs.version }}
@@ -92,7 +92,7 @@ jobs:
           retention-days: "1"
   test-linux: 
     name: Test (Linux)
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -223,7 +223,7 @@ jobs:
         shell: bash
   clippy: 
     name: Clippy
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -252,7 +252,7 @@ jobs:
         shell: bash
   docs: 
     name: Documentation
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -278,7 +278,7 @@ jobs:
           RUSTDOCFLAGS: "-D warnings"
   build-plugins-acorn: 
     name: "Plugins (acorn): css, html, javascript, jsdoc, json, scss, tsx, typescript, xml"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -308,7 +308,7 @@ jobs:
           retention-days: "7"
   build-plugins-bark: 
     name: "Plugins (bark): clojure, groovy, java, kotlin, scala"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -338,7 +338,7 @@ jobs:
           retention-days: "7"
   build-plugins-birch: 
     name: "Plugins (birch): asm, c, cpp, d, go, objc, odin, rust, x86asm, zig"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -368,7 +368,7 @@ jobs:
           retention-days: "7"
   build-plugins-cedar: 
     name: "Plugins (cedar): cedar, cedarschema"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -398,7 +398,7 @@ jobs:
           retention-days: "7"
   build-plugins-fern: 
     name: "Plugins (fern): agda, commonlisp, elixir, elm, erlang, gleam, haskell, idris, lean, ocaml, regex, scheme"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -428,7 +428,7 @@ jobs:
           retention-days: "7"
   build-plugins-hazel: 
     name: "Plugins (hazel): awk, bash, batch, fish, lua, perl, php, powershell, python, ruby, zsh"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -458,7 +458,7 @@ jobs:
           retention-days: "7"
   build-plugins-maple: 
     name: "Plugins (maple): caddy, cmake, dockerfile, dot, gitattributes, graphql, hcl, ini, jq, just, kconfig, kdl, make, meson, nginx, ninja, nix, query, rego, ron, sql, ssh-config, styx, toml, yaml"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -488,7 +488,7 @@ jobs:
           retention-days: "7"
   build-plugins-moss: 
     name: "Plugins (moss): ada, glsl, hlsl, julia, matlab, prolog, r, sparql, tlaplus, verilog, vhdl"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -518,7 +518,7 @@ jobs:
           retention-days: "7"
   build-plugins-pine: 
     name: "Plugins (pine): capnp, dart, devicetree, proto, rescript, solidity, starlark, swift, textproto, thrift, uiua, wit, yuri"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -548,7 +548,7 @@ jobs:
           retention-days: "7"
   build-plugins-rowan: 
     name: "Plugins (rowan): cobol"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -578,7 +578,7 @@ jobs:
           retention-days: "7"
   build-plugins-sage: 
     name: "Plugins (sage): c-sharp, elisp, fsharp, postscript, vb, vim"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -608,7 +608,7 @@ jobs:
           retention-days: "7"
   build-plugins-willow: 
     name: "Plugins (willow): asciidoc, diff, jinja2, markdown, svelte, typst, vue"
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
@@ -638,7 +638,7 @@ jobs:
           retention-days: "7"
   publish-crates: 
     name: Publish crates.io
-    runs-on: bearcove-ubuntu-24.04
+    runs-on: ubuntu-24.04
     container: "ghcr.io/bearcove/arborium-plugin-builder:latest"
     needs: 
       - generate
