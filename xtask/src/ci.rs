@@ -464,12 +464,11 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                             "grammar-v1-${{ hashFiles('xtask/Cargo.lock', 'xtask/src/**/*.rs') }}-",
                         ),
                     ]),
-                // Standard GitHub-hosted runners have four cores and substantially
-                // less memory than the previous custom runner. Match their CPU count
-                // rather than the xtask default of 16 concurrent child processes.
+                // Tree-sitter generation is memory-heavy enough that multiple child
+                // processes exceed a standard GitHub-hosted runner's memory limit.
                 Step::run(
                     "Generate grammar sources",
-                    "./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet --jobs 4",
+                    "./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet --jobs 1",
                 ),
                 // Upload generated files for downstream jobs
                 // Note: no root Cargo.toml/lock - each crate is standalone
@@ -619,7 +618,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                                 Step::run(
                                     format!("Build {}", display_grammars),
                                     format!(
-                                        "./xtask/target/release/xtask build {} -o dist/plugins --jobs 4",
+                                        "./xtask/target/release/xtask build {} -o dist/plugins --jobs 1",
                                         grammars_list
                                     ),
                                 ),
