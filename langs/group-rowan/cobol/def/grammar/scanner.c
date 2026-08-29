@@ -170,8 +170,17 @@ bool tree_sitter_cobol_external_scanner_scan(void *payload, TSLexer *lexer,
     }
 
     if(valid_symbols[LINE_PREFIX_COMMENT] && lexer->get_column(lexer) <= 5) {
-        while(lexer->get_column(lexer) <= 5) {
+        // The column can only advance while input remains: at end of file
+        // `advance` is a no-op, so testing the column alone spins forever.
+        bool consumed_any = false;
+        while(lexer->lookahead != 0 && lexer->get_column(lexer) <= 5) {
             lexer->advance(lexer, true);
+            consumed_any = true;
+        }
+        // Never emit a zero-width token: the parser would re-enter the scanner
+        // at the same position and loop just as tightly.
+        if(!consumed_any) {
+            return false;
         }
         lexer->result_symbol = LINE_PREFIX_COMMENT;
         lexer->mark_end(lexer);
