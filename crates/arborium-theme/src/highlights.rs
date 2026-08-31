@@ -29,9 +29,14 @@ pub enum ThemeSlot {
     Keyword,
     Function,
     String,
+    Character,
+    Regexp,
+    Escape,
     Comment,
     Type,
+    EnumVariant,
     Variable,
+    Parameter,
     Constant,
     Number,
     Operator,
@@ -75,9 +80,14 @@ impl ThemeSlot {
             ThemeSlot::Keyword => Some("k"),
             ThemeSlot::Function => Some("f"),
             ThemeSlot::String => Some("s"),
+            ThemeSlot::Character => Some("ch"),
+            ThemeSlot::Regexp => Some("rx"),
+            ThemeSlot::Escape => Some("se"),
             ThemeSlot::Comment => Some("c"),
             ThemeSlot::Type => Some("t"),
+            ThemeSlot::EnumVariant => Some("ev"),
             ThemeSlot::Variable => Some("v"),
+            ThemeSlot::Parameter => Some("vp"),
             ThemeSlot::Constant => Some("co"),
             ThemeSlot::Number => Some("n"),
             ThemeSlot::Operator => Some("o"),
@@ -121,9 +131,14 @@ impl ThemeSlot {
             ThemeSlot::Keyword => Some("keyword"),
             ThemeSlot::Function => Some("function"),
             ThemeSlot::String => Some("string"),
+            ThemeSlot::Character => Some("character"),
+            ThemeSlot::Regexp => Some("regexp"),
+            ThemeSlot::Escape => Some("escape"),
             ThemeSlot::Comment => Some("comment"),
             ThemeSlot::Type => Some("type"),
+            ThemeSlot::EnumVariant => Some("enum-variant"),
             ThemeSlot::Variable => Some("variable"),
+            ThemeSlot::Parameter => Some("parameter"),
             ThemeSlot::Constant => Some("constant"),
             ThemeSlot::Number => Some("number"),
             ThemeSlot::Operator => Some("operator"),
@@ -159,9 +174,18 @@ pub fn slot_to_highlight_index(slot: ThemeSlot) -> Option<usize> {
         ThemeSlot::Keyword => HIGHLIGHTS.iter().position(|h| h.name == "keyword"),
         ThemeSlot::Function => HIGHLIGHTS.iter().position(|h| h.name == "function"),
         ThemeSlot::String => HIGHLIGHTS.iter().position(|h| h.name == "string"),
+        ThemeSlot::Character => HIGHLIGHTS.iter().position(|h| h.name == "character"),
+        ThemeSlot::Regexp => HIGHLIGHTS.iter().position(|h| h.name == "string.regexp"),
+        ThemeSlot::Escape => HIGHLIGHTS.iter().position(|h| h.name == "string.escape"),
         ThemeSlot::Comment => HIGHLIGHTS.iter().position(|h| h.name == "comment"),
         ThemeSlot::Type => HIGHLIGHTS.iter().position(|h| h.name == "type"),
+        ThemeSlot::EnumVariant => HIGHLIGHTS
+            .iter()
+            .position(|h| h.name == "type.enum.variant"),
         ThemeSlot::Variable => HIGHLIGHTS.iter().position(|h| h.name == "variable"),
+        ThemeSlot::Parameter => HIGHLIGHTS
+            .iter()
+            .position(|h| h.name == "variable.parameter"),
         ThemeSlot::Constant => HIGHLIGHTS.iter().position(|h| h.name == "constant"),
         ThemeSlot::Number => HIGHLIGHTS.iter().position(|h| h.name == "number"),
         ThemeSlot::Operator => HIGHLIGHTS.iter().position(|h| h.name == "operator"),
@@ -228,8 +252,16 @@ pub fn capture_to_slot(capture: &str) -> ThemeSlot {
 
         // Strings
         "string" | "string.special" | "string.special.symbol" | "string.special.path"
-        | "string.special.url" | "string.escape" | "string.regexp" | "string.regex"
-        | "character" | "character.special" | "escape" => ThemeSlot::String,
+        | "string.special.url" => ThemeSlot::String,
+
+        // Characters
+        "character" | "character.special" => ThemeSlot::Character,
+
+        // Regular expressions
+        "string.regexp" | "string.regex" => ThemeSlot::Regexp,
+
+        // Escape sequences
+        "string.escape" | "escape" => ThemeSlot::Escape,
 
         // Comments
         "comment" | "comment.documentation" | "comment.line" | "comment.block"
@@ -239,11 +271,15 @@ pub fn capture_to_slot(capture: &str) -> ThemeSlot {
 
         // Types
         "type" | "type.builtin" | "type.qualifier" | "type.definition" | "type.enum"
-        | "type.enum.variant" | "type.parameter" => ThemeSlot::Type,
+        | "type.parameter" => ThemeSlot::Type,
+
+        "type.enum.variant" => ThemeSlot::EnumVariant,
 
         // Variables
-        "variable" | "variable.builtin" | "variable.parameter" | "variable.member"
-        | "variable.other" | "variable.other.member" | "parameter" | "field" => {
+        "variable.parameter" | "parameter" => ThemeSlot::Parameter,
+
+        "variable" | "variable.builtin" | "variable.member" | "variable.other"
+        | "variable.other.member" | "field" => {
             ThemeSlot::Variable
         }
 
@@ -332,13 +368,25 @@ pub fn capture_to_slot(capture: &str) -> ThemeSlot {
                 ThemeSlot::Keyword
             } else if other.starts_with("function") || other.starts_with("method") {
                 ThemeSlot::Function
-            } else if other.starts_with("string") || other.starts_with("character") {
+            } else if other.starts_with("string.escape") || other.starts_with("escape") {
+                ThemeSlot::Escape
+            } else if other.starts_with("string.regexp") || other.starts_with("string.regex") {
+                ThemeSlot::Regexp
+            } else if other.starts_with("character") {
+                ThemeSlot::Character
+            } else if other.starts_with("string") {
                 ThemeSlot::String
             } else if other.starts_with("comment") {
                 ThemeSlot::Comment
+            } else if other.starts_with("type.enum.variant") {
+                ThemeSlot::EnumVariant
             } else if other.starts_with("type") {
                 ThemeSlot::Type
-            } else if other.starts_with("variable") || other.starts_with("parameter") {
+            } else if other.starts_with("variable.parameter")
+                || other.starts_with("parameter")
+            {
+                ThemeSlot::Parameter
+            } else if other.starts_with("variable") {
                 ThemeSlot::Variable
             } else if other.starts_with("constant") {
                 ThemeSlot::Constant
@@ -819,6 +867,12 @@ pub const HIGHLIGHTS: &[HighlightDef] = &[
         parent_tag: "",
         aliases: &[],
     }, // Same as constant.builtin
+    HighlightDef {
+        name: "type.enum.variant",
+        tag: "ev",
+        parent_tag: "t",
+        aliases: &[],
+    },
 ];
 
 /// Get the highlight names array for tree-sitter configuration.
@@ -932,9 +986,14 @@ pub fn tag_to_name(tag: &str) -> Option<&'static str> {
         "k" => Some("keyword"),
         "f" => Some("function"),
         "s" => Some("string"),
+        "ch" => Some("character"),
+        "rx" => Some("regexp"),
+        "se" => Some("escape"),
         "c" => Some("comment"),
         "t" => Some("type"),
+        "ev" => Some("enum-variant"),
         "v" => Some("variable"),
+        "vp" => Some("parameter"),
         "co" => Some("constant"),
         "n" => Some("number"),
         "o" => Some("operator"),
@@ -1190,6 +1249,22 @@ mod tests {
     }
 
     #[test]
+    fn test_capture_to_slot_parameters() {
+        assert_eq!(capture_to_slot("parameter"), ThemeSlot::Parameter);
+        assert_eq!(capture_to_slot("variable.parameter"), ThemeSlot::Parameter);
+    }
+
+    #[test]
+    fn test_capture_to_slot_string_subtypes() {
+        assert_eq!(capture_to_slot("character"), ThemeSlot::Character);
+        assert_eq!(capture_to_slot("character.special"), ThemeSlot::Character);
+        assert_eq!(capture_to_slot("string.regexp"), ThemeSlot::Regexp);
+        assert_eq!(capture_to_slot("string.regex"), ThemeSlot::Regexp);
+        assert_eq!(capture_to_slot("string.escape"), ThemeSlot::Escape);
+        assert_eq!(capture_to_slot("escape"), ThemeSlot::Escape);
+    }
+
+    #[test]
     fn test_capture_to_slot_markup() {
         assert_eq!(capture_to_slot("markup.heading"), ThemeSlot::Title);
         assert_eq!(capture_to_slot("markup.heading.1"), ThemeSlot::Title);
@@ -1203,6 +1278,11 @@ mod tests {
         assert_eq!(capture_to_slot("none"), ThemeSlot::None);
         assert_eq!(capture_to_slot("spell"), ThemeSlot::None);
         assert_eq!(capture_to_slot("nospell"), ThemeSlot::None);
+    }
+
+    #[test]
+    fn test_capture_to_slot_variant() {
+        assert_eq!(capture_to_slot("type.enum.variant"), ThemeSlot::EnumVariant);
     }
 
     #[test]
@@ -1231,7 +1311,11 @@ mod tests {
         assert_eq!(ThemeSlot::Keyword.tag(), Some("k"));
         assert_eq!(ThemeSlot::Function.tag(), Some("f"));
         assert_eq!(ThemeSlot::String.tag(), Some("s"));
+        assert_eq!(ThemeSlot::Character.tag(), Some("ch"));
+        assert_eq!(ThemeSlot::Regexp.tag(), Some("rx"));
+        assert_eq!(ThemeSlot::Escape.tag(), Some("se"));
         assert_eq!(ThemeSlot::Comment.tag(), Some("c"));
+        assert_eq!(ThemeSlot::Parameter.tag(), Some("vp"));
         assert_eq!(ThemeSlot::None.tag(), None);
     }
 

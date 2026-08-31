@@ -13,18 +13,21 @@ foreground = "#cdd6f4"
 "function" = { fg = "blue" }
 "keyword" = { fg = "mauve" }
 "operator" = { fg = "teal" }
-"property" = { fg = "blue" }
+"property" = { fg = "lavender" }
 "punctuation" = { fg = "overlay2" }
 "punctuation.bracket" = { fg = "overlay2" }
 "punctuation.delimiter" = { fg = "overlay2" }
 "string" = { fg = "green" }
+"character" = { fg = "teal" }
+"string.regexp" = { fg = "pink" }
 "string.special" = { fg = "red" }
 "tag" = { fg = "blue" }
 "type" = { fg = "yellow" }
 "type.builtin" = { fg = "yellow" }
+"type.enum.variant" = { fg = "teal" }
 "variable" = { fg = "text" }
 "variable.builtin" = { fg = "red" }
-"variable.parameter" = { fg = "peach" }
+"variable.parameter" = { fg = "maroon" }
 "comment" = { fg = "overlay0" }
 "macro" = { fg = "teal" }
 "label" = { fg = "pink" }
@@ -36,11 +39,12 @@ foreground = "#cdd6f4"
 "text.strong" = { modifiers = ["bold"] }
 "text.uri" = { fg = "blue", modifiers = ["underlined"] }
 "text.reference" = { fg = "sky" }
-"string.escape" = { fg = "peach" }
+"string.escape" = { fg = "pink" }
 "text.title" = { fg = "mauve", modifiers = ["bold"] }
 "punctuation.special" = { fg = "pink" }
 "text.strikethrough" = { modifiers = ["crossed_out"] }
 "spell" = { fg = "text" }
+"namespace" = { fg = "yellow" }
 
 [palette]
 rosewater = "#f5e0dc"

@@ -37,6 +37,9 @@
   type: (scoped_type_identifier
     name: (type_identifier) @constructor))
 
+(enum_variant
+  name: (identifier) @type.enum.variant)
+
 ; Function calls
 
 (call_expression
@@ -149,7 +152,7 @@
 
 (self) @variable.builtin
 
-(char_literal) @string
+(char_literal) @character
 (string_literal) @string
 (raw_string_literal) @string
 

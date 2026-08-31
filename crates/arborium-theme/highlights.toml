@@ -285,3 +285,7 @@ tag = "n"
 
 [boolean]
 tag = "cb"
+
+["type.enum.variant"]
+tag = "ev"
+parent = "type"
