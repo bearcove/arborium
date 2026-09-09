@@ -60,7 +60,7 @@ jobs:
       - name: Build xtask
         run: |-
           set -e
-          cargo build --release --manifest-path xtask/Cargo.toml
+          cargo build --release --locked --manifest-path xtask/Cargo.toml
         shell: bash
       - name: Compute grammar cache key
         run: |-
