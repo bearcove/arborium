@@ -469,6 +469,10 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                     "Generate grammar sources",
                     "./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet",
                 ),
+                Step::run(
+                    "Check WASM stdio symbols",
+                    "python3 scripts/check_wasm_stdio.py",
+                ),
                 // Upload generated files for downstream jobs
                 // Note: no root Cargo.toml/lock - each crate is standalone
                 // Includes xtask binary so downstream jobs don't need to rebuild it.

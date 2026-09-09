@@ -79,6 +79,11 @@ jobs:
           set -e
           ./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet
         shell: bash
+      - name: Check WASM stdio symbols
+        run: |-
+          set -e
+          python3 scripts/check_wasm_stdio.py
+        shell: bash
       - name: Create generate output tarball
         run: |-
           set -e

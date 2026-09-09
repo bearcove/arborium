@@ -6,7 +6,8 @@
 typedef unsigned long size_t;
 typedef struct {} FILE;
 
-extern FILE *stderr;
+// Stdio macros discard their arguments, so `stderr` must not require a symbol.
+#define stderr ((FILE *)0)
 
 #define fprintf(stream, ...) 0
 #define snprintf(str, size, format, ...) 0
