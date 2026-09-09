@@ -9,14 +9,11 @@ camino = "1"
 chrono = "0.4"
 fs-err = "3"
 which = "7"
-facet = { git = "https://github.com/facet-rs/facet", features = ["indexmap"] }
-facet-value = { git = "https://github.com/facet-rs/facet" }
-facet-args = { git = "https://github.com/facet-rs/facet" }
-facet-json = { git = "https://github.com/facet-rs/facet" }
-facet-yaml = { git = "https://github.com/facet-rs/facet" }
-facet-pretty = { git = "https://github.com/facet-rs/facet" }
-facet-diff = { git = "https://github.com/facet-rs/facet" }
-facet-toml = { git = "https://github.com/facet-rs/facet" }
+facet = { version = "0.50.0-rc.7", features = ["indexmap"] }
+figue = "5.0.0-rc.6"
+facet-json = "0.50.0-rc.7"
+facet-yaml = "0.50.0-rc.7"
+facet-toml = "0.50.0-rc.7"
 indexmap = { version = "2", features = ["std"] }
 thiserror = "2"
 structstruck = "0.4"
@@ -29,8 +26,6 @@ tempfile = "3"
 regex = "1"
 blake3 = "1"
 
-
-ignore = "0.4"
 tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 sailfish = "0.10"
 rand = "0.9.2"
