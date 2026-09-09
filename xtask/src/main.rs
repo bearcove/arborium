@@ -25,7 +25,7 @@ mod util;
 mod version_store;
 
 use facet::Facet;
-use facet_args as args;
+use figue as args;
 use owo_colors::OwoColorize;
 use std::process::Command as StdCommand;
 
@@ -34,12 +34,14 @@ use std::process::Command as StdCommand;
 struct Args {
     #[facet(args::subcommand)]
     command: Command,
+
+    #[facet(flatten)]
+    _builtins: args::FigueBuiltins,
 }
 
 /// Available commands
 #[derive(Debug, Facet)]
 #[repr(u8)]
-#[allow(dead_code)] // variants used by facet_args derive
 enum Command {
     /// Print version information
     Version,
@@ -241,19 +243,17 @@ enum PublishAction {
 }
 
 fn main() {
-    // Initialize tracing subscriber for structured logging
     tracing_subscriber::fmt::init();
 
-    let args: Args = facet_args::from_std_args().unwrap_or_else(|e| {
-        if let Some(text) = e.help_text() {
-            eprintln!("{text}");
-        } else {
-            eprintln!("{e}");
-        }
-        std::process::exit(1);
-    });
-
-    // Handle version early - doesn't need repo root
+    let config = args::builder::<Args>()
+        .unwrap()
+        .cli(|cli| cli.args(std::env::args().skip(1)))
+        .help(|help| {
+            help.program_name("arborium-xtask")
+                .version(env!("CARGO_PKG_VERSION"))
+        })
+        .build();
+    let args: Args = args::Driver::new(config).run().unwrap();
     if matches!(args.command, Command::Version) {
         println!("arborium-xtask {}", env!("CARGO_PKG_VERSION"));
         return;

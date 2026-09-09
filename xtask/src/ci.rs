@@ -443,7 +443,7 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                 // Build xtask (not pre-baked in container, built fresh from source)
                 Step::run(
                     "Build xtask",
-                    "cargo build --release --manifest-path xtask/Cargo.toml",
+                    "cargo build --release --locked --manifest-path xtask/Cargo.toml",
                 ),
                 // Layer 2: Cache grammars using canonical key from xtask
                 // This key includes tree-sitter version and all grammar inputs
@@ -468,6 +468,10 @@ echo "Version: $VERSION (release: $IS_RELEASE)""#,
                 Step::run(
                     "Generate grammar sources",
                     "./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet",
+                ),
+                Step::run(
+                    "Check WASM stdio symbols",
+                    "python3 scripts/check_wasm_stdio.py",
                 ),
                 // Upload generated files for downstream jobs
                 // Note: no root Cargo.toml/lock - each crate is standalone

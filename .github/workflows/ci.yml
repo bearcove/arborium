@@ -60,7 +60,7 @@ jobs:
       - name: Build xtask
         run: |-
           set -e
-          cargo build --release --manifest-path xtask/Cargo.toml
+          cargo build --release --locked --manifest-path xtask/Cargo.toml
         shell: bash
       - name: Compute grammar cache key
         run: |-
@@ -78,6 +78,11 @@ jobs:
         run: |-
           set -e
           ./xtask/target/release/xtask gen --version ${{ steps.version.outputs.version }} --quiet
+        shell: bash
+      - name: Check WASM stdio symbols
+        run: |-
+          set -e
+          python3 scripts/check_wasm_stdio.py
         shell: bash
       - name: Create generate output tarball
         run: |-
