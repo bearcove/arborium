@@ -25,6 +25,7 @@ use walrus::Module;
 use crate::highlight_gen::{self, NamedHighlight};
 use crate::tool::Tool;
 use crate::types::CrateRegistry;
+use crate::util::slash_path;
 use crate::version_store;
 
 /// Print command before execution (for non-streaming commands)
@@ -1212,8 +1213,8 @@ fn build_manifest(
             version: version.to_string(),
             cdn_js: format!("{}/grammar.js", cdn_base),
             cdn_wasm: format!("{}/grammar_bg.wasm", cdn_base),
-            local_js: format!("/{}", rel_js),
-            local_wasm: format!("/{}", rel_wasm),
+            local_js: format!("/{}", slash_path(rel_js)),
+            local_wasm: format!("/{}", slash_path(rel_wasm)),
             size_bytes,
             size_gzip,
             size_brotli,

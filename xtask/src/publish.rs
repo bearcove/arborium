@@ -23,6 +23,7 @@ use std::collections::HashMap;
 use std::process::{Command, Stdio};
 
 use crate::tool::Tool;
+use crate::util::slash_path;
 use crate::version_store;
 
 type Result<T> = std::result::Result<T, Report>;
@@ -1299,7 +1300,9 @@ arborium-highlight = {{ version = "{workspace_version}", path = "../arborium-hig
         let rel_path = crate_path.strip_prefix(repo_root).unwrap_or(crate_path);
         content.push_str(&format!(
             "{} = {{ version = \"{}\", path = \"../../{}\", optional = true }}\n",
-            name, version, rel_path
+            name,
+            version,
+            slash_path(rel_path)
         ));
     }
 

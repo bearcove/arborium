@@ -9,7 +9,7 @@ use crate::cache::GrammarCache;
 use crate::plan::{Operation, Plan, PlanMode, PlanSet};
 use crate::tool::Tool;
 use crate::types::{CrateRegistry, CrateState};
-use crate::util::find_repo_root;
+use crate::util::{find_repo_root, slash_path};
 use crate::version_store;
 use camino::{Utf8Path, Utf8PathBuf};
 use indicatif::{ProgressBar, ProgressStyle};
@@ -2103,7 +2103,9 @@ arborium-highlight = {{ version = "{version}", path = "../arborium-highlight", f
             .unwrap_or(crate_path);
         content.push_str(&format!(
             "{} = {{ version = \"{}\", path = \"../../{}\", optional = true }}\n",
-            name, version, rel_path
+            name,
+            version,
+            slash_path(rel_path)
         ));
     }
 
