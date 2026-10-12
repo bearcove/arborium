@@ -1,0 +1,31 @@
+repo: https://github.com/tong/tree-sitter-haxe
+commit: a7a60817b1f466a6a06f4e8ed408932f590f0200
+license: MIT
+
+grammars:
+  - id: haxe
+    name: Haxe
+    tag: code
+    tier: 3
+    icon: devicon-plain:haxe
+    aliases:
+      - hx
+
+    injections:
+      - jsdoc
+
+    inventor: Nicolas Cannasse
+    year: 2005
+    description: "Strictly typed, cross-platform language that compiles a single codebase to JavaScript, C++, the JVM, Python, Lua, PHP and the HashLink VM, among others."
+    link: https://en.wikipedia.org/wiki/Haxe
+    trivia: "Nicolas Cannasse started Haxe (then spelled \"haXe\") in 2005 as the successor to MTASC, his open-source ActionScript 2 compiler; its first targets were Flash and his own Neko VM. Games built on Haxe frameworks include Dead Cells and Northgard (Heaps), Friday Night Funkin' (HaxeFlixel) and the original release of Papers, Please (OpenFL)."
+
+    samples:
+      - path: samples/CallStack.hx
+        description: Haxe standard library call-stack API with an enum, an abstract over Array, array pattern matching, string interpolation and metadata.
+        link: https://github.com/HaxeFoundation/haxe/blob/4.3.7/std/haxe/CallStack.hx
+        license: MIT
+      - path: samples/EntryPoint.hx
+        description: Haxe standard library main-loop entry point, heavy on conditional compilation, metadata, closures and untyped target code.
+        link: https://github.com/HaxeFoundation/haxe/blob/4.3.7/std/haxe/EntryPoint.hx
+        license: MIT

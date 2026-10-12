@@ -186,6 +186,7 @@ export function normalizeLanguage(lang: string): string {
     'c++': 'cpp',
     'c#': 'c-sharp',
     'f#': 'fsharp',
+    hx: 'haxe',
     dockerfile: 'dockerfile',
     docker: 'dockerfile',
     makefile: 'make',
