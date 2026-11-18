@@ -1,0 +1,34 @@
+model
+  schema 1.1
+
+type employee
+
+type customer
+
+# We need a global Bank type where we define all customers and the transfer limit policy 
+# assigned to them
+
+type bank
+  relations
+    define customer : [customer]
+    define account_manager : [employee]
+
+    # We can define different transfer limit policies for customers and account managers
+    define transfer_limit_policy : [bank#customer with transfer_limit_policy, bank#account_manager with transfer_limit_policy]
+
+type account
+  relations
+    define bank : [bank]
+    define owner : [customer] 
+    define account_manager : [employee]
+
+    # The customer can delegate access to another customer
+    define delegate: [customer]
+
+    # The bank transfer permission is conditioned to the policy assigned to customers or account managers.
+    define can_make_bank_transfer : (owner or account_manager or delegate) and transfer_limit_policy from bank
+
+# The policy has a maximum limit depending that can be overruled for a specific transaction.
+condition transfer_limit_policy(transaction_amount: double, transaction_limit: double, new_transaction_limit_approved: double) {
+   transaction_amount <= transaction_limit || transaction_amount <= new_transaction_limit_approved
+}
