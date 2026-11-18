@@ -1,0 +1,28 @@
+repo: https://github.com/matoous/tree-sitter-fga
+commit: b17d4593107baea124197bc8a034579c90e9ff12
+license: MIT
+
+grammars:
+  - id: fga
+    name: OpenFGA
+    tag: config
+    tier: 3
+    icon: thesvg:openfga
+    aliases:
+      - openfga
+
+    inventor: Auth0 (Okta)
+    year: 2022
+    description: 'Authorization model language of <a href="https://openfga.dev/">OpenFGA</a>, a relationship-based access control system; see the <a href="https://openfga.dev/docs/configuration-language">configuration language reference</a>.'
+    link: https://openfga.dev/docs/configuration-language
+    trivia: "OpenFGA is inspired by Google's Zanzibar paper. Auth0 open-sourced it in 2022, and it was accepted into the CNCF Sandbox that September."
+
+    samples:
+      - path: samples/banking.fga
+        description: Banking model with a transfer limit condition, from the OpenFGA sample stores.
+        link: https://github.com/openfga/sample-stores/blob/main/stores/banking/store.fga.yaml
+        license: Apache-2.0
+      - path: samples/gdrive.fga
+        description: Google Drive model with wildcards and userset references, from the OpenFGA sample stores.
+        link: https://github.com/openfga/sample-stores/blob/main/stores/gdrive/model.fga
+        license: Apache-2.0
