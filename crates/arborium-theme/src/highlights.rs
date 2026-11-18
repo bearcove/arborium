@@ -263,8 +263,8 @@ pub fn capture_to_slot(capture: &str) -> ThemeSlot {
             ThemeSlot::Punctuation
         }
 
-        // Properties
-        "property" | "property.builtin" => ThemeSlot::Property,
+        // Properties, including object keys
+        "property" | "property.builtin" | "string.special.key" => ThemeSlot::Property,
 
         // Attributes
         "attribute" | "attribute.builtin" => ThemeSlot::Attribute,
@@ -1064,6 +1064,7 @@ pub const CAPTURE_NAMES: &[&str] = &[
     // Properties
     "property",
     "property.builtin",
+    "string.special.key",
     // Attributes
     "attribute",
     "attribute.builtin",
@@ -1220,6 +1221,10 @@ mod tests {
         // Comments get "c"
         assert_eq!(tag_for_capture("comment"), Some("c"));
         assert_eq!(tag_for_capture("comment.documentation"), Some("c"));
+
+        // Object keys get the property slot, string values keep "s"
+        assert_eq!(tag_for_capture("string.special.key"), Some("pr"));
+        assert_eq!(tag_for_capture("string"), Some("s"));
 
         // No tag for special captures
         assert_eq!(tag_for_capture("spell"), None);

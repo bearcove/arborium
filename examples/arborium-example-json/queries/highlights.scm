@@ -1,7 +1,8 @@
+(string) @string
+
+; Later patterns win, so the key capture must follow the string capture
 (pair
   key: (_) @string.special.key)
-
-(string) @string
 
 (number) @number
 
