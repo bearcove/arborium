@@ -50,3 +50,29 @@
 [
   (backslash_escape)
 ] @string.escape
+
+(task_list_marker_checked) @markup.list.checked
+(task_list_marker_unchecked) @markup.list.unchecked
+
+(pipe_table_header
+  (pipe_table_cell) @markup.heading)
+
+(pipe_table_header "|" @punctuation.special)
+(pipe_table_row "|" @punctuation.special)
+(pipe_table_delimiter_row "|" @punctuation.special)
+(pipe_table_delimiter_cell) @punctuation.special
+[
+  (pipe_table_align_left)
+  (pipe_table_align_right)
+] @punctuation.delimiter
+
+(block_quote) @markup.quote
+
+[
+  (minus_metadata)
+  (plus_metadata)
+] @keyword.directive
+
+(fenced_code_block
+  (info_string
+    (language) @label))
