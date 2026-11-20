@@ -25,6 +25,10 @@ grammars:
     trivia: "Gruber published Markdown 1.0 with Swartz as beta tester in 2004; the canonical description and reference implementation are on <a href=\"https://daringfireball.net/projects/markdown/\">Gruber's site</a>."
 
     samples:
+      - path: sample.md
+        description: Handwritten sample with front matter, a block quote, a task list, a pipe table, and a code fence.
+        link: local
+        license: MIT
       - path: samples/rust-readme.md
         description: Rust language README with headings, lists, links, images, and code fences.
         link: https://github.com/rust-lang/rust/blob/master/README.md
